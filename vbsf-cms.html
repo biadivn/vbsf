@@ -1,0 +1,2903 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VBSF CMS — Quản trị nội dung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --vd:#1B0066; --vd2:#12004A; --vg:#240088; --gold:#E8A93A;
+  --ink:#161622; --muted:#6B7280; --hint:#9CA3AF;
+  --line:#EDEFF7; --line-strong:#E7E9F3;
+  --surface:#F7F9FE; --danger:#C4433A; --danger-soft:#FBEAEA;
+  --tag-green:#1C9A6C; --tag-green-soft:#EAF7EF;
+  --tag-purple:#240088; --tag-purple-soft:#F1EEFB;
+  --tag-amber:#B7791F; --tag-amber-soft:#FDF3E7;
+  --tag-gray:#6B7280; --tag-gray-soft:#EEF1F6;
+  --radius:8px; --radius-lg:10px;
+  --shadow-card:0 1px 2px 0 rgba(20,20,40,.04),0 2px 8px 0 rgba(20,20,40,.04);
+  --shadow-pop:0 20px 60px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--surface);line-height:1.5715;font-size:14px;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px}
+
+.app{display:flex;min-height:100vh}
+
+/* Sidebar */
+.sidebar{width:236px;flex-shrink:0;background:var(--vd);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:16px 16px 14px;border-bottom:1px solid rgba(255,255,255,.12)}
+.sb-badge{width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:10px;font-weight:600;flex-shrink:0}
+.sb-brand-txt div:first-child{font-size:14px;font-weight:600}
+.sb-brand-txt div:last-child{font-size:11px;color:rgba(255,255,255,.55)}
+.sb-nav{flex:1;overflow-y:auto;padding:8px}
+.sb-group-label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.35);padding:14px 12px 6px;font-weight:500}
+.sb-item{display:flex;align-items:center;gap:10px;padding:0 12px;height:40px;border-radius:var(--radius);color:rgba(255,255,255,.75);font-size:14px;cursor:pointer;text-decoration:none;justify-content:space-between;transition:background .15s,color .15s}
+.sb-item .lft{display:flex;align-items:center;gap:10px}
+.sb-item i{font-size:16px;width:16px;text-align:center;flex-shrink:0}
+.sb-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.sb-item.active{background:var(--gold);color:#3A2D08;font-weight:600}
+.sb-item.active i{color:#3A2D08}
+.sb-count{font-size:11px;background:rgba(255,255,255,.15);padding:0 7px;height:18px;line-height:18px;border-radius:9px;min-width:18px;text-align:center}
+.sb-item.active .sb-count{background:rgba(58,45,8,.18);color:#3A2D08}
+.sb-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.12);font-size:11px;color:rgba(255,255,255,.4)}
+
+/* Main */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:16px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+.topbar h1{font-size:20px;font-weight:600;color:var(--ink)}
+.topbar .sub{font-size:13px;color:var(--hint);margin-top:2px}
+.topbar-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+/* Buttons */
+.btn{border:1px solid transparent;border-radius:var(--radius);height:32px;padding:0 15px;font-size:14px;font-weight:400;display:inline-flex;align-items:center;gap:6px;transition:color .15s,border-color .15s,background .15s}
+.btn-primary{background:var(--vg);border-color:var(--vg);color:#fff}
+.btn-primary:hover{background:var(--vd2);border-color:var(--vd2)}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:#3A2D08}
+.btn-gold:hover{background:#edb856;border-color:#edb856}
+.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line-strong)}
+.btn-ghost:hover{border-color:#C9CEDC}
+.btn-danger-outline{background:#fff;color:var(--danger);border:1px solid var(--line-strong)}
+.btn-danger-outline:hover{color:#fff;background:var(--danger);border-color:var(--danger)}
+.btn-icon{background:none;border:1px solid transparent;color:var(--hint);width:28px;height:28px;border-radius:var(--radius);font-size:14px;display:inline-flex;align-items:center;justify-content:center}
+.btn-icon:hover{background:rgba(0,0,0,.04);color:var(--ink)}
+
+.content{padding:24px 28px 60px}
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line-strong);border-radius:var(--radius);padding:0 11px;height:32px;min-width:220px;flex:1;max-width:320px;transition:border-color .15s,box-shadow .15s}
+.search:focus-within{border-color:var(--vg);box-shadow:0 0 0 2px rgba(36,0,136,.1)}
+.search input{border:none;outline:none;font-size:14px;width:100%;background:transparent}
+.search i{color:var(--hint)}
+.count-pill{font-size:13px;color:var(--hint)}
+
+/* Table */
+.tbl-wrap{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{font-size:12.5px;color:var(--muted);text-align:left;padding:12px 20px;border-bottom:1px solid var(--line);background:#fff;font-weight:600}
+td{padding:14px 20px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:#FBFBFE}
+td.actions{text-align:right;white-space:nowrap}
+
+/* Tags */
+.badge{font-size:12px;font-weight:500;padding:3px 10px;border-radius:100px;background:var(--tag-purple-soft);color:var(--tag-purple);white-space:nowrap;display:inline-block}
+.status{font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px;white-space:nowrap;display:inline-block}
+.status.green{background:var(--tag-green-soft);color:var(--tag-green)}
+.status.gold{background:var(--tag-amber-soft);color:var(--tag-amber)}
+.status.gray{background:var(--tag-gray-soft);color:var(--tag-gray)}
+.status.blue{background:var(--tag-purple-soft);color:var(--tag-purple)}
+.status.red{background:var(--danger-soft);color:var(--danger)}
+.featured-flag{color:var(--gold)}
+.cell-muted{color:var(--hint)}
+.empty{padding:56px 20px;text-align:center;color:var(--hint)}
+.empty i{font-size:32px;color:rgba(0,0,0,.15);display:block;margin-bottom:10px}
+.empty b{color:var(--muted);display:block;margin-bottom:4px;font-size:14px;font-weight:500}
+
+/* Cards (dashboard) */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.dash-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.dash-card:hover{box-shadow:var(--shadow-card);border-color:var(--line-strong)}
+.dash-card .n{font-size:26px;font-weight:600;color:var(--ink);line-height:1.3}
+.dash-card .l{font-size:13px;color:var(--hint);margin-top:4px;display:flex;align-items:center;gap:6px}
+.dash-card i{color:var(--gold)}
+.dash-hero{background:linear-gradient(135deg,var(--vd),var(--vd2));color:#fff;border-radius:var(--radius-lg);padding:24px 26px;margin-bottom:24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.dash-hero h2{font-size:20px;font-weight:600}
+.dash-hero p{font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;max-width:520px}
+
+/* Form */
+.form-card{background:#fff;border:1px solid var(--line-strong);border-radius:var(--radius-lg);padding:24px;max-width:720px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 20px}
+.form-grid.full{grid-template-columns:1fr}
+.fld{margin-bottom:2px}
+.fld.span2{grid-column:1/3}
+.fld label{font-size:12.5px;color:var(--ink);margin-bottom:6px;display:block;font-weight:600}
+.fld input[type=text],.fld input[type=number],.fld input[type=date],.fld select,.fld textarea{
+  width:100%;border:1px solid var(--line-strong);border-radius:7px;padding:8px 11px;font-size:13.5px;color:var(--ink);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.fld select{appearance:none;-webkit-appearance:none;padding-right:32px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--vg);box-shadow:0 0 0 2px rgba(36,0,136,.1)}
+.fld textarea{resize:vertical;min-height:80px}
+.fld input:disabled,.fld select:disabled,.fld textarea:disabled{background:var(--surface);color:var(--hint);cursor:not-allowed}
+.fld .fld-hint{font-size:11.5px;color:var(--hint);margin-top:5px}
+.fld .view-value{font-size:13.5px;color:var(--ink);padding:9px 0;min-height:20px}
+tr.row-hidden{opacity:.5}
+.gd-prev{font-family:'Be Vietnam Pro',sans-serif;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:-24px;width:calc(100% + 48px)}
+.gd-prev .gd-note{background:#FBF5E6;color:#9A7B2E;font-size:11.5px;padding:7px 22px;border-bottom:1px solid #E8D8A8}
+.gd-prev .gd-band{background:#C8102E;padding:20px 22px}
+.gd-prev .gd-crumb{font-size:11px;color:#F5D6D8}
+.gd-prev .gd-org{display:flex;align-items:center;gap:10px;margin-top:12px}
+.gd-prev .gd-org-ic{width:30px;height:30px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#7A1F17}
+.gd-prev .gd-org-lbl{color:#F5D6D8;font-size:11.5px}
+.gd-prev .gd-org-name{color:#fff;font-size:12.5px;font-weight:500;margin-top:1px}
+.gd-status{font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:4px;background:#fff;color:#7A1F17;display:inline-block;margin-top:12px}
+.gd-prev .gd-title{color:#fff;font-size:19px;font-weight:600;margin-top:9px}
+.gd-prev .gd-meta{color:#F5D6D8;font-size:12px;margin-top:5px}
+.gd-prev .gd-tabs{padding:0 22px;border-bottom:1px solid var(--line);display:flex;gap:20px}
+.gd-tab{font-size:12.5px;color:var(--hint);padding:11px 0;border-bottom:2px solid transparent;cursor:pointer}
+.gd-tab.on{color:#7A1F17;font-weight:600;border-bottom-color:#C8102E}
+.gd-prev .gd-body{padding:20px 22px}
+.gd-h{font-size:14px;font-weight:600;color:#7A1F17;margin:0 0 10px}
+.gd-cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:18px;background:var(--surface)}
+.gd-cta-info{flex:1;min-width:180px;font-size:12px;color:var(--hint);line-height:1.8}
+.gd-cta-info b{color:#7A1F17}
+.gd-btn{display:inline-block;background:#fff;border:1px solid #7A1F17;color:#7A1F17;font-size:12.5px;font-weight:500;padding:8px 16px;border-radius:6px;white-space:nowrap}
+.gd-tbl{width:100%;border-collapse:collapse;margin-bottom:20px}
+.gd-tbl th{font-size:10px;text-transform:uppercase;color:var(--hint);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.gd-tbl td{padding:8px 10px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--ink)}
+.gd-rules{border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.gd-li{font-size:12.5px;color:#444;line-height:1.6;padding-left:16px;position:relative;margin-top:6px}
+.gd-li:before{content:'';position:absolute;left:2px;top:7px;width:5px;height:5px;border-radius:50%;background:#C8102E}
+.gd-prev .gd-tabpanel{display:none}
+.gd-prev .gd-tabpanel.on{display:block}
+.gd-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:8px}
+.gd-row:first-child{margin-top:0}
+.gd-row.live{border-color:#C8102E;background:#FFF5F5}
+.gd-row.pending{opacity:.6}
+.gd-mbadge{font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;min-width:44px;text-align:center;flex-shrink:0}
+.gd-mbadge.kt{background:#F1F1EE;color:#8A968F}
+.gd-mbadge.live{background:#FDECEC;color:#9E2A2B}
+.gd-mbadge.soon{background:#F4F1E8;color:#9A7B2E}
+.gd-match{flex:1;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.gd-match b{font-size:13px;color:#7A1F17}
+.gd-match .score{font-size:14px;font-weight:700;color:#7A1F17}
+.gd-match .opp{font-size:13px;color:var(--muted)}
+.gd-pods{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px}
+.gd-pod{flex:1;min-width:110px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px;text-align:center}
+.gd-pod .av{width:46px;height:46px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;margin:8px auto;color:var(--hint)}
+.gd-pod .nm{font-size:12.5px;font-weight:500;color:var(--ink);margin-top:2px}
+.news-editor{max-width:100%}
+.ne-title-wrap{border-bottom:1px solid var(--line);padding-bottom:10px}
+.news-editor-title{width:100%;border:none;outline:none;background:none;font-size:24px;font-weight:600;color:var(--ink);font-family:inherit;padding:4px 0}
+.news-editor-title::placeholder{color:var(--hint);font-weight:500}
+.rte-lg .rte-body{min-height:420px;max-height:600px}
+.ne-banner{width:100%;height:220px;border-radius:10px;overflow:hidden;background:var(--surface);border:1px dashed var(--line-strong);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ne-banner img{width:100%;height:100%;object-fit:cover;display:block}
+.ne-banner-empty{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--hint);font-size:13px}
+.ne-banner-empty i{font-size:26px}
+.checkbox-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.checkbox-row label{font-size:13.5px;color:var(--ink)}
+.form-actions{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.req{color:var(--danger)}
+
+/* Chip (multi-select toggle) */
+.chiplist{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:12.5px;font-weight:500;padding:7px 14px;border-radius:100px;border:1px solid var(--line-strong);background:#fff;cursor:pointer;color:var(--muted);white-space:nowrap;transition:background .15s,color .15s,border-color .15s;user-select:none}
+.chip:hover{border-color:#C9CEDC}
+.chip.on{background:var(--vg);border-color:var(--vg);color:#fff}
+
+/* Switch (toggle) */
+.switch{width:36px;height:20px;border-radius:100px;background:#DADDE8;position:relative;cursor:pointer;display:inline-block;flex-shrink:0;transition:background .15s}
+.switch.on{background:var(--vg)}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.switch.on::after{left:18px}
+
+/* Card */
+.card{background:#fff;border:1px solid var(--line-strong);border-radius:var(--radius-lg)}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+.card-head h2{font-size:15px;font-weight:600;margin:0 0 3px;color:var(--ink)}
+.card-head .desc{font-size:12.5px;color:var(--muted)}
+.card-body.padded{padding:20px}
+
+/* Section builder (list + detail) */
+.sec-builder{display:flex;gap:20px;align-items:flex-start}
+.sec-list-card{width:300px;flex-shrink:0;position:sticky;top:88px}
+.sec-detail-card{flex:1;min-width:0}
+.sec-list{padding:8px}
+.sec-row{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:8px;cursor:pointer;transition:background .15s}
+.sec-row:hover{background:#FBFBFE}
+.sec-row.selected{background:var(--tag-purple-soft)}
+.sec-row-order{display:flex;flex-direction:column;gap:0}
+.sec-row-order .btn-icon{width:22px;height:16px;font-size:11px}
+.sec-row-label{flex:1;font-size:13.5px;font-weight:500;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec-row.selected .sec-row-label{color:var(--vg);font-weight:600}
+.sec-detail-group{padding:20px;border-bottom:1px solid var(--line)}
+.sec-detail-group:last-of-type{border-bottom:none}
+.sec-detail-group-label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--hint);margin-bottom:14px}
+.sec-detail-actions{padding:16px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.sec-status-tag{font-size:11px;font-weight:600;padding:2px 9px;border-radius:100px}
+.sec-status-tag.on{background:var(--tag-green-soft);color:var(--tag-green)}
+.sec-status-tag.off{background:var(--tag-gray-soft);color:var(--tag-gray)}
+.sec-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sec-type-card{display:flex;align-items:flex-start;gap:11px;border:1.5px solid var(--line-strong);border-radius:var(--radius-lg);padding:13px;cursor:pointer;transition:border-color .15s,background .15s}
+.sec-type-card:hover{border-color:var(--vg)}
+.sec-type-card.on{border-color:var(--vg);background:var(--tag-purple-soft)}
+.sec-type-card i{font-size:19px;color:var(--vg);flex-shrink:0;margin-top:1px}
+.sec-type-title{font-size:13.5px;font-weight:600;color:var(--ink)}
+.sec-type-desc{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+@media(max-width:520px){ .sec-type-grid{grid-template-columns:1fr} }
+@media(max-width:960px){
+  .sec-builder{flex-direction:column}
+  .sec-list-card{width:100%;position:static}
+}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(20,20,35,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-overlay.on{display:flex}
+.modal{background:#fff;border-radius:12px;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow-pop)}
+.modal.wide{max-width:760px}
+.rte{border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.rte:focus-within{border-color:var(--vg);box-shadow:0 0 0 2px rgba(36,0,136,.1)}
+.rte-toolbar{display:flex;gap:2px;padding:5px;border-bottom:1px solid var(--line);background:#fafafa;flex-wrap:wrap}
+.rte-toolbar button{width:28px;height:28px;border:none;background:transparent;border-radius:4px;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+.rte-toolbar button:hover{background:#fff;color:var(--vg)}
+.rte-toolbar .sep{width:1px;background:var(--line-strong);margin:3px 2px}
+.rte-body{min-height:140px;max-height:340px;overflow-y:auto;padding:10px 12px;font-size:14px;line-height:1.6;outline:none}
+.rte-body:empty:before{content:attr(data-placeholder);color:var(--hint)}
+.rte-body ul,.rte-body ol{padding-left:20px;margin:6px 0}
+.rte-body p{margin:0 0 8px}
+.modal-hd{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.modal-hd h3{font-size:16px;font-weight:600;color:var(--ink)}
+.modal-close{background:none;border:none;font-size:16px;color:var(--hint);cursor:pointer;padding:4px;border-radius:4px}
+.modal-close:hover{color:var(--ink);background:rgba(0,0,0,.04)}
+.modal-body{padding:24px;overflow-y:auto}
+.modal-ft{padding:12px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+
+/* Toast */
+.toast{position:fixed;top:22px;left:50%;transform:translateX(-50%) translateY(-8px);background:#fff;color:var(--ink);padding:9px 16px;border-radius:var(--radius);font-size:14px;opacity:0;pointer-events:none;transition:all .2s;z-index:200;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-pop)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast i{color:var(--tag-green)}
+
+.navtgl{display:none}
+@media(max-width:860px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .2s}
+<script>
+/* =========================================================
+   SCHEMA DEFINITIONS
+   ========================================================= */
+const VN_PROVINCES = ['Hà Nội','TP.HCM','Đà Nẵng','Hải Phòng','Cần Thơ','An Giang','Bà Rịa - Vũng Tàu','Bạc Liêu','Bắc Giang','Bắc Kạn','Bắc Ninh','Bến Tre','Bình Định','Bình Dương','Bình Phước','Bình Thuận','Cà Mau','Cao Bằng','Đắk Lắk','Đắk Nông','Điện Biên','Đồng Nai','Đồng Tháp','Gia Lai','Hà Giang','Hà Nam','Hà Tĩnh','Hải Dương','Hậu Giang','Hòa Bình','Hưng Yên','Khánh Hòa','Kiên Giang','Kon Tum','Lai Châu','Lâm Đồng','Lạng Sơn','Lào Cai','Long An','Nam Định','Nghệ An','Ninh Bình','Ninh Thuận','Phú Thọ','Phú Yên','Quảng Bình','Quảng Nam','Quảng Ngãi','Quảng Ninh','Quảng Trị','Sóc Trăng','Sơn La','Tây Ninh','Thái Bình','Thái Nguyên','Thanh Hóa','Thừa Thiên Huế','Tiền Giang','Trà Vinh','Tuyên Quang','Vĩnh Long','Vĩnh Phúc','Yên Bái'];
+
+const COLLECTIONS = {
+  news: {
+    label:'Tin tức', icon:'ti-news', single:'bài viết',
+    fields:[
+      {key:'image', label:'Ảnh banner', type:'image', span2:true},
+      {key:'title', label:'Tiêu đề', type:'text', required:true, span2:true},
+      {key:'category', label:'Chuyên mục', type:'select', options:['Hoạt động VBSF','Giải đấu','Đào tạo','Trong nước','Quốc tế']},
+      {key:'date', label:'Ngày đăng', type:'date'},
+      {key:'author', label:'Tác giả', type:'text', placeholder:'Ban Truyền thông VBSF'},
+      {key:'featured', label:'Hiển thị ở mục "Tin nổi bật" (trang chủ)', type:'checkbox'},
+      {key:'excerpt', label:'Tóm tắt', type:'textarea', span2:true},
+      {key:'content', label:'Nội dung chi tiết', type:'richtext', span2:true}
+    ],
+    columns:[
+      {key:'image', label:'', render:r=> r.image ? `<img src="${r.image}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;display:block">` : `<div style="width:36px;height:36px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--hint)"><i class="ti ti-photo"></i></div>`},
+      {key:'title', label:'Tiêu đề', render:r=>`${r.title||'(chưa có tiêu đề)'}${r.featured?' <i class="ti ti-star-filled featured-flag" title="Tin nổi bật"></i>':''}`},
+      {key:'category', label:'Chuyên mục', badge:true},
+      {key:'date', label:'Ngày đăng', muted:true}
+    ]
+  },
+  tournaments: {
+    label:'Giải đấu', icon:'ti-trophy', single:'giải đấu', viewDetail:true, noSync:true,
+    fields:[
+      {key:'name', label:'Tên giải đấu', type:'text', required:true, span2:true},
+      {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker']},
+      {key:'status', label:'Trạng thái', type:'select', options:['upcoming','ongoing','completed'], optionLabels:{upcoming:'Sắp diễn ra',ongoing:'Đang diễn ra',completed:'Đã kết thúc'}},
+      {key:'date', label:'Ngày thi đấu', type:'date'},
+      {key:'participants', label:'Số cơ thủ', type:'number'},
+      {key:'location', label:'Địa điểm', type:'text', span2:true},
+      {key:'note', label:'Trạng thái đăng ký', type:'text', placeholder:'VD: Mở đăng ký / Sắp mở'},
+      {key:'champion', label:'Nhà vô địch (nếu đã kết thúc)', type:'text'},
+      {key:'entryFee', label:'Lệ phí tham gia', type:'text', placeholder:'VD: 200.000đ / cơ thủ'},
+      {key:'rules', label:'Thể lệ & luật thi đấu', type:'textarea', span2:true, rows:6, placeholder:'Mỗi dòng là một điều luật...'}
+    ],
+    columns:[
+      {key:'name', label:'Tên giải'},
+      {key:'category', label:'Nội dung', badge:true},
+      {key:'date', label:'Ngày', muted:true},
+      {key:'status', label:'Trạng thái', status:true, statusMap:{upcoming:{t:'Sắp diễn ra',c:'blue'},ongoing:{t:'Đang diễn ra',c:'red'},completed:{t:'Đã kết thúc',c:'gray'}}}
+    ]
+  },
+  library_docs: {
+    label:'Văn bản & Luật', icon:'ti-file-text', single:'tài liệu',
+    fields:[
+      {key:'title', label:'Tên tài liệu', type:'text', required:true, span2:true},
+      {key:'fileType', label:'Định dạng', type:'select', options:['PDF','DOCX','XLSX']},
+      {key:'tag', label:'Phân loại', type:'select', options:['Quy chế','Luật','Biểu mẫu','Thông báo']},
+      {key:'size', label:'Dung lượng', type:'text', placeholder:'VD: 1,2 MB'},
+      {key:'date', label:'Ngày ban hành', type:'date'}
+    ],
+    columns:[
+      {key:'title', label:'Tên tài liệu'},
+      {key:'fileType', label:'Định dạng', muted:true},
+      {key:'tag', label:'Phân loại', badge:true},
+      {key:'date', label:'Ngày', muted:true}
+    ]
+  },
+  library_media: {
+    label:'Thư viện Media', icon:'ti-photo', single:'album',
+    fields:[
+      {key:'title', label:'Tên album', type:'text', required:true, span2:true},
+      {key:'mediaType', label:'Loại', type:'select', options:['photo','video'], optionLabels:{photo:'Hình ảnh',video:'Video'}},
+      {key:'count', label:'Số lượng ảnh/video', type:'number'},
+      {key:'date', label:'Ngày đăng', type:'date'}
+    ],
+    columns:[
+      {key:'title', label:'Tên album'},
+      {key:'mediaType', label:'Loại', badge:true, mapLabels:{photo:'Hình ảnh',video:'Video'}},
+      {key:'count', label:'Số lượng', muted:true},
+      {key:'date', label:'Ngày', muted:true}
+    ]
+  },
+  members: {
+    label:'Hội viên & Xếp hạng', icon:'ti-users', single:'hội viên', filterField:'category',
+    fields:[
+      {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true},
+      {key:'name', label:'Họ và tên', type:'text', required:true},
+      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx'},
+      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi'},
+      {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker']},
+      {key:'club', label:'Câu lạc bộ / Đơn vị', type:'text'},
+      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES},
+      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}},
+      {key:'rank', label:'Hạng xếp hạng', type:'number'},
+      {key:'points', label:'Điểm', type:'number'},
+      {key:'matches', label:'Số trận', type:'number'},
+      {key:'trend', label:'Xu hướng', type:'select', options:['up','down','eq'], optionLabels:{up:'Tăng hạng',down:'Giảm hạng',eq:'Giữ nguyên'}},
+      {key:'trendValue', label:'Số bậc thay đổi', type:'number'}
+    ],
+    columns:[
+      {key:'name', label:'Hội viên'},
+      {key:'code', label:'Mã HV', muted:true},
+      {key:'phone', label:'SĐT', muted:true},
+      {key:'category', label:'Nội dung', badge:true},
+      {key:'rank', label:'Hạng', render:r=>`<b>${r.rank ?? '—'}</b>`},
+      {key:'points', label:'Điểm', render:r=>`<b>${r.points ?? '—'}</b>`},
+      {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
+    ]
+  },
+  partners: {
+    label:'Đối tác & Tài trợ', icon:'ti-building', single:'đối tác',
+    fields:[
+      {key:'image', label:'Hình minh họa', type:'image', span2:true},
+      {key:'name', label:'Tên đối tác', type:'text', required:true, span2:true},
+      {key:'tier', label:'Hạng mục', type:'select', options:['Đối tác chiến lược','Nhà tài trợ Kim cương','Nhà tài trợ Vàng','Đối tác đồng hành'], span2:true},
+      {key:'description', label:'Mô tả ngắn', type:'richtext', span2:true}
+    ],
+    columns:[
+      {key:'image', label:'', render:r=> r.image ? `<img src="${r.image}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;display:block">` : `<div style="width:36px;height:36px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--hint)"><i class="ti ti-building"></i></div>`},
+      {key:'name', label:'Tên đối tác'},
+      {key:'tier', label:'Hạng mục', badge:true},
+      {key:'description', label:'Mô tả', render:r=>{ const t = stripHtml(r.description||''); return `<span class="cell-muted">${escapeHtml(t.slice(0,60))}${t.length>60?'…':''}</span>`; }}
+    ]
+  }
+};
+/* =========================================================
+   PAGE SECTIONS (mô phỏng — chưa kết nối thật với index.html)
+   ========================================================= */
+const PAGE_SECTIONS_REGISTRY = {
+  'trang-chu': {label:'Trang chủ', icon:'ti-home', path:'/', sections:[
+    {key:'hero', label:'Banner giải đấu nổi bật + Tin nổi bật', fields:[
+      {key:'bannerTag', label:'Nhãn banner', type:'text', default:'GIẢI ĐẤU NỔI BẬT'},
+      {key:'bannerTitle', label:'Tiêu đề banner', type:'text', span2:true, default:'Giải Vô địch Billiards & Snooker Quốc gia 2026'},
+      {key:'bannerSubtitle', label:'Mô tả banner', type:'text', span2:true, default:'Khởi tranh 12/06 · Nhà thi đấu Phú Thọ, TP.HCM'},
+      {key:'sideLabel', label:'Nhãn khối "Tin nổi bật"', type:'text', default:'Tin nổi bật'}
+    ]},
+    {key:'bxh-home', label:'Bảng xếp hạng quốc gia (trích)', title:'Bảng xếp hạng quốc gia', apiIntegrated:true},
+    {key:'lich-giai-dau', label:'Lịch giải đấu sắp diễn ra', title:'Lịch giải đấu sắp diễn ra', apiIntegrated:true},
+    {key:'tin-tuc-home', label:'Tin tức mới nhất', title:'Tin tức mới nhất', newsPicker:true},
+    {key:'cta-hoi-vien', label:'CTA — Trở thành hội viên', fields:[
+      {key:'title', label:'Tiêu đề', type:'text', span2:true, default:'Trở thành hội viên chính thức của VBSF'},
+      {key:'subtitle', label:'Mô tả', type:'text', span2:true, default:'Đăng ký trực tuyến, theo dõi xếp hạng cá nhân và tham gia hệ thống giải đấu quốc gia.'},
+      {key:'buttonText', label:'Nút bấm', type:'text', default:'Đăng ký hội viên'}
+    ]},
+    {key:'doi-tac-home', label:'Đối tác & nhà tài trợ', partnerPicker:true}
+  ]},
+  'gioi-thieu': {label:'Giới thiệu', icon:'ti-info-circle', path:'/gioi-thieu', sections:[
+    {key:'thong-tin-chung', label:'Thông tin chung & số liệu', title:'Về Liên đoàn', fields:[
+      {key:'paragraph', label:'Đoạn giới thiệu', type:'textarea', span2:true, rows:4, default:'Liên đoàn Billiards & Snooker Việt Nam (VBSF) là tổ chức xã hội – nghề nghiệp đại diện cho phong trào billiards & snooker trên cả nước.'},
+      {key:'visionText', label:'Tầm nhìn', type:'textarea', default:'Đưa billiards & snooker Việt Nam phát triển chuyên nghiệp, minh bạch và hội nhập quốc tế.'},
+      {key:'missionText', label:'Sứ mệnh', type:'textarea', default:'Chuẩn hóa hệ thống thi đấu, xếp hạng công bằng và mở rộng phong trào tới mọi cấp độ người chơi.'}
+    ]},
+    {key:'ban-lanh-dao', label:'Ban lãnh đạo & sơ đồ tổ chức', title:'Ban lãnh đạo', items:true, itemCount:4, maxItems:4,
+      itemFields:[{key:'name', label:'Họ và tên', type:'text'},{key:'role', label:'Chức vụ', type:'text'}]},
+    {key:'bo-mon', label:'Bộ môn thi đấu', title:'Billiards & Snooker', items:true, itemCount:3, maxItems:3,
+      itemFields:[{key:'name', label:'Tên bộ môn', type:'text'},{key:'desc', label:'Mô tả', type:'text'},{key:'tags', label:'Nội dung (phân cách bởi ,)', type:'text'}]}
+  ]},
+  'tin-tuc': {label:'Tin tức', icon:'ti-news', path:'/tin-tuc', sections:[
+    {key:'tin-noi-bat', label:'Bài viết nổi bật', fields:[
+      {key:'tag', label:'Chuyên mục', type:'text', default:'HOẠT ĐỘNG VBSF'},
+      {key:'title', label:'Tiêu đề', type:'text', span2:true, default:'VBSF công bố hệ thống thi đấu quốc gia năm 2026'},
+      {key:'excerpt', label:'Tóm tắt', type:'textarea', span2:true, default:'Hệ thống giải đấu năm 2026 gồm các giải vô địch quốc gia, cúp khu vực và hệ thống tích điểm xếp hạng áp dụng cho tất cả nội dung pool, carom và snooker.'},
+      {key:'date', label:'Ngày đăng', type:'text', default:'02/06/2026'}
+    ]},
+    {key:'danh-sach-tin', label:'Danh sách tin tức', newsPicker:true},
+    {key:'sidebar-tin-tuc', label:'Sidebar (tìm kiếm, chuyên mục, tin xem nhiều)'}
+  ]},
+  'giai-dau': {label:'Giải đấu', icon:'ti-trophy', path:'/giai-dau', sections:[
+    {key:'dang-dien-ra', label:'Giải đang diễn ra', apiIntegrated:true},
+    {key:'sap-dien-ra', label:'Giải sắp diễn ra', title:'Sắp diễn ra', apiIntegrated:true},
+    {key:'ket-qua-gan-day', label:'Kết quả gần đây', title:'Kết quả gần đây', apiIntegrated:true}
+  ]},
+  'ranking': {label:'Xếp hạng', icon:'ti-medal', path:'/xep-hang', sections:[
+    {key:'top3', label:'Top 3 (podium)', title:'Top 3 · Pool 9 bi', apiIntegrated:true},
+    {key:'bang-xep-hang', label:'Bảng xếp hạng chi tiết', apiIntegrated:true}
+  ]},
+  'thu-vien': {label:'Thư viện', icon:'ti-books', path:'/thu-vien', sections:[
+    {key:'van-ban-luat', label:'Văn bản & Luật thi đấu', title:'Văn bản & Luật thi đấu', items:true, itemCount:6, maxItems:6,
+      itemFields:[{key:'title', label:'Tên tài liệu', type:'text'},{key:'fileType', label:'Định dạng', type:'text'},{key:'size', label:'Dung lượng', type:'text'},{key:'date', label:'Ngày', type:'text'},{key:'tag', label:'Phân loại', type:'text'}]},
+    {key:'thu-vien-media', label:'Thư viện media', title:'Thư viện media', items:true, itemCount:4, maxItems:4,
+      itemFields:[{key:'title', label:'Tên album', type:'text'},{key:'mediaType', label:'Loại (photo/video)', type:'text'},{key:'count', label:'Số lượng', type:'text'}]}
+  ]},
+  'hoi-vien': {label:'Hội viên', icon:'ti-users', path:'/hoi-vien', sections:[
+    {key:'form-dang-ky', label:'Form đăng ký hội viên', fields:[
+      {key:'feeLabel', label:'Nhãn hội phí', type:'text', default:'Hội phí năm 2026'},
+      {key:'feeAmount', label:'Số tiền', type:'text', default:'300.000đ'},
+      {key:'bankName', label:'Ngân hàng', type:'text', default:'Vietcombank'},
+      {key:'bankAccount', label:'Số tài khoản', type:'text', default:'00xx xxx xxx'}
+    ]},
+    {key:'danh-sach-hoi-vien', label:'Danh sách người chơi (hội viên)', title:'Danh sách hội viên', apiIntegrated:true}
+  ]},
+  'doi-tac': {label:'Đối tác', icon:'ti-building', path:'/doi-tac', sections:[
+    {key:'gioi-thieu-doi-tac', label:'Đoạn giới thiệu', fields:[
+      {key:'paragraph', label:'Nội dung', type:'textarea', span2:true, default:'Liên đoàn Billiards & Snooker Việt Nam trân trọng cảm ơn các đối tác và nhà tài trợ đã đồng hành, góp phần thúc đẩy phong trào và nâng tầm các giải đấu billiards & snooker trên cả nước.'}
+    ]},
+    {key:'doi-tac-chien-luoc', label:'Đối tác chiến lược', title:'Đối tác chiến lược', partnerPicker:true},
+    {key:'tai-tro-kim-cuong', label:'Nhà tài trợ Kim cương', title:'Nhà tài trợ Kim cương', partnerPicker:true},
+    {key:'tai-tro-vang', label:'Nhà tài trợ Vàng', title:'Nhà tài trợ Vàng', partnerPicker:true},
+    {key:'doi-tac-dong-hanh', label:'Đối tác đồng hành', title:'Đối tác đồng hành', partnerPicker:true},
+    {key:'cta-doi-tac', label:'CTA — Trở thành đối tác', fields:[
+      {key:'title', label:'Tiêu đề', type:'text', span2:true, default:'Trở thành đối tác của VBSF'},
+      {key:'subtitle', label:'Mô tả', type:'text', span2:true, default:'Cùng đồng hành phát triển phong trào billiards & snooker và kết nối với cộng đồng cơ thủ toàn quốc.'},
+      {key:'buttonText', label:'Nút bấm', type:'text', default:'Liên hệ hợp tác'}
+    ]}
+  ]},
+  'lien-he': {label:'Liên hệ', icon:'ti-phone', path:'/lien-he', sections:[
+    {key:'thong-tin-lien-he', label:'Thông tin liên hệ', title:'Thông tin liên hệ', fields:[
+      {key:'address', label:'Địa chỉ', type:'text', span2:true, default:'Số ..., Quận ..., Hà Nội, Việt Nam'},
+      {key:'email', label:'Email', type:'text', default:'info@billiards.org.vn'},
+      {key:'phone', label:'Điện thoại', type:'text', default:'024 xxxx xxxx'},
+      {key:'hours', label:'Giờ làm việc', type:'text', span2:true, default:'Thứ 2 – Thứ 6 · 08:00 – 17:00'}
+    ]},
+    {key:'form-lien-he', label:'Form gửi liên hệ'},
+    {key:'ban-do', label:'Bản đồ'}
+  ]}
+};
+/* ---- Trang & section tùy chỉnh (do admin tạo thêm) ---- */
+function getPageRegistry(pageKey){
+  return PAGE_SECTIONS_REGISTRY[pageKey] || (DB.customPages && DB.customPages[pageKey]) || null;
+}
+function getAllPageKeys(){
+  return [...Object.keys(PAGE_SECTIONS_REGISTRY), ...Object.keys(DB.customPages||{})];
+}
+function getPageLabel(pageKey){
+  const meta = DB.pageMeta && DB.pageMeta[pageKey];
+  if(meta && meta.title) return meta.title;
+  const reg = getPageRegistry(pageKey);
+  return reg ? reg.label : pageKey;
+}
+function getPageIcon(pageKey){ const reg = getPageRegistry(pageKey); return (reg && reg.icon) || 'ti-file'; }
+function getPagePath(pageKey){
+  const meta = DB.pageMeta && DB.pageMeta[pageKey];
+  if(meta && meta.slug) return meta.slug;
+  const reg = getPageRegistry(pageKey);
+  return (reg && reg.path) || '';
+}
+function getSectionCatalog(pageKey){
+  const builtIn = (PAGE_SECTIONS_REGISTRY[pageKey] && PAGE_SECTIONS_REGISTRY[pageKey].sections) || [];
+  const custom = (DB.customSections && DB.customSections[pageKey]) || [];
+  return [...builtIn, ...custom];
+}
+function getSectionDef(pageKey, key){
+  return getSectionCatalog(pageKey).find(s=>s.key===key);
+}
+function getSectionLabel(pageKey, key){
+  const entry = (DB.pageSections[pageKey]||[]).find(e=>e.key===key);
+  const def = getSectionDef(pageKey, key);
+  return (entry && entry.labelOverride) || (def && def.label) || key;
+}
+function makeDefaultSectionEntry(s){
+  const entry = {key:s.key, enabled:true, title: s.title!==undefined ? s.title : undefined, itemCount: s.items ? s.itemCount : undefined, backgroundImage:null};
+  if(s.fields){ entry.content = {}; s.fields.forEach(f=>{ entry.content[f.key] = f.default||''; }); }
+  if(s.itemFields){ entry.items = Array.from({length:s.itemCount||1}, ()=>{ const it={}; s.itemFields.forEach(f=>it[f.key]=''); return it; }); }
+  if(s.tournamentSelect){ entry.tournamentIds = []; }
+  if(s.newsPicker){ entry.newsIds = []; }
+  if(s.partnerPicker){ entry.partnerIds = []; }
+  if(s.tournamentSelect || s.newsPicker){
+    entry.pickerMode = 'manual';
+    if(!s.singleSelect) entry.autoCount = 3;
+  }
+  return entry;
+}
+function ensurePageMeta(pageKey){
+  if(!DB.pageMeta[pageKey]){
+    const reg = getPageRegistry(pageKey);
+    DB.pageMeta[pageKey] = {slug: (reg && reg.path) || ('/'+pageKey), title: (reg && reg.label) || pageKey, metaTitle:'', metaDescription:''};
+  }
+}
+/** Đảm bảo DB.pageSections khớp với danh mục section hiện tại (thêm section mới lần đầu, không tự thêm lại section admin đã xóa, bù field còn thiếu). */
+function normalizePageSections(){
+  if(!DB.customPages) DB.customPages = {};
+  if(!DB.customSections) DB.customSections = {};
+  if(!DB.pageMeta) DB.pageMeta = {};
+  if(!DB.pageSections) DB.pageSections = {};
+  if(!DB.pageSectionKeysEverAdded) DB.pageSectionKeysEverAdded = {};
+  getAllPageKeys().forEach(pageKey=>{
+    ensurePageMeta(pageKey);
+    if(!Array.isArray(DB.pageSections[pageKey])) DB.pageSections[pageKey] = [];
+    if(!Array.isArray(DB.pageSectionKeysEverAdded[pageKey])) DB.pageSectionKeysEverAdded[pageKey] = DB.pageSections[pageKey].map(e=>e.key);
+    const catalog = getSectionCatalog(pageKey);
+    const everAdded = DB.pageSectionKeysEverAdded[pageKey];
+    catalog.forEach(s=>{
+      if(!DB.pageSections[pageKey].find(e=>e.key===s.key) && !everAdded.includes(s.key)){
+        DB.pageSections[pageKey].push(makeDefaultSectionEntry(s));
+        everAdded.push(s.key);
+      }
+    });
+    DB.pageSections[pageKey] = DB.pageSections[pageKey].filter(e=>catalog.find(s=>s.key===e.key));
+    DB.pageSections[pageKey].forEach(e=>{
+      const s = catalog.find(r=>r.key===e.key);
+      if(e.backgroundImage===undefined) e.backgroundImage = null;
+      if(s.tournamentSelect){
+        if(!Array.isArray(e.tournamentIds)) e.tournamentIds = e.tournamentId ? [e.tournamentId] : [];
+        delete e.tournamentId;
+      } else {
+        delete e.tournamentIds;
+      }
+      if(s.newsPicker && !Array.isArray(e.newsIds)) e.newsIds = [];
+      if(s.partnerPicker){ if(!Array.isArray(e.partnerIds)) e.partnerIds = []; } else { delete e.partnerIds; }
+      if(s.tournamentSelect || s.newsPicker){
+        if(e.pickerMode!=='auto' && e.pickerMode!=='manual') e.pickerMode = 'manual';
+        if(!s.singleSelect && (typeof e.autoCount!=='number' || e.autoCount<1)) e.autoCount = 3;
+        if(s.singleSelect) delete e.autoCount;
+      } else {
+        delete e.pickerMode; delete e.autoCount;
+      }
+      if(!s.items){ delete e.items; delete e.itemCount; }
+      if(!s.fields){ delete e.content; }
+    });
+  });
+}
+
+const SETTINGS_FIELDS = [
+  {key:'orgName', label:'Tên đầy đủ tổ chức', type:'text', span2:true},
+  {key:'orgShort', label:'Tên viết tắt', type:'text'},
+  {key:'foundedYear', label:'Năm thành lập', type:'text'},
+  {key:'memberCount', label:'Số hội viên (hiển thị)', type:'text'},
+  {key:'clubCount', label:'Số câu lạc bộ (hiển thị)', type:'text'},
+  {key:'provinceCount', label:'Số tỉnh/thành (hiển thị)', type:'text'},
+  {key:'about', label:'Giới thiệu chung', type:'textarea', span2:true, rows:5},
+  {key:'heroTitle', label:'Giải đấu nổi bật (trang chủ)', type:'text', span2:true},
+  {key:'heroSubtitle', label:'Mô tả giải đấu nổi bật', type:'text', span2:true},
+  {key:'memberFee', label:'Hội phí năm (VNĐ)', type:'text'},
+  {key:'bankName', label:'Ngân hàng', type:'text'},
+  {key:'bankAccount', label:'Số tài khoản', type:'text'},
+  {key:'bankHolder', label:'Chủ tài khoản', type:'text'}
+];
+
+const CONTACT_FIELDS = [
+  {key:'address', label:'Địa chỉ', type:'text', span2:true},
+  {key:'email', label:'Email', type:'text'},
+  {key:'phone', label:'Điện thoại', type:'text'},
+  {key:'hours', label:'Giờ làm việc', type:'text', span2:true},
+  {key:'facebook', label:'Facebook (URL)', type:'text'},
+  {key:'youtube', label:'YouTube (URL)', type:'text'},
+  {key:'tiktok', label:'TikTok (URL)', type:'text'}
+];
+/* =========================================================
+   SEED DATA (matches current prototype website content)
+   ========================================================= */
+function seedData(){
+  return {
+    settings:{
+      orgName:'Liên đoàn Billiards & Snooker Việt Nam', orgShort:'VBSF',
+      foundedYear:'200x', memberCount:'1.500+', clubCount:'120+', provinceCount:'30+',
+      about:'Liên đoàn Billiards & Snooker Việt Nam (VBSF) là tổ chức xã hội – nghề nghiệp đại diện cho phong trào billiards & snooker trên cả nước. Liên đoàn giữ vai trò quản lý chuyên môn, tổ chức hệ thống thi đấu quốc gia, phát triển vận động viên và kết nối với các tổ chức billiards quốc tế.',
+      heroTitle:'Giải Vô địch Billiards & Snooker Quốc gia 2026',
+      heroSubtitle:'Khởi tranh 12/06 · Nhà thi đấu Phú Thọ, TP.HCM',
+      memberFee:'300.000', bankName:'Vietcombank', bankAccount:'00xx xxx xxx', bankHolder:'LĐ Billiards & Snooker VN'
+    },
+    contact:{
+      address:'Số ..., Quận ..., Hà Nội, Việt Nam', email:'info@billiards.org.vn', phone:'024 xxxx xxxx',
+      hours:'Thứ 2 – Thứ 6 · 08:00 – 17:00', facebook:'', youtube:'', tiktok:''
+    },
+    news:[
+      {id:uid(),title:'VBSF công bố hệ thống thi đấu quốc gia năm 2026',category:'Hoạt động VBSF',date:'2026-06-02',author:'Ban Truyền thông VBSF',featured:false,excerpt:'VBSF chính thức công bố hệ thống thi đấu quốc gia năm 2026 với cấu trúc ba cấp độ.',content:'Liên đoàn Billiards & Snooker Việt Nam (VBSF) vừa chính thức công bố hệ thống thi đấu quốc gia năm 2026, với cấu trúc giải đấu xuyên suốt và cơ chế tích điểm xếp hạng áp dụng cho tất cả các nội dung.'},
+      {id:uid(),title:'Khởi tranh vòng loại khu vực phía Nam',category:'Giải đấu',date:'2026-06-02',author:'Ban Truyền thông VBSF',featured:false,excerpt:'Hơn 120 cơ thủ tranh tài tại vòng loại khu vực.',content:''},
+      {id:uid(),title:'VBSF công bố khung chuẩn trọng tài cấp quốc gia',category:'Đào tạo',date:'2026-05-28',author:'Ban Truyền thông VBSF',featured:true,excerpt:'Chương trình đào tạo và cấp chứng nhận trọng tài.',content:''},
+      {id:uid(),title:'Cơ thủ Việt Nam giành vé dự giải vô địch châu Á',category:'Quốc tế',date:'2026-05-20',author:'Ban Truyền thông VBSF',featured:true,excerpt:'Thành tích ấn tượng tại vòng loại Đông Nam Á.',content:''},
+      {id:uid(),title:'Giải Carom 3 băng các CLB toàn quốc khởi động',category:'Trong nước',date:'2026-05-16',author:'Ban Truyền thông VBSF',featured:false,excerpt:'Mùa giải mới quy tụ các CLB mạnh cả nước.',content:''},
+      {id:uid(),title:'Ký kết hợp tác phát triển hệ thống xếp hạng',category:'Hoạt động VBSF',date:'2026-05-10',author:'Ban Truyền thông VBSF',featured:false,excerpt:'Hướng tới chuẩn hóa dữ liệu và minh bạch xếp hạng.',content:''},
+      {id:uid(),title:'Lịch thi đấu hệ thống quốc gia quý III/2026',category:'Giải đấu',date:'2026-05-15',author:'Ban Truyền thông VBSF',featured:true,excerpt:'',content:''},
+      {id:uid(),title:'Tổng kết mùa giải Pool 2025',category:'Giải đấu',date:'2026-04-28',author:'Ban Truyền thông VBSF',featured:false,excerpt:'Nhìn lại những dấu ấn của mùa giải vừa qua.',content:''}
+    ],
+    library_docs:[
+      {id:uid(),title:'Quy chế hệ thống thi đấu quốc gia 2026',fileType:'PDF',tag:'Quy chế',size:'1,2 MB',date:'2026-05-12'},
+      {id:uid(),title:'Luật thi đấu Pool (8 / 9 / 10 bi)',fileType:'PDF',tag:'Luật',size:'2,4 MB',date:'2026-03-01'},
+      {id:uid(),title:'Luật thi đấu Carom (1 băng & 3 băng)',fileType:'PDF',tag:'Luật',size:'1,8 MB',date:'2026-03-01'},
+      {id:uid(),title:'Luật thi đấu Snooker',fileType:'PDF',tag:'Luật',size:'2,1 MB',date:'2026-03-01'},
+      {id:uid(),title:'Đơn đăng ký hội viên (biểu mẫu)',fileType:'DOCX',tag:'Biểu mẫu',size:'240 KB',date:'2026-01-10'},
+      {id:uid(),title:'Thông báo lịch thi đấu quý III/2026',fileType:'PDF',tag:'Thông báo',size:'560 KB',date:'2026-05-20'}
+    ],
+    library_media:[
+      {id:uid(),title:'Giải VĐQG Pool 2025',mediaType:'photo',count:48,date:'2025-12-20'},
+      {id:uid(),title:'Lễ ký kết hợp tác',mediaType:'photo',count:12,date:'2026-05-10'},
+      {id:uid(),title:'Chung kết Carom 3 băng 2025',mediaType:'video',count:1,date:'2025-12-12'},
+      {id:uid(),title:'Hướng dẫn luật Snooker',mediaType:'video',count:1,date:'2026-03-05'}
+    ],
+    partners:[
+      {id:uid(),name:'Tên đối tác',tier:'Đối tác chiến lược',description:'Đối tác công nghệ & hệ thống xếp hạng'},
+      {id:uid(),name:'Tên đối tác',tier:'Đối tác chiến lược',description:'Đối tác hệ thống câu lạc bộ'},
+      {id:uid(),name:'Nhà tài trợ Kim cương 1',tier:'Nhà tài trợ Kim cương',description:''},
+      {id:uid(),name:'Nhà tài trợ Kim cương 2',tier:'Nhà tài trợ Kim cương',description:''},
+      {id:uid(),name:'Nhà tài trợ Vàng 1',tier:'Nhà tài trợ Vàng',description:''},
+      {id:uid(),name:'Nhà tài trợ Vàng 2',tier:'Nhà tài trợ Vàng',description:''},
+      {id:uid(),name:'Đối tác đồng hành 1',tier:'Đối tác đồng hành',description:''},
+      {id:uid(),name:'Đối tác đồng hành 2',tier:'Đối tác đồng hành',description:''}
+    ]
+  };
+}
+function uid(){return 'id_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+/* =========================================================
+   DATABASE QUERIES
+   Giải đấu và Hội viên không được nhập tay trong seedData —
+   hai danh mục này được truy vấn từ CSDL qua fetchFromDatabase().
+   ========================================================= */
+const DB_LATENCY_MS = 500;
+const DB_TABLES = {
+  tournaments:[
+    {name:'Giải Vô địch Quốc gia Pool 2026',category:'Pool 9 bi',status:'ongoing',date:'2026-06-12',location:'Nhà thi đấu Phú Thọ, TP.HCM',participants:128,note:'Vòng tứ kết',champion:''},
+    {name:'Cúp Carom 3 băng Hà Nội Mở rộng',category:'Carom 3 băng',status:'upcoming',date:'2026-06-28',location:'CLB Meow Billiards, Hà Nội',participants:64,note:'Mở đăng ký',champion:''},
+    {name:'Giải Snooker Toàn quốc 2026',category:'Snooker',status:'upcoming',date:'2026-07-15',location:'Cung Thể thao Đà Nẵng',participants:48,note:'Mở đăng ký',champion:''},
+    {name:'Giải các CLB mạnh toàn quốc',category:'Pool 10 bi',status:'upcoming',date:'2026-08-02',location:'TP. Thủ Dầu Một, Bình Dương',participants:'',note:'Sắp mở',champion:''},
+    {name:'Giải Carom 3 băng Cúp Mùa Xuân 2026',category:'Carom 3 băng',status:'completed',date:'2026-04-18',location:'',participants:'',note:'',champion:'Trần Quốc Bảo'},
+    {name:'Giải Pool 9 bi các tỉnh phía Bắc 2026',category:'Pool 9 bi',status:'completed',date:'2026-03-30',location:'',participants:'',note:'',champion:'Nguyễn Phúc Long'},
+    {name:'Giải Snooker Cúp CLB toàn quốc 2025',category:'Snooker',status:'completed',date:'2025-12-12',location:'',participants:'',note:'',champion:'Lê Minh Khôi'}
+  ],
+  members:[
+    {rank:1,name:'Nguyễn Phúc Long',code:'VBSF-2026-00098',phone:'0901234567',password:'123456',club:'CLB Sài Gòn',province:'TP.HCM',category:'Pool 9 bi',status:'active',points:2485,matches:45,trend:'up',trendValue:1},
+    {rank:2,name:'Trần Quốc Bảo',code:'VBSF-2026-00071',phone:'0912345678',password:'123456',club:'CLB Thủ Đô',province:'Hà Nội',category:'Pool 9 bi',status:'active',points:2410,matches:44,trend:'down',trendValue:1},
+    {rank:3,name:'Lê Minh Khôi',code:'VBSF-2026-00112',phone:'0923456789',password:'123456',club:'CLB Sông Hàn',province:'Đà Nẵng',category:'Pool 9 bi',status:'active',points:2388,matches:43,trend:'eq',trendValue:0},
+    {rank:4,name:'Phạm Anh Tú',code:'VBSF-2026-00123',phone:'0934567890',password:'123456',club:'Meow Billiards',province:'Bình Dương',category:'Pool 9 bi',status:'pending',points:2301,matches:42,trend:'up',trendValue:2},
+    {rank:5,name:'Đỗ Thành Nam',code:'VBSF-2025-00410',phone:'0945678901',password:'123456',club:'CLB Cảng',province:'Hải Phòng',category:'Pool 9 bi',status:'expired',points:2256,matches:38,trend:'down',trendValue:1},
+    {rank:6,name:'Vũ Hoàng Sơn',code:'VBSF-2026-00201',phone:'0956789012',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',status:'active',points:2198,matches:40,trend:'up',trendValue:1},
+    {rank:7,name:'Ngô Gia Huy',code:'VBSF-2026-00202',phone:'0967890123',password:'123456',club:'',province:'Cần Thơ',category:'Pool 9 bi',status:'active',points:2154,matches:35,trend:'eq',trendValue:0},
+    {rank:8,name:'Bùi Đức Anh',code:'VBSF-2026-00203',phone:'0978901234',password:'123456',club:'',province:'TP.HCM',category:'Pool 9 bi',status:'active',points:2097,matches:33,trend:'up',trendValue:3},
+    {rank:9,name:'Lý Trường Giang',code:'VBSF-2026-00204',phone:'0989012345',password:'123456',club:'',province:'Đà Nẵng',category:'Pool 9 bi',status:'active',points:2041,matches:31,trend:'down',trendValue:2},
+    {rank:10,name:'Hoàng Minh Quân',code:'VBSF-2026-00205',phone:'0990123456',password:'123456',club:'',province:'Nghệ An',category:'Pool 9 bi',status:'active',points:1988,matches:29,trend:'up',trendValue:1},
+    {rank:11,name:'Đặng Văn Hậu',code:'VBSF-2026-00206',phone:'0901987654',password:'123456',club:'',province:'Bình Định',category:'Pool 9 bi',status:'active',points:1945,matches:28,trend:'eq',trendValue:0},
+    {rank:12,name:'Trịnh Bá Phước',code:'VBSF-2026-00207',phone:'0912987654',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',status:'active',points:1902,matches:27,trend:'down',trendValue:1}
+  ]
+};
+/** Mô phỏng một truy vấn CSDL (SELECT * FROM <table>) qua mạng. */
+function fetchFromDatabase(table){
+  return new Promise(resolve=>{
+    setTimeout(()=>{
+      resolve(DB_TABLES[table].map(row=>({...row, id:uid()})));
+    }, DB_LATENCY_MS);
+  });
+}
+/* =========================================================
+   STORAGE
+   ========================================================= */
+const STORAGE_KEY='vbsf_cms_data_v1';
+let DB=null;
+let syncingKey=null;
+
+async function loadDB(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if(res && res.value){
+      DB = JSON.parse(res.value);
+      let needsSave=false;
+      for(const table of Object.keys(DB_TABLES)){
+        if(!Array.isArray(DB[table])){ DB[table] = await fetchFromDatabase(table); needsSave=true; }
+      }
+      normalizePageSections();
+      needsSave = true;
+      if(needsSave) await saveDB();
+      return;
+    }
+  }catch(e){ /* key not found or storage unavailable */ }
+  DB = seedData();
+  for(const table of Object.keys(DB_TABLES)){
+    DB[table] = await fetchFromDatabase(table);
+  }
+  DB.pageSections = {}; DB.customPages = {}; DB.customSections = {}; DB.pageMeta = {}; DB.pageSectionKeysEverAdded = {};
+  normalizePageSections();
+  await saveDB();
+}
+
+async function syncFromDatabase(key){
+  syncingKey = key;
+  renderContent();
+  const rows = await fetchFromDatabase(key);
+  const toggleKey = COLLECTIONS[key] && COLLECTIONS[key].toggleVisibility;
+  if(toggleKey){
+    const prevByName = {};
+    (DB[key]||[]).forEach(r=>{ if(r[toggleKey]) prevByName[r.name] = true; });
+    rows.forEach(r=>{ if(prevByName[r.name]) r[toggleKey] = true; });
+  }
+  DB[key] = rows;
+  syncingKey = null;
+  await saveDB();
+  renderSidebar();
+  renderContent();
+  showToast(`Đã đồng bộ ${rows.length} mục từ cơ sở dữ liệu`);
+}
+async function saveDB(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(DB), false);
+  }catch(e){
+    console.error('Storage save failed', e);
+    showToast('Không thể lưu dữ liệu (lỗi bộ nhớ)', true);
+  }
+}
+/* =========================================================
+   NAV / STATE
+   ========================================================= */
+let currentView = 'dashboard';
+let searchTerm = '';
+let filterValue = '';
+let editingCollection = null;
+let editingId = null;
+let activeSectionKey = null;
+let sectionEditBuffer = null;
+
+const NAV_GROUPS = [
+  {label:null, items:[{key:'dashboard', label:'Tổng quan', icon:'ti-layout-dashboard'}]},
+  {label:'Nội dung', items:[
+    {key:'news', label:COLLECTIONS.news.label, icon:'ti-news'},
+    {key:'tournaments', label:COLLECTIONS.tournaments.label, icon:'ti-trophy'},
+  ]},
+  {label:'Thư viện', items:[
+    {key:'library_docs', label:'Văn bản & Luật', icon:'ti-file-text'},
+    {key:'library_media', label:'Media', icon:'ti-photo'},
+  ]},
+  {label:'Cộng đồng', items:[
+    {key:'members', label:COLLECTIONS.members.label, icon:'ti-users'},
+    {key:'partners', label:COLLECTIONS.partners.label, icon:'ti-building'},
+  ]},
+  {label:'Trang website', items:[
+    {key:'pages', label:'Trang website', icon:'ti-layout-2'},
+  ]},
+  {label:'Cấu hình chung', items:[
+    {key:'settings', label:'Thông tin tổ chức', icon:'ti-settings'},
+    {key:'contact', label:'Liên hệ', icon:'ti-address-book'},
+  ]}
+];
+
+function countFor(key){
+  if(COLLECTIONS[key]) return DB[key].length;
+  return null;
+}
+
+function renderSidebar(){
+  const nav = document.getElementById('sbNav');
+  nav.innerHTML = NAV_GROUPS.map(group=>{
+    const label = group.label ? `<div class="sb-group-label">${group.label}</div>` : '';
+    const items = group.items.map(it=>{
+      const c = countFor(it.key);
+      const active = (currentView===it.key || (it.key==='pages' && currentView.startsWith('page:')) || (it.key==='news' && currentView.startsWith('news-edit:')) || (it.key==='tournaments' && currentView.startsWith('tournament-edit:'))) ? 'active' : '';
+      return `<div class="sb-item ${active}" data-nav="${it.key}">
+        <span class="lft"><i class="ti ${it.icon}"></i>${it.label}</span>
+        ${c!==null ? `<span class="sb-count">${c}</span>` : ''}
+      </div>`;
+    }).join('');
+    return label+items;
+  }).join('');
+  nav.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click', ()=>{ setView(el.getAttribute('data-nav')); document.getElementById('sidebar').classList.remove('open'); });
+  });
+}
+
+function setView(view){
+  currentView = view;
+  searchTerm = '';
+  filterValue = '';
+  renderSidebar();
+  renderTopbar();
+  renderContent();
+}
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+function renderTopbar(){
+  const title = document.getElementById('pageTitle');
+  const sub = document.getElementById('pageSub');
+  const actions = document.getElementById('topbarActions');
+
+  if(currentView==='dashboard'){
+    title.textContent = 'Tổng quan';
+    sub.textContent = 'Toàn cảnh nội dung trên website VBSF';
+    actions.innerHTML = `<button class="btn btn-ghost" id="exportBtn"><i class="ti ti-download"></i> Xuất JSON</button>
+      <label class="btn btn-ghost" style="cursor:pointer"><i class="ti ti-upload"></i> Nhập JSON<input type="file" id="importFile" accept=".json" style="display:none"></label>`;
+  } else if(COLLECTIONS[currentView]){
+    const c = COLLECTIONS[currentView];
+    title.textContent = c.label;
+    sub.textContent = DB_TABLES[currentView]
+      ? `Dữ liệu truy vấn từ cơ sở dữ liệu VBSF${c.readOnly ? ' — chỉ xem, không thể chỉnh sửa trực tiếp' : ''}`
+      : `Quản lý ${c.single} hiển thị trên website`;
+    const syncBtn = (DB_TABLES[currentView] && !c.noSync) ? `<button class="btn btn-ghost" id="syncBtn" ${syncingKey===currentView?'disabled':''}><i class="ti ti-refresh"></i> ${syncingKey===currentView?'Đang đồng bộ...':'Đồng bộ từ CSDL'}</button>` : '';
+    const addBtnHtml = c.readOnly ? '' : (currentView==='news' ? `<button class="btn btn-primary" id="addNewsBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : currentView==='tournaments' ? `<button class="btn btn-primary" id="addTourneyBtn"><i class="ti ti-plus"></i> Tạo giải đấu</button>` : `<button class="btn btn-primary" id="addNewBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>`);
+    actions.innerHTML = `${syncBtn}${addBtnHtml}`;
+  } else if(currentView.startsWith('news-edit:')){
+    const id = currentView.slice('news-edit:'.length);
+    const rec = id!=='new' ? DB.news.find(r=>r.id===id) : null;
+    title.textContent = rec ? 'Sửa bài viết' : 'Bài viết mới';
+    sub.textContent = rec && rec.title ? rec.title : 'Soạn nội dung tin tức';
+    actions.innerHTML = `<button class="btn btn-ghost" id="newsEditorBack"><i class="ti ti-arrow-left"></i> Quay lại danh sách</button>`;
+  } else if(currentView.startsWith('tournament-edit:')){
+    const id = currentView.slice('tournament-edit:'.length);
+    const rec = id!=='new' ? DB.tournaments.find(r=>r.id===id) : null;
+    title.textContent = rec ? 'Sửa giải đấu' : 'Tạo giải đấu';
+    sub.textContent = rec && rec.name ? rec.name : 'Thông tin, danh sách người chơi, cặp đấu & kết quả';
+    actions.innerHTML = `<button class="btn btn-ghost" id="tourneyEditorBack"><i class="ti ti-arrow-left"></i> Quay lại danh sách</button>`;
+  } else if(currentView==='pages'){
+    title.textContent = 'Trang website';
+    sub.textContent = 'Quản lý các trang trên website và cấu hình section cho từng trang';
+    actions.innerHTML = `<a class="btn btn-ghost" href="index.html" target="_blank" rel="noopener"><i class="ti ti-external-link"></i> Xem trang (thật)</a>
+      <button class="btn btn-primary" id="newPageBtn"><i class="ti ti-plus"></i> Tạo trang mới</button>`;
+  } else if(currentView.startsWith('page:')){
+    const pageKey = currentView.slice(5);
+    title.textContent = getPageLabel(pageKey);
+    sub.textContent = 'Bật/tắt, sắp xếp và cấu hình nội dung từng section trên trang này — mô phỏng, chưa áp dụng trực tiếp lên website';
+    actions.innerHTML = `<a class="btn btn-ghost" href="index.html" target="_blank" rel="noopener"><i class="ti ti-external-link"></i> Xem trang (thật)</a>`;
+  } else if(currentView==='settings'){
+    title.textContent = 'Thông tin tổ chức';
+    sub.textContent = 'Nội dung hiển thị ở trang Giới thiệu & Trang chủ';
+    actions.innerHTML = '';
+  } else if(currentView==='contact'){
+    title.textContent = 'Liên hệ';
+    sub.textContent = 'Thông tin liên hệ hiển thị ở Footer & trang Liên hệ';
+    actions.innerHTML = '';
+  }
+
+  const addBtn = document.getElementById('addNewBtn');
+  if(addBtn) addBtn.addEventListener('click', ()=>openModal(currentView, null));
+  const addNewsBtn = document.getElementById('addNewsBtn');
+  if(addNewsBtn) addNewsBtn.addEventListener('click', ()=>setView('news-edit:new'));
+  const newsEditorBack = document.getElementById('newsEditorBack');
+  if(newsEditorBack) newsEditorBack.addEventListener('click', ()=>setView('news'));
+  const addTourneyBtn = document.getElementById('addTourneyBtn');
+  if(addTourneyBtn) addTourneyBtn.addEventListener('click', ()=>setView('tournament-edit:new'));
+  const tourneyEditorBack = document.getElementById('tourneyEditorBack');
+  if(tourneyEditorBack) tourneyEditorBack.addEventListener('click', ()=>setView('tournaments'));
+  const syncBtn = document.getElementById('syncBtn');
+  if(syncBtn) syncBtn.addEventListener('click', ()=>syncFromDatabase(currentView));
+  const newPageBtn = document.getElementById('newPageBtn');
+  if(newPageBtn) newPageBtn.addEventListener('click', ()=>openPageModal());
+  const exportBtn = document.getElementById('exportBtn');
+  if(exportBtn) exportBtn.addEventListener('click', exportData);
+  const importFile = document.getElementById('importFile');
+  if(importFile) importFile.addEventListener('change', importData);
+}
+/* =========================================================
+   CONTENT RENDER
+   ========================================================= */
+function renderContent(){
+  const el = document.getElementById('content');
+  renderTopbar();
+  if(currentView==='dashboard'){ el.innerHTML = renderDashboard(); attachDashboardEvents(); return; }
+  if(currentView==='settings'){ el.innerHTML = renderSingletonForm('settings', SETTINGS_FIELDS); attachSingletonEvents('settings', SETTINGS_FIELDS); return; }
+  if(currentView==='contact'){ el.innerHTML = renderSingletonForm('contact', CONTACT_FIELDS); attachSingletonEvents('contact', CONTACT_FIELDS); return; }
+  if(currentView==='pages'){ el.innerHTML = renderPagesListView(); attachPagesListEvents(); return; }
+  if(currentView.startsWith('page:')){ el.innerHTML = renderPageSectionsView(); attachPageSectionsEvents(); return; }
+  if(currentView.startsWith('news-edit:')){ el.innerHTML = renderNewsEditor(currentView.slice('news-edit:'.length)); attachNewsEditorEvents(); return; }
+  if(currentView.startsWith('tournament-edit:')){ el.innerHTML = renderTournamentEditor(currentView.slice('tournament-edit:'.length)); attachTournamentEditorEvents(); return; }
+  if(COLLECTIONS[currentView]){
+    if(syncingKey===currentView){ el.innerHTML = `<div class="tbl-wrap"><div class="empty"><i class="ti ti-loader-2"></i><b>Đang truy vấn cơ sở dữ liệu...</b></div></div>`; return; }
+    el.innerHTML = renderListView(currentView); attachListEvents(currentView); return;
+  }
+}
+
+function renderDashboard(){
+  const heroTitle = DB.settings.heroTitle || 'Chưa thiết lập giải đấu nổi bật';
+  const heroSub = DB.settings.heroSubtitle || '';
+  let html = `<div class="dash-hero">
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#C9A24B;font-weight:600">Giải đấu nổi bật · Trang chủ</div>
+      <h2 style="margin-top:6px">${escapeHtml(heroTitle)}</h2>
+      <p>${escapeHtml(heroSub)}</p>
+    </div>
+    <button class="btn btn-gold" id="goSettings"><i class="ti ti-edit"></i> Chỉnh sửa</button>
+  </div>`;
+
+  html += `<div class="dash-grid">`;
+  const cards = [
+    ['news','Tin tức','ti-news'],
+    ['tournaments','Giải đấu','ti-trophy'],
+    ['library_docs','Văn bản & Luật','ti-file-text'],
+    ['library_media','Album Media','ti-photo'],
+    ['members','Hội viên & Xếp hạng','ti-users'],
+    ['partners','Đối tác','ti-building']
+  ];
+  cards.forEach(([key,label,icon])=>{
+    html += `<div class="dash-card" data-nav="${key}">
+      <div class="n">${DB[key].length}</div>
+      <div class="l"><i class="ti ${icon}"></i>${label}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="tbl-wrap" style="padding:4px 0">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--vd)">Tin tức mới nhất</div>
+    <table><tbody>`;
+  const recentNews = [...DB.news].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,5);
+  if(recentNews.length===0){ html += `<tr><td style="padding:16px;color:var(--hint)">Chưa có tin tức nào.</td></tr>`; }
+  recentNews.forEach(n=>{
+    html += `<tr><td style="width:60%">${escapeHtml(n.title)}</td><td><span class="badge">${escapeHtml(n.category||'')}</span></td><td class="cell-muted">${fmtDate(n.date)}</td></tr>`;
+  });
+  html += `</tbody></table></div>`;
+  return html;
+}
+function attachDashboardEvents(){
+  document.querySelectorAll('[data-nav]').forEach(el=>{
+    if(el.closest('.sidebar')) return;
+    el.addEventListener('click', ()=>setView(el.getAttribute('data-nav')));
+  });
+  const gs = document.getElementById('goSettings');
+  if(gs) gs.addEventListener('click', ()=>setView('settings'));
+}
+
+function renderListView(key){
+  const c = COLLECTIONS[key];
+  const filterField = c.filterField ? c.fields.find(f=>f.key===c.filterField) : null;
+  const rows = filterRows(DB[key], c, searchTerm, filterField, filterValue);
+  let html = `<div class="toolbar">
+    <div class="search"><i class="ti ti-search"></i><input type="text" id="searchInput" placeholder="Tìm ${c.single}..." value="${escapeAttr(searchTerm)}"></div>
+    ${filterField ? `<select id="filterSelect" class="fld select" style="width:auto;height:32px;border:1px solid var(--line-strong);border-radius:var(--radius);padding:0 11px;color:var(--ink);background:#fff">
+      <option value="">Tất cả ${filterField.label.toLowerCase()}</option>
+      ${filterField.options.map(o=>`<option value="${escapeAttr(o)}" ${filterValue===o?'selected':''}>${escapeHtml(o)}</option>`).join('')}
+    </select>` : ''}
+    <span class="count-pill">${rows.length} / ${DB[key].length} mục</span>
+  </div>`;
+
+  if(rows.length===0){
+    html += `<div class="tbl-wrap"><div class="empty"><i class="ti ${c.icon}"></i><b>Chưa có dữ liệu</b>${searchTerm?'Không tìm thấy kết quả phù hợp.':(c.readOnly?'Nhấn "Đồng bộ từ CSDL" để tải dữ liệu.':`Nhấn "Thêm ${c.single}" để bắt đầu.`)}</div></div>`;
+    return html;
+  }
+
+  const hasActionCol = !c.readOnly || c.viewDetail || c.toggleVisibility;
+  html += `<div class="tbl-wrap"><table><thead><tr>`;
+  c.columns.forEach(col=> html += `<th>${col.label}</th>`);
+  html += `${hasActionCol ? '<th style="width:90px"></th>' : ''}</tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const isHidden = c.toggleVisibility && r[c.toggleVisibility];
+    html += `<tr data-id="${r.id}"${isHidden ? ' class="row-hidden"' : ''}>`;
+    c.columns.forEach(col=>{
+      let val;
+      if(col.render){ val = col.render(r); }
+      else if(col.status){
+        const m = col.statusMap[r[col.key]] || {t:r[col.key]||'', c:'gray'};
+        val = `<span class="status ${m.c}">${m.t}</span>`;
+      } else if(col.badge){
+        const lbl = col.mapLabels ? (col.mapLabels[r[col.key]]||r[col.key]||'') : (r[col.key]||'');
+        val = lbl ? `<span class="badge">${escapeHtml(lbl)}</span>` : '';
+      } else {
+        val = escapeHtml(r[col.key] ?? '');
+        if(col.muted) val = `<span class="cell-muted">${val||'—'}</span>`;
+      }
+      html += `<td>${val}</td>`;
+    });
+    if(!c.readOnly){
+      html += `<td class="actions">
+        ${c.viewDetail ? `<button class="btn-icon" data-view="${r.id}" title="Xem trước trên website"><i class="ti ti-eye"></i></button>` : ''}
+        <button class="btn-icon" data-edit="${r.id}" title="Sửa"><i class="ti ti-edit"></i></button>
+        <button class="btn-icon" data-del="${r.id}" title="Xóa"><i class="ti ti-trash"></i></button>
+      </td>`;
+    } else if(c.viewDetail || c.toggleVisibility){
+      html += `<td class="actions">`;
+      if(c.viewDetail) html += `<button class="btn-icon" data-view="${r.id}" title="Xem chi tiết"><i class="ti ti-eye"></i></button>`;
+      if(c.toggleVisibility) html += `<button class="btn-icon" data-toggle-vis="${r.id}" title="${isHidden?'Hiện lại trên website':'Ẩn khỏi website'}"><i class="ti ${isHidden?'ti-eye-off':'ti-eye'}"></i></button>`;
+      html += `</td>`;
+    }
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div>`;
+  return html;
+}
+
+function filterRows(rows, schema, term, filterField, filterVal){
+  let out = rows;
+  if(filterField && filterVal) out = out.filter(r=> r[filterField.key]===filterVal);
+  if(!term) return out;
+  const t = term.toLowerCase();
+  return out.filter(r=> schema.columns.some(col=> String(r[col.key]||'').toLowerCase().includes(t)) || String(r.name||r.title||'').toLowerCase().includes(t));
+}
+
+function attachListEvents(key){
+  const search = document.getElementById('searchInput');
+  if(search){
+    search.addEventListener('input', e=>{ searchTerm = e.target.value; renderContent(); document.getElementById('searchInput').focus(); document.getElementById('searchInput').setSelectionRange(searchTerm.length,searchTerm.length); });
+  }
+  const filterSelect = document.getElementById('filterSelect');
+  if(filterSelect){
+    filterSelect.addEventListener('change', e=>{ filterValue = e.target.value; renderContent(); });
+  }
+  document.querySelectorAll('[data-edit]').forEach(btn=>{
+    const id = btn.getAttribute('data-edit');
+    btn.addEventListener('click', ()=> key==='news' ? setView('news-edit:'+id) : key==='tournaments' ? setView('tournament-edit:'+id) : openModal(key, id));
+  });
+  document.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', ()=>confirmDelete(key, btn.getAttribute('data-del')));
+  });
+  document.querySelectorAll('[data-view]').forEach(btn=>{
+    btn.addEventListener('click', ()=>openViewModal(key, btn.getAttribute('data-view')));
+  });
+  document.querySelectorAll('[data-toggle-vis]').forEach(btn=>{
+    btn.addEventListener('click', ()=>toggleRowVisibility(key, btn.getAttribute('data-toggle-vis')));
+  });
+}
+/* =========================================================
+   SINGLETON FORM (settings / contact)
+   ========================================================= */
+function renderSingletonForm(key, fields){
+  const data = DB[key];
+  let html = `<div class="form-card"><div class="form-grid">`;
+  fields.forEach(f=>{
+    html += `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label>${renderField(f, data[f.key])}</div>`;
+  });
+  html += `</div><div class="form-actions"><button class="btn btn-primary" id="saveSingleton"><i class="ti ti-check"></i> Lưu thay đổi</button></div></div>`;
+  return html;
+}
+function attachSingletonEvents(key, fields){
+  document.getElementById('saveSingleton').addEventListener('click', async ()=>{
+    const data = {};
+    fields.forEach(f=>{
+      const el = document.getElementById('f_'+f.key);
+      data[f.key] = f.type==='checkbox' ? el.classList.contains('on') : el.value;
+    });
+    DB[key] = data;
+    await saveDB();
+    showToast('Đã lưu thay đổi');
+    renderSidebar();
+  });
+}
+/* =========================================================
+   PAGES LIST VIEW
+   ========================================================= */
+function renderPagesListView(){
+  const pageKeys = getAllPageKeys();
+  const term = searchTerm.toLowerCase();
+  const rows = pageKeys.filter(k=> !term || getPageLabel(k).toLowerCase().includes(term) || getPagePath(k).toLowerCase().includes(term));
+
+  let html = `<div class="toolbar">
+    <div class="search"><i class="ti ti-search"></i><input type="text" id="searchInput" placeholder="Tìm theo tên trang..." value="${escapeAttr(searchTerm)}"></div>
+    <span class="count-pill">${rows.length} / ${pageKeys.length} trang</span>
+  </div>`;
+
+  if(rows.length===0){
+    html += `<div class="tbl-wrap"><div class="empty"><i class="ti ti-layout-2"></i><b>Không tìm thấy trang</b>Không có trang nào khớp với tìm kiếm.</div></div>`;
+    return html;
+  }
+
+  html += `<div class="tbl-wrap"><table><thead><tr>
+    <th>Tên trang</th><th>Section</th><th style="width:90px"></th>
+  </tr></thead><tbody>`;
+  rows.forEach(k=>{
+    const cfg = DB.pageSections[k] || [];
+    const total = cfg.length;
+    const enabled = cfg.filter(s=>s.enabled).length;
+    const customTag = DB.customPages[k] ? `<span class="badge" style="margin-left:6px">Tùy chỉnh</span>` : '';
+    html += `<tr data-page-row="${k}" style="cursor:pointer">
+      <td>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="width:34px;height:34px;border-radius:8px;background:var(--tag-purple-soft);color:var(--tag-purple);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0"><i class="ti ${getPageIcon(k)}"></i></span>
+          <div>
+            <div style="font-weight:600">${escapeHtml(getPageLabel(k))}${customTag}</div>
+            <div class="cell-muted" style="font-size:12px">${escapeHtml(getPagePath(k))}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="cell-muted">${enabled} / ${total} section đang bật</span></td>
+      <td class="actions"><button class="btn-icon" data-edit-page="${k}" title="Mở trang"><i class="ti ti-edit"></i></button></td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  return html;
+}
+function attachPagesListEvents(){
+  const search = document.getElementById('searchInput');
+  if(search){
+    search.addEventListener('input', e=>{ searchTerm = e.target.value; renderContent(); document.getElementById('searchInput').focus(); document.getElementById('searchInput').setSelectionRange(searchTerm.length,searchTerm.length); });
+  }
+  document.querySelectorAll('[data-page-row]').forEach(tr=>{
+    tr.addEventListener('click', ()=> setView('page:'+tr.getAttribute('data-page-row')));
+  });
+  document.querySelectorAll('[data-edit-page]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); setView('page:'+btn.getAttribute('data-edit-page')); });
+  });
+}
+/* =========================================================
+   PAGE SECTIONS VIEW (mô phỏng)
+   ========================================================= */
+function renderPageSectionsView(){
+  const pageKey = currentView.slice(5);
+  const registry = getSectionCatalog(pageKey);
+  const cfg = DB.pageSections[pageKey];
+
+  if(!activeSectionKey || !cfg.find(s=>s.key===activeSectionKey)){
+    activeSectionKey = cfg[0] ? cfg[0].key : null;
+  }
+  if(activeSectionKey) ensureSectionEditBuffer(pageKey, activeSectionKey);
+
+  const listRows = cfg.map((s, idx)=>{
+    const def = registry.find(r=>r.key===s.key) || {};
+    const apiBadge = def.apiIntegrated ? `<i class="ti ti-api" style="color:var(--tag-purple);font-size:12px" title="Tích hợp API"></i>` : '';
+    const selected = s.key===activeSectionKey ? 'selected' : '';
+    return `<div class="sec-row ${selected}" data-select-section="${s.key}">
+      <div class="sec-row-order">
+        <button class="btn-icon" data-move-up="${idx}" ${idx===0?'disabled style="opacity:.3"':''} title="Lên"><i class="ti ti-chevron-up"></i></button>
+        <button class="btn-icon" data-move-down="${idx}" ${idx===cfg.length-1?'disabled style="opacity:.3"':''} title="Xuống"><i class="ti ti-chevron-down"></i></button>
+      </div>
+      <span class="switch ${s.enabled?'on':''}" data-enable-input="${s.key}" title="${s.enabled?'Đang hiển thị':'Đang ẩn'}"></span>
+      <span class="sec-row-label">${escapeHtml(getSectionLabel(pageKey, s.key))}</span>${apiBadge}
+      <button class="btn-icon" data-rename-section="${s.key}" title="Đổi tên section" style="flex-shrink:0"><i class="ti ti-pencil"></i></button>
+      <button class="btn-icon" data-remove-section="${s.key}" title="Xóa khỏi trang" style="flex-shrink:0"><i class="ti ti-trash"></i></button>
+    </div>`;
+  }).join('');
+
+  return `<div data-back-to-pages style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:14px">
+      <i class="ti ti-arrow-left"></i> Tất cả trang
+    </div>
+    ${renderPageMetaCard(pageKey)}
+    <div class="sec-builder">
+      <div class="card sec-list-card">
+        <div class="card-head">
+          <div>
+            <h2>Section</h2>
+            <div class="desc">${cfg.filter(s=>s.enabled).length}/${cfg.length} section đang hiển thị</div>
+          </div>
+        </div>
+        <div class="sec-list">${listRows || '<div class="empty" style="padding:24px"><b>Chưa có section nào</b></div>'}</div>
+        <div data-add-section style="padding:12px 14px;border-top:1px solid var(--line);cursor:pointer;color:var(--vg);font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px"><i class="ti ti-plus"></i> Thêm section</div>
+      </div>
+      <div class="card sec-detail-card" id="secDetailCard">
+        ${renderSectionDetailPanel(pageKey, activeSectionKey)}
+      </div>
+    </div>`;
+}
+
+/* ---- Thẻ "Thông tin trang" (tên, slug, metadata) ngay trong màn hình chi tiết ---- */
+let pageMetaEditBuffer = null;
+function ensurePageMetaEditBuffer(pageKey){
+  if(pageMetaEditBuffer && pageMetaEditBuffer.pageKey===pageKey) return;
+  const meta = DB.pageMeta[pageKey] || {};
+  pageMetaEditBuffer = {pageKey, values:{
+    title: meta.title || getPageLabel(pageKey),
+    slug: meta.slug || getPagePath(pageKey),
+    metaTitle: meta.metaTitle || '',
+    metaDescription: meta.metaDescription || ''
+  }};
+}
+function renderPageMetaField(f, value){
+  if(f.type==='textarea') return `<textarea id="pm_${f.key}" rows="${f.rows||3}" placeholder="${escapeAttr(f.placeholder||'')}">${escapeHtml(value||'')}</textarea>`;
+  return `<input type="text" id="pm_${f.key}" value="${escapeAttr(value||'')}" placeholder="${escapeAttr(f.placeholder||'')}">`;
+}
+function renderPageMetaCard(pageKey){
+  ensurePageMetaEditBuffer(pageKey);
+  const v = pageMetaEditBuffer.values;
+  const isCustom = !!DB.customPages[pageKey];
+  const fieldsHtml = PAGE_META_FIELDS.map(f=>
+    `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${renderPageMetaField(f, v[f.key])}</div>`
+  ).join('');
+  return `<div class="card" style="margin-bottom:20px">
+    <div class="card-head">
+      <div>
+        <h2>Thông tin trang</h2>
+        <div class="desc">Tên, đường dẫn (slug) và metadata SEO của trang này</div>
+      </div>
+      ${isCustom ? `<button class="btn btn-danger-outline" id="pageDeleteBtn"><i class="ti ti-trash"></i> Xóa trang</button>` : ''}
+    </div>
+    <div class="sec-detail-group"><div class="form-grid">${fieldsHtml}</div></div>
+    <div class="sec-detail-actions">
+      <button class="btn btn-primary" id="pageMetaSaveBtn"><i class="ti ti-check"></i> Lưu thông tin trang</button>
+    </div>
+  </div>`;
+}
+function attachPageMetaCardEvents(pageKey){
+  const saveBtn = document.getElementById('pageMetaSaveBtn');
+  if(saveBtn) saveBtn.addEventListener('click', async ()=>{
+    const values = {};
+    PAGE_META_FIELDS.forEach(f=>{ values[f.key] = document.getElementById('pm_'+f.key).value; });
+    if(!values.title.trim()){ showToast('Vui lòng nhập tên trang', true); return; }
+    if(!values.slug.trim()) values.slug = slugify(values.title);
+    if(!values.slug.startsWith('/')) values.slug = '/'+values.slug;
+    DB.pageMeta[pageKey] = values;
+    if(DB.customPages[pageKey]) DB.customPages[pageKey].label = values.title;
+    pageMetaEditBuffer = null;
+    await saveDB();
+    renderSidebar();
+    renderContent();
+    showToast('Đã lưu thông tin trang');
+  });
+  const delBtn = document.getElementById('pageDeleteBtn');
+  if(delBtn) delBtn.addEventListener('click', ()=>{
+    if(!confirm(`Xóa trang "${getPageLabel(pageKey)}"? Toàn bộ section của trang này cũng sẽ bị xóa. Hành động này không thể hoàn tác.`)) return;
+    delete DB.customPages[pageKey];
+    delete DB.customSections[pageKey];
+    delete DB.pageSections[pageKey];
+    delete DB.pageMeta[pageKey];
+    delete DB.pageSectionKeysEverAdded[pageKey];
+    pageMetaEditBuffer = null;
+    saveDB().then(()=>{ setView('pages'); showToast('Đã xóa trang'); });
+  });
+}
+
+function attachPageSectionsEvents(){
+  const pageKey = currentView.slice(5);
+  const backBtn = document.querySelector('[data-back-to-pages]');
+  if(backBtn) backBtn.addEventListener('click', ()=>{ pageMetaEditBuffer = null; setView('pages'); });
+  attachPageMetaCardEvents(pageKey);
+  document.querySelectorAll('[data-move-up]').forEach(el=>{
+    el.addEventListener('click', ()=> moveSectionRow(parseInt(el.getAttribute('data-move-up'),10), -1));
+  });
+  document.querySelectorAll('[data-move-down]').forEach(el=>{
+    el.addEventListener('click', ()=> moveSectionRow(parseInt(el.getAttribute('data-move-down'),10), 1));
+  });
+  document.querySelectorAll('[data-enable-input]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const s = DB.pageSections[pageKey].find(r=>r.key===el.getAttribute('data-enable-input'));
+      s.enabled = !s.enabled;
+      await saveDB();
+      renderContent();
+      showToast('Đã lưu cấu hình (giả lập)');
+    });
+  });
+  document.querySelectorAll('[data-remove-section]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const key = el.getAttribute('data-remove-section');
+      const def = getSectionDef(pageKey, key) || {};
+      if(!confirm(`Xóa section "${getSectionLabel(pageKey, key)}" khỏi trang này?`)) return;
+      DB.pageSections[pageKey] = DB.pageSections[pageKey].filter(s=>s.key!==key);
+      if(def.custom){
+        DB.customSections[pageKey] = (DB.customSections[pageKey]||[]).filter(s=>s.key!==key);
+      }
+      if(activeSectionKey===key){ activeSectionKey = null; sectionEditBuffer = null; }
+      saveDB();
+      renderContent();
+      showToast('Đã xóa section khỏi trang');
+    });
+  });
+  document.querySelectorAll('[data-rename-section]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const key = el.getAttribute('data-rename-section');
+      const current = getSectionLabel(pageKey, key);
+      const next = prompt('Tên section:', current);
+      if(next===null) return;
+      const trimmed = next.trim();
+      if(!trimmed || trimmed===current) return;
+      const entry = DB.pageSections[pageKey].find(s=>s.key===key);
+      entry.labelOverride = trimmed;
+      saveDB();
+      renderContent();
+      showToast('Đã đổi tên section');
+    });
+  });
+  const addSectionBtn = document.querySelector('[data-add-section]');
+  if(addSectionBtn) addSectionBtn.addEventListener('click', ()=> openAddSectionModal(pageKey));
+  document.querySelectorAll('[data-select-section]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-move-up],[data-move-down],[data-enable-input],[data-remove-section],[data-rename-section]')) return;
+      activeSectionKey = el.getAttribute('data-select-section');
+      sectionEditBuffer = null;
+      renderContent();
+    });
+  });
+  attachSectionDetailEvents(pageKey, activeSectionKey);
+}
+
+async function moveSectionRow(idx, dir){
+  const pageKey = currentView.slice(5);
+  const list = DB.pageSections[pageKey];
+  const j = idx + dir;
+  if(j<0 || j>=list.length) return;
+  [list[idx], list[j]] = [list[j], list[idx]];
+  await saveDB();
+  renderContent();
+}
+/* =========================================================
+   SECTION DETAIL PANEL (mô phỏng)
+   ========================================================= */
+function ensureSectionEditBuffer(pageKey, key){
+  if(sectionEditBuffer && sectionEditBuffer.pageKey===pageKey && sectionEditBuffer.key===key) return;
+  const entry = DB.pageSections[pageKey].find(r=>r.key===key) || {};
+  sectionEditBuffer = {
+    pageKey, key,
+    title: entry.title,
+    itemCount: entry.itemCount,
+    content: entry.content ? {...entry.content} : undefined,
+    items: entry.items ? JSON.parse(JSON.stringify(entry.items)) : undefined,
+    tournamentIds: entry.tournamentIds ? [...entry.tournamentIds] : undefined,
+    newsIds: entry.newsIds ? [...entry.newsIds] : undefined,
+    partnerIds: entry.partnerIds ? [...entry.partnerIds] : undefined,
+    pickerMode: entry.pickerMode || 'manual',
+    autoCount: entry.autoCount,
+    backgroundImage: entry.backgroundImage || null
+  };
+}
+
+function latestTournaments(n){ return [...DB.tournaments].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0, n); }
+function latestNews(n){ return [...DB.news].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0, n); }
+
+function renderSectionDetailPanel(pageKey, key){
+  if(!key){
+    return `<div class="empty" style="padding:60px 20px"><i class="ti ti-layout-2"></i><b>Trang này chưa có section</b></div>`;
+  }
+  const def = getSectionDef(pageKey, key);
+  const entry = DB.pageSections[pageKey].find(r=>r.key===key);
+  const buf = sectionEditBuffer;
+
+  let html = `<div class="card-head">
+      <div>
+        <h2>${escapeHtml(getSectionLabel(pageKey, key))} <button class="btn-icon" data-rename-section-detail title="Đổi tên section" style="vertical-align:middle"><i class="ti ti-pencil" style="font-size:13px"></i></button> ${def.apiIntegrated?'<span class="badge" style="margin-left:4px"><i class="ti ti-api"></i> API</span>':''}</h2>
+        <div class="desc">Cấu hình nội dung hiển thị cho section này</div>
+      </div>
+      <span class="sec-status-tag ${entry.enabled?'on':'off'}">${entry.enabled?'Đang hiển thị':'Đang ẩn'}</span>
+    </div>`;
+
+  html += `<div class="sec-detail-group">
+    <div class="sec-detail-group-label">Hiển thị</div>`;
+  if(def.title!==undefined){
+    html += `<div class="fld" style="max-width:420px"><label>Tiêu đề hiển thị</label><input type="text" id="secTitleInput" value="${escapeAttr(buf.title ?? '')}" placeholder="${escapeAttr(def.title||'')}"></div>`;
+  }
+  if(def.items){
+    html += `<div class="fld" style="max-width:160px;margin-top:${def.title!==undefined?'14px':'0'}"><label>Số lượng hiển thị</label><input type="number" min="1" max="${def.maxItems}" id="secCountInput" value="${buf.itemCount ?? def.itemCount}"></div>`;
+  }
+  if(def.title===undefined && !def.items){
+    html += `<div class="hint">Section này không có tuỳ chọn hiển thị bổ sung.</div>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="sec-detail-group"><div class="sec-detail-group-label">Nội dung</div>`;
+  if(def.tournamentSelect){
+    html += renderPickerModeSection('tournament', def, buf);
+  } else if(def.newsPicker){
+    html += renderPickerModeSection('news', def, buf);
+  } else if(def.partnerPicker){
+    html += renderPartnerPickerInline(buf);
+  } else if(def.fields){
+    html += `<div class="form-grid">` + def.fields.map(f=>
+      `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label>${f.type==='textarea' ? renderRichTextField(f, buf.content[f.key]) : renderField(f, buf.content[f.key])}</div>`
+    ).join('') + `</div>`;
+  } else if(def.itemFields){
+    html += renderItemsEditorInline(def.itemFields, buf.items);
+  } else {
+    html += `<div class="hint">Section này không có nội dung tuỳ chỉnh (dùng chung bố cục cố định).</div>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="sec-detail-group"><div class="sec-detail-group-label">Ảnh nền</div>${renderBackgroundImageInline(buf)}</div>`;
+
+  html += `<div class="sec-detail-actions">
+    <button class="btn btn-ghost" id="secDiscardBtn">Hủy thay đổi</button>
+    <button class="btn btn-primary" id="secSaveBtn"><i class="ti ti-check"></i> Lưu thay đổi</button>
+  </div>`;
+
+  return html;
+}
+
+function renderPickerInline(ids, allItems, renderMeta){
+  const selected = ids.map(id=>allItems.find(x=>x.id===id)).filter(Boolean);
+  const selectedHtml = selected.length ? selected.map((item, idx)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-bottom:1px solid var(--line)">
+      <div class="sec-row-order">
+        <button class="btn-icon" data-picker-up="${idx}" ${idx===0?'disabled style="opacity:.3"':''} title="Lên"><i class="ti ti-chevron-up"></i></button>
+        <button class="btn-icon" data-picker-down="${idx}" ${idx===selected.length-1?'disabled style="opacity:.3"':''} title="Xuống"><i class="ti ti-chevron-down"></i></button>
+      </div>
+      <span class="cell-muted" style="font-size:11px;width:16px;text-align:center;flex-shrink:0">${idx+1}</span>
+      ${renderMeta(item)}
+      <button class="btn-icon" data-picker-remove="${item.id}" title="Bỏ chọn"><i class="ti ti-x"></i></button>
+    </div>`).join('') : `<div class="empty" style="padding:16px"><b>Chưa chọn mục nào</b></div>`;
+
+  const available = allItems.filter(x=>!ids.includes(x.id));
+  const availableHtml = available.map(item=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid var(--line);cursor:pointer" data-picker-add-row="${item.id}">
+      <i class="ti ti-plus" style="color:var(--hint);font-size:14px;flex-shrink:0"></i>
+      ${renderMeta(item)}
+    </label>`).join('');
+
+  return `<div class="sec-detail-group-label" style="margin-bottom:8px">Đã chọn (${selected.length}) — dùng mũi tên để sắp xếp thứ tự hiển thị</div>
+    <div style="border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;margin-bottom:16px">${selectedHtml}</div>
+    <div class="sec-detail-group-label" style="margin-bottom:8px">Thêm mục</div>
+    <div style="max-height:220px;overflow-y:auto;border:1px solid var(--line-strong);border-radius:8px">${availableHtml || '<div class="empty" style="padding:16px"><b>Không còn mục nào khác</b></div>'}</div>`;
+}
+
+function renderPickerModeSection(kind, def, buf){
+  const multi = kind==='tournament' ? !def.singleSelect : true;
+  const mode = buf.pickerMode || 'manual';
+  const noun = kind==='tournament' ? 'giải đấu' : 'tin tức';
+
+  let html = `<div style="display:flex;gap:8px;margin-bottom:16px">
+    <button type="button" class="btn ${mode==='auto'?'btn-primary':'btn-ghost'}" data-picker-mode-btn="auto"><i class="ti ti-bolt"></i> Tự động (mới nhất)</button>
+    <button type="button" class="btn ${mode==='manual'?'btn-primary':'btn-ghost'}" data-picker-mode-btn="manual"><i class="ti ti-list"></i> Chọn thủ công</button>
+  </div>`;
+
+  if(mode==='auto'){
+    if(multi){
+      const count = buf.autoCount || 3;
+      const latest = kind==='tournament' ? latestTournaments(count) : latestNews(count);
+      const previewRows = latest.map(x=>`<div style="padding:8px 10px;border-bottom:1px solid var(--line);font-size:13.5px">${escapeHtml(kind==='tournament'?x.name:x.title)}</div>`).join('') || `<div class="empty" style="padding:16px"><b>Chưa có dữ liệu</b></div>`;
+      html += `<div class="fld" style="max-width:160px;margin-bottom:14px"><label>Số lượng hiển thị</label><input type="number" min="1" id="secAutoCountInput" value="${count}"></div>
+        <div class="hint" style="margin-bottom:8px">Hệ thống sẽ tự động lấy ${count} ${noun} mới nhất theo ngày, không cần chọn thủ công (mô phỏng, chưa áp dụng trực tiếp). Xem trước:</div>
+        <div style="border:1px solid var(--line-strong);border-radius:8px;overflow:hidden">${previewRows}</div>`;
+    } else {
+      const latest = latestTournaments(1)[0];
+      html += `<div class="hint" style="margin-bottom:8px">Hệ thống sẽ tự động lấy giải đấu mới nhất theo ngày, không cần chọn thủ công (mô phỏng, chưa áp dụng trực tiếp).</div>
+        <div style="border:1px solid var(--line-strong);border-radius:8px;padding:10px 12px;font-size:13.5px">${latest ? escapeHtml(latest.name) : '<span class="hint">Chưa có giải đấu nào</span>'}</div>`;
+    }
+    return html;
+  }
+
+  html += kind==='tournament' ? renderTournamentPickerInline(def, buf) : renderNewsPickerInline(buf);
+  return html;
+}
+
+function renderTournamentPickerInline(def, buf){
+  const statusMap = COLLECTIONS.tournaments.columns.find(c=>c.status)?.statusMap || {};
+  const renderMeta = t=>{
+    const m = statusMap[t.status];
+    return `<span style="flex:1;font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(t.name||'(chưa có tên)')}</span><span class="badge">${escapeHtml(t.category||'')}</span>${m ? `<span class="status ${m.c}">${m.t}</span>` : ''}`;
+  };
+
+  if(def.singleSelect){
+    const ids = buf.tournamentIds || [];
+    const rows = DB.tournaments.map(t=>`<label style="display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);cursor:pointer">
+        <input type="radio" name="secTournamentPick" data-sec-tournament-pick="${t.id}" ${ids.includes(t.id)?'checked':''} style="width:16px;height:16px;flex-shrink:0">
+        ${renderMeta(t)}
+      </label>`).join('');
+    const hint = def.apiIntegrated ? 'Dữ liệu sẽ được lấy tự động qua API theo giải đấu đã chọn (mô phỏng, chưa gọi API thật).' : 'Nội dung sẽ lấy tự động từ giải đấu đã chọn trong danh mục "Giải đấu".';
+    return `<div style="max-height:320px;overflow-y:auto;border:1px solid var(--line-strong);border-radius:8px">${rows || '<div class="empty" style="padding:20px"><b>Chưa có giải đấu nào</b></div>'}</div>
+      <div class="hint" style="margin-top:10px">${hint}</div>`;
+  }
+
+  const hint = def.apiIntegrated
+    ? 'Bảng xếp hạng sẽ được lấy tự động qua API theo các giải đấu đã chọn, đúng theo thứ tự bên trên (mô phỏng, chưa gọi API thật).'
+    : 'Nội dung hiển thị sẽ lấy tự động từ các giải đấu đã chọn, đúng theo thứ tự bên trên.';
+  return renderPickerInline(buf.tournamentIds || [], DB.tournaments, renderMeta) + `<div class="hint" style="margin-top:10px">${hint}</div>`;
+}
+
+function renderNewsPickerInline(buf){
+  const renderMeta = n=>`<span style="flex:1;font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(n.title||'(chưa có tiêu đề)')}</span><span class="badge">${escapeHtml(n.category||'')}</span><span class="cell-muted" style="font-size:11px;width:76px;text-align:right;flex-shrink:0">${fmtDate(n.date)}</span>`;
+  return renderPickerInline(buf.newsIds || [], DB.news, renderMeta) + `<div class="hint" style="margin-top:10px">Thứ tự hiển thị theo danh sách "Đã chọn" bên trên.</div>`;
+}
+
+function renderPartnerPickerInline(buf){
+  const renderMeta = p=>{
+    const thumb = p.image ? `<img src="${p.image}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0">` : `<div style="width:28px;height:28px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--hint);flex-shrink:0"><i class="ti ti-building" style="font-size:14px"></i></div>`;
+    return `${thumb}<span style="flex:1;font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(p.name||'(chưa có tên)')}</span><span class="badge">${escapeHtml(p.tier||'')}</span>`;
+  };
+  return renderPickerInline(buf.partnerIds || [], DB.partners, renderMeta) + `<div class="hint" style="margin-top:10px">Nội dung hiển thị sẽ lấy tự động từ các đối tác/nhà tài trợ đã chọn trong danh mục "Đối tác & Tài trợ", đúng theo thứ tự bên trên.</div>`;
+}
+
+function renderItemsEditorInline(itemFields, items){
+  const imageField = itemFields.find(f=>f.type==='image');
+  const textFields = itemFields.filter(f=>f.type!=='image');
+
+  const rows = items.map((item, idx)=>{
+    const imageHtml = imageField ? `<div style="width:88px;flex-shrink:0">
+      ${item[imageField.key] ? `<img src="${item[imageField.key]}" style="width:100%;height:88px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block;margin-bottom:6px">` : `<div style="width:100%;height:88px;border:1px dashed var(--line-strong);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--hint);margin-bottom:6px"><i class="ti ti-photo" style="font-size:20px"></i></div>`}
+      <input type="file" accept="image/*" data-sec-ci-image="${idx}:${imageField.key}" style="font-size:10px;width:100%">
+    </div>` : '';
+
+    const fieldsHtml = textFields.map(f=>
+      `<div class="fld" style="margin:0"><label style="font-size:11px">${f.label}</label><input type="text" data-sec-ci="${idx}:${f.key}" value="${escapeAttr(item[f.key]||'')}"></div>`
+    ).join('');
+
+    return `<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line-strong);border-radius:10px;margin-bottom:10px" data-sec-ci-row="${idx}">
+      ${imageHtml}
+      <div style="flex:1;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 14px">${fieldsHtml}</div>
+      <button class="btn-icon" data-sec-ci-remove="${idx}" title="Xóa mục" style="flex-shrink:0"><i class="ti ti-trash"></i></button>
+    </div>`;
+  }).join('');
+  return `<div id="secCiList">${rows || '<div class="empty" style="padding:24px"><b>Chưa có mục nào</b></div>'}</div>
+    <button class="btn btn-ghost" id="secCiAdd" style="margin-top:4px"><i class="ti ti-plus"></i> Thêm mục</button>`;
+}
+
+function renderBackgroundImageInline(buf){
+  return `
+    ${buf.backgroundImage ? `<div style="margin-bottom:12px"><img src="${buf.backgroundImage}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--line);display:block"></div>` : ''}
+    <input type="file" id="secBgFileInput" accept="image/*">
+    <div class="hint" style="margin-top:10px;display:flex;gap:6px"><i class="ti ti-info-circle"></i> Ảnh được lưu trực tiếp trong CMS (mô phỏng) — nên dùng ảnh dung lượng nhỏ.</div>
+    ${buf.backgroundImage ? `<button class="btn btn-danger-outline" id="secBgRemoveBtn" style="margin-top:12px"><i class="ti ti-trash"></i> Xóa ảnh nền</button>` : ''}
+  `;
+}
+
+function syncSectionItemsFromInputs(){
+  if(!sectionEditBuffer.items) return;
+  document.querySelectorAll('[data-sec-ci]').forEach(el=>{
+    const [idx, key] = el.getAttribute('data-sec-ci').split(':');
+    sectionEditBuffer.items[parseInt(idx,10)][key] = el.value;
+  });
+}
+
+function attachSectionDetailEvents(pageKey, key){
+  if(!key) return;
+  const def = getSectionDef(pageKey, key);
+  const buf = sectionEditBuffer;
+  attachRTEEvents();
+
+  const renameBtn = document.querySelector('[data-rename-section-detail]');
+  if(renameBtn) renameBtn.addEventListener('click', ()=>{
+    const current = getSectionLabel(pageKey, key);
+    const next = prompt('Tên section:', current);
+    if(next===null) return;
+    const trimmed = next.trim();
+    if(!trimmed || trimmed===current) return;
+    const entry = DB.pageSections[pageKey].find(s=>s.key===key);
+    entry.labelOverride = trimmed;
+    saveDB();
+    renderContent();
+    showToast('Đã đổi tên section');
+  });
+
+  document.querySelectorAll('[data-picker-mode-btn]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      buf.pickerMode = el.getAttribute('data-picker-mode-btn');
+      renderContent();
+    });
+  });
+
+  document.querySelectorAll('[data-sec-tournament-pick]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{ buf.tournamentIds = cb.checked ? [cb.getAttribute('data-sec-tournament-pick')] : []; });
+  });
+
+  const pickerField = (def.tournamentSelect && !def.singleSelect) ? 'tournamentIds' : (def.newsPicker ? 'newsIds' : (def.partnerPicker ? 'partnerIds' : null));
+  if(pickerField){
+    document.querySelectorAll('[data-picker-add-row]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        buf[pickerField].push(el.getAttribute('data-picker-add-row'));
+        renderContent();
+      });
+    });
+    document.querySelectorAll('[data-picker-remove]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const id = el.getAttribute('data-picker-remove');
+        buf[pickerField] = buf[pickerField].filter(x=>x!==id);
+        renderContent();
+      });
+    });
+    document.querySelectorAll('[data-picker-up]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const idx = parseInt(el.getAttribute('data-picker-up'),10);
+        if(idx<=0) return;
+        const arr = buf[pickerField];
+        [arr[idx-1], arr[idx]] = [arr[idx], arr[idx-1]];
+        renderContent();
+      });
+    });
+    document.querySelectorAll('[data-picker-down]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const idx = parseInt(el.getAttribute('data-picker-down'),10);
+        const arr = buf[pickerField];
+        if(idx>=arr.length-1) return;
+        [arr[idx+1], arr[idx]] = [arr[idx], arr[idx+1]];
+        renderContent();
+      });
+    });
+  }
+
+  const addBtn = document.getElementById('secCiAdd');
+  if(addBtn) addBtn.addEventListener('click', ()=>{
+    syncSectionItemsFromInputs();
+    const blank = {}; def.itemFields.forEach(f=>blank[f.key]='');
+    buf.items.push(blank);
+    renderContent();
+  });
+  document.querySelectorAll('[data-sec-ci-remove]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      syncSectionItemsFromInputs();
+      buf.items.splice(parseInt(el.getAttribute('data-sec-ci-remove'),10), 1);
+      renderContent();
+    });
+  });
+  document.querySelectorAll('[data-sec-ci-image]').forEach(el=>{
+    el.addEventListener('change', (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      syncSectionItemsFromInputs();
+      const [idx, fkey] = el.getAttribute('data-sec-ci-image').split(':');
+      const reader = new FileReader();
+      reader.onload = (ev)=>{ buf.items[parseInt(idx,10)][fkey] = ev.target.result; renderContent(); };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  const bgInput = document.getElementById('secBgFileInput');
+  if(bgInput) bgInput.addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{ buf.backgroundImage = ev.target.result; renderContent(); };
+    reader.readAsDataURL(file);
+  });
+  const bgRemoveBtn = document.getElementById('secBgRemoveBtn');
+  if(bgRemoveBtn) bgRemoveBtn.addEventListener('click', ()=>{ buf.backgroundImage = null; renderContent(); });
+
+  const saveBtn = document.getElementById('secSaveBtn');
+  if(saveBtn) saveBtn.addEventListener('click', ()=> saveSectionDetail(pageKey, key));
+  const discardBtn = document.getElementById('secDiscardBtn');
+  if(discardBtn) discardBtn.addEventListener('click', ()=>{ sectionEditBuffer = null; renderContent(); showToast('Đã hủy thay đổi'); });
+}
+
+async function saveSectionDetail(pageKey, key){
+  const def = getSectionDef(pageKey, key);
+  const buf = sectionEditBuffer;
+
+  const titleInput = document.getElementById('secTitleInput');
+  if(titleInput) buf.title = titleInput.value;
+  const countInput = document.getElementById('secCountInput');
+  if(countInput) buf.itemCount = Math.max(1, parseInt(countInput.value,10)||1);
+  const autoCountInput = document.getElementById('secAutoCountInput');
+  if(autoCountInput) buf.autoCount = Math.max(1, parseInt(autoCountInput.value,10)||1);
+  if(def.fields){
+    buf.content = buf.content || {};
+    def.fields.forEach(f=>{
+      buf.content[f.key] = f.type==='textarea' ? document.getElementById('rte_'+f.key).innerHTML : document.getElementById('f_'+f.key).value;
+    });
+  }
+  if(def.itemFields) syncSectionItemsFromInputs();
+
+  const entry = DB.pageSections[pageKey].find(r=>r.key===key);
+  if(def.title!==undefined) entry.title = buf.title;
+  if(def.items) entry.itemCount = buf.itemCount;
+  if(def.fields) entry.content = buf.content;
+  if(def.itemFields){ entry.items = buf.items; entry.itemCount = buf.items.length; }
+  if(def.tournamentSelect) entry.tournamentIds = buf.tournamentIds;
+  if(def.newsPicker) entry.newsIds = buf.newsIds;
+  if(def.partnerPicker) entry.partnerIds = buf.partnerIds;
+  if(def.tournamentSelect || def.newsPicker){
+    entry.pickerMode = buf.pickerMode;
+    if(!def.singleSelect) entry.autoCount = buf.autoCount;
+  }
+  entry.backgroundImage = buf.backgroundImage;
+
+  await saveDB();
+  sectionEditBuffer = null;
+  renderContent();
+  showToast('Đã lưu section (giả lập)');
+}
+
+const RTE_TOOLBAR = [
+  {cmd:'bold', icon:'ti-bold', title:'Đậm'},
+  {cmd:'italic', icon:'ti-italic', title:'Nghiêng'},
+  {cmd:'underline', icon:'ti-underline', title:'Gạch chân'},
+  {cmd:'sep'},
+  {cmd:'formatBlock:h3', icon:'ti-h-3', title:'Tiêu đề nhỏ'},
+  {cmd:'insertUnorderedList', icon:'ti-list', title:'Danh sách chấm'},
+  {cmd:'insertOrderedList', icon:'ti-list-numbers', title:'Danh sách số'},
+  {cmd:'sep'},
+  {cmd:'createLink', icon:'ti-link', title:'Chèn liên kết'},
+  {cmd:'removeFormat', icon:'ti-clear-formatting', title:'Xóa định dạng'}
+];
+function renderRichTextField(f, value){
+  const toolbar = RTE_TOOLBAR.map(t=> t.cmd==='sep' ? `<span class="sep"></span>` : `<button type="button" data-cmd="${t.cmd}" title="${t.title}"><i class="ti ${t.icon}"></i></button>`).join('');
+  return `<div class="rte" data-rte-field="${f.key}">
+    <div class="rte-toolbar">${toolbar}</div>
+    <div class="rte-body" id="rte_${f.key}" contenteditable="true" data-placeholder="${escapeAttr(f.placeholder||'Nhập nội dung...')}">${value||''}</div>
+  </div>`;
+}
+function attachRTEEvents(){
+  document.querySelectorAll('.rte').forEach(wrap=>{
+    const editor = wrap.querySelector('.rte-body');
+    wrap.querySelectorAll('[data-cmd]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        editor.focus();
+        const cmd = btn.getAttribute('data-cmd');
+        if(cmd==='createLink'){
+          const url = prompt('Nhập URL liên kết:');
+          if(url) document.execCommand('createLink', false, url);
+        } else if(cmd.startsWith('formatBlock:')){
+          document.execCommand('formatBlock', false, cmd.split(':')[1]);
+        } else {
+          document.execCommand(cmd, false, null);
+        }
+      });
+    });
+  });
+}
+/* =========================================================
+   MODAL (add / edit for collections)
+   ========================================================= */
+let modalImageValues = {};
+function openModal(key, id){
+  pageModal = null; addSectionModal = null;
+  editingCollection = key; editingId = id;
+  const c = COLLECTIONS[key];
+  const record = id ? DB[key].find(r=>r.id===id) : {};
+  modalImageValues = {};
+  c.fields.forEach(f=>{ if(f.type==='image') modalImageValues[f.key] = record[f.key] || null; });
+  document.getElementById('modalTitle').textContent = id ? `Sửa ${c.single}` : `Thêm ${c.single}`;
+  const body = document.getElementById('modalBody');
+  body.innerHTML = `<div class="form-grid">` + c.fields.map(f=>{
+    return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${f.type==='richtext' ? renderRichTextField(f, record[f.key]) : renderField(f, record[f.key])}</div>`;
+  }).join('') + `</div>`;
+  document.getElementById('modalDeleteBtn').style.display = id ? 'inline-flex' : 'none';
+  document.getElementById('modalSaveBtn').style.display = '';
+  document.querySelector('#modalOverlay .modal').classList.remove('wide');
+  document.getElementById('modalOverlay').classList.add('on');
+  attachRTEEvents();
+  attachModalImageEvents();
+  document.querySelectorAll('[data-multiselect]').forEach(chip=>{
+    chip.addEventListener('click', ()=> chip.classList.toggle('on'));
+  });
+}
+function openViewModal(key, id){
+  pageModal = null; addSectionModal = null;
+  editingCollection = null; editingId = null;
+  const c = COLLECTIONS[key];
+  const record = DB[key].find(r=>r.id===id);
+  if(!record) return;
+  const modalEl = document.querySelector('#modalOverlay .modal');
+  const body = document.getElementById('modalBody');
+  if(key==='tournaments'){
+    document.getElementById('modalTitle').textContent = `Chi tiết ${c.single}`;
+    body.innerHTML = renderTourneyDetailPreview(record);
+    attachTourneyPreviewEvents(body);
+    modalEl.classList.add('wide');
+  } else {
+    modalEl.classList.remove('wide');
+    document.getElementById('modalTitle').textContent = `Chi tiết ${c.single}`;
+    body.innerHTML = `<div class="form-grid">` + c.fields.map(f=>{
+      let val = record[f.key];
+      if(f.type==='select'){ val = (f.optionLabels ? f.optionLabels[val] : null) || val; }
+      else if(f.type==='multiselect'){ val = Array.isArray(val) ? val.map(v=> (f.optionLabels?f.optionLabels[v]:null)||v).join(', ') : val; }
+      else if(f.type==='checkbox'){ val = val ? 'Có' : 'Không'; }
+      else if(f.type==='password'){ val = val ? '••••••••' : ''; }
+      else if(f.type==='image'){ return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label>${val?`<img src="${val}" style="width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block">`:`<div class="view-value"><span class="cell-muted">—</span></div>`}</div>`; }
+      else if(f.type==='richtext'){ return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label><div class="view-value">${val||'<span class="cell-muted">—</span>'}</div></div>`; }
+      return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label><div class="view-value">${val!==undefined&&val!==null&&val!=='' ? escapeHtml(String(val)) : '<span class="cell-muted">—</span>'}</div></div>`;
+    }).join('') + `</div>`;
+  }
+  document.getElementById('modalDeleteBtn').style.display = 'none';
+  document.getElementById('modalSaveBtn').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('on');
+}
+function renderTourneyDetailPreview(r){
+  const statusMap = {
+    upcoming: /mở đăng ký/i.test(r.note||'') ? {label:'Mở đăng ký', cta:'upcoming-open'} : {label:'Sắp mở đăng ký', cta:'upcoming-soon'},
+    ongoing: {label:'Đang diễn ra · Trực tiếp', cta:'live'},
+    completed: {label:'Đã kết thúc', cta:'finished'}
+  };
+  const st = statusMap[r.status] || statusMap.upcoming;
+  const loc = r.location || 'Chưa cập nhật';
+  const date = fmtDate(r.date);
+  const disc = r.category || '—';
+
+  let ctaInfo, ctaBtn;
+  if(st.cta==='live'){
+    ctaInfo = `<i class="ti ti-calendar"></i> Ngày thi đấu: <b>${date}</b><br><i class="ti ti-map-pin"></i> Địa điểm: ${escapeHtml(loc)}${r.note?` · ${escapeHtml(r.note)}`:''}`;
+    ctaBtn = '';
+  } else if(st.cta==='finished'){
+    ctaInfo = `<i class="ti ti-calendar"></i> Ngày thi đấu: <b>${date}</b>${r.champion?`<br><i class="ti ti-trophy"></i> Vô địch: <b>${escapeHtml(r.champion)}</b>`:''}`;
+    ctaBtn = `<span class="gd-btn">Xem kết quả chung cuộc</span>`;
+  } else {
+    ctaInfo = `<i class="ti ti-calendar"></i> Ngày thi đấu: <b>${date}</b><br><i class="ti ti-map-pin"></i> Địa điểm: ${escapeHtml(loc)}`;
+    ctaBtn = st.cta==='upcoming-open' ? '' : `<span class="gd-btn" style="opacity:.6">Chưa mở đăng ký</span>`;
+  }
+
+  return `<div class="gd-prev">
+    <div class="gd-note"><i class="ti ti-eye"></i> Xem trước giao diện trang "Chi tiết giải đấu" trên website công khai</div>
+    <div class="gd-band">
+      <div class="gd-crumb">Trang chủ / Giải đấu / Chi tiết giải đấu</div>
+      <div class="gd-org"><div class="gd-org-ic"><i class="ti ti-shield-check"></i></div><div><div class="gd-org-lbl">Đơn vị tổ chức</div><div class="gd-org-name">Liên đoàn Billiards &amp; Snooker Việt Nam</div></div></div>
+      <span class="gd-status">${escapeHtml(st.label)}</span>
+      <div class="gd-title">${escapeHtml(r.name||'(chưa có tên)')}</div>
+      <div class="gd-meta">${escapeHtml(disc)} · ${date}</div>
+      <div class="gd-meta"><i class="ti ti-map-pin"></i> ${escapeHtml(loc)}</div>
+    </div>
+    <div class="gd-tabs"><span class="gd-tab on" data-gtab="chung">Thông tin chung</span><span class="gd-tab" data-gtab="thi-dau">Thi đấu</span></div>
+    <div class="gd-body">
+      <div class="gd-tabpanel on" data-gpanel="chung">
+        <div class="gd-cta-row"><div class="gd-cta-info">${ctaInfo}</div>${ctaBtn}</div>
+        <div class="gd-h">Giải thưởng</div>
+        <table class="gd-tbl"><thead><tr><th style="width:60px">Hạng</th><th>Tiền mặt</th><th>Hiện vật</th></tr></thead><tbody>
+          ${(r.prizes&&r.prizes.length?r.prizes:TE_DEFAULT_PRIZES).map(p=>`<tr><td><b>${escapeHtml(p.rank)}</b></td><td>${escapeHtml(p.cash)}</td><td>${escapeHtml(p.item)}</td></tr>`).join('')}
+        </tbody></table>
+        <div class="gd-h">Thể lệ thi đấu</div>
+        <div class="gd-rules">
+          <div style="font-size:12.5px;color:var(--ink)"><b>Lệ phí tham gia:</b> ${escapeHtml(r.entryFee||TE_DEFAULT_ENTRY_FEE)}</div>
+          <div class="gd-h" style="font-size:12.5px;margin-top:12px">Điều lệ</div>
+          ${(r.rules||TE_DEFAULT_RULES).split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`<div class="gd-li">${escapeHtml(l)}</div>`).join('')}
+        </div>
+      </div>
+      <div class="gd-tabpanel" data-gpanel="thi-dau">${renderTourneyMatchesTab(r, st)}</div>
+    </div>
+  </div>`;
+}
+function gdMatchRow(state, p1, score, p2){
+  const badge = state==='live' ? {c:'live', t:'LIVE'} : state==='soon' ? {c:'soon', t:'SẮP'} : {c:'kt', t:'KT'};
+  return `<div class="gd-row ${state==='live'?'live':''} ${state==='soon'?'pending':''}">
+    <span class="gd-mbadge ${badge.c}">${badge.t}</span>
+    <div class="gd-match"><b>${escapeHtml(p1)}</b><span class="score">${score}</span><span class="opp">${escapeHtml(p2)}</span></div>
+  </div>`;
+}
+function renderTourneyMatchesTab(r, st){
+  if(st.cta==='live'){
+    return `<div class="gd-h">Vòng 1/8 · Đã hoàn thành</div>
+    <div>
+      ${gdMatchRow('kt','Nguyễn Phúc Long','4 – 0','Dương Anh Kiệt')}
+      ${gdMatchRow('kt','Đặng Văn Hậu','4 – 3','Phan Đức Thịnh')}
+      ${gdMatchRow('kt','Trần Quốc Bảo','4 – 1','Đoàn Minh Tuấn')}
+      ${gdMatchRow('kt','Bùi Đức Anh','4 – 2','Vương Quốc Huy')}
+      ${gdMatchRow('kt','Lê Minh Khôi','4 – 0','Lý Gia Bảo')}
+      ${gdMatchRow('kt','Ngô Gia Huy','4 – 3','Trịnh Xuân Sơn')}
+      ${gdMatchRow('kt','Phạm Anh Tú','4 – 1','Đỗ Anh Dũng')}
+      ${gdMatchRow('kt','Hoàng Minh Quân','4 – 2','Vũ Trọng Nghĩa')}
+    </div>
+    <div class="gd-h" style="margin-top:18px">${escapeHtml(r.note||'Vòng tứ kết')} · Kết quả các trận đấu loại</div>
+    <div>
+      ${gdMatchRow('kt','Nguyễn Phúc Long','4 – 2','Đặng Văn Hậu')}
+      ${gdMatchRow('live','Trần Quốc Bảo','2 – 1','Bùi Đức Anh')}
+      ${gdMatchRow('kt','Lê Minh Khôi','4 – 1','Ngô Gia Huy')}
+      ${gdMatchRow('soon','Phạm Anh Tú','–','Hoàng Minh Quân')}
+    </div>
+    <div style="font-size:11px;color:var(--hint);margin-top:12px">Tỷ số theo thể thức đấu loại trực tiếp · Cập nhật tự động khi có kết quả mới</div>`;
+  }
+  if(st.cta==='finished'){
+    return `<div class="gd-h">Bục nhận giải</div>
+    <div class="gd-pods">
+      <div class="gd-pod"><div class="lbl" style="color:#888780;font-size:10.5px;font-weight:600"><i class="ti ti-medal"></i> HẠNG 2</div><div class="av"><i class="ti ti-user"></i></div><div class="nm">—</div></div>
+      <div class="gd-pod" style="border-top:3px solid #C8102E;padding-top:20px;padding-bottom:20px"><div class="lbl" style="color:#C8102E;font-size:10.5px;font-weight:700"><i class="ti ti-crown"></i> VÔ ĐỊCH</div><div class="av" style="border:2px solid #C8102E"><i class="ti ti-user"></i></div><div class="nm">${escapeHtml(r.champion||'Chưa cập nhật')}</div></div>
+      <div class="gd-pod"><div class="lbl" style="color:#A9784E;font-size:10.5px;font-weight:600"><i class="ti ti-medal"></i> HẠNG 3</div><div class="av"><i class="ti ti-user"></i></div><div class="nm">—</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--hint);line-height:1.7">Hạng 2, hạng 3 và bảng xếp hạng chi tiết (hạng 4 trở đi) được quản lý trong mục <b style="color:#7A1F17">Bảng xếp hạng</b>.</div>`;
+  }
+  return `<div style="font-size:12.5px;color:var(--hint);line-height:1.7">Lịch thi đấu chi tiết sẽ được công bố sau khi giải đóng đăng ký.</div>`;
+}
+function attachTourneyPreviewEvents(container){
+  const tabs = container.querySelectorAll('.gd-tab');
+  const panels = container.querySelectorAll('.gd-tabpanel');
+  tabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      tabs.forEach(t=>t.classList.toggle('on', t===tab));
+      panels.forEach(p=>p.classList.toggle('on', p.getAttribute('data-gpanel')===tab.getAttribute('data-gtab')));
+    });
+  });
+}
+function toggleRowVisibility(key, id){
+  const c = COLLECTIONS[key];
+  const row = DB[key].find(r=>r.id===id);
+  if(!row || !c.toggleVisibility) return;
+  row[c.toggleVisibility] = !row[c.toggleVisibility];
+  saveDB();
+  renderContent();
+  showToast(row[c.toggleVisibility] ? `Đã ẩn ${c.single} khỏi website` : `Đã hiện lại ${c.single} trên website`);
+}
+function attachModalImageEvents(){
+  document.querySelectorAll('[data-image-field]').forEach(input=>{
+    input.addEventListener('change', (e)=>{
+      const key = input.getAttribute('data-image-field');
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        modalImageValues[key] = ev.target.result;
+        document.getElementById('imgPreview_'+key).innerHTML = `<img src="${ev.target.result}" style="width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block">`;
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('on');
+  editingCollection = null; editingId = null;
+}
+function renderField(f, value){
+  value = value===undefined||value===null ? '' : value;
+  const disabledAttr = f.disabled ? 'disabled' : '';
+  const disabledHint = f.disabled ? `<div class="fld-hint"><i class="ti ti-lock"></i> Do hệ thống quản lý, không thể chỉnh sửa</div>` : '';
+  if(f.type==='select'){
+    const opts = f.options.map(o=>{
+      const lbl = f.optionLabels ? (f.optionLabels[o]||o) : o;
+      return `<option value="${escapeAttr(o)}" ${value===o?'selected':''}>${escapeHtml(lbl)}</option>`;
+    }).join('');
+    return `<select id="f_${f.key}" ${disabledAttr}><option value="">— Chọn —</option>${opts}</select>${disabledHint}`;
+  }
+  if(f.type==='multiselect'){
+    const values = Array.isArray(value) ? value : (value ? [value] : []);
+    const chips = f.options.map(o=>{
+      const lbl = f.optionLabels ? (f.optionLabels[o]||o) : o;
+      const on = values.includes(o);
+      return `<div class="chip ${on?'on':''}" data-multiselect="${f.key}" data-value="${escapeAttr(o)}">${escapeHtml(lbl)}</div>`;
+    }).join('');
+    return `<div class="chiplist" id="f_${f.key}">${chips}</div>`;
+  }
+  if(f.type==='textarea'){
+    return `<textarea id="f_${f.key}" rows="${f.rows||3}" placeholder="${escapeAttr(f.placeholder||'')}" ${disabledAttr}>${escapeHtml(value)}</textarea>${disabledHint}`;
+  }
+  if(f.type==='checkbox'){
+    return `<div class="checkbox-row"><span class="switch ${value?'on':''}" id="f_${f.key}" data-toggle></span><label>Bật</label></div>`;
+  }
+  if(f.type==='number'){
+    return `<input type="number" id="f_${f.key}" value="${escapeAttr(value)}" placeholder="${escapeAttr(f.placeholder||'')}" ${disabledAttr}>${disabledHint}`;
+  }
+  if(f.type==='date'){
+    return `<input type="date" id="f_${f.key}" value="${escapeAttr(value)}" ${disabledAttr}>${disabledHint}`;
+  }
+  if(f.type==='password'){
+    return `<input type="password" id="f_${f.key}" value="${escapeAttr(value)}" placeholder="${escapeAttr(f.placeholder||'')}" autocomplete="new-password" ${disabledAttr}>${disabledHint}`;
+  }
+  if(f.type==='image'){
+    return `<div>
+      <div id="imgPreview_${f.key}" style="margin-bottom:8px">${value ? `<img src="${value}" style="width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block">` : `<div style="width:96px;height:96px;border:1px dashed var(--line-strong);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--hint)"><i class="ti ti-photo" style="font-size:22px"></i></div>`}</div>
+      <input type="file" accept="image/*" data-image-field="${f.key}">
+    </div>`;
+  }
+  return `<input type="text" id="f_${f.key}" value="${escapeAttr(value)}" placeholder="${escapeAttr(f.placeholder||'')}" ${disabledAttr}>${disabledHint}`;
+}
+
+async function saveModal(){
+  const key = editingCollection;
+  const c = COLLECTIONS[key];
+  const data = {};
+  let missingRequired = false;
+  c.fields.forEach(f=>{
+    let val;
+    if(f.type==='checkbox'){ val = document.getElementById('f_'+f.key).classList.contains('on'); }
+    else if(f.type==='image'){ val = modalImageValues[f.key] || ''; }
+    else if(f.type==='richtext'){ val = document.getElementById('rte_'+f.key).innerHTML; }
+    else if(f.type==='multiselect'){
+      val = Array.from(document.querySelectorAll(`[data-multiselect="${f.key}"].on`)).map(el=>el.getAttribute('data-value'));
+    }
+    else {
+      val = document.getElementById('f_'+f.key).value;
+      if(f.type==='number' && val!=='') val = Number(val);
+    }
+    if(f.required && (val===''||val===undefined||val===null)) missingRequired = true;
+    data[f.key] = val;
+  });
+  if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
+
+  if(editingId){
+    const idx = DB[key].findIndex(r=>r.id===editingId);
+    DB[key][idx] = {...DB[key][idx], ...data};
+  } else {
+    data.id = uid();
+    DB[key].push(data);
+  }
+  await saveDB();
+  closeModal();
+  renderSidebar();
+  renderContent();
+  showToast(editingId ? 'Đã cập nhật' : 'Đã thêm mới');
+}
+
+async function deleteModal(){
+  if(!editingCollection || !editingId) return;
+  DB[editingCollection] = DB[editingCollection].filter(r=>r.id!==editingId);
+  await saveDB();
+  closeModal();
+  renderSidebar();
+  renderContent();
+  showToast('Đã xóa');
+}
+
+function confirmDelete(key, id){
+  const c = COLLECTIONS[key];
+  const record = DB[key].find(r=>r.id===id);
+  const label = record ? (record.name||record.title||'mục này') : 'mục này';
+  if(confirm(`Xóa "${label}" khỏi ${c.label}? Hành động này không thể hoàn tác.`)){
+    DB[key] = DB[key].filter(r=>r.id!==id);
+    saveDB();
+    renderSidebar();
+    renderContent();
+    showToast('Đã xóa');
+  }
+}
+/* =========================================================
+   NEWS EDITOR (full-screen editor for Tin tức, thay cho modal)
+   ========================================================= */
+let neBannerImage = null;
+function renderNewsEditor(id){
+  const isNew = id==='new';
+  const record = isNew ? {} : (DB.news.find(r=>r.id===id) || {});
+  neBannerImage = record.image || null;
+  const catField = COLLECTIONS.news.fields.find(f=>f.key==='category');
+  const catOpts = catField.options.map(o=>`<option value="${escapeAttr(o)}" ${record.category===o?'selected':''}>${escapeHtml(o)}</option>`).join('');
+  return `<div class="news-editor">
+    <div class="form-card" style="max-width:840px">
+      <div class="fld span2">
+        <label>Ảnh banner</label>
+        <div class="ne-banner" id="neBannerPreview">${renderBannerPreview()}</div>
+        <input type="file" accept="image/*" id="ne_image" style="display:none">
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button type="button" class="btn btn-ghost" id="neBannerPick"><i class="ti ti-upload"></i> <span id="neBannerPickLbl">${neBannerImage?'Đổi ảnh':'Chọn ảnh'}</span></button>
+          <button type="button" class="btn btn-ghost" id="neBannerRemove" style="${neBannerImage?'':'display:none'}"><i class="ti ti-trash"></i> Xóa ảnh</button>
+        </div>
+      </div>
+      <div class="ne-title-wrap" style="margin-top:14px"><input type="text" id="ne_title" class="news-editor-title" placeholder="Tiêu đề bài viết..." value="${escapeAttr(record.title||'')}"></div>
+      <div class="form-grid" style="margin-top:10px">
+        <div class="fld"><label>Chuyên mục</label><select id="ne_category"><option value="">— Chọn —</option>${catOpts}</select></div>
+        <div class="fld"><label>Ngày đăng</label><input type="date" id="ne_date" value="${escapeAttr(record.date||'')}"></div>
+        <div class="fld"><label>Tác giả</label><input type="text" id="ne_author" placeholder="Ban Truyền thông VBSF" value="${escapeAttr(record.author||'')}"></div>
+        <div class="fld"><label>&nbsp;</label><div class="checkbox-row"><span class="switch ${record.featured?'on':''}" id="ne_featured" data-toggle></span><label>Hiển thị ở "Tin nổi bật" (trang chủ)</label></div></div>
+      </div>
+      <div class="fld span2" style="margin-top:10px"><label>Tóm tắt</label><textarea id="ne_excerpt" rows="2" placeholder="Tóm tắt ngắn gọn...">${escapeHtml(record.excerpt||'')}</textarea></div>
+      <div class="fld span2" style="margin-top:10px"><label>Nội dung chi tiết</label><div class="rte-lg">${renderRichTextField({key:'content', placeholder:'Soạn nội dung bài viết...'}, record.content||'')}</div></div>
+      <div class="form-actions" style="justify-content:space-between">
+        ${!isNew ? `<button class="btn btn-danger-outline" id="neDeleteBtn"><i class="ti ti-trash"></i> Xóa bài viết</button>` : `<span></span>`}
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" id="neCancelBtn">Hủy</button>
+          <button class="btn btn-primary" id="neSaveBtn"><i class="ti ti-check"></i> ${isNew?'Đăng bài':'Lưu thay đổi'}</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function renderBannerPreview(){
+  return neBannerImage
+    ? `<img src="${neBannerImage}">`
+    : `<div class="ne-banner-empty"><i class="ti ti-photo-up"></i><span>Chưa có ảnh banner</span></div>`;
+}
+function attachNewsEditorEvents(){
+  attachRTEEvents();
+  const cancelBtn = document.getElementById('neCancelBtn');
+  if(cancelBtn) cancelBtn.addEventListener('click', ()=>setView('news'));
+  const saveBtn = document.getElementById('neSaveBtn');
+  if(saveBtn) saveBtn.addEventListener('click', saveNewsEditor);
+  const delBtn = document.getElementById('neDeleteBtn');
+  if(delBtn) delBtn.addEventListener('click', deleteNewsEditor);
+
+  const fileInput = document.getElementById('ne_image');
+  const pickBtn = document.getElementById('neBannerPick');
+  const removeBtn = document.getElementById('neBannerRemove');
+  const preview = document.getElementById('neBannerPreview');
+  const openPicker = ()=> fileInput.click();
+  if(pickBtn) pickBtn.addEventListener('click', openPicker);
+  if(preview) preview.addEventListener('click', openPicker);
+  if(fileInput) fileInput.addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      neBannerImage = ev.target.result;
+      preview.innerHTML = renderBannerPreview();
+      document.getElementById('neBannerPickLbl').textContent = 'Đổi ảnh';
+      removeBtn.style.display = '';
+    };
+    reader.readAsDataURL(file);
+  });
+  if(removeBtn) removeBtn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    neBannerImage = null;
+    fileInput.value = '';
+    preview.innerHTML = renderBannerPreview();
+    document.getElementById('neBannerPickLbl').textContent = 'Chọn ảnh';
+    removeBtn.style.display = 'none';
+  });
+}
+async function saveNewsEditor(){
+  const id = currentView.slice('news-edit:'.length);
+  const isNew = id==='new';
+  const title = document.getElementById('ne_title').value.trim();
+  if(!title){ showToast('Vui lòng nhập tiêu đề bài viết', true); return; }
+  const data = {
+    image: neBannerImage || '',
+    title,
+    category: document.getElementById('ne_category').value,
+    date: document.getElementById('ne_date').value,
+    author: document.getElementById('ne_author').value,
+    featured: document.getElementById('ne_featured').classList.contains('on'),
+    excerpt: document.getElementById('ne_excerpt').value,
+    content: document.getElementById('rte_content').innerHTML
+  };
+  if(isNew){
+    data.id = uid();
+    DB.news.push(data);
+  } else {
+    const idx = DB.news.findIndex(r=>r.id===id);
+    DB.news[idx] = {...DB.news[idx], ...data};
+  }
+  await saveDB();
+  renderSidebar();
+  showToast(isNew ? 'Đã đăng bài viết' : 'Đã lưu thay đổi');
+  setView('news');
+}
+function deleteNewsEditor(){
+  const id = currentView.slice('news-edit:'.length);
+  const record = DB.news.find(r=>r.id===id);
+  const label = record ? record.title : 'bài viết này';
+  if(confirm(`Xóa "${label}" khỏi Tin tức? Hành động này không thể hoàn tác.`)){
+    DB.news = DB.news.filter(r=>r.id!==id);
+    saveDB();
+    renderSidebar();
+    showToast('Đã xóa');
+    setView('news');
+  }
+}
+/* =========================================================
+   TOURNAMENT EDITOR (full-screen editor for Giải đấu, thay cho modal)
+   Quản lý: Thông tin giải đấu · Danh sách người chơi (upload) ·
+   Cặp đấu & Kết quả (tính điểm ranking hội viên tự động)
+   ========================================================= */
+const TE_WIN_POINTS = 25;
+const TE_LOSS_POINTS = 5;
+let teTab = 'info';
+let teCsvText = '';
+
+const TE_DEFAULT_PRIZES = [
+  {rank:'1', cash:'20.000.000đ', item:'Cúp + Huy chương'},
+  {rank:'2', cash:'10.000.000đ', item:'Bằng khen + Huy chương'},
+  {rank:'3', cash:'5.000.000đ', item:'Bằng khen + Huy chương'},
+  {rank:'4–5', cash:'2.000.000đ', item:'Bằng khen'},
+  {rank:'6–10', cash:'1.000.000đ', item:'Giấy khen'},
+  {rank:'11–20', cash:'—', item:'Áo đấu VBSF'}
+];
+const TE_DEFAULT_RULES = `Thi đấu theo thể thức đấu loại trực tiếp, tính điểm theo luật hiện hành của từng nội dung (Pool / Carom / Snooker).
+Mỗi trận đấu theo thể thức best-of, số ván do Ban tổ chức công bố trước ngày thi đấu.
+Cơ thủ có mặt trễ quá 15 phút so với giờ thi đấu được công bố sẽ bị xử thua trận đó.
+Trường hợp hoà điểm ở vòng bảng, thứ hạng được xét theo hiệu số bàn thắng rồi đến kết quả đối đầu trực tiếp.
+Khiếu nại kết quả trận đấu phải gửi cho trọng tài chính trong vòng 15 phút sau khi trận đấu kết thúc.
+Cơ thủ cần có mã hội viên VBSF còn hiệu lực tại thời điểm đăng ký.`;
+const TE_DEFAULT_ENTRY_FEE = '200.000đ / cơ thủ';
+
+let teNewDraft = null;
+function teRecord(id){
+  return id==='new' ? null : DB.tournaments.find(r=>r.id===id);
+}
+function teResetNewDraft(){ teNewDraft = null; }
+function teCurrentRecord(){
+  const id = currentView.slice('tournament-edit:'.length);
+  return id==='new' ? teNewDraft : teRecord(id);
+}
+function teSyncInfoFieldsIntoRecord(record){
+  if(teTab!=='info') return;
+  COLLECTIONS.tournaments.fields.forEach(f=>{
+    const el = document.getElementById('f_'+f.key);
+    if(el) record[f.key] = el.value;
+  });
+}
+
+function renderTournamentEditor(id){
+  const isNew = id==='new';
+  let record;
+  if(isNew){
+    if(!teNewDraft) teNewDraft = {name:'',category:'',status:'upcoming',date:'',participants:'',location:'',note:'',champion:'',entryFee:TE_DEFAULT_ENTRY_FEE,rules:TE_DEFAULT_RULES,prizes:TE_DEFAULT_PRIZES.map(p=>({...p})),players:[],matches:[]};
+    record = teNewDraft;
+  } else {
+    record = teRecord(id) || {};
+  }
+  if(!record.players) record.players = [];
+  if(!record.matches) record.matches = [];
+  if(!record.prizes || !record.prizes.length) record.prizes = TE_DEFAULT_PRIZES.map(p=>({...p}));
+  if(isNew) teTab = 'info';
+  if(!isNew && teTab!=='info' && teTab!=='players' && teTab!=='matches') teTab = 'info';
+
+  const tabs = [
+    {key:'info', label:'Thông tin', icon:'ti-info-circle'},
+    {key:'players', label:`Danh sách người chơi${record.players.length?` (${record.players.length})`:''}`, icon:'ti-users', disabled:isNew},
+    {key:'matches', label:`Cặp đấu & Kết quả${record.matches.length?` (${record.matches.length})`:''}`, icon:'ti-swords', disabled:isNew}
+  ];
+
+  const tabsHtml = `<div style="display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:20px">
+    ${tabs.map(t=>`<span class="gd-tab ${teTab===t.key?'on':''}" data-tetab="${t.key}" style="${t.disabled?'opacity:.4;pointer-events:none':''}"><i class="ti ${t.icon}" style="margin-right:5px"></i>${t.label}</span>`).join('')}
+  </div>`;
+
+  const hint = isNew ? `<div style="font-size:12px;color:var(--hint);margin-bottom:16px"><i class="ti ti-info-circle"></i> Lưu thông tin giải đấu trước để mở khóa danh sách người chơi và cặp đấu.</div>` : '';
+
+  let body = '';
+  if(teTab==='info') body = renderTeInfoTab(record, isNew);
+  else if(teTab==='players') body = renderTePlayersTab(record);
+  else if(teTab==='matches') body = renderTeMatchesTab(record);
+
+  return `<div class="news-editor">${tabsHtml}${hint}${body}</div>`;
+}
+
+function renderTeInfoTab(record, isNew){
+  const c = COLLECTIONS.tournaments;
+  const prizeRows = record.prizes.map((p,i)=>`<tr data-prow="${i}">
+    <td><input type="text" data-prize-field="rank" data-prize-idx="${i}" value="${escapeAttr(p.rank)}" style="width:100%;border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px"></td>
+    <td><input type="text" data-prize-field="cash" data-prize-idx="${i}" value="${escapeAttr(p.cash)}" style="width:100%;border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px"></td>
+    <td><input type="text" data-prize-field="item" data-prize-idx="${i}" value="${escapeAttr(p.item)}" style="width:100%;border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px"></td>
+    <td class="actions"><button class="btn-icon" data-te-rm-prize="${i}" title="Xóa hạng"><i class="ti ti-trash"></i></button></td>
+  </tr>`).join('');
+
+  return `<div class="form-card" style="max-width:760px">
+    <div class="form-grid">
+      ${c.fields.map(f=>`<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${renderField(f, record[f.key])}</div>`).join('')}
+    </div>
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)">
+      <label style="font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:10px">Giải thưởng theo hạng</label>
+      <div class="tbl-wrap"><table><thead><tr><th style="width:110px">Thứ hạng</th><th>Giải thưởng tiền mặt</th><th>Hiện vật</th><th style="width:50px"></th></tr></thead><tbody>${prizeRows}</tbody></table></div>
+      <button type="button" class="btn btn-ghost" id="teAddPrizeBtn" style="margin-top:10px"><i class="ti ti-plus"></i> Thêm hạng</button>
+    </div>
+    <div class="form-actions" style="justify-content:space-between">
+      ${!isNew ? `<button class="btn btn-danger-outline" id="teDeleteBtn"><i class="ti ti-trash"></i> Xóa giải đấu</button>` : `<span></span>`}
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" id="teCancelBtn">Hủy</button>
+        <button class="btn btn-primary" id="teSaveInfoBtn"><i class="ti ti-check"></i> ${isNew?'Tạo giải đấu':'Lưu thông tin'}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function teMemberOptions(){
+  return DB.members.map(m=>`<option value="${m.id}">${escapeHtml(m.name)} — ${escapeHtml(m.code||'')}${m.club?` (${escapeHtml(m.club)})`:''}</option>`).join('');
+}
+
+function renderTePlayersTab(record){
+  const rows = record.players.map(p=>{
+    const m = p.memberId ? DB.members.find(x=>x.id===p.memberId) : null;
+    return `<tr data-pid="${p.id}">
+      <td>${escapeHtml(p.name)}</td>
+      <td class="cell-muted">${escapeHtml(p.club||'—')}</td>
+      <td class="cell-muted">${escapeHtml(p.category||record.category||'—')}</td>
+      <td>${m ? `<span class="status green">Hội viên · ${escapeHtml(m.code||'')}</span>` : `<span class="status gray">Khách mời</span>`}</td>
+      <td class="actions"><button class="btn-icon" data-te-rm-player="${p.id}" title="Xóa"><i class="ti ti-x"></i></button></td>
+    </tr>`;
+  }).join('');
+
+  return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+    <div class="card" style="flex:1;min-width:320px">
+      <div class="card-head"><div><h2>Thêm người chơi</h2><div class="desc">Chọn hội viên đã có trong hệ thống hoặc thêm khách mời</div></div></div>
+      <div class="card-body padded">
+        <div class="form-grid">
+          <div class="fld"><label>Chọn hội viên (tùy chọn)</label><select id="te_p_member"><option value="">— Khách mời / nhập tên tự do —</option>${teMemberOptions()}</select></div>
+          <div class="fld"><label>Họ tên</label><input type="text" id="te_p_name" placeholder="Bắt buộc nếu không chọn hội viên"></div>
+          <div class="fld"><label>Câu lạc bộ</label><input type="text" id="te_p_club" placeholder="CLB / Đơn vị"></div>
+          <div class="fld"><label>Nội dung thi đấu</label><input type="text" id="te_p_category" placeholder="${escapeAttr(record.category||'Pool 9 bi')}"></div>
+        </div>
+        <div class="form-actions" style="justify-content:flex-end;border-top:none;padding-top:10px;margin-top:10px">
+          <button class="btn btn-primary" id="teAddPlayerBtn"><i class="ti ti-plus"></i> Thêm vào danh sách</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="flex:1;min-width:320px">
+      <div class="card-head"><div><h2>Nhập danh sách (upload)</h2><div class="desc">Dán danh sách, mỗi dòng: Họ tên, SĐT hoặc Mã HV (tùy chọn), CLB (tùy chọn)</div></div></div>
+      <div class="card-body padded">
+        <div class="fld"><textarea id="te_csv" rows="6" placeholder="Nguyễn Văn A, 0901234567, CLB Sài Gòn&#10;Trần Thị B,, CLB Thủ Đô&#10;Lê Văn C">${escapeHtml(teCsvText)}</textarea></div>
+        <input type="file" id="te_csv_file" accept=".csv,.txt" style="display:none">
+        <div class="form-actions" style="justify-content:space-between;border-top:none;padding-top:10px;margin-top:10px">
+          <button class="btn btn-ghost" id="teCsvFileBtn"><i class="ti ti-upload"></i> Tải file .csv/.txt</button>
+          <button class="btn btn-primary" id="teImportCsvBtn"><i class="ti ti-list-check"></i> Nhập danh sách</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tbl-wrap" style="margin-top:20px">
+    ${record.players.length===0 ? `<div class="empty"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc nhập danh sách ở trên.</div>` : `<table><thead><tr><th>Họ tên</th><th>CLB</th><th>Nội dung</th><th>Liên kết</th><th style="width:60px"></th></tr></thead><tbody>${rows}</tbody></table>`}
+  </div>`;
+}
+
+function teNextRound(record){
+  return record.matches.length ? Math.max(...record.matches.map(m=>m.round||1)) + (teLatestRoundDone(record) ? 1 : 0) : 1;
+}
+function teLatestRound(record){
+  return record.matches.length ? Math.max(...record.matches.map(m=>m.round||1)) : 0;
+}
+function teLatestRoundDone(record){
+  const lr = teLatestRound(record);
+  if(!lr) return true;
+  return record.matches.filter(m=>m.round===lr).every(m=>m.status==='done');
+}
+function tePlayerName(record, pid){
+  if(!pid) return null;
+  const p = record.players.find(x=>x.id===pid);
+  return p ? p.name : '—';
+}
+function tePairedPlayerIds(record, round){
+  const set = new Set();
+  record.matches.filter(m=>m.round===round).forEach(m=>{ set.add(m.p1Id); if(m.p2Id) set.add(m.p2Id); });
+  return set;
+}
+function teRoundContenders(record){
+  const lr = teLatestRound(record);
+  if(!lr) return record.players.map(p=>p.id);
+  if(!teLatestRoundDone(record)) return [];
+  return record.matches.filter(m=>m.round===lr).map(m=>m.winnerId).filter(Boolean);
+}
+
+function renderTeMatchesTab(record){
+  const lr = teLatestRound(record);
+  const roundDone = teLatestRoundDone(record);
+  const contenders = teRoundContenders(record);
+  const nextRoundNum = lr ? lr+1 : 1;
+  const canDrawNext = record.status!=='completed' && (lr===0 ? record.players.length>=2 : (roundDone && contenders.length>=2));
+
+  const drawSection = canDrawNext ? `<div class="card" style="margin-bottom:20px">
+      <div class="card-head"><div><h2>${lr===0?'Bốc thăm vòng 1':`Bốc thăm vòng ${nextRoundNum}`}</h2><div class="desc">${lr===0?`Ghép ngẫu nhiên ${record.players.length} người chơi thành các cặp đấu`:`Ghép ngẫu nhiên ${contenders.length} người thắng vòng ${lr} vào vòng tiếp theo`}</div></div>
+      <button class="btn btn-primary" id="teDrawBtn"><i class="ti ti-dice"></i> Bốc thăm tự động</button></div>
+    </div>` : (record.status==='completed' ? '' : (lr>0 && !roundDone ? `<div class="card" style="margin-bottom:20px"><div class="card-body padded" style="color:var(--hint);font-size:13px"><i class="ti ti-clock"></i> Hoàn tất kết quả vòng ${lr} trước khi bốc thăm vòng tiếp theo.</div></div>` : ''));
+
+  const manualOptions = (excludeId)=> record.players.filter(p=>p.id!==excludeId).map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+  const manualSection = record.status!=='completed' ? `<div class="card" style="margin-bottom:20px">
+    <div class="card-head"><div><h2>Ghép cặp thủ công</h2><div class="desc">Tự chọn 2 người chơi và vòng đấu</div></div></div>
+    <div class="card-body padded">
+      <div class="form-grid">
+        <div class="fld"><label>Người chơi 1</label><select id="te_m_p1"><option value="">— Chọn —</option>${manualOptions()}</select></div>
+        <div class="fld"><label>Người chơi 2</label><select id="te_m_p2"><option value="">— Chọn —</option>${manualOptions()}</select></div>
+        <div class="fld"><label>Vòng đấu</label><input type="number" id="te_m_round" min="1" value="${nextRoundNum}"></div>
+      </div>
+      <div class="form-actions" style="justify-content:flex-end;border-top:none;padding-top:10px;margin-top:10px">
+        <button class="btn btn-primary" id="teManualPairBtn"><i class="ti ti-plus"></i> Tạo cặp đấu</button>
+      </div>
+    </div>
+  </div>` : '';
+
+  const rounds = {};
+  record.matches.forEach(m=>{ (rounds[m.round]=rounds[m.round]||[]).push(m); });
+  const roundKeys = Object.keys(rounds).map(Number).sort((a,b)=>a-b);
+
+  let matchesHtml = '';
+  if(roundKeys.length===0){
+    matchesHtml = `<div class="tbl-wrap"><div class="empty"><i class="ti ti-swords"></i><b>Chưa có cặp đấu</b>Bốc thăm tự động hoặc ghép cặp thủ công ở trên.</div></div>`;
+  } else {
+    matchesHtml = roundKeys.map(rn=>{
+      const rowsHtml = rounds[rn].map(m=>{
+        const p1 = tePlayerName(record, m.p1Id);
+        const p2 = m.p2Id ? tePlayerName(record, m.p2Id) : null;
+        if(!p2){
+          return `<tr data-mid="${m.id}"><td colspan="4"><b>${escapeHtml(p1)}</b> <span class="badge">Miễn đấu vòng này</span></td><td class="actions"></td></tr>`;
+        }
+        if(m.status==='done'){
+          const winnerName = tePlayerName(record, m.winnerId);
+          return `<tr data-mid="${m.id}">
+            <td><b>${escapeHtml(p1)}</b></td>
+            <td style="white-space:nowrap"><b style="color:var(--vg)">${m.score1}</b> — <b style="color:var(--vg)">${m.score2}</b></td>
+            <td><b>${escapeHtml(p2)}</b></td>
+            <td><span class="status green">Thắng: ${escapeHtml(winnerName)}</span></td>
+            <td class="actions"></td>
+          </tr>`;
+        }
+        return `<tr data-mid="${m.id}">
+          <td><b>${escapeHtml(p1)}</b></td>
+          <td style="white-space:nowrap"><input type="number" min="0" id="te_score1_${m.id}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:5px"> — <input type="number" min="0" id="te_score2_${m.id}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:5px"></td>
+          <td><b>${escapeHtml(p2)}</b></td>
+          <td><span class="status gold">Chưa có kết quả</span></td>
+          <td class="actions">
+            <button class="btn-icon" data-te-save-result="${m.id}" title="Lưu kết quả"><i class="ti ti-device-floppy"></i></button>
+            <button class="btn-icon" data-te-rm-match="${m.id}" title="Xóa cặp đấu"><i class="ti ti-trash"></i></button>
+          </td>
+        </tr>`;
+      }).join('');
+      return `<div style="margin-bottom:18px"><div class="gd-h" style="font-size:13.5px">Vòng ${rn}</div>
+        <div class="tbl-wrap"><table><thead><tr><th>Người chơi 1</th><th style="width:120px">Tỷ số</th><th>Người chơi 2</th><th style="width:170px">Trạng thái</th><th style="width:80px"></th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
+      </div>`;
+    }).join('');
+  }
+
+  return `<div style="font-size:12px;color:var(--hint);margin-bottom:16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px">
+      <i class="ti ti-info-circle"></i> Thắng trận: <b>+${TE_WIN_POINTS} điểm</b> · Thua trận: <b>+${TE_LOSS_POINTS} điểm</b> · Mỗi trận: <b>+1 số trận đã đấu</b>. Bảng xếp hạng hội viên (mục "Hội viên & Xếp hạng") được tính lại tự động ngay sau khi lưu kết quả. Chỉ người chơi được liên kết với hội viên mới được cộng điểm.
+    </div>
+    ${drawSection}${manualSection}${matchesHtml}`;
+}
+
+function attachTournamentEditorEvents(){
+  document.querySelectorAll('[data-tetab]').forEach(t=>{
+    t.addEventListener('click', ()=>{ teTab = t.getAttribute('data-tetab'); renderContent(); });
+  });
+  const cancelBtn = document.getElementById('teCancelBtn');
+  if(cancelBtn) cancelBtn.addEventListener('click', ()=>{ teResetNewDraft(); setView('tournaments'); });
+  const saveInfoBtn = document.getElementById('teSaveInfoBtn');
+  if(saveInfoBtn) saveInfoBtn.addEventListener('click', teSaveInfo);
+  const delBtn = document.getElementById('teDeleteBtn');
+  if(delBtn) delBtn.addEventListener('click', teDeleteTournament);
+
+  document.querySelectorAll('[data-prize-field]').forEach(input=>{
+    input.addEventListener('change', ()=>{
+      const record = teCurrentRecord();
+      if(!record) return;
+      const idx = Number(input.getAttribute('data-prize-idx'));
+      const field = input.getAttribute('data-prize-field');
+      record.prizes[idx][field] = input.value;
+      if(!teNewDraft || currentView!=='tournament-edit:new') saveDB();
+    });
+  });
+  const addPrizeBtn = document.getElementById('teAddPrizeBtn');
+  if(addPrizeBtn) addPrizeBtn.addEventListener('click', ()=>{
+    const record = teCurrentRecord();
+    if(!record) return;
+    teSyncInfoFieldsIntoRecord(record);
+    record.prizes.push({rank:'', cash:'', item:''});
+    if(currentView!=='tournament-edit:new') saveDB();
+    renderContent();
+  });
+  document.querySelectorAll('[data-te-rm-prize]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const record = teCurrentRecord();
+      if(!record) return;
+      teSyncInfoFieldsIntoRecord(record);
+      const idx = Number(btn.getAttribute('data-te-rm-prize'));
+      record.prizes.splice(idx,1);
+      if(currentView!=='tournament-edit:new') saveDB();
+      renderContent();
+    });
+  });
+
+  const addPlayerBtn = document.getElementById('teAddPlayerBtn');
+  if(addPlayerBtn) addPlayerBtn.addEventListener('click', teAddPlayer);
+  const csvFileBtn = document.getElementById('teCsvFileBtn');
+  const csvFileInput = document.getElementById('te_csv_file');
+  if(csvFileBtn && csvFileInput){
+    csvFileBtn.addEventListener('click', ()=>csvFileInput.click());
+    csvFileInput.addEventListener('change', (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{ document.getElementById('te_csv').value = ev.target.result; };
+      reader.readAsText(file, 'utf-8');
+    });
+  }
+  const importCsvBtn = document.getElementById('teImportCsvBtn');
+  if(importCsvBtn) importCsvBtn.addEventListener('click', teImportCsv);
+  document.querySelectorAll('[data-te-rm-player]').forEach(btn=>{
+    btn.addEventListener('click', ()=>teRemovePlayer(btn.getAttribute('data-te-rm-player')));
+  });
+
+  const drawBtn = document.getElementById('teDrawBtn');
+  if(drawBtn) drawBtn.addEventListener('click', teDrawRound);
+  const manualPairBtn = document.getElementById('teManualPairBtn');
+  if(manualPairBtn) manualPairBtn.addEventListener('click', teManualPair);
+  document.querySelectorAll('[data-te-save-result]').forEach(btn=>{
+    btn.addEventListener('click', ()=>teSaveMatchResult(btn.getAttribute('data-te-save-result')));
+  });
+  document.querySelectorAll('[data-te-rm-match]').forEach(btn=>{
+    btn.addEventListener('click', ()=>teRemoveMatch(btn.getAttribute('data-te-rm-match')));
+  });
+}
+
+async function teSaveInfo(){
+  const id = currentView.slice('tournament-edit:'.length);
+  const isNew = id==='new';
+  const c = COLLECTIONS.tournaments;
+  const data = {};
+  let missingRequired = false;
+  c.fields.forEach(f=>{
+    let val = document.getElementById('f_'+f.key).value;
+    if(f.type==='number' && val!=='') val = Number(val);
+    if(f.required && (val===''||val===undefined||val===null)) missingRequired = true;
+    data[f.key] = val;
+  });
+  if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
+  if(isNew){
+    data.id = uid();
+    data.players = [];
+    data.matches = [];
+    data.prizes = (teNewDraft && teNewDraft.prizes) ? teNewDraft.prizes : TE_DEFAULT_PRIZES.map(p=>({...p}));
+    DB.tournaments.push(data);
+    teResetNewDraft();
+    await saveDB();
+    renderSidebar();
+    showToast('Đã tạo giải đấu');
+    setView('tournament-edit:'+data.id);
+  } else {
+    const idx = DB.tournaments.findIndex(r=>r.id===id);
+    DB.tournaments[idx] = {...DB.tournaments[idx], ...data};
+    await saveDB();
+    renderSidebar();
+    showToast('Đã lưu thông tin giải đấu');
+    renderContent();
+  }
+}
+function teDeleteTournament(){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  const label = record ? record.name : 'giải đấu này';
+  if(confirm(`Xóa "${label}" khỏi Giải đấu? Toàn bộ danh sách người chơi và kết quả sẽ bị xóa. Hành động này không thể hoàn tác.`)){
+    DB.tournaments = DB.tournaments.filter(r=>r.id!==id);
+    saveDB();
+    renderSidebar();
+    showToast('Đã xóa giải đấu');
+    setView('tournaments');
+  }
+}
+
+function teAddPlayer(){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  const memberId = document.getElementById('te_p_member').value;
+  const nameInput = document.getElementById('te_p_name').value.trim();
+  const clubInput = document.getElementById('te_p_club').value.trim();
+  const categoryInput = document.getElementById('te_p_category').value.trim();
+  let player;
+  if(memberId){
+    const m = DB.members.find(x=>x.id===memberId);
+    if(!m) return;
+    if(record.players.some(p=>p.memberId===memberId)){ showToast('Hội viên này đã có trong danh sách', true); return; }
+    player = {id:uid(), memberId, name:m.name, club:m.club||clubInput, category:categoryInput||m.category||record.category};
+  } else {
+    if(!nameInput){ showToast('Vui lòng nhập họ tên hoặc chọn hội viên', true); return; }
+    player = {id:uid(), memberId:null, name:nameInput, club:clubInput, category:categoryInput||record.category};
+  }
+  record.players.push(player);
+  saveDB();
+  renderSidebar();
+  showToast('Đã thêm người chơi');
+  document.getElementById('te_p_name').value='';
+  document.getElementById('te_p_club').value='';
+  document.getElementById('te_p_category').value='';
+  document.getElementById('te_p_member').value='';
+  renderContent();
+}
+function teImportCsv(){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  const raw = document.getElementById('te_csv').value;
+  teCsvText = raw;
+  const lines = raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  if(lines.length===0){ showToast('Vui lòng dán hoặc tải lên danh sách', true); return; }
+  let added = 0;
+  lines.forEach(line=>{
+    const cols = line.split(',').map(c=>c.trim());
+    const name = cols[0];
+    if(!name) return;
+    const idToken = cols[1] || '';
+    const club = cols[2] || '';
+    let member = null;
+    if(idToken) member = DB.members.find(m=>m.phone===idToken || m.code===idToken);
+    if(member && record.players.some(p=>p.memberId===member.id)) return;
+    record.players.push({
+      id:uid(),
+      memberId: member ? member.id : null,
+      name: member ? member.name : name,
+      club: member ? (member.club||club) : club,
+      category: (member && member.category) || record.category
+    });
+    added++;
+  });
+  teCsvText = '';
+  saveDB();
+  renderSidebar();
+  showToast(`Đã nhập ${added} người chơi từ danh sách`);
+  renderContent();
+}
+function teRemovePlayer(pid){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  if(record.matches.some(m=>m.p1Id===pid || m.p2Id===pid)){
+    showToast('Không thể xóa: người chơi đã có trong cặp đấu. Hãy xóa cặp đấu liên quan trước.', true);
+    return;
+  }
+  record.players = record.players.filter(p=>p.id!==pid);
+  saveDB();
+  renderSidebar();
+  showToast('Đã xóa người chơi');
+  renderContent();
+}
+
+function teDrawRound(){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  const lr = teLatestRound(record);
+  const round = lr ? lr+1 : 1;
+  let pool;
+  if(!lr){
+    pool = record.players.map(p=>p.id);
+  } else {
+    pool = teRoundContenders(record);
+  }
+  if(pool.length<2){ showToast('Không đủ người chơi để bốc thăm', true); return; }
+  const shuffled = [...pool];
+  for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+  const newMatches = [];
+  for(let i=0;i<shuffled.length;i+=2){
+    if(i+1<shuffled.length){
+      newMatches.push({id:uid(), round, p1Id:shuffled[i], p2Id:shuffled[i+1], score1:null, score2:null, status:'pending', winnerId:null});
+    } else {
+      newMatches.push({id:uid(), round, p1Id:shuffled[i], p2Id:null, score1:null, score2:null, status:'done', winnerId:shuffled[i]});
+    }
+  }
+  record.matches.push(...newMatches);
+  teCheckTournamentComplete(record);
+  saveDB();
+  showToast(`Đã bốc thăm ${newMatches.length} cặp đấu cho vòng ${round}`);
+  renderContent();
+}
+function teManualPair(){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  const p1 = document.getElementById('te_m_p1').value;
+  const p2 = document.getElementById('te_m_p2').value;
+  const round = Number(document.getElementById('te_m_round').value) || 1;
+  if(!p1 || !p2){ showToast('Vui lòng chọn đủ 2 người chơi', true); return; }
+  if(p1===p2){ showToast('Vui lòng chọn 2 người chơi khác nhau', true); return; }
+  record.matches.push({id:uid(), round, p1Id:p1, p2Id:p2, score1:null, score2:null, status:'pending', winnerId:null});
+  saveDB();
+  showToast('Đã tạo cặp đấu');
+  renderContent();
+}
+function teRemoveMatch(mid){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  record.matches = record.matches.filter(m=>m.id!==mid);
+  saveDB();
+  showToast('Đã xóa cặp đấu');
+  renderContent();
+}
+
+function recomputeMemberRanking(){
+  const prevRank = {};
+  DB.members.forEach(m=>{ prevRank[m.id] = m.rank; });
+  const sorted = [...DB.members].sort((a,b)=>(b.points||0)-(a.points||0));
+  sorted.forEach((m,i)=>{
+    const newRank = i+1;
+    const oldRank = prevRank[m.id] ?? newRank;
+    const delta = oldRank - newRank;
+    m.rank = newRank;
+    m.trend = delta>0 ? 'up' : (delta<0 ? 'down' : 'eq');
+    m.trendValue = Math.abs(delta);
+  });
+}
+
+function teCheckTournamentComplete(record){
+  const lr = teLatestRound(record);
+  if(!lr) return;
+  const roundMatches = record.matches.filter(m=>m.round===lr);
+  if(roundMatches.length===1 && roundMatches[0].status==='done' && roundMatches[0].p2Id){
+    const championName = tePlayerName(record, roundMatches[0].winnerId);
+    record.champion = championName;
+    record.status = 'completed';
+  }
+}
+
+function teSaveMatchResult(mid){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  const match = record.matches.find(m=>m.id===mid);
+  if(!match) return;
+  const s1 = document.getElementById('te_score1_'+mid).value;
+  const s2 = document.getElementById('te_score2_'+mid).value;
+  if(s1===''||s2===''){ showToast('Vui lòng nhập tỷ số cho cả 2 người chơi', true); return; }
+  const score1 = Number(s1), score2 = Number(s2);
+  if(score1===score2){ showToast('Tỷ số không được hòa — cần xác định người thắng', true); return; }
+  const winnerId = score1>score2 ? match.p1Id : match.p2Id;
+  const loserId = score1>score2 ? match.p2Id : match.p1Id;
+  match.score1 = score1; match.score2 = score2; match.status = 'done'; match.winnerId = winnerId;
+
+  const winnerPlayer = record.players.find(p=>p.id===winnerId);
+  const loserPlayer = record.players.find(p=>p.id===loserId);
+  if(winnerPlayer && winnerPlayer.memberId){
+    const m = DB.members.find(x=>x.id===winnerPlayer.memberId);
+    if(m){ m.points = (m.points||0) + TE_WIN_POINTS; m.matches = (m.matches||0) + 1; }
+  }
+  if(loserPlayer && loserPlayer.memberId){
+    const m = DB.members.find(x=>x.id===loserPlayer.memberId);
+    if(m){ m.points = (m.points||0) + TE_LOSS_POINTS; m.matches = (m.matches||0) + 1; }
+  }
+  recomputeMemberRanking();
+  teCheckTournamentComplete(record);
+  saveDB();
+  renderSidebar();
+  showToast('Đã ghi nhận kết quả và cập nhật bảng xếp hạng');
+  renderContent();
+}
+/* =========================================================
+   ADD SECTION MODAL (chọn loại section khi thêm mới)
+   ========================================================= */
+let addSectionModal = null;
+const CUSTOM_SECTION_TYPES = [
+  {type:'tournaments', label:'Danh sách giải đấu', icon:'ti-trophy', desc:'Tích hợp API danh sách giải đấu (chỉ đọc) — chỉ cấu hình tiêu đề',
+    build:(key,label)=>({key, label, custom:true, apiIntegrated:true, title:label})},
+  {type:'players', label:'Người chơi', icon:'ti-users', desc:'Tích hợp API danh sách hội viên / VĐV — chỉ cấu hình tiêu đề',
+    build:(key,label)=>({key, label, custom:true, apiIntegrated:true, title:label})},
+  {type:'news', label:'Tin tức', icon:'ti-news', desc:'Chọn & sắp xếp tin tức, hoặc tự động lấy tin mới nhất',
+    build:(key,label)=>({key, label, custom:true, newsPicker:true, title:label})},
+  {type:'text', label:'Văn bản', icon:'ti-align-left', desc:'Khối nội dung tự do, soạn thảo dạng rich text',
+    build:(key,label)=>({key, label, custom:true, fields:[{key:'body', label:'Nội dung', type:'textarea', span2:true}]})}
+];
+function openAddSectionModal(pageKey){
+  editingCollection = null; editingId = null; pageModal = null;
+  addSectionModal = {pageKey, type:'text', label:''};
+  document.getElementById('modalTitle').textContent = 'Thêm section mới';
+  document.getElementById('modalDeleteBtn').style.display = 'none';
+  renderAddSectionModalBody();
+  document.getElementById('modalOverlay').classList.add('on');
+}
+function renderAddSectionModalBody(){
+  const body = document.getElementById('modalBody');
+  const cards = CUSTOM_SECTION_TYPES.map(t=>`
+    <div class="sec-type-card ${addSectionModal.type===t.type?'on':''}" data-section-type="${t.type}">
+      <i class="ti ${t.icon}"></i>
+      <div>
+        <div class="sec-type-title">${t.label}</div>
+        <div class="sec-type-desc">${t.desc}</div>
+      </div>
+    </div>`).join('');
+  body.innerHTML = `
+    <div class="sec-detail-group-label" style="margin-bottom:10px">Loại section</div>
+    <div class="sec-type-grid">${cards}</div>
+    <div class="fld" style="margin-top:18px"><label>Tên section <span class="req">*</span></label><input type="text" id="addSectionLabel" value="${escapeAttr(addSectionModal.label)}" placeholder="VD: Giải đấu nổi bật"></div>
+  `;
+  document.querySelectorAll('[data-section-type]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const labelInput = document.getElementById('addSectionLabel');
+      if(labelInput) addSectionModal.label = labelInput.value;
+      addSectionModal.type = el.getAttribute('data-section-type');
+      renderAddSectionModalBody();
+      document.getElementById('addSectionLabel').focus();
+    });
+  });
+}
+function saveAddSectionModal(){
+  const label = document.getElementById('addSectionLabel').value.trim();
+  if(!label){ showToast('Vui lòng nhập tên section', true); return; }
+  const pageKey = addSectionModal.pageKey;
+  const typeDef = CUSTOM_SECTION_TYPES.find(t=>t.type===addSectionModal.type);
+  const base = slugify(label).replace(/^\//,'') || 'section';
+  let key = base, i = 2;
+  while(getSectionCatalog(pageKey).find(s=>s.key===key)) key = `${base}-${i++}`;
+  const def = typeDef.build(key, label);
+
+  if(!DB.customSections[pageKey]) DB.customSections[pageKey] = [];
+  DB.customSections[pageKey].push(def);
+  DB.pageSections[pageKey].push(makeDefaultSectionEntry(def));
+  if(!DB.pageSectionKeysEverAdded[pageKey]) DB.pageSectionKeysEverAdded[pageKey] = [];
+  DB.pageSectionKeysEverAdded[pageKey].push(key);
+
+  activeSectionKey = key;
+  sectionEditBuffer = null;
+  saveDB();
+  closeAddSectionModal();
+  renderContent();
+  showToast('Đã thêm section mới');
+}
+function closeAddSectionModal(){
+  addSectionModal = null;
+  document.getElementById('modalOverlay').classList.remove('on');
+}
+/* =========================================================
+   PAGE MODAL (tạo trang mới / cài đặt trang: slug, title, metadata)
+   ========================================================= */
+let pageModal = null;
+const PAGE_META_FIELDS = [
+  {key:'title', label:'Tên trang', type:'text', required:true, span2:true},
+  {key:'slug', label:'Slug (đường dẫn)', type:'text', required:true, placeholder:'/ten-trang'},
+  {key:'metaTitle', label:'Meta title (SEO)', type:'text'},
+  {key:'metaDescription', label:'Meta description (SEO)', type:'textarea', span2:true, rows:3}
+];
+function slugify(str){
+  return '/'+String(str).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/đ/g,'d').replace(/Đ/g,'d')
+    .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');
+}
+const NEW_PAGE_FIELDS = [
+  {key:'title', label:'Tên trang', type:'text', required:true, span2:true, placeholder:'VD: Sự kiện đặc biệt'}
+];
+function slugify(str){
+  return '/'+String(str).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/đ/g,'d').replace(/Đ/g,'d')
+    .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');
+}
+function openPageModal(){
+  editingCollection = null; editingId = null; addSectionModal = null;
+  pageModal = {values:{title:''}};
+  document.getElementById('modalTitle').textContent = 'Tạo trang mới';
+  document.getElementById('modalDeleteBtn').style.display = 'none';
+  const body = document.getElementById('modalBody');
+  body.innerHTML = `<div class="form-grid">` + NEW_PAGE_FIELDS.map(f=>
+    `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${renderField(f, pageModal.values[f.key])}</div>`
+  ).join('') + `<div class="hint" style="margin-top:2px">Bạn có thể chỉnh slug và metadata SEO ngay trong màn hình chi tiết của trang sau khi tạo.</div></div>`;
+  document.getElementById('modalOverlay').classList.add('on');
+}
+async function savePageModal(){
+  const title = document.getElementById('f_title').value.trim();
+  if(!title){ showToast('Vui lòng nhập tên trang', true); return; }
+  const slug = slugify(title);
+  const base = slug.replace(/^\//,'') || 'trang-moi';
+  let pageKey = base, i = 2;
+  while(getAllPageKeys().includes(pageKey)) pageKey = `${base}-${i++}`;
+  DB.customPages[pageKey] = {label:title, icon:'ti-file', path:slug};
+  DB.customSections[pageKey] = [];
+  DB.pageSections[pageKey] = [];
+  DB.pageSectionKeysEverAdded[pageKey] = [];
+  DB.pageMeta[pageKey] = {slug, title, metaTitle:'', metaDescription:''};
+  await saveDB();
+  closePageModal();
+  setView('page:'+pageKey);
+  showToast('Đã tạo trang mới');
+}
+function closePageModal(){
+  pageModal = null;
+  document.getElementById('modalOverlay').classList.remove('on');
+}
+/* =========================================================
+   EXPORT / IMPORT
+   ========================================================= */
+function exportData(){
+  const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'vbsf-cms-data.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Đã xuất file JSON');
+}
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev)=>{
+    try{
+      const parsed = JSON.parse(ev.target.result);
+      DB = parsed;
+      await saveDB();
+      renderSidebar(); renderTopbar(); renderContent();
+      showToast('Đã nhập dữ liệu thành công');
+    }catch(err){
+      showToast('File JSON không hợp lệ', true);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+/* =========================================================
+   UTILS
+   ========================================================= */
+function escapeHtml(str){
+  return String(str??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
+function stripHtml(html){ return String(html??'').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(); }
+function fmtDate(d){
+  if(!d) return '—';
+  const parts = String(d).split('-');
+  if(parts.length===3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  return d;
+}
+let toastTimer=null;
+function showToast(msg, isError){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  const icon = t.querySelector('i');
+  icon.className = isError ? 'ti ti-alert-circle' : 'ti ti-circle-check';
+  icon.style.color = isError ? 'var(--danger)' : 'var(--tag-green)';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+/* =========================================================
+   INIT
+   ========================================================= */
+function closeActiveModal(){ addSectionModal ? closeAddSectionModal() : (pageModal ? closePageModal() : closeModal()); }
+document.getElementById('modalClose').addEventListener('click', closeActiveModal);
+document.getElementById('modalCancelBtn').addEventListener('click', closeActiveModal);
+document.getElementById('modalSaveBtn').addEventListener('click', ()=> addSectionModal ? saveAddSectionModal() : (pageModal ? savePageModal() : saveModal()));
+document.getElementById('modalDeleteBtn').addEventListener('click', ()=>{ if(addSectionModal || pageModal) return; deleteModal(); });
+document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='modalOverlay') closeActiveModal(); });
+document.getElementById('navtgl').addEventListener('click', ()=>document.getElementById('sidebar').classList.toggle('open'));
+document.addEventListener('click', (e)=>{
+  const sw = e.target.closest('.switch[data-toggle]');
+  if(sw) sw.classList.toggle('on');
+});
+
+(async function init(){
+  await loadDB();
+  renderSidebar();
+  renderTopbar();
+  renderContent();
+})();
+</script>
+</body>
+</html>

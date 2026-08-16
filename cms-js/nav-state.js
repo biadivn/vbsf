@@ -1,0 +1,67 @@
+/* =========================================================
+   NAV / STATE
+   ========================================================= */
+let currentView = 'dashboard';
+let searchTerm = '';
+let filterValue = '';
+let editingCollection = null;
+let editingId = null;
+let activeSectionKey = null;
+let sectionEditBuffer = null;
+
+const NAV_GROUPS = [
+  {label:null, items:[{key:'dashboard', label:'Tổng quan', icon:'ti-layout-dashboard'}]},
+  {label:'Nội dung', items:[
+    {key:'news', label:COLLECTIONS.news.label, icon:'ti-news'},
+    {key:'tournaments', label:COLLECTIONS.tournaments.label, icon:'ti-trophy'},
+  ]},
+  {label:'Thư viện', items:[
+    {key:'library_docs', label:'Văn bản & Luật', icon:'ti-file-text'},
+    {key:'library_media', label:'Media', icon:'ti-photo'},
+  ]},
+  {label:'Cộng đồng', items:[
+    {key:'members', label:COLLECTIONS.members.label, icon:'ti-users'},
+    {key:'partners', label:COLLECTIONS.partners.label, icon:'ti-building'},
+  ]},
+  {label:'Trang website', items:[
+    {key:'pages', label:'Trang website', icon:'ti-layout-2'},
+  ]},
+  {label:'Cấu hình chung', items:[
+    {key:'settings', label:'Thông tin tổ chức', icon:'ti-settings'},
+    {key:'contact', label:'Liên hệ', icon:'ti-address-book'},
+  ]}
+];
+
+function countFor(key){
+  if(COLLECTIONS[key]) return DB[key].length;
+  return null;
+}
+
+function renderSidebar(){
+  const nav = document.getElementById('sbNav');
+  nav.innerHTML = NAV_GROUPS.map(group=>{
+    const label = group.label ? `<div class="sb-group-label">${group.label}</div>` : '';
+    const items = group.items.map(it=>{
+      const c = countFor(it.key);
+      const active = (currentView===it.key || (it.key==='pages' && currentView.startsWith('page:')) || (it.key==='news' && currentView.startsWith('news-edit:')) || (it.key==='tournaments' && currentView.startsWith('tournament-edit:'))) ? 'active' : '';
+      return `<div class="sb-item ${active}" data-nav="${it.key}">
+        <span class="lft"><i class="ti ${it.icon}"></i>${it.label}</span>
+        ${c!==null ? `<span class="sb-count">${c}</span>` : ''}
+      </div>`;
+    }).join('');
+    return label+items;
+  }).join('');
+  nav.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click', ()=>{ setView(el.getAttribute('data-nav')); document.getElementById('sidebar').classList.remove('open'); });
+  });
+}
+
+function setView(view){
+  currentView = view;
+  searchTerm = '';
+  filterValue = '';
+  renderSidebar();
+  renderTopbar();
+  renderContent();
+}
+

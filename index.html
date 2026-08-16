@@ -1,0 +1,570 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>VBSF — Prototype website</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<style>
+:root{--vd:#C8102E;--vd2:#8C0A20;--vg:#C8102E;--gold:#FFFFFF;--ink:#1B2A24;--muted:#5C6B63;--hint:#8A968F;--line:#E3E8E4;--surface:#F5F7F5;--ph:#E7ECF0;--phc:#8A9FAE}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Be Vietnam Pro',sans-serif;color:var(--ink);background:#EAEEEB;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+a{color:inherit}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.doc-top{background:var(--vd);color:#fff;padding:16px 0;position:sticky;top:0;z-index:20;border-bottom:3px solid var(--gold)}
+.doc-top .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.doc-badge{width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:12px;font-weight:600}
+.doc-title{font-size:16px;font-weight:600}
+.doc-sub{font-size:12px;color:#F5D6D8}
+.doc-idx{margin-left:auto;display:flex;gap:16px;flex-wrap:wrap}
+.doc-idx a{color:#F5D6D8;text-decoration:none;font-size:13px}
+.doc-idx a:hover{color:#fff}
+.panel{background:#fff;border-radius:12px;border:1px solid var(--line);margin:22px 0;overflow:hidden}
+.panel-h{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.panel-h h2{font-size:18px;font-weight:600;color:var(--vd)}
+.panel-h span{font-size:12px;color:var(--hint)}
+.panel-b{padding:22px}
+.section-tag{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sw{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sw-c{height:54px}
+.sw-m{padding:8px 10px;font-size:12px}
+.sw-m b{display:block;font-weight:500}
+.sw-m code{color:var(--muted);font-size:11px}
+.type-row{display:flex;align-items:baseline;gap:14px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.type-row:last-child{border:none}
+.type-row .l{font-size:11px;color:var(--hint);width:120px;flex-shrink:0}
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.comp-cell{border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.comp-cell .cl{font-size:11px;color:var(--hint);text-transform:uppercase;letter-spacing:.05em}
+.btn-out{background:none;color:var(--vg);font-size:13px;font-weight:500;padding:8px 18px;border:1.5px solid var(--vg);border-radius:6px;cursor:pointer}
+.note{font-size:13px;color:var(--muted)}
+.note b{color:var(--ink)}
+.note ul{margin:6px 0 0 18px}
+.note li{margin:5px 0}
+.screen-label{display:flex;align-items:center;gap:10px;margin:24px 0 10px;flex-wrap:wrap}
+.screen-label .n{font-size:13.5px;font-weight:600;color:var(--vd)}
+.screen-label .s{font-size:12px;color:var(--hint)}
+.frame{background:#DFE5E1;border-radius:12px;padding:10px}
+.frame-bar{display:flex;align-items:center;gap:7px;padding:4px 6px 10px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.url{flex:1;background:#fff;border:1px solid var(--line);border-radius:6px;font-size:11px;color:var(--hint);padding:4px 12px;margin-left:6px}
+.page{background:#fff;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+footer.docftr{text-align:center;color:var(--muted);font-size:12px;padding:30px 0}
+.vb-nav{color:#D6E4DC;font-size:12.5px;text-decoration:none;white-space:nowrap}
+.vb-nav:hover{color:#fff}
+.vb-nav.active{color:#FFFFFF}
+.vb-sec{padding:22px 26px}
+.vb-st{font-size:17px;font-weight:600;color:#7A1F17;margin:0}
+.vb-h{font-size:16px;font-weight:600;color:#7A1F17;margin:0}
+.vb-stag{font-size:11px;font-weight:600;color:#FFFFFF;text-transform:uppercase;letter-spacing:.06em}
+.vb-link{font-size:12px;color:#7A1F17;text-decoration:none;cursor:pointer}
+.vb-tag{font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:4px;background:#FCE8E9;color:#7A1F17;white-space:nowrap;display:inline-block}
+.vb-ph{background:#E7ECF0;display:flex;align-items:center;justify-content:center;color:#8A9FAE}
+.vb-card{border:0.5px solid #E3E8E4;border-radius:8px;overflow:hidden;background:#fff}
+.vb-rtab{font-size:12px;padding:6px 12px;border-radius:6px;color:#5C6B63;white-space:nowrap;cursor:pointer}
+.vb-rtab.on{background:#C8102E;color:#fff}
+.vb-fcol a{display:block;color:#AFC4B8;font-size:12px;text-decoration:none;padding:3px 0}
+.vb-p{font-size:13.5px;color:#3C4A43;line-height:1.7}
+.vb-pill{font-size:12px;padding:5px 13px;border-radius:20px;color:#5C6B63;white-space:nowrap;border:1px solid #E3E8E4;background:#fff;cursor:pointer}
+.vb-pill.on{background:#C8102E;color:#fff;border-color:#C8102E}
+.vb-sel{font-size:12px;color:#3C4A43;border:1px solid #E3E8E4;border-radius:6px;padding:6px 12px;background:#fff;white-space:nowrap}
+.vb-row{display:flex;align-items:center;gap:14px;border:0.5px solid #E3E8E4;border-radius:8px;padding:12px 14px;background:#fff}
+.vb-dateblk{text-align:center;background:#C8102E;color:#fff;border-radius:6px;padding:7px 10px;min-width:50px}
+.vb-dateblk .d{font-size:17px;font-weight:600;line-height:1}
+.vb-dateblk .m{font-size:10px;color:#F5D6D8}
+.vb-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.vb-ttl{font-size:13.5px;font-weight:500;color:#1B2A24;line-height:1.35;margin-top:8px}
+.vb-ex{font-size:12px;color:#5C6B63;line-height:1.5;margin-top:5px}
+.vb-dt{font-size:10.5px;color:#8A968F;margin-top:8px}
+.vb-pg{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border:0.5px solid #E3E8E4;border-radius:6px;font-size:12.5px;color:#5C6B63;cursor:pointer}
+.vb-pg.dis{opacity:.4;cursor:default;pointer-events:none}
+.vb-pg.on{background:#C8102E;color:#fff;border-color:#C8102E}
+.vb-seg{display:inline-flex;background:#EDEFEC;border-radius:8px;padding:3px}
+.vb-seg span{font-size:12.5px;padding:7px 16px;border-radius:6px;color:#5C6B63}
+.vb-seg span.on{background:#fff;color:#7A1F17;font-weight:500}
+.vb-band{background:#C8102E;padding:22px 26px}
+.vb-head{background:#C8102E;padding:14px 26px;display:flex;align-items:center;gap:16px}
+.vb-util{background:#8C0A20;color:#F5D6D8;font-size:11px;padding:5px 26px;display:flex;justify-content:space-between;align-items:center}
+.vb-cprt{background:#8C0A20;color:#7E8FA0;font-size:11px;padding:10px 26px;text-align:center}
+.btn-gold{display:inline-block;background:#FFFFFF;color:#7A1F17;font-size:13px;font-weight:500;padding:10px 22px;border:none;border-radius:6px;cursor:pointer;text-decoration:none}
+.fld{margin-bottom:12px}
+.lbl{font-size:11.5px;color:#5C6B63;margin-bottom:5px;display:block}
+.req{color:#9E2A2B}
+.inp{border:0.5px solid #E3E8E4;border-radius:6px;padding:9px 12px;font-size:12.5px;color:#9AA6A0;background:#fff}
+.chip{font-size:11.5px;padding:5px 11px;border-radius:16px;border:1px solid #E3E8E4;color:#5C6B63;background:#fff;cursor:pointer}
+.chip.on{background:#FCE8E9;border-color:#C8102E;color:#7A1F17}
+.scir{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.rk-tbl,.mtbl{width:100%;border-collapse:collapse}
+.rk-tbl th,.mtbl th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#8A968F;text-align:left;padding:10px 12px;border-bottom:1px solid #E3E8E4;font-weight:600}
+.rk-tbl td,.mtbl td{padding:10px 12px;border-bottom:0.5px solid #EEF1EE;font-size:13px;color:#1B2A24;vertical-align:middle}
+.av{width:30px;height:30px;border-radius:50%;background:#E7ECF0;display:inline-flex;align-items:center;justify-content:center;color:#8A9FAE;vertical-align:middle;margin-right:8px}
+.up{color:#1F9D57;font-size:11px}
+.dn{color:#9E2A2B;font-size:11px}
+.eq{color:#A9B2AC;font-size:11px}
+.pod{flex:1;min-width:120px;background:#fff;border:0.5px solid #E3E8E4;border-radius:10px;padding:16px 10px;text-align:center}
+.art-lead{font-size:15px;font-weight:500;color:#1B2A24;line-height:1.7}
+.art-p{font-size:14px;color:#34423B;line-height:1.8;margin-top:14px}
+.art-h{font-size:16px;font-weight:600;color:#7A1F17;margin-top:22px}
+.art-li{font-size:14px;color:#34423B;line-height:1.7;padding-left:20px;position:relative;margin-top:8px}
+.art-li:before{content:'';position:absolute;left:4px;top:9px;width:6px;height:6px;border-radius:50%;background:#C8102E}
+.art-quote{border-left:3px solid #FFFFFF;background:#F5F7F5;padding:14px 18px;margin:20px 0;font-size:15px;font-style:italic;color:#7A1F17;line-height:1.6}
+.shr{width:32px;height:32px;border-radius:50%;border:0.5px solid #E3E8E4;display:flex;align-items:center;justify-content:center;color:#5C6B63}
+.doc-row{display:flex;align-items:center;gap:13px;padding:11px 14px;border:0.5px solid #E3E8E4;border-radius:8px;background:#fff}
+.ficon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.media{border:0.5px solid #E3E8E4;border-radius:8px;overflow:hidden;background:#fff}
+.ci{display:flex;gap:13px;align-items:flex-start;margin-bottom:16px}
+.ci-ic{width:38px;height:38px;border-radius:50%;background:#FCE8E9;color:#7A1F17;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ci-l{font-size:11px;color:#8A968F}
+.ci-v{font-size:13px;color:#1B2A24;margin-top:1px}
+.soc{width:34px;height:34px;border-radius:50%;border:0.5px solid #E3E8E4;display:flex;align-items:center;justify-content:center;color:#5C6B63}
+.tierlbl{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#7A1F17}
+.tierdot{width:9px;height:9px;border-radius:50%}
+.logobox{background:#fff;border:0.5px solid #E3E8E4;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#A9B6AE}
+.tt-tab{font-size:13.5px;color:#8A968F;padding:13px 0;border-bottom:2px solid transparent;cursor:pointer}
+.tt-tab.on{color:#7A1F17;font-weight:600;border-bottom-color:#C8102E}
+
+body{background:#E4E8E5}
+.site{max-width:1080px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 50px rgba(0,0,0,.07)}
+.site-hd{position:sticky;top:0;z-index:30}
+.pg{display:none}
+.pg.on{display:block}
+[data-go]{cursor:pointer}
+.vb-nav{cursor:pointer}
+.mainnav{flex:1;display:flex;gap:15px;justify-content:flex-end;flex-wrap:wrap}
+.navtgl{display:none;margin-left:auto;background:none;border:none;color:#fff;cursor:pointer;padding:4px;line-height:1}
+@media(max-width:760px){
+  body{background:#fff}
+  .site{box-shadow:none;max-width:100%}
+  .vb-head{flex-wrap:wrap}
+  .navtgl{display:inline-flex;align-items:center}
+  .mainnav{display:none;flex-basis:100%;flex-direction:column;gap:0;margin-top:8px}
+  .vb-head.open .mainnav{display:flex}
+  .mainnav a{padding:11px 2px;border-top:1px solid rgba(255,255,255,.10);font-size:14px}
+  .vb-util{flex-wrap:wrap;gap:4px;font-size:10.5px}
+  .vb-sec,.vb-band,.vb-head{padding-left:16px;padding-right:16px}
+  .vb-util,.vb-cprt{padding-left:16px;padding-right:16px}
+  .rk-tbl th:nth-child(3),.rk-tbl td:nth-child(3){display:none}
+  .mtbl th:nth-child(3),.mtbl td:nth-child(3),.mtbl th:nth-child(4),.mtbl td:nth-child(4){display:none}
+}
+@media(max-width:480px){
+  .rk-tbl th:nth-child(4),.rk-tbl td:nth-child(4){display:none}
+}
+</style></head><body>
+<div class="site"><header class="site-hd">
+<div class="vb-util"><span>Cổng thông tin chính thức &nbsp;·&nbsp; <span style="background:#FFFFFF;color:#8C0A20;font-weight:600;padding:1px 8px;border-radius:10px;font-size:10px;letter-spacing:.03em">PROTOTYPE</span></span><span>VI &nbsp;|&nbsp; EN &nbsp;·&nbsp; <i class="ti ti-search"></i> Tìm kiếm</span></div>
+<div class="vb-head"><div data-go="trang-chu" style="display:flex;align-items:center;gap:10px;cursor:pointer"><div style="width:38px;height:38px;border-radius:50%;border:2px solid #FFFFFF;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:12px;font-weight:500">VBSF</div><div style="line-height:1.15"><div style="color:#fff;font-size:13px;font-weight:500">Liên đoàn Billiards &amp; Snooker</div><div style="color:#F5D6D8;font-size:10.5px">Việt Nam · VBSF</div></div></div>
+<button class="navtgl" aria-label="Mở menu"><i class="ti ti-menu-2" style="font-size:20px"></i></button><nav class="mainnav" id="mainnav"><a class="vb-nav" data-go="trang-chu" data-nav="trang-chu" href="#trang-chu">Trang chủ</a><a class="vb-nav" data-go="gioi-thieu" data-nav="gioi-thieu" href="#gioi-thieu">Giới thiệu</a><a class="vb-nav" data-go="tin-tuc" data-nav="tin-tuc" href="#tin-tuc">Tin tức</a><a class="vb-nav" data-go="giai-dau" data-nav="giai-dau" href="#giai-dau">Giải đấu</a><a class="vb-nav" data-go="ranking" data-nav="ranking" href="#ranking">Ranking</a><a class="vb-nav" data-go="thu-vien" data-nav="thu-vien" href="#thu-vien">Thư viện</a><a class="vb-nav" data-go="hoi-vien" data-nav="hoi-vien" href="#hoi-vien">Hội viên</a><a class="vb-nav" data-go="lien-he" data-nav="lien-he" href="#lien-he">Liên hệ</a></nav></div></header><main><div id="pages-root"></div></main><div style="background:#C8102E;padding:24px 26px;display:flex;gap:24px;flex-wrap:wrap"><div style="flex:1.4;min-width:200px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:30px;height:30px;border-radius:50%;border:1.5px solid #FFFFFF;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:10px;font-weight:500">VBSF</div><span style="color:#fff;font-size:13px;font-weight:500">VBSF</span></div><div style="color:#F5D6D8;font-size:11.5px;line-height:1.6">Liên đoàn Billiards &amp; Snooker Việt Nam — cơ quan quản lý và phát triển phong trào bi-a toàn quốc.</div></div>
+<div class="vb-fcol" style="flex:1;min-width:120px"><div style="color:#fff;font-size:12px;font-weight:500;margin-bottom:6px">Liên kết nhanh</div><a data-go="gioi-thieu">Giới thiệu</a><a data-go="giai-dau">Giải đấu</a><a data-go="ranking">Bảng xếp hạng</a><a data-go="hoi-vien">Hội viên</a></div>
+<div class="vb-fcol" style="flex:1;min-width:150px"><div style="color:#fff;font-size:12px;font-weight:500;margin-bottom:6px">Liên hệ</div><a data-go="lien-he"><i class="ti ti-map-pin"></i> Hà Nội, Việt Nam</a><a data-go="lien-he"><i class="ti ti-mail"></i> info@billiards.org.vn</a><a data-go="lien-he"><i class="ti ti-phone"></i> 024 xxxx xxxx</a></div></div><div class="vb-cprt">© 2026 Liên đoàn Billiards &amp; Snooker Việt Nam (VBSF). Bảo lưu mọi quyền.</div></div>
+<script>
+(async function(){
+  var pagesRoot=document.getElementById('pages-root');
+  var navs=document.querySelectorAll('[data-nav]');
+  var head=document.querySelector('.vb-head');
+  var norm=function(s){return s.trim().toLowerCase();};
+  var escapeHtmlSite=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});};
+
+  var MEMBER_SESSION_KEY='vbsf_member_session';
+  var MEMBER_DB=[
+    {code:'VBSF-2026-00098',name:'Nguyễn Phúc Long',phone:'0901234567',password:'123456',club:'CLB Sài Gòn',province:'TP.HCM',category:'Pool 9 bi',status:'active',expiry:'31/12/2026',rank:1,points:2485,matches:45,trend:'up',trendValue:1},
+    {code:'VBSF-2026-00071',name:'Trần Quốc Bảo',phone:'0912345678',password:'123456',club:'CLB Thủ Đô',province:'Hà Nội',category:'Pool 9 bi',status:'active',expiry:'30/11/2026',rank:2,points:2410,matches:44,trend:'down',trendValue:1},
+    {code:'VBSF-2026-00112',name:'Lê Minh Khôi',phone:'0923456789',password:'123456',club:'CLB Sông Hàn',province:'Đà Nẵng',category:'Pool 9 bi',status:'active',expiry:'15/10/2026',rank:3,points:2388,matches:43,trend:'eq',trendValue:0},
+    {code:'VBSF-2026-00123',name:'Phạm Anh Tú',phone:'0934567890',password:'123456',club:'Meow Billiards',province:'Bình Dương',category:'Pool 9 bi',status:'pending',expiry:'',rank:4,points:2301,matches:42,trend:'up',trendValue:2},
+    {code:'VBSF-2025-00410',name:'Đỗ Thành Nam',phone:'0945678901',password:'123456',club:'CLB Cảng',province:'Hải Phòng',category:'Pool 9 bi',status:'expired',expiry:'31/12/2025',rank:5,points:2256,matches:38,trend:'down',trendValue:1}
+  ];
+  var MEMBER_STATUS_LABEL={active:['Đang hiệu lực','#E7F4EC','#1F9D57'],pending:['Chờ thanh toán','#F4F1E8','#9A7B2E'],expired:['Hết hạn','#F1F1EE','#8A8A82']};
+  function getLoggedInMember(){
+    var code=localStorage.getItem(MEMBER_SESSION_KEY);
+    if(!code) return null;
+    return MEMBER_DB.find(function(m){return m.code===code;})||null;
+  }
+  function memberInfoRow(label,value){
+    return '<div><div style="font-size:10.5px;color:#8A968F;text-transform:uppercase;letter-spacing:.04em">'+label+'</div><div style="font-size:13px;color:#1B2A24;margin-top:3px">'+escapeHtmlSite(value)+'</div></div>';
+  }
+  function memberTrendHtml(m){
+    if(m.trend==='up') return '<i class="ti ti-arrow-up-right up"></i> <span class="up">+'+(m.trendValue||0)+' bậc</span>';
+    if(m.trend==='down') return '<i class="ti ti-arrow-down-right dn"></i> <span class="dn">-'+(m.trendValue||0)+' bậc</span>';
+    return '<i class="ti ti-minus eq"></i> <span class="eq">Giữ nguyên</span>';
+  }
+  function memberExpiryHtml(m){
+    if(m.status==='active'){
+      return '<span class="vb-badge" style="background:#E7F4EC;color:#1F9D57"><i class="ti ti-circle-check-filled" style="font-size:11px"></i> Đang hiệu lực</span>'
+        +'<div style="font-size:12.5px;color:#5C6B63;margin-top:12px">Có hiệu lực đến</div>'
+        +'<div style="font-size:19px;font-weight:600;color:#7A1F17;margin-top:2px">'+escapeHtmlSite(m.expiry||'—')+'</div>'
+        +'<div style="font-size:11.5px;color:#8A968F;line-height:1.6;margin-top:10px">Gia hạn sớm để không gián đoạn quyền lợi thi đấu, xếp hạng và các ưu đãi dành cho hội viên VBSF.</div>'
+        +'<a class="btn-gold" data-go="hoi-vien-gia-han" data-code="'+escapeHtmlSite(m.code)+'" data-name="'+escapeHtmlSite(m.name)+'" style="width:100%;text-align:center;margin-top:14px;display:block;cursor:pointer">Gia hạn hội viên</a>';
+    }
+    if(m.status==='expired'){
+      return '<span class="vb-badge" style="background:#F1F1EE;color:#8A8A82"><i class="ti ti-clock-x" style="font-size:11px"></i> Hết hạn</span>'
+        +'<div style="font-size:12.5px;color:#5C6B63;margin-top:12px">Đã hết hiệu lực từ</div>'
+        +'<div style="font-size:19px;font-weight:600;color:#7A1F17;margin-top:2px">'+escapeHtmlSite(m.expiry||'—')+'</div>'
+        +'<div style="font-size:11.5px;color:#8A968F;line-height:1.6;margin-top:10px">Gia hạn ngay để khôi phục quyền lợi thi đấu và xếp hạng hội viên VBSF.</div>'
+        +'<a class="btn-gold" data-go="hoi-vien-gia-han" data-code="'+escapeHtmlSite(m.code)+'" data-name="'+escapeHtmlSite(m.name)+'" style="width:100%;text-align:center;margin-top:14px;display:block;cursor:pointer">Gia hạn hội viên</a>';
+    }
+    return '<span class="vb-badge" style="background:#F4F1E8;color:#9A7B2E"><i class="ti ti-clock" style="font-size:11px"></i> Chờ thanh toán</span>'
+      +'<div style="font-size:11.5px;color:#8A968F;line-height:1.6;margin-top:12px">Đang chờ xác nhận thanh toán hội phí đăng ký lần đầu.</div>';
+  }
+  function renderMemberProfileHtml(m){
+    var st=MEMBER_STATUS_LABEL[m.status]||['—','#F1F1EE','#8A8A82'];
+    return '<div style="display:flex;gap:20px;flex-wrap:wrap">'
+      +'<div style="flex:1;min-width:240px;border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff">'
+        +'<div style="display:flex;align-items:center;gap:14px">'
+          +'<div class="vb-ph" style="width:56px;height:56px;border-radius:50%;flex-shrink:0"><i class="ti ti-user" style="font-size:24px"></i></div>'
+          +'<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;color:#1B2A24">'+escapeHtmlSite(m.name)+'</div><div style="font-size:12px;color:#8A968F;margin-top:2px">'+escapeHtmlSite(m.code)+'</div></div>'
+          +'<span class="vb-badge" style="background:'+st[1]+';color:'+st[2]+'">'+st[0]+'</span>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px">'
+          +memberInfoRow('Câu lạc bộ / Đơn vị',m.club||'—')
+          +memberInfoRow('Tỉnh / Thành',m.province||'—')
+          +memberInfoRow('Nội dung thi đấu',m.category||'—')
+        +'</div>'
+        +'<button class="btn-out" data-member-logout style="margin-top:18px">Đăng xuất</button>'
+      +'</div>'
+      +'<div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:20px">'
+        +'<div style="border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff">'
+          +'<div style="font-size:13px;font-weight:600;color:#7A1F17;margin-bottom:14px">Xếp hạng của bạn</div>'
+          +'<div style="display:flex;align-items:center;gap:16px">'
+            +'<div style="text-align:center;background:#7A1F17;color:#fff;border-radius:10px;padding:14px 18px;min-width:70px"><div style="font-size:22px;font-weight:600;line-height:1">'+(m.rank!=null?m.rank:'—')+'</div><div style="font-size:10px;color:#F5D6D8;margin-top:2px">HẠNG</div></div>'
+            +'<div style="flex:1"><div style="font-size:20px;font-weight:600;color:#1B2A24">'+(m.points!=null?m.points:'—')+' <span style="font-size:12px;font-weight:400;color:#8A968F">điểm</span></div><div style="font-size:12px;color:#5C6B63;margin-top:4px">'+(m.matches!=null?m.matches:'—')+' trận đã đấu</div><div style="font-size:12px;margin-top:6px">'+memberTrendHtml(m)+'</div></div>'
+          +'</div>'
+        +'</div>'
+        +'<div style="border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff">'
+          +'<div style="font-size:13px;font-weight:600;color:#7A1F17;margin-bottom:14px">Thời hạn hội viên</div>'
+          +memberExpiryHtml(m)
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }
+  function wirePager(scope){
+    var pageNums=Array.prototype.filter.call(scope.querySelectorAll('.vb-pg'),function(b){return !b.querySelector('i');});
+    var pagePrevIc=scope.querySelector('.vb-pg i.ti-chevron-left');
+    var pageNextIc=scope.querySelector('.vb-pg i.ti-chevron-right');
+    var pagePrev=pagePrevIc?pagePrevIc.closest('.vb-pg'):null;
+    var pageNext=pageNextIc?pageNextIc.closest('.vb-pg'):null;
+    function setPage(btn){
+      pageNums.forEach(function(b){b.classList.remove('on');});
+      btn.classList.add('on');
+      if(pagePrev) pagePrev.classList.toggle('dis',pageNums.indexOf(btn)===0);
+      if(pageNext) pageNext.classList.toggle('dis',pageNums.indexOf(btn)===pageNums.length-1);
+      var list=scope.querySelector('[data-items]')||scope.querySelector('tbody');
+      if(list) list.scrollIntoView({block:'nearest'});
+    }
+    pageNums.forEach(function(b){b.addEventListener('click',function(){setPage(b);});});
+    if(pagePrev) pagePrev.addEventListener('click',function(){
+      var idx=pageNums.findIndex(function(b){return b.classList.contains('on');});
+      if(idx>0) setPage(pageNums[idx-1]);
+    });
+    if(pageNext) pageNext.addEventListener('click',function(){
+      var idx=pageNums.findIndex(function(b){return b.classList.contains('on');});
+      if(idx>-1&&idx<pageNums.length-1) setPage(pageNums[idx+1]);
+    });
+  }
+  var parentMap={'hoi-vien-danh-sach':'hoi-vien','hoi-vien-chi-tiet':'hoi-vien','hoi-vien-gia-han':'hoi-vien','tin-tuc-chi-tiet':'tin-tuc','giai-dau-dang-ky':'giai-dau','giai-dau-truc-tiep':'giai-dau','giai-dau-ket-qua':'giai-dau','giai-dau-chi-tiet':'giai-dau'};
+  function parent(id){return parentMap[id]||id;}
+
+  var initFns={
+    'tin-tuc':initNews,
+    'giai-dau':initTourney,
+    'ranking':initRanking,
+    'giai-dau-chi-tiet':initTourneyDetail,
+    'trang-chu':initHome,
+    'thu-vien':initLib,
+    'hoi-vien':initJoin,
+    'hoi-vien-danh-sach':initMemberList,
+    'hoi-vien-gia-han':initRenew,
+    'lien-he':initContact
+  };
+
+  async function ensurePage(id){
+    var existing=document.getElementById('pg-'+id);
+    if(existing) return existing;
+    var res;
+    try{ res=await fetch('pages/'+id+'.html'); }catch(err){ return null; }
+    if(!res.ok) return null;
+    var html=await res.text();
+    var tmp=document.createElement('div');
+    tmp.innerHTML=html;
+    var section=tmp.firstElementChild;
+    pagesRoot.appendChild(section);
+    if(initFns[id]) initFns[id](section);
+    return section;
+  }
+
+  async function show(id){
+    var page=await ensurePage(id);
+    if(!page){ id='trang-chu'; page=await ensurePage(id); }
+    document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+    page.classList.add('on');
+    var pid=parent(id);
+    navs.forEach(function(n){n.classList.toggle('active', n.getAttribute('data-nav')===pid);});
+    window.scrollTo(0,0);
+  }
+
+  document.addEventListener('click',async function(e){
+    if(e.target.closest('.navtgl')){ head.classList.toggle('open'); return; }
+    var t=e.target.closest('[data-go]');
+    if(t){
+      e.preventDefault(); head.classList.remove('open');
+      var dest=t.getAttribute('data-go');
+      var destPage=await ensurePage(dest);
+      if(destPage){
+        Object.keys(t.dataset).forEach(function(k){
+          if(k==='go'||k==='more') return;
+          destPage.querySelectorAll('[data-fill="'+k+'"]').forEach(function(slot){slot.textContent=t.dataset[k];});
+        });
+        var moreTarget=destPage.querySelector('[data-more-target]');
+        if(moreTarget){
+          if(t.dataset.more){
+            var rows=JSON.parse(t.dataset.more);
+            moreTarget.innerHTML=rows.map(function(row){
+              return '<tr><td><b>'+row.r+'</b></td><td><span class="av"><i class="ti ti-user" style="font-size:15px"></i></span>'+row.n+'</td><td style="color:#5C6B63">'+row.c+'</td></tr>';
+            }).join('');
+          }else{
+            moreTarget.innerHTML='';
+          }
+        }
+        var ctas=destPage.querySelectorAll('[data-cta]');
+        if(ctas.length){
+          ctas.forEach(function(btn){
+            var show=btn.getAttribute('data-cta')===t.dataset.status;
+            btn.style.display=show?'':'none';
+            if(show){
+              var innerGo=btn.hasAttribute('data-go')?btn:btn.querySelector('[data-go]');
+              Object.keys(t.dataset).forEach(function(k){
+                if(k==='go'||k==='status'||k==='statuslabel') return;
+                btn.setAttribute('data-'+k, t.dataset[k]);
+                if(innerGo&&innerGo!==btn) innerGo.setAttribute('data-'+k, t.dataset[k]);
+              });
+            }
+          });
+        }
+        var ttReset=destPage.querySelectorAll('.tt-tab');
+        if(ttReset.length){
+          ttReset.forEach(function(tb,i){tb.classList.toggle('on',i===0);});
+          destPage.querySelectorAll('[data-tabpanel]').forEach(function(p,i){p.style.display=i===0?'':'none';});
+        }
+      }
+      location.hash=dest;
+    }
+  });
+  window.addEventListener('hashchange',function(){show(location.hash.replace('#','')||'trang-chu');});
+  await show(location.hash.replace('#','')||'trang-chu');
+
+  function initNews(newsPage){
+    var pills=newsPage.querySelectorAll('.vb-pill');
+    var newsCards=newsPage.querySelectorAll('[data-items] .vb-card');
+    var searchInput=newsPage.querySelector('[data-news-search]');
+    var curCat='tất cả';
+
+    function applyFilters(){
+      var q=searchInput?norm(searchInput.value):'';
+      newsCards.forEach(function(card){
+        var tag=card.querySelector('.vb-tag');
+        var ttl=card.querySelector('.vb-ttl');
+        var matchCat=curCat==='tất cả'||(tag&&norm(tag.textContent)===curCat);
+        var matchQ=!q||(ttl&&norm(ttl.textContent).indexOf(q)>-1);
+        card.style.display=(matchCat&&matchQ)?'':'none';
+      });
+    }
+    pills.forEach(function(p){
+      p.addEventListener('click',function(){
+        curCat=norm(p.textContent);
+        pills.forEach(function(x){x.classList.toggle('on',x===p);});
+        applyFilters();
+      });
+    });
+    if(searchInput) searchInput.addEventListener('input',applyFilters);
+    wirePager(newsPage);
+  }
+
+  function initTourney(tourneyPage){
+    var tPills=tourneyPage.querySelectorAll('.vb-pill');
+    var tSections={
+      'sắp diễn ra':tourneyPage.querySelector('[data-section="sap-dien-ra"]'),
+      'đang diễn ra':tourneyPage.querySelector('[data-section="dang-dien-ra"]'),
+      'đã kết thúc':tourneyPage.querySelector('[data-section="ket-qua-gan-day"]')
+    };
+    function showTourneyTab(key){
+      Object.keys(tSections).forEach(function(k){
+        if(tSections[k]) tSections[k].style.display=(k===key)?'':'none';
+      });
+      tPills.forEach(function(p){p.classList.toggle('on',norm(p.textContent)===key);});
+    }
+    tPills.forEach(function(p){p.addEventListener('click',function(){showTourneyTab(norm(p.textContent));});});
+    showTourneyTab('sắp diễn ra');
+  }
+
+  function initRanking(rankPage){
+    var rPills=rankPage.querySelectorAll('.vb-pill');
+    var rDisc=rankPage.querySelector('[data-disc]');
+    var rSearch=rankPage.querySelector('[data-rank-search]');
+    var rRows=rankPage.querySelectorAll('[data-section="bang-xep-hang"] tbody[data-items] tr');
+    rPills.forEach(function(p){
+      p.addEventListener('click',function(){
+        rPills.forEach(function(x){x.classList.toggle('on',x===p);});
+        if(rDisc) rDisc.textContent=p.textContent.trim();
+      });
+    });
+    if(rSearch) rSearch.addEventListener('input',function(){
+      var q=norm(rSearch.value);
+      rRows.forEach(function(tr){
+        var name=tr.querySelectorAll('td')[1];
+        var show=!q||(name&&norm(name.textContent).indexOf(q)>-1);
+        tr.style.display=show?'':'none';
+      });
+    });
+  }
+
+  function initTourneyDetail(tourneyDetailPage){
+    var ttTabs=tourneyDetailPage.querySelectorAll('.tt-tab');
+    var ttPanels=tourneyDetailPage.querySelectorAll('[data-tabpanel]');
+    ttTabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        ttTabs.forEach(function(t){t.classList.toggle('on',t===tab);});
+        ttPanels.forEach(function(p){p.style.display=(p.getAttribute('data-tabpanel')===tab.getAttribute('data-tab'))?'':'none';});
+      });
+    });
+  }
+
+  function initHome(homePage){
+    var hRtabs=homePage.querySelectorAll('.vb-rtab');
+    hRtabs.forEach(function(p){
+      p.addEventListener('click',function(){
+        hRtabs.forEach(function(x){x.classList.toggle('on',x===p);});
+      });
+    });
+  }
+
+  function initLib(libPage){
+    var libPills=libPage.querySelectorAll('.vb-pill');
+    var libRows=libPage.querySelectorAll('[data-section="van-ban-luat"] .doc-row');
+    var libDocSection=libPage.querySelector('[data-section="van-ban-luat"]');
+    var libMediaSection=libPage.querySelector('[data-section="thu-vien-media"]');
+    var libSearch=libPage.querySelector('[data-lib-search]');
+    var libCat='tất cả';
+    function applyLibFilters(){
+      var q=libSearch?norm(libSearch.value):'';
+      if(libCat==='media'){
+        if(libDocSection) libDocSection.style.display='none';
+        if(libMediaSection) libMediaSection.style.display='';
+        return;
+      }
+      if(libDocSection) libDocSection.style.display='';
+      if(libMediaSection) libMediaSection.style.display=libCat==='tất cả'?'':'none';
+      libRows.forEach(function(row){
+        var cat=row.getAttribute('data-cat');
+        var title=row.querySelector('div[style*="font-weight:500"]');
+        var matchCat=libCat==='tất cả'||cat===libCat;
+        var matchQ=!q||(title&&norm(title.textContent).indexOf(q)>-1);
+        row.style.display=(matchCat&&matchQ)?'':'none';
+      });
+    }
+    libPills.forEach(function(p){
+      p.addEventListener('click',function(){
+        libCat=norm(p.textContent);
+        libPills.forEach(function(x){x.classList.toggle('on',x===p);});
+        applyLibFilters();
+      });
+    });
+    if(libSearch) libSearch.addEventListener('input',applyLibFilters);
+  }
+
+  function wirePayBtn(page){
+    var payBtn=page.querySelector('[data-pay-btn]');
+    var payBadge=page.querySelector('[data-pay-badge]');
+    if(payBtn) payBtn.addEventListener('click',function(){
+      if(payBadge){
+        payBadge.style.background='#E7F4EC';
+        payBadge.style.color='#1F9D57';
+        payBadge.innerHTML='<i class="ti ti-circle-check-filled" style="font-size:11px"></i> Đã xác nhận thanh toán';
+      }
+      payBtn.textContent='Đã gửi xác nhận';
+      payBtn.style.opacity='.6';
+      payBtn.style.pointerEvents='none';
+    });
+  }
+  function initRenew(renewPage){
+    wirePayBtn(renewPage);
+  }
+  function initJoin(joinPage){
+    var chips=joinPage.querySelectorAll('.chip');
+    chips.forEach(function(c){c.addEventListener('click',function(){c.classList.toggle('on');});});
+    wirePayBtn(joinPage);
+
+    var loginBox=joinPage.querySelector('[data-section="login-box"]');
+    var profileBox=joinPage.querySelector('[data-section="member-profile"]');
+    var formSections=joinPage.querySelectorAll('[data-section="form-dang-ky"]');
+    var loginPhone=joinPage.querySelector('[data-member-login-phone]');
+    var loginPassword=joinPage.querySelector('[data-member-login-password]');
+    var loginBtn=joinPage.querySelector('[data-member-login-btn]');
+    var loginErr=joinPage.querySelector('[data-member-login-error]');
+
+    function renderAuthState(){
+      var m=getLoggedInMember();
+      if(m){
+        loginBox.style.display='none';
+        formSections.forEach(function(s){s.style.display='none';});
+        profileBox.style.display='';
+        profileBox.innerHTML=renderMemberProfileHtml(m);
+        var logoutBtn=profileBox.querySelector('[data-member-logout]');
+        if(logoutBtn) logoutBtn.addEventListener('click',function(){
+          localStorage.removeItem(MEMBER_SESSION_KEY);
+          renderAuthState();
+        });
+      }else{
+        loginBox.style.display='';
+        formSections.forEach(function(s){s.style.display='';});
+        profileBox.style.display='none';
+        profileBox.innerHTML='';
+      }
+    }
+    if(loginBtn) loginBtn.addEventListener('click',function(){
+      var phone=(loginPhone.value||'').trim();
+      var password=(loginPassword.value||'').trim();
+      if(!phone||!password){
+        if(loginErr){ loginErr.textContent='Vui lòng nhập số điện thoại và mật khẩu.'; loginErr.style.display=''; }
+        return;
+      }
+      var m=MEMBER_DB.find(function(r){return r.phone===phone;});
+      if(!m||m.password!==password){
+        if(loginErr){ loginErr.textContent='Số điện thoại hoặc mật khẩu không đúng.'; loginErr.style.display=''; }
+        return;
+      }
+      if(loginErr) loginErr.style.display='none';
+      localStorage.setItem(MEMBER_SESSION_KEY,m.code);
+      loginPhone.value=''; loginPassword.value='';
+      renderAuthState();
+    });
+    [loginPhone,loginPassword].forEach(function(input){
+      if(input) input.addEventListener('keydown',function(e){
+        if(e.key==='Enter'){ e.preventDefault(); if(loginBtn) loginBtn.click(); }
+      });
+    });
+    renderAuthState();
+  }
+
+  function initMemberList(memberPage){
+    var memberSearch=memberPage.querySelector('[data-member-search]');
+    var memberRows=memberPage.querySelectorAll('tbody tr');
+    if(memberSearch) memberSearch.addEventListener('input',function(){
+      var q=norm(memberSearch.value);
+      memberRows.forEach(function(tr){
+        var name=tr.querySelector('td');
+        var show=!q||(name&&norm(name.textContent).indexOf(q)>-1);
+        tr.style.display=show?'':'none';
+      });
+    });
+    wirePager(memberPage);
+  }
+
+  function initContact(contactPage){
+    var contactBtn=contactPage.querySelector('[data-contact-btn]');
+    var contactMsg=contactPage.querySelector('[data-contact-msg]');
+    if(contactBtn) contactBtn.addEventListener('click',function(){
+      if(contactMsg) contactMsg.style.display='';
+      contactBtn.style.opacity='.6';
+      contactBtn.style.pointerEvents='none';
+    });
+  }
+})();
+</script>
+</body></html>

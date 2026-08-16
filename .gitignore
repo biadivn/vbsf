@@ -1,0 +1,4 @@
+.DS_Store
+server.log
+*.log
+.claude/
