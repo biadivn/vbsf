@@ -269,6 +269,62 @@ tr.row-hidden{opacity:.5}
 .navtgl{display:none}
 @media(max-width:860px){
   .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .2s}
+  .sidebar.open{transform:translateX(0)}
+  .navtgl{display:inline-flex;align-items:center;justify-content:center;background:#fff;color:var(--ink);border:1px solid var(--line-strong);width:32px;height:32px;border-radius:var(--radius);font-size:16px}
+  .form-grid{grid-template-columns:1fr}
+  .fld.span2{grid-column:1/2}
+  .content{padding:16px}
+  .topbar{padding:12px 16px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-badge">VBSF</div>
+      <div class="sb-brand-txt">
+        <div>VBSF CMS</div>
+        <div>Quản trị nội dung</div>
+      </div>
+    </div>
+    <nav class="sb-nav" id="sbNav"></nav>
+    <div class="sb-footer">Dữ liệu lưu tự động trên thiết bị này</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="navtgl" id="navtgl"><i class="ti ti-menu-2"></i></button>
+      <div>
+        <h1 id="pageTitle">Tổng quan</h1>
+        <div class="sub" id="pageSub">Toàn cảnh nội dung trên website VBSF</div>
+      </div>
+      <div class="topbar-actions" id="topbarActions"></div>
+    </header>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3 id="modalTitle">Thêm mới</h3>
+      <button class="modal-close" id="modalClose"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-ft">
+      <button class="btn btn-danger-outline" id="modalDeleteBtn" style="display:none"><i class="ti ti-trash"></i> Xóa</button>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-ghost" id="modalCancelBtn">Hủy</button>
+        <button class="btn btn-primary" id="modalSaveBtn"><i class="ti ti-check"></i> Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="toastMsg"></span></div>
+
 <script>
 /* =========================================================
    SCHEMA DEFINITIONS

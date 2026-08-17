@@ -9,9 +9,15 @@ const PAGE_SECTIONS_REGISTRY = {
       {key:'bannerSubtitle', label:'Mô tả banner', type:'text', span2:true, default:'Khởi tranh 12/06 · Nhà thi đấu Phú Thọ, TP.HCM'},
       {key:'sideLabel', label:'Nhãn khối "Tin nổi bật"', type:'text', default:'Tin nổi bật'}
     ]},
-    {key:'bxh-home', label:'Bảng xếp hạng quốc gia (trích)', title:'Bảng xếp hạng quốc gia', apiIntegrated:true},
-    {key:'lich-giai-dau', label:'Lịch giải đấu sắp diễn ra', title:'Lịch giải đấu sắp diễn ra', apiIntegrated:true},
     {key:'tin-tuc-home', label:'Tin tức mới nhất', title:'Tin tức mới nhất', newsPicker:true},
+    {key:'event-banner', label:'Banner sự kiện tùy chỉnh', fields:[
+      {key:'tag', label:'Nhãn', type:'text', default:'SỰ KIỆN'},
+      {key:'title', label:'Tiêu đề', type:'text', span2:true, default:'Vòng chung kết giải Vô địch Quốc gia 2026'},
+      {key:'subtitle', label:'Mô tả', type:'text', span2:true, default:'Trực tiếp 12–20/06 tại Nhà thi đấu Phú Thọ, TP.HCM — cập nhật tỷ số theo thời gian thực.'},
+      {key:'buttonText', label:'Nút bấm', type:'text', default:'Xem chi tiết'}
+    ]},
+    {key:'lich-giai-dau', label:'Lịch giải đấu sắp diễn ra', title:'Lịch giải đấu sắp diễn ra', apiIntegrated:true},
+    {key:'top-players', label:'Top players theo nội dung', title:'Top players', apiIntegrated:true},
     {key:'cta-hoi-vien', label:'CTA — Trở thành hội viên', fields:[
       {key:'title', label:'Tiêu đề', type:'text', span2:true, default:'Trở thành hội viên chính thức của VBSF'},
       {key:'subtitle', label:'Mô tả', type:'text', span2:true, default:'Đăng ký trực tuyến, theo dõi xếp hạng cá nhân và tham gia hệ thống giải đấu quốc gia.'},
