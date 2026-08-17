@@ -587,9 +587,11 @@ body{background:#E4E8E5}
     var loginPassword=joinPage.querySelector('[data-member-login-password]');
     var loginBtn=joinPage.querySelector('[data-member-login-btn]');
     var loginErr=joinPage.querySelector('[data-member-login-error]');
+    var regTabLabel=joinPage.querySelector('[data-reg-tab-label]');
 
     function renderAuthState(){
       var m=getLoggedInMember();
+      if(regTabLabel) regTabLabel.textContent=m?'Thông tin hội viên':'Đăng ký hội viên';
       if(m){
         loginBox.style.display='none';
         formSections.forEach(function(s){s.style.display='none';});
