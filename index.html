@@ -124,6 +124,10 @@ footer.docftr{text-align:center;color:var(--muted);font-size:12px;padding:30px 0
 .tp-slide{display:none}
 .tp-slide.on{display:block;animation:tpFade .4s ease}
 @keyframes tpFade{from{opacity:0}to{opacity:1}}
+.rk-car-slide{display:none}
+.rk-car-slide.on{display:block;animation:tpFade .4s ease}
+.rk-dot{width:6px;height:6px;border-radius:50%;background:#D2DAD4;cursor:pointer}
+.rk-dot.on{background:#21428E;width:16px;border-radius:3px}
 
 body{background:#E4E8E5}
 .site{max-width:1080px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 50px rgba(0,0,0,.07)}
@@ -398,13 +402,46 @@ body{background:#E4E8E5}
 
   function initRanking(rankPage){
     var rPills=rankPage.querySelectorAll('.vb-pill');
-    var rDisc=rankPage.querySelector('[data-disc]');
     var rSearch=rankPage.querySelector('[data-rank-search]');
     var rRows=rankPage.querySelectorAll('[data-section="bang-xep-hang"] tbody[data-items] tr');
+    var rSlides=rankPage.querySelectorAll('.rk-car-slide');
+    var rGroupLbl=rankPage.querySelector('[data-car-disc]') && rankPage.querySelector('[data-car-group]');
+    var rDiscLbl=rankPage.querySelector('[data-car-disc]');
+    var rDots=rankPage.querySelector('[data-car-dots]');
+    var idx=0,timer=null;
+    if(rSlides.length){
+      rDots.innerHTML='';
+      rSlides.forEach(function(s,i){
+        var d=document.createElement('span');
+        d.className='rk-dot'+(i===0?' on':'');
+        d.addEventListener('click',function(){goTo(i);restart();});
+        rDots.appendChild(d);
+      });
+    }
+    function render(){
+      rSlides.forEach(function(s,i){s.classList.toggle('on',i===idx);});
+      var dotEls=rDots?rDots.querySelectorAll('.rk-dot'):[];
+      dotEls.forEach(function(d,i){d.classList.toggle('on',i===idx);});
+      var cur=rSlides[idx];
+      if(cur){
+        if(rGroupLbl) rankPage.querySelector('[data-car-group]').textContent=cur.getAttribute('data-car-group');
+        if(rDiscLbl) rDiscLbl.textContent=cur.getAttribute('data-car-disc');
+        var curKey=cur.getAttribute('data-car-key');
+        rPills.forEach(function(p){p.classList.toggle('on',p.getAttribute('data-rank-key')===curKey);});
+      }
+    }
+    function goTo(i){idx=i%rSlides.length;render();}
+    function restart(){
+      if(timer) clearInterval(timer);
+      timer=setInterval(function(){goTo(idx+1);},4000);
+    }
+    if(rSlides.length){render();restart();}
     rPills.forEach(function(p){
       p.addEventListener('click',function(){
-        rPills.forEach(function(x){x.classList.toggle('on',x===p);});
-        if(rDisc) rDisc.textContent=p.textContent.trim();
+        var target=p.getAttribute('data-rank-key');
+        var found=-1;
+        rSlides.forEach(function(s,i){if(s.getAttribute('data-car-key')===target) found=i;});
+        if(found>-1){goTo(found);restart();}
       });
     });
     if(rSearch) rSearch.addEventListener('input',function(){
