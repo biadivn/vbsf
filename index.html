@@ -3,7 +3,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <style>
-:root{--vd:#21428E;--vd2:#15305F;--vg:#21428E;--gold:#FFFFFF;--ink:#1B2A24;--muted:#5C6B63;--hint:#8A968F;--line:#E3E8E4;--surface:#F5F7F5;--ph:#E7ECF0;--phc:#8A9FAE}
+:root{--vd:#21428E;--vd2:#15305F;--vg:#21428E;--gold:#FFFFFF;--vbrown:#AD702F;--vgreen:#00814D;--vcyan:#0190BF;--ink:#1B2A24;--muted:#5C6B63;--hint:#8A968F;--line:#E3E8E4;--surface:#F5F7F5;--ph:#E7ECF0;--phc:#8A9FAE}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Be Vietnam Pro',sans-serif;color:var(--ink);background:#EAEEEB;line-height:1.6;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1000px;margin:0 auto;padding:0 20px}
@@ -97,7 +97,7 @@ footer.docftr{text-align:center;color:var(--muted);font-size:12px;padding:30px 0
 .rk-tbl th,.mtbl th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#8A968F;text-align:left;padding:10px 12px;border-bottom:1px solid #E3E8E4;font-weight:600}
 .rk-tbl td,.mtbl td{padding:10px 12px;border-bottom:0.5px solid #EEF1EE;font-size:13px;color:#1B2A24;vertical-align:middle}
 .av{width:30px;height:30px;border-radius:50%;background:#E7ECF0;display:inline-flex;align-items:center;justify-content:center;color:#8A9FAE;vertical-align:middle;margin-right:8px}
-.up{color:#1F9D57;font-size:11px}
+.up{color:#00814D;font-size:11px}
 .dn{color:#9E2A2B;font-size:11px}
 .eq{color:#A9B2AC;font-size:11px}
 .pod{flex:1;min-width:120px;background:#fff;border:0.5px solid #E3E8E4;border-radius:10px;padding:16px 10px;text-align:center}
@@ -178,7 +178,7 @@ body{background:#E4E8E5}
     {code:'VBSF-2026-00123',name:'Phạm Anh Tú',phone:'0934567890',password:'123456',cccd:'074097003456',club:'Meow Billiards',province:'Bình Dương',category:'Pool 9 bi',status:'pending',expiry:'',rank:4,points:2301,matches:42,trend:'up',trendValue:2},
     {code:'VBSF-2025-00410',name:'Đỗ Thành Nam',phone:'0945678901',password:'123456',cccd:'031093007890',club:'CLB Cảng',province:'Hải Phòng',category:'Pool 9 bi',status:'expired',expiry:'31/12/2025',rank:5,points:2256,matches:38,trend:'down',trendValue:1}
   ];
-  var MEMBER_STATUS_LABEL={active:['Đang hiệu lực','#E7F4EC','#1F9D57'],pending:['Chờ thanh toán','#F4F1E8','#9A7B2E'],expired:['Hết hạn','#F1F1EE','#8A8A82']};
+  var MEMBER_STATUS_LABEL={active:['Đang hiệu lực','#E7F4EC','#00814D'],pending:['Chờ thanh toán','#F4F1E8','#9A7B2E'],expired:['Hết hạn','#F1F1EE','#8A8A82']};
   function getLoggedInMember(){
     var code=localStorage.getItem(MEMBER_SESSION_KEY);
     if(!code) return null;
@@ -194,7 +194,7 @@ body{background:#E4E8E5}
   }
   function memberExpiryHtml(m){
     if(m.status==='active'){
-      return '<span class="vb-badge" style="background:#E7F4EC;color:#1F9D57"><i class="ti ti-circle-check-filled" style="font-size:11px"></i> Đang hiệu lực</span>'
+      return '<span class="vb-badge" style="background:#E7F4EC;color:#00814D"><i class="ti ti-circle-check-filled" style="font-size:11px"></i> Đang hiệu lực</span>'
         +'<div style="font-size:12.5px;color:#5C6B63;margin-top:12px">Có hiệu lực đến</div>'
         +'<div style="font-size:19px;font-weight:600;color:#21428E;margin-top:2px">'+escapeHtmlSite(m.expiry||'—')+'</div>'
         +'<div style="font-size:11.5px;color:#8A968F;line-height:1.6;margin-top:10px">Gia hạn sớm để không gián đoạn quyền lợi thi đấu, xếp hạng và các ưu đãi dành cho hội viên VBSF.</div>'
@@ -466,6 +466,8 @@ body{background:#E4E8E5}
   }
 
   function initHome(homePage){
+    var ebSection=homePage.querySelector('[data-section="event-banner"]');
+    if(ebSection && ebSection.getAttribute('data-eb-enabled')==='false') ebSection.style.display='none';
     var tpBoxes=homePage.querySelectorAll('.tp-box');
     tpBoxes.forEach(function(box){
       var slides=box.querySelectorAll('.tp-slide');
@@ -518,7 +520,7 @@ body{background:#E4E8E5}
     if(payBtn) payBtn.addEventListener('click',function(){
       if(payBadge){
         payBadge.style.background='#E7F4EC';
-        payBadge.style.color='#1F9D57';
+        payBadge.style.color='#00814D';
         payBadge.innerHTML='<i class="ti ti-circle-check-filled" style="font-size:11px"></i> Đã xác nhận thanh toán';
       }
       payBtn.textContent='Đã gửi xác nhận';
