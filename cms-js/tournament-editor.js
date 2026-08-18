@@ -104,8 +104,9 @@ function renderTeInfoTab(record, isNew){
   </div>`;
 }
 
-function teMemberOptions(){
-  return DB.members.map(m=>`<option value="${m.id}">${escapeHtml(m.name)} — ${escapeHtml(m.code||'')}${m.club?` (${escapeHtml(m.club)})`:''}</option>`).join('');
+function teAvailableMemberOptions(record){
+  const usedIds = new Set(record.players.filter(p=>p.memberId).map(p=>p.memberId));
+  return DB.members.filter(m=>!usedIds.has(m.id)).map(m=>`<option value="${m.id}">${escapeHtml(m.name)} — ${escapeHtml(m.code||'')}${m.club?` (${escapeHtml(m.club)})`:''}</option>`).join('');
 }
 
 function renderTePlayersTab(record){
@@ -114,7 +115,6 @@ function renderTePlayersTab(record){
     return `<tr data-pid="${p.id}">
       <td>${escapeHtml(p.name)}</td>
       <td class="cell-muted">${escapeHtml(p.club||'—')}</td>
-      <td class="cell-muted">${escapeHtml(p.category||record.category||'—')}</td>
       <td>${m ? `<span class="status green">Hội viên · ${escapeHtml(m.code||'')}</span>` : `<span class="status gray">Khách mời</span>`}</td>
       <td class="actions"><button class="btn-icon" data-te-rm-player="${p.id}" title="Xóa"><i class="ti ti-x"></i></button></td>
     </tr>`;
@@ -122,16 +122,22 @@ function renderTePlayersTab(record){
 
   return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
     <div class="card" style="flex:1;min-width:320px">
-      <div class="card-head"><div><h2>Thêm người chơi</h2><div class="desc">Chọn hội viên đã có trong hệ thống hoặc thêm khách mời</div></div></div>
+      <div class="card-head"><div><h2>Thêm người chơi</h2><div class="desc">Chọn nhiều hội viên để thêm cùng lúc, hoặc thêm khách mời</div></div></div>
       <div class="card-body padded">
-        <div class="form-grid">
-          <div class="fld"><label>Chọn hội viên (tùy chọn)</label><select id="te_p_member"><option value="">— Khách mời / nhập tên tự do —</option>${teMemberOptions()}</select></div>
-          <div class="fld"><label>Họ tên</label><input type="text" id="te_p_name" placeholder="Bắt buộc nếu không chọn hội viên"></div>
-          <div class="fld"><label>Câu lạc bộ</label><input type="text" id="te_p_club" placeholder="CLB / Đơn vị"></div>
-          <div class="fld"><label>Nội dung thi đấu</label><input type="text" id="te_p_category" placeholder="${escapeAttr(record.category||'Pool 9 bi')}"></div>
+        <div class="fld"><label>Chọn hội viên (giữ Ctrl/Cmd hoặc Shift để chọn nhiều)</label>
+          <select id="te_p_members" multiple size="8" style="width:100%">${teAvailableMemberOptions(record)}</select>
         </div>
         <div class="form-actions" style="justify-content:flex-end;border-top:none;padding-top:10px;margin-top:10px">
-          <button class="btn btn-primary" id="teAddPlayerBtn"><i class="ti ti-plus"></i> Thêm vào danh sách</button>
+          <button class="btn btn-primary" id="teAddPlayersBtn"><i class="ti ti-plus"></i> Thêm hội viên đã chọn</button>
+        </div>
+        <div style="border-top:1px solid var(--line);margin-top:16px;padding-top:16px">
+          <div class="form-grid">
+            <div class="fld"><label>Khách mời — Họ tên</label><input type="text" id="te_p_name" placeholder="Không phải hội viên"></div>
+            <div class="fld"><label>Câu lạc bộ</label><input type="text" id="te_p_club" placeholder="CLB / Đơn vị"></div>
+          </div>
+          <div class="form-actions" style="justify-content:flex-end;border-top:none;padding-top:10px;margin-top:10px">
+            <button class="btn btn-ghost" id="teAddGuestBtn"><i class="ti ti-user-plus"></i> Thêm khách mời</button>
+          </div>
         </div>
       </div>
     </div>
@@ -148,7 +154,7 @@ function renderTePlayersTab(record){
     </div>
   </div>
   <div class="tbl-wrap" style="margin-top:20px">
-    ${record.players.length===0 ? `<div class="empty"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc nhập danh sách ở trên.</div>` : `<table><thead><tr><th>Họ tên</th><th>CLB</th><th>Nội dung</th><th>Liên kết</th><th style="width:60px"></th></tr></thead><tbody>${rows}</tbody></table>`}
+    ${record.players.length===0 ? `<div class="empty"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc nhập danh sách ở trên.</div>` : `<table><thead><tr><th>Họ tên</th><th>CLB</th><th>Liên kết</th><th style="width:60px"></th></tr></thead><tbody>${rows}</tbody></table>`}
   </div>`;
 }
 
@@ -220,14 +226,17 @@ function renderTeMatchesTab(record){
         const p1 = tePlayerName(record, m.p1Id);
         const p2 = m.p2Id ? tePlayerName(record, m.p2Id) : null;
         if(!p2){
-          return `<tr data-mid="${m.id}"><td colspan="4"><b>${escapeHtml(p1)}</b> <span class="badge">Miễn đấu vòng này</span></td><td class="actions"></td></tr>`;
+          return `<tr data-mid="${m.id}"><td colspan="5"><b>${escapeHtml(p1)}</b> <span class="badge">Miễn đấu vòng này</span></td><td class="actions"></td></tr>`;
         }
         if(m.status==='done'){
           const winnerName = tePlayerName(record, m.winnerId);
+          const wp = m.winPoints!=null ? m.winPoints : TE_WIN_POINTS;
+          const lp = m.lossPoints!=null ? m.lossPoints : TE_LOSS_POINTS;
           return `<tr data-mid="${m.id}">
             <td><b>${escapeHtml(p1)}</b></td>
             <td style="white-space:nowrap"><b style="color:var(--vg)">${m.score1}</b> — <b style="color:var(--vg)">${m.score2}</b></td>
             <td><b>${escapeHtml(p2)}</b></td>
+            <td style="font-size:11.5px;color:var(--hint);white-space:nowrap">Thắng ${wp>=0?'+':''}${wp}đ · Thua ${lp>=0?'+':''}${lp}đ</td>
             <td><span class="status green">Thắng: ${escapeHtml(winnerName)}</span></td>
             <td class="actions"></td>
           </tr>`;
@@ -236,6 +245,7 @@ function renderTeMatchesTab(record){
           <td><b>${escapeHtml(p1)}</b></td>
           <td style="white-space:nowrap"><input type="number" min="0" id="te_score1_${m.id}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:5px"> — <input type="number" min="0" id="te_score2_${m.id}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:5px"></td>
           <td><b>${escapeHtml(p2)}</b></td>
+          <td style="white-space:nowrap;font-size:11px;color:var(--hint)">Thắng<br><input type="number" id="te_wpts_${m.id}" value="${TE_WIN_POINTS}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:4px;margin-top:2px"><br>Thua<br><input type="number" id="te_lpts_${m.id}" value="${TE_LOSS_POINTS}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:4px;margin-top:2px"></td>
           <td><span class="status gold">Chưa có kết quả</span></td>
           <td class="actions">
             <button class="btn-icon" data-te-save-result="${m.id}" title="Lưu kết quả"><i class="ti ti-device-floppy"></i></button>
@@ -244,13 +254,13 @@ function renderTeMatchesTab(record){
         </tr>`;
       }).join('');
       return `<div style="margin-bottom:18px"><div class="gd-h" style="font-size:13.5px">Vòng ${rn}</div>
-        <div class="tbl-wrap"><table><thead><tr><th>Người chơi 1</th><th style="width:120px">Tỷ số</th><th>Người chơi 2</th><th style="width:170px">Trạng thái</th><th style="width:80px"></th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Người chơi 1</th><th style="width:120px">Tỷ số</th><th>Người chơi 2</th><th style="width:110px">Điểm xếp hạng</th><th style="width:170px">Trạng thái</th><th style="width:80px"></th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
       </div>`;
     }).join('');
   }
 
   return `<div style="font-size:12px;color:var(--hint);margin-bottom:16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px">
-      <i class="ti ti-info-circle"></i> Thắng trận: <b>+${TE_WIN_POINTS} điểm</b> · Thua trận: <b>+${TE_LOSS_POINTS} điểm</b> · Mỗi trận: <b>+1 số trận đã đấu</b>. Bảng xếp hạng hội viên (mục "Hội viên & Xếp hạng") được tính lại tự động ngay sau khi lưu kết quả. Chỉ người chơi được liên kết với hội viên mới được cộng điểm.
+      <i class="ti ti-info-circle"></i> Mặc định: Thắng trận <b>+${TE_WIN_POINTS} điểm</b> · Thua trận <b>+${TE_LOSS_POINTS} điểm</b> — có thể chỉnh điểm tăng/giảm riêng cho từng trận trước khi lưu kết quả. Mỗi trận: <b>+1 số trận đã đấu</b>. Bảng xếp hạng hội viên (mục "Hội viên & Xếp hạng") được tính lại tự động ngay sau khi lưu kết quả. Chỉ người chơi được liên kết với hội viên mới được cộng điểm.
     </div>
     ${drawSection}${manualSection}${matchesHtml}`;
 }
@@ -297,8 +307,10 @@ function attachTournamentEditorEvents(){
     });
   });
 
-  const addPlayerBtn = document.getElementById('teAddPlayerBtn');
-  if(addPlayerBtn) addPlayerBtn.addEventListener('click', teAddPlayer);
+  const addPlayersBtn = document.getElementById('teAddPlayersBtn');
+  if(addPlayersBtn) addPlayersBtn.addEventListener('click', teAddPlayers);
+  const addGuestBtn = document.getElementById('teAddGuestBtn');
+  if(addGuestBtn) addGuestBtn.addEventListener('click', teAddGuest);
   const csvFileBtn = document.getElementById('teCsvFileBtn');
   const csvFileInput = document.getElementById('te_csv_file');
   if(csvFileBtn && csvFileInput){
@@ -375,32 +387,37 @@ function teDeleteTournament(){
   }
 }
 
-function teAddPlayer(){
+function teAddPlayers(){
   const id = currentView.slice('tournament-edit:'.length);
   const record = teRecord(id);
   if(!record) return;
-  const memberId = document.getElementById('te_p_member').value;
-  const nameInput = document.getElementById('te_p_name').value.trim();
-  const clubInput = document.getElementById('te_p_club').value.trim();
-  const categoryInput = document.getElementById('te_p_category').value.trim();
-  let player;
-  if(memberId){
+  const sel = document.getElementById('te_p_members');
+  const ids = Array.from(sel.selectedOptions).map(o=>o.value);
+  if(!ids.length){ showToast('Vui lòng chọn ít nhất một hội viên', true); return; }
+  let added = 0;
+  ids.forEach(memberId=>{
+    if(record.players.some(p=>p.memberId===memberId)) return;
     const m = DB.members.find(x=>x.id===memberId);
     if(!m) return;
-    if(record.players.some(p=>p.memberId===memberId)){ showToast('Hội viên này đã có trong danh sách', true); return; }
-    player = {id:uid(), memberId, name:m.name, club:m.club||clubInput, category:categoryInput||m.category||record.category};
-  } else {
-    if(!nameInput){ showToast('Vui lòng nhập họ tên hoặc chọn hội viên', true); return; }
-    player = {id:uid(), memberId:null, name:nameInput, club:clubInput, category:categoryInput||record.category};
-  }
-  record.players.push(player);
+    record.players.push({id:uid(), memberId, name:m.name, club:m.club||''});
+    added++;
+  });
   saveDB();
   renderSidebar();
-  showToast('Đã thêm người chơi');
-  document.getElementById('te_p_name').value='';
-  document.getElementById('te_p_club').value='';
-  document.getElementById('te_p_category').value='';
-  document.getElementById('te_p_member').value='';
+  showToast(`Đã thêm ${added} hội viên vào danh sách`);
+  renderContent();
+}
+function teAddGuest(){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  const nameInput = document.getElementById('te_p_name').value.trim();
+  const clubInput = document.getElementById('te_p_club').value.trim();
+  if(!nameInput){ showToast('Vui lòng nhập họ tên khách mời', true); return; }
+  record.players.push({id:uid(), memberId:null, name:nameInput, club:clubInput});
+  saveDB();
+  renderSidebar();
+  showToast('Đã thêm khách mời');
   renderContent();
 }
 function teImportCsv(){
@@ -425,8 +442,7 @@ function teImportCsv(){
       id:uid(),
       memberId: member ? member.id : null,
       name: member ? member.name : name,
-      club: member ? (member.club||club) : club,
-      category: (member && member.category) || record.category
+      club: member ? (member.club||club) : club
     });
     added++;
   });
@@ -540,19 +556,24 @@ function teSaveMatchResult(mid){
   if(s1===''||s2===''){ showToast('Vui lòng nhập tỷ số cho cả 2 người chơi', true); return; }
   const score1 = Number(s1), score2 = Number(s2);
   if(score1===score2){ showToast('Tỷ số không được hòa — cần xác định người thắng', true); return; }
+  const wptsInput = document.getElementById('te_wpts_'+mid);
+  const lptsInput = document.getElementById('te_lpts_'+mid);
+  const winPoints = (wptsInput && wptsInput.value!=='') ? Number(wptsInput.value) : TE_WIN_POINTS;
+  const lossPoints = (lptsInput && lptsInput.value!=='') ? Number(lptsInput.value) : TE_LOSS_POINTS;
   const winnerId = score1>score2 ? match.p1Id : match.p2Id;
   const loserId = score1>score2 ? match.p2Id : match.p1Id;
   match.score1 = score1; match.score2 = score2; match.status = 'done'; match.winnerId = winnerId;
+  match.winPoints = winPoints; match.lossPoints = lossPoints;
 
   const winnerPlayer = record.players.find(p=>p.id===winnerId);
   const loserPlayer = record.players.find(p=>p.id===loserId);
   if(winnerPlayer && winnerPlayer.memberId){
     const m = DB.members.find(x=>x.id===winnerPlayer.memberId);
-    if(m){ m.points = (m.points||0) + TE_WIN_POINTS; m.matches = (m.matches||0) + 1; }
+    if(m){ m.points = (m.points||0) + winPoints; m.matches = (m.matches||0) + 1; }
   }
   if(loserPlayer && loserPlayer.memberId){
     const m = DB.members.find(x=>x.id===loserPlayer.memberId);
-    if(m){ m.points = (m.points||0) + TE_LOSS_POINTS; m.matches = (m.matches||0) + 1; }
+    if(m){ m.points = (m.points||0) + lossPoints; m.matches = (m.matches||0) + 1; }
   }
   recomputeMemberRanking();
   teCheckTournamentComplete(record);
