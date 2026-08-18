@@ -184,6 +184,47 @@ body{background:#E4E8E5}
     if(!code) return null;
     return MEMBER_DB.find(function(m){return m.code===code;})||null;
   }
+
+  var ORG_SESSION_KEY='vbsf_org_session';
+  var ORG_DB=[
+    {code:'VBSF-TC-2019-001',name:'CLB Sài Gòn',orgType:'Câu lạc bộ',province:'TP.HCM',address:'Quận 1, TP.HCM',repName:'Nguyễn Văn Hòa',repTitle:'Chủ nhiệm CLB',repPhone:'0901112233',repEmail:'clbsaigon@vbsf.org.vn',phone:'0901112233',password:'123456',package:'Gói Tiêu chuẩn',joinYear:'2019',status:'active',expiry:'31/12/2026'},
+    {code:'VBSF-TC-2020-002',name:'CLB Thủ Đô',orgType:'Câu lạc bộ',province:'Hà Nội',address:'Cầu Giấy, Hà Nội',repName:'Trần Thị Mai',repTitle:'Chủ nhiệm CLB',repPhone:'0912223344',repEmail:'clbthudo@vbsf.org.vn',phone:'0912223344',password:'123456',package:'Gói Tiêu chuẩn',joinYear:'2020',status:'active',expiry:'30/11/2026'},
+    {code:'VBSF-TC-2021-003',name:'CLB Sông Hàn',orgType:'Câu lạc bộ',province:'Đà Nẵng',address:'Hải Châu, Đà Nẵng',repName:'Lê Văn Đức',repTitle:'Chủ nhiệm CLB',repPhone:'0923334455',repEmail:'clbsonghan@vbsf.org.vn',phone:'0923334455',password:'123456',package:'Gói Cơ bản',joinYear:'2021',status:'active',expiry:'15/10/2026'},
+    {code:'VBSF-TC-2022-004',name:'Meow Billiards',orgType:'Doanh nghiệp',province:'Bình Dương',address:'Thủ Dầu Một, Bình Dương',repName:'Phạm Anh Tuấn',repTitle:'Giám đốc',repPhone:'0934445566',repEmail:'meowbilliards@vbsf.org.vn',phone:'0934445566',password:'123456',package:'Gói Nâng cao',joinYear:'2022',status:'pending',expiry:''},
+    {code:'VBSF-TC-2023-005',name:'CLB Cảng',orgType:'Câu lạc bộ',province:'Hải Phòng',address:'Hồng Bàng, Hải Phòng',repName:'Đỗ Thành Long',repTitle:'Chủ nhiệm CLB',repPhone:'0945556677',repEmail:'clbcang@vbsf.org.vn',phone:'0945556677',password:'123456',package:'Gói Cơ bản',joinYear:'2023',status:'expired',expiry:'31/12/2025'}
+  ];
+  function getLoggedInOrg(){
+    var code=localStorage.getItem(ORG_SESSION_KEY);
+    if(!code) return null;
+    return ORG_DB.find(function(o){return o.code===code;})||null;
+  }
+  function renderOrgProfileHtml(o){
+    var st=MEMBER_STATUS_LABEL[o.status]||['—','#F1F1EE','#8A8A82'];
+    return '<div style="display:flex;gap:20px;flex-wrap:wrap">'
+      +'<div style="flex:1;min-width:240px;border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff">'
+        +'<div style="display:flex;align-items:center;gap:14px">'
+          +'<div class="vb-ph" style="width:56px;height:56px;border-radius:50%;flex-shrink:0"><i class="ti ti-building" style="font-size:24px"></i></div>'
+          +'<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;color:#1B2A24">'+escapeHtmlSite(o.name)+'</div><div style="font-size:12px;color:#8A968F;margin-top:2px">'+escapeHtmlSite(o.code)+'</div></div>'
+          +'<span class="vb-badge" style="background:'+st[1]+';color:'+st[2]+'">'+st[0]+'</span>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px">'
+          +memberInfoRow('Loại hình',o.orgType||'—')
+          +memberInfoRow('Tỉnh / Thành',o.province||'—')
+          +memberInfoRow('Địa chỉ',o.address||'—')
+          +memberInfoRow('Gói hội viên',o.package||'—')
+          +memberInfoRow('Người đại diện',(o.repName||'—')+(o.repTitle?' — '+o.repTitle:''))
+          +memberInfoRow('Liên hệ',(o.repPhone||'—')+(o.repEmail?' · '+o.repEmail:''))
+        +'</div>'
+        +'<button class="btn-out" data-org-logout style="margin-top:18px">Đăng xuất</button>'
+      +'</div>'
+      +'<div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:20px">'
+        +'<div style="border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff">'
+          +'<div style="font-size:13px;font-weight:600;color:#21428E;margin-bottom:14px">Thời hạn hội viên</div>'
+          +memberExpiryHtml(o)
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }
   function memberInfoRow(label,value){
     return '<div><div style="font-size:10.5px;color:#8A968F;text-transform:uppercase;letter-spacing:.04em">'+label+'</div><div style="font-size:13px;color:#1B2A24;margin-top:3px">'+escapeHtmlSite(value)+'</div></div>';
   }
@@ -634,6 +675,66 @@ body{background:#E4E8E5}
       });
     });
     renderAuthState();
+
+    var hvTabs=joinPage.querySelectorAll('[data-hv-tab]');
+    var hvPanels=joinPage.querySelectorAll('[data-hv-panel]');
+    hvTabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        hvTabs.forEach(function(t){t.classList.toggle('on',t===tab);});
+        hvPanels.forEach(function(p){p.style.display=(p.getAttribute('data-hv-panel')===tab.getAttribute('data-hv-tab'))?'':'none';});
+      });
+    });
+
+    var orgLoginBox=joinPage.querySelector('[data-section="org-login-box"]');
+    var orgProfileBox=joinPage.querySelector('[data-section="org-profile"]');
+    var orgFormSections=joinPage.querySelectorAll('[data-section="org-form-dang-ky"]');
+    var orgLoginPhone=joinPage.querySelector('[data-org-login-phone]');
+    var orgLoginPassword=joinPage.querySelector('[data-org-login-password]');
+    var orgLoginBtn=joinPage.querySelector('[data-org-login-btn]');
+    var orgLoginErr=joinPage.querySelector('[data-org-login-error]');
+
+    function renderOrgAuthState(){
+      var o=getLoggedInOrg();
+      if(o){
+        orgLoginBox.style.display='none';
+        orgFormSections.forEach(function(s){s.style.display='none';});
+        orgProfileBox.style.display='';
+        orgProfileBox.innerHTML=renderOrgProfileHtml(o);
+        var logoutBtn=orgProfileBox.querySelector('[data-org-logout]');
+        if(logoutBtn) logoutBtn.addEventListener('click',function(){
+          localStorage.removeItem(ORG_SESSION_KEY);
+          renderOrgAuthState();
+        });
+      }else{
+        orgLoginBox.style.display='';
+        orgFormSections.forEach(function(s){s.style.display='';});
+        orgProfileBox.style.display='none';
+        orgProfileBox.innerHTML='';
+      }
+    }
+    if(orgLoginBtn) orgLoginBtn.addEventListener('click',function(){
+      var phone=(orgLoginPhone.value||'').trim();
+      var password=(orgLoginPassword.value||'').trim();
+      if(!phone||!password){
+        if(orgLoginErr){ orgLoginErr.textContent='Vui lòng nhập số điện thoại và mật khẩu.'; orgLoginErr.style.display=''; }
+        return;
+      }
+      var o=ORG_DB.find(function(r){return r.phone===phone;});
+      if(!o||o.password!==password){
+        if(orgLoginErr){ orgLoginErr.textContent='Số điện thoại hoặc mật khẩu không đúng.'; orgLoginErr.style.display=''; }
+        return;
+      }
+      if(orgLoginErr) orgLoginErr.style.display='none';
+      localStorage.setItem(ORG_SESSION_KEY,o.code);
+      orgLoginPhone.value=''; orgLoginPassword.value='';
+      renderOrgAuthState();
+    });
+    [orgLoginPhone,orgLoginPassword].forEach(function(input){
+      if(input) input.addEventListener('keydown',function(e){
+        if(e.key==='Enter'){ e.preventDefault(); if(orgLoginBtn) orgLoginBtn.click(); }
+      });
+    });
+    renderOrgAuthState();
   }
 
   function initMemberList(memberPage){

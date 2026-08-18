@@ -36,6 +36,7 @@ function renderDashboard(){
     ['library_docs','Văn bản & Luật','ti-file-text'],
     ['library_media','Album Media','ti-photo'],
     ['members','Hội viên & Xếp hạng','ti-users'],
+    ['members_org','Hội viên tổ chức','ti-building'],
     ['partners','Đối tác','ti-building']
   ];
   cards.forEach(([key,label,icon])=>{

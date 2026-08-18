@@ -11,24 +11,23 @@ let sectionEditBuffer = null;
 
 const NAV_GROUPS = [
   {label:null, items:[{key:'dashboard', label:'Tổng quan', icon:'ti-layout-dashboard'}]},
-  {label:'Nội dung', items:[
+  {label:'Quản lý website', items:[
+    {key:'pages', label:'Trang website', icon:'ti-layout-2'},
     {key:'news', label:COLLECTIONS.news.label, icon:'ti-news'},
+    {key:'settings', label:'Thông tin tổ chức', icon:'ti-settings'},
+    {key:'contact', label:'Liên hệ', icon:'ti-address-book'},
+  ]},
+  {label:'Quản lý giải đấu', items:[
     {key:'tournaments', label:COLLECTIONS.tournaments.label, icon:'ti-trophy'},
+  ]},
+  {label:'Quản lý Hội viên', items:[
+    {key:'members', label:COLLECTIONS.members.label, icon:'ti-users'},
+    {key:'members_org', label:COLLECTIONS.members_org.label, icon:'ti-building'},
+    {key:'partners', label:COLLECTIONS.partners.label, icon:'ti-building'},
   ]},
   {label:'Thư viện', items:[
     {key:'library_docs', label:'Văn bản & Luật', icon:'ti-file-text'},
     {key:'library_media', label:'Media', icon:'ti-photo'},
-  ]},
-  {label:'Cộng đồng', items:[
-    {key:'members', label:COLLECTIONS.members.label, icon:'ti-users'},
-    {key:'partners', label:COLLECTIONS.partners.label, icon:'ti-building'},
-  ]},
-  {label:'Trang website', items:[
-    {key:'pages', label:'Trang website', icon:'ti-layout-2'},
-  ]},
-  {label:'Cấu hình chung', items:[
-    {key:'settings', label:'Thông tin tổ chức', icon:'ti-settings'},
-    {key:'contact', label:'Liên hệ', icon:'ti-address-book'},
   ]}
 ];
 

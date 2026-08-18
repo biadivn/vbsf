@@ -102,6 +102,35 @@ const COLLECTIONS = {
       {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
     ]
   },
+  members_org: {
+    label:'Hội viên tổ chức', icon:'ti-building', single:'hội viên tổ chức', filterField:'orgType',
+    fields:[
+      {key:'code', label:'Mã hội viên tổ chức', type:'text', placeholder:'VBSF-TC-2026-XXX', span2:true, disabled:true},
+      {key:'name', label:'Tên tổ chức / CLB', type:'text', required:true, span2:true},
+      {key:'orgType', label:'Loại hình', type:'select', options:['Câu lạc bộ','Doanh nghiệp','Trường học','Tổ chức khác']},
+      {key:'taxCode', label:'Mã số thuế', type:'text'},
+      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES},
+      {key:'address', label:'Địa chỉ', type:'text', span2:true},
+      {key:'repName', label:'Người đại diện', type:'text'},
+      {key:'repTitle', label:'Chức vụ', type:'text', placeholder:'VD: Chủ nhiệm CLB'},
+      {key:'repPhone', label:'SĐT người đại diện', type:'text'},
+      {key:'repEmail', label:'Email liên hệ', type:'text'},
+      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx'},
+      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi'},
+      {key:'package', label:'Gói hội viên', type:'select', options:['Gói Cơ bản','Gói Tiêu chuẩn','Gói Nâng cao']},
+      {key:'joinDate', label:'Ngày gia nhập', type:'date'},
+      {key:'expiry', label:'Ngày hết hạn', type:'date'},
+      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}}
+    ],
+    columns:[
+      {key:'name', label:'Tổ chức'},
+      {key:'code', label:'Mã HV', muted:true},
+      {key:'orgType', label:'Loại hình', badge:true},
+      {key:'province', label:'Tỉnh / Thành', muted:true},
+      {key:'repName', label:'Người đại diện', muted:true},
+      {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
+    ]
+  },
   partners: {
     label:'Đối tác & Tài trợ', icon:'ti-building', single:'đối tác',
     fields:[
