@@ -370,6 +370,11 @@ body{background:#E4E8E5}
             moreTarget.innerHTML='';
           }
         }
+        var rulesTarget=destPage.querySelector('[data-rules-target]');
+        if(rulesTarget&&t.dataset.rules){
+          var ruleLines=t.dataset.rules.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+          rulesTarget.innerHTML=ruleLines.map(function(l){return '<div class="art-li">'+l+'</div>';}).join('');
+        }
         var ctas=destPage.querySelectorAll('[data-cta]');
         if(ctas.length){
           ctas.forEach(function(btn){

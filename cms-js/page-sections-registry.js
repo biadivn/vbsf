@@ -31,9 +31,9 @@ const PAGE_SECTIONS_REGISTRY = {
       {key:'visionText', label:'Tầm nhìn', type:'textarea', default:'Đưa billiards & snooker Việt Nam phát triển chuyên nghiệp, minh bạch và hội nhập quốc tế.'},
       {key:'missionText', label:'Sứ mệnh', type:'textarea', default:'Chuẩn hóa hệ thống thi đấu, xếp hạng công bằng và mở rộng phong trào tới mọi cấp độ người chơi.'}
     ]},
-    {key:'ban-lanh-dao', label:'Ban lãnh đạo & sơ đồ tổ chức', title:'Ban lãnh đạo', items:true, itemCount:4, maxItems:4,
+    {key:'ban-lanh-dao', label:'Ban lãnh đạo & sơ đồ tổ chức', title:'Ban lãnh đạo', items:true, itemCount:4, maxItems:20,
       itemFields:[{key:'name', label:'Họ và tên', type:'text'},{key:'role', label:'Chức vụ', type:'text'}]},
-    {key:'bo-mon', label:'Bộ môn thi đấu', title:'Billiards & Snooker', items:true, itemCount:3, maxItems:3,
+    {key:'bo-mon', label:'Bộ môn thi đấu', title:'Billiards & Snooker', items:true, itemCount:3, maxItems:12,
       itemFields:[{key:'name', label:'Tên bộ môn', type:'text'},{key:'desc', label:'Mô tả', type:'text'},{key:'tags', label:'Nội dung (phân cách bởi ,)', type:'text'}]}
   ]},
   'tin-tuc': {label:'Tin tức', icon:'ti-news', path:'/tin-tuc', sections:[
@@ -201,7 +201,10 @@ const SETTINGS_FIELDS = [
   {key:'about', label:'Giới thiệu chung', type:'textarea', span2:true, rows:5},
   {key:'heroTitle', label:'Giải đấu nổi bật (trang chủ)', type:'text', span2:true},
   {key:'heroSubtitle', label:'Mô tả giải đấu nổi bật', type:'text', span2:true},
-  {key:'memberFee', label:'Hội phí năm (VNĐ)', type:'text'},
+  {key:'feeFirstTime', label:'Lệ phí tham gia lần đầu (VNĐ)', type:'text', placeholder:'200.000đ'},
+  {key:'feeAnnualFull', label:'Phí thường niên cả năm — đăng ký trước 01/7 (VNĐ)', type:'text', placeholder:'500.000đ'},
+  {key:'feeAnnualHalf', label:'Phí thường niên nửa năm — đăng ký từ 01/7 (VNĐ)', type:'text', placeholder:'250.000đ'},
+  {key:'feeRenewal', label:'Phí gia hạn hội viên cũ (VNĐ)', type:'text', placeholder:'500.000đ'},
   {key:'bankName', label:'Ngân hàng', type:'text'},
   {key:'bankAccount', label:'Số tài khoản', type:'text'},
   {key:'bankHolder', label:'Chủ tài khoản', type:'text'}

@@ -28,6 +28,13 @@ function renderNewsEditor(id){
       </div>
       <div class="fld span2" style="margin-top:10px"><label>Tóm tắt</label><textarea id="ne_excerpt" rows="2" placeholder="Tóm tắt ngắn gọn...">${escapeHtml(record.excerpt||'')}</textarea></div>
       <div class="fld span2" style="margin-top:10px"><label>Nội dung chi tiết</label><div class="rte-lg">${renderRichTextField({key:'content', placeholder:'Soạn nội dung bài viết...'}, record.content||'')}</div></div>
+      <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line)">
+        <label style="font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:10px">SEO</label>
+        <div class="form-grid">
+          <div class="fld span2"><label>Meta title</label><input type="text" id="ne_metaTitle" placeholder="Để trống sẽ dùng Tiêu đề" value="${escapeAttr(record.metaTitle||'')}"></div>
+          <div class="fld span2"><label>Meta description</label><textarea id="ne_metaDescription" rows="2" placeholder="Để trống sẽ dùng Tóm tắt">${escapeHtml(record.metaDescription||'')}</textarea></div>
+        </div>
+      </div>
       <div class="form-actions" style="justify-content:space-between">
         ${!isNew ? `<button class="btn btn-danger-outline" id="neDeleteBtn"><i class="ti ti-trash"></i> Xóa bài viết</button>` : `<span></span>`}
         <div style="display:flex;gap:8px">
@@ -93,7 +100,9 @@ async function saveNewsEditor(){
     author: document.getElementById('ne_author').value,
     featured: document.getElementById('ne_featured').classList.contains('on'),
     excerpt: document.getElementById('ne_excerpt').value,
-    content: document.getElementById('rte_content').innerHTML
+    content: document.getElementById('rte_content').innerHTML,
+    metaTitle: document.getElementById('ne_metaTitle').value,
+    metaDescription: document.getElementById('ne_metaDescription').value
   };
   if(isNew){
     data.id = uid();

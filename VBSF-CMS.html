@@ -326,6 +326,7 @@ tr.row-hidden{opacity:.5}
 <div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="toastMsg"></span></div>
 
 <script>
+/* ===== schema.js ===== */
 /* =========================================================
    SCHEMA DEFINITIONS
    ========================================================= */
@@ -342,7 +343,9 @@ const COLLECTIONS = {
       {key:'author', label:'Tác giả', type:'text', placeholder:'Ban Truyền thông VBSF'},
       {key:'featured', label:'Hiển thị ở mục "Tin nổi bật" (trang chủ)', type:'checkbox'},
       {key:'excerpt', label:'Tóm tắt', type:'textarea', span2:true},
-      {key:'content', label:'Nội dung chi tiết', type:'richtext', span2:true}
+      {key:'content', label:'Nội dung chi tiết', type:'richtext', span2:true},
+      {key:'metaTitle', label:'SEO — Meta title', type:'text', span2:true, placeholder:'Để trống sẽ dùng Tiêu đề'},
+      {key:'metaDescription', label:'SEO — Meta description', type:'textarea', span2:true, rows:2, placeholder:'Để trống sẽ dùng Tóm tắt'}
     ],
     columns:[
       {key:'image', label:'', render:r=> r.image ? `<img src="${r.image}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;display:block">` : `<div style="width:36px;height:36px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--hint)"><i class="ti ti-photo"></i></div>`},
@@ -361,9 +364,13 @@ const COLLECTIONS = {
       {key:'participants', label:'Số cơ thủ', type:'number'},
       {key:'location', label:'Địa điểm', type:'text', span2:true},
       {key:'note', label:'Trạng thái đăng ký', type:'text', placeholder:'VD: Mở đăng ký / Sắp mở'},
+      {key:'regDeadline', label:'Hạn đăng ký', type:'date'},
+      {key:'liveRound', label:'Vòng đấu hiện tại (khi đang diễn ra)', type:'text', placeholder:'VD: Vòng tứ kết'},
       {key:'champion', label:'Nhà vô địch (nếu đã kết thúc)', type:'text'},
       {key:'entryFee', label:'Lệ phí tham gia', type:'text', placeholder:'VD: 200.000đ / cơ thủ'},
-      {key:'rules', label:'Thể lệ & luật thi đấu', type:'textarea', span2:true, rows:6, placeholder:'Mỗi dòng là một điều luật...'}
+      {key:'rules', label:'Thể lệ & luật thi đấu', type:'textarea', span2:true, rows:6, placeholder:'Mỗi dòng là một điều luật...'},
+      {key:'metaTitle', label:'SEO — Meta title', type:'text', span2:true, placeholder:'Để trống sẽ dùng Tên giải đấu'},
+      {key:'metaDescription', label:'SEO — Meta description', type:'textarea', span2:true, rows:2}
     ],
     columns:[
       {key:'name', label:'Tên giải'},
@@ -408,12 +415,15 @@ const COLLECTIONS = {
     fields:[
       {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true},
       {key:'name', label:'Họ và tên', type:'text', required:true},
+      {key:'cccd', label:'Số CCCD', type:'text', required:true, placeholder:'079095001234', span2:true},
       {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx'},
       {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi'},
-      {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker']},
+      {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker','English Billiards']},
+      {key:'group', label:'Nhóm xếp hạng', type:'select', options:['Nam','Nữ','VĐV trẻ']},
       {key:'club', label:'Câu lạc bộ / Đơn vị', type:'text'},
       {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES},
       {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}},
+      {key:'expiry', label:'Ngày hết hạn', type:'date'},
       {key:'rank', label:'Hạng xếp hạng', type:'number'},
       {key:'points', label:'Điểm', type:'number'},
       {key:'matches', label:'Số trận', type:'number'},
@@ -423,10 +433,41 @@ const COLLECTIONS = {
     columns:[
       {key:'name', label:'Hội viên'},
       {key:'code', label:'Mã HV', muted:true},
-      {key:'phone', label:'SĐT', muted:true},
+      {key:'cccd', label:'CCCD', muted:true},
       {key:'category', label:'Nội dung', badge:true},
+      {key:'group', label:'Nhóm', render:r=>r.group?`<span class="badge">${escapeHtml(r.group)}</span>`:'<span class="cell-muted">—</span>'},
       {key:'rank', label:'Hạng', render:r=>`<b>${r.rank ?? '—'}</b>`},
       {key:'points', label:'Điểm', render:r=>`<b>${r.points ?? '—'}</b>`},
+      {key:'expiry', label:'Hết hạn', muted:true},
+      {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
+    ]
+  },
+  members_org: {
+    label:'Hội viên tổ chức', icon:'ti-building', single:'hội viên tổ chức', filterField:'orgType',
+    fields:[
+      {key:'code', label:'Mã hội viên tổ chức', type:'text', placeholder:'VBSF-TC-2026-XXX', span2:true, disabled:true},
+      {key:'name', label:'Tên tổ chức / CLB', type:'text', required:true, span2:true},
+      {key:'orgType', label:'Loại hình', type:'select', options:['Câu lạc bộ','Doanh nghiệp','Trường học','Tổ chức khác']},
+      {key:'taxCode', label:'Mã số thuế', type:'text'},
+      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES},
+      {key:'address', label:'Địa chỉ', type:'text', span2:true},
+      {key:'repName', label:'Người đại diện', type:'text'},
+      {key:'repTitle', label:'Chức vụ', type:'text', placeholder:'VD: Chủ nhiệm CLB'},
+      {key:'repPhone', label:'SĐT người đại diện', type:'text'},
+      {key:'repEmail', label:'Email liên hệ', type:'text'},
+      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx'},
+      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi'},
+      {key:'package', label:'Gói hội viên', type:'select', options:['Gói Cơ bản','Gói Tiêu chuẩn','Gói Nâng cao']},
+      {key:'joinDate', label:'Ngày gia nhập', type:'date'},
+      {key:'expiry', label:'Ngày hết hạn', type:'date'},
+      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}}
+    ],
+    columns:[
+      {key:'name', label:'Tổ chức'},
+      {key:'code', label:'Mã HV', muted:true},
+      {key:'orgType', label:'Loại hình', badge:true},
+      {key:'province', label:'Tỉnh / Thành', muted:true},
+      {key:'repName', label:'Người đại diện', muted:true},
       {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
     ]
   },
@@ -446,6 +487,8 @@ const COLLECTIONS = {
     ]
   }
 };
+
+/* ===== page-sections-registry.js ===== */
 /* =========================================================
    PAGE SECTIONS (mô phỏng — chưa kết nối thật với index.html)
    ========================================================= */
@@ -479,9 +522,9 @@ const PAGE_SECTIONS_REGISTRY = {
       {key:'visionText', label:'Tầm nhìn', type:'textarea', default:'Đưa billiards & snooker Việt Nam phát triển chuyên nghiệp, minh bạch và hội nhập quốc tế.'},
       {key:'missionText', label:'Sứ mệnh', type:'textarea', default:'Chuẩn hóa hệ thống thi đấu, xếp hạng công bằng và mở rộng phong trào tới mọi cấp độ người chơi.'}
     ]},
-    {key:'ban-lanh-dao', label:'Ban lãnh đạo & sơ đồ tổ chức', title:'Ban lãnh đạo', items:true, itemCount:4, maxItems:4,
+    {key:'ban-lanh-dao', label:'Ban lãnh đạo & sơ đồ tổ chức', title:'Ban lãnh đạo', items:true, itemCount:4, maxItems:20,
       itemFields:[{key:'name', label:'Họ và tên', type:'text'},{key:'role', label:'Chức vụ', type:'text'}]},
-    {key:'bo-mon', label:'Bộ môn thi đấu', title:'Billiards & Snooker', items:true, itemCount:3, maxItems:3,
+    {key:'bo-mon', label:'Bộ môn thi đấu', title:'Billiards & Snooker', items:true, itemCount:3, maxItems:12,
       itemFields:[{key:'name', label:'Tên bộ môn', type:'text'},{key:'desc', label:'Mô tả', type:'text'},{key:'tags', label:'Nội dung (phân cách bởi ,)', type:'text'}]}
   ]},
   'tin-tuc': {label:'Tin tức', icon:'ti-news', path:'/tin-tuc', sections:[
@@ -649,7 +692,10 @@ const SETTINGS_FIELDS = [
   {key:'about', label:'Giới thiệu chung', type:'textarea', span2:true, rows:5},
   {key:'heroTitle', label:'Giải đấu nổi bật (trang chủ)', type:'text', span2:true},
   {key:'heroSubtitle', label:'Mô tả giải đấu nổi bật', type:'text', span2:true},
-  {key:'memberFee', label:'Hội phí năm (VNĐ)', type:'text'},
+  {key:'feeFirstTime', label:'Lệ phí tham gia lần đầu (VNĐ)', type:'text', placeholder:'200.000đ'},
+  {key:'feeAnnualFull', label:'Phí thường niên cả năm — đăng ký trước 01/7 (VNĐ)', type:'text', placeholder:'500.000đ'},
+  {key:'feeAnnualHalf', label:'Phí thường niên nửa năm — đăng ký từ 01/7 (VNĐ)', type:'text', placeholder:'250.000đ'},
+  {key:'feeRenewal', label:'Phí gia hạn hội viên cũ (VNĐ)', type:'text', placeholder:'500.000đ'},
   {key:'bankName', label:'Ngân hàng', type:'text'},
   {key:'bankAccount', label:'Số tài khoản', type:'text'},
   {key:'bankHolder', label:'Chủ tài khoản', type:'text'}
@@ -664,6 +710,8 @@ const CONTACT_FIELDS = [
   {key:'youtube', label:'YouTube (URL)', type:'text'},
   {key:'tiktok', label:'TikTok (URL)', type:'text'}
 ];
+
+/* ===== seed-data.js ===== */
 /* =========================================================
    SEED DATA (matches current prototype website content)
    ========================================================= */
@@ -675,7 +723,8 @@ function seedData(){
       about:'Liên đoàn Billiards & Snooker Việt Nam (VBSF) là tổ chức xã hội – nghề nghiệp đại diện cho phong trào billiards & snooker trên cả nước. Liên đoàn giữ vai trò quản lý chuyên môn, tổ chức hệ thống thi đấu quốc gia, phát triển vận động viên và kết nối với các tổ chức billiards quốc tế.',
       heroTitle:'Giải Vô địch Billiards & Snooker Quốc gia 2026',
       heroSubtitle:'Khởi tranh 12/06 · Nhà thi đấu Phú Thọ, TP.HCM',
-      memberFee:'300.000', bankName:'Vietcombank', bankAccount:'00xx xxx xxx', bankHolder:'LĐ Billiards & Snooker VN'
+      feeFirstTime:'200.000đ', feeAnnualFull:'500.000đ', feeAnnualHalf:'250.000đ', feeRenewal:'500.000đ',
+      bankName:'Vietcombank', bankAccount:'00xx xxx xxx', bankHolder:'LĐ Billiards & Snooker VN'
     },
     contact:{
       address:'Số ..., Quận ..., Hà Nội, Việt Nam', email:'info@billiards.org.vn', phone:'024 xxxx xxxx',
@@ -705,6 +754,13 @@ function seedData(){
       {id:uid(),title:'Chung kết Carom 3 băng 2025',mediaType:'video',count:1,date:'2025-12-12'},
       {id:uid(),title:'Hướng dẫn luật Snooker',mediaType:'video',count:1,date:'2026-03-05'}
     ],
+    members_org:[
+      {id:uid(),code:'VBSF-TC-2019-001',name:'CLB Sài Gòn',orgType:'Câu lạc bộ',taxCode:'',province:'TP.HCM',address:'Quận 1, TP.HCM',repName:'Nguyễn Văn Hòa',repTitle:'Chủ nhiệm CLB',repPhone:'0901112233',repEmail:'clbsaigon@vbsf.org.vn',phone:'0901112233',password:'123456',package:'Gói Tiêu chuẩn',joinDate:'2019-03-10',expiry:'2026-12-31',status:'active'},
+      {id:uid(),code:'VBSF-TC-2020-002',name:'CLB Thủ Đô',orgType:'Câu lạc bộ',taxCode:'',province:'Hà Nội',address:'Cầu Giấy, Hà Nội',repName:'Trần Thị Mai',repTitle:'Chủ nhiệm CLB',repPhone:'0912223344',repEmail:'clbthudo@vbsf.org.vn',phone:'0912223344',password:'123456',package:'Gói Tiêu chuẩn',joinDate:'2020-05-18',expiry:'2026-11-30',status:'active'},
+      {id:uid(),code:'VBSF-TC-2021-003',name:'CLB Sông Hàn',orgType:'Câu lạc bộ',taxCode:'',province:'Đà Nẵng',address:'Hải Châu, Đà Nẵng',repName:'Lê Văn Đức',repTitle:'Chủ nhiệm CLB',repPhone:'0923334455',repEmail:'clbsonghan@vbsf.org.vn',phone:'0923334455',password:'123456',package:'Gói Cơ bản',joinDate:'2021-07-02',expiry:'2026-10-15',status:'active'},
+      {id:uid(),code:'VBSF-TC-2022-004',name:'Meow Billiards',orgType:'Doanh nghiệp',taxCode:'0312345678',province:'Bình Dương',address:'Thủ Dầu Một, Bình Dương',repName:'Phạm Anh Tuấn',repTitle:'Giám đốc',repPhone:'0934445566',repEmail:'meowbilliards@vbsf.org.vn',phone:'0934445566',password:'123456',package:'Gói Nâng cao',joinDate:'2022-01-20',expiry:'',status:'pending'},
+      {id:uid(),code:'VBSF-TC-2023-005',name:'CLB Cảng',orgType:'Câu lạc bộ',taxCode:'',province:'Hải Phòng',address:'Hồng Bàng, Hải Phòng',repName:'Đỗ Thành Long',repTitle:'Chủ nhiệm CLB',repPhone:'0945556677',repEmail:'clbcang@vbsf.org.vn',phone:'0945556677',password:'123456',package:'Gói Cơ bản',joinDate:'2023-09-12',expiry:'2025-12-31',status:'expired'}
+    ],
     partners:[
       {id:uid(),name:'Tên đối tác',tier:'Đối tác chiến lược',description:'Đối tác công nghệ & hệ thống xếp hạng'},
       {id:uid(),name:'Tên đối tác',tier:'Đối tác chiến lược',description:'Đối tác hệ thống câu lạc bộ'},
@@ -718,6 +774,8 @@ function seedData(){
   };
 }
 function uid(){return 'id_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+
+/* ===== database-queries.js ===== */
 /* =========================================================
    DATABASE QUERIES
    Giải đấu và Hội viên không được nhập tay trong seedData —
@@ -735,18 +793,18 @@ const DB_TABLES = {
     {name:'Giải Snooker Cúp CLB toàn quốc 2025',category:'Snooker',status:'completed',date:'2025-12-12',location:'',participants:'',note:'',champion:'Lê Minh Khôi'}
   ],
   members:[
-    {rank:1,name:'Nguyễn Phúc Long',code:'VBSF-2026-00098',phone:'0901234567',password:'123456',club:'CLB Sài Gòn',province:'TP.HCM',category:'Pool 9 bi',status:'active',points:2485,matches:45,trend:'up',trendValue:1},
-    {rank:2,name:'Trần Quốc Bảo',code:'VBSF-2026-00071',phone:'0912345678',password:'123456',club:'CLB Thủ Đô',province:'Hà Nội',category:'Pool 9 bi',status:'active',points:2410,matches:44,trend:'down',trendValue:1},
-    {rank:3,name:'Lê Minh Khôi',code:'VBSF-2026-00112',phone:'0923456789',password:'123456',club:'CLB Sông Hàn',province:'Đà Nẵng',category:'Pool 9 bi',status:'active',points:2388,matches:43,trend:'eq',trendValue:0},
-    {rank:4,name:'Phạm Anh Tú',code:'VBSF-2026-00123',phone:'0934567890',password:'123456',club:'Meow Billiards',province:'Bình Dương',category:'Pool 9 bi',status:'pending',points:2301,matches:42,trend:'up',trendValue:2},
-    {rank:5,name:'Đỗ Thành Nam',code:'VBSF-2025-00410',phone:'0945678901',password:'123456',club:'CLB Cảng',province:'Hải Phòng',category:'Pool 9 bi',status:'expired',points:2256,matches:38,trend:'down',trendValue:1},
-    {rank:6,name:'Vũ Hoàng Sơn',code:'VBSF-2026-00201',phone:'0956789012',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',status:'active',points:2198,matches:40,trend:'up',trendValue:1},
-    {rank:7,name:'Ngô Gia Huy',code:'VBSF-2026-00202',phone:'0967890123',password:'123456',club:'',province:'Cần Thơ',category:'Pool 9 bi',status:'active',points:2154,matches:35,trend:'eq',trendValue:0},
-    {rank:8,name:'Bùi Đức Anh',code:'VBSF-2026-00203',phone:'0978901234',password:'123456',club:'',province:'TP.HCM',category:'Pool 9 bi',status:'active',points:2097,matches:33,trend:'up',trendValue:3},
-    {rank:9,name:'Lý Trường Giang',code:'VBSF-2026-00204',phone:'0989012345',password:'123456',club:'',province:'Đà Nẵng',category:'Pool 9 bi',status:'active',points:2041,matches:31,trend:'down',trendValue:2},
-    {rank:10,name:'Hoàng Minh Quân',code:'VBSF-2026-00205',phone:'0990123456',password:'123456',club:'',province:'Nghệ An',category:'Pool 9 bi',status:'active',points:1988,matches:29,trend:'up',trendValue:1},
-    {rank:11,name:'Đặng Văn Hậu',code:'VBSF-2026-00206',phone:'0901987654',password:'123456',club:'',province:'Bình Định',category:'Pool 9 bi',status:'active',points:1945,matches:28,trend:'eq',trendValue:0},
-    {rank:12,name:'Trịnh Bá Phước',code:'VBSF-2026-00207',phone:'0912987654',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',status:'active',points:1902,matches:27,trend:'down',trendValue:1}
+    {rank:1,name:'Nguyễn Phúc Long',code:'VBSF-2026-00098',cccd:'079095001234',phone:'0901234567',password:'123456',club:'CLB Sài Gòn',province:'TP.HCM',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-12-31',points:2485,matches:45,trend:'up',trendValue:1},
+    {rank:2,name:'Trần Quốc Bảo',code:'VBSF-2026-00071',cccd:'001094005678',phone:'0912345678',password:'123456',club:'CLB Thủ Đô',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-11-30',points:2410,matches:44,trend:'down',trendValue:1},
+    {rank:3,name:'Lê Minh Khôi',code:'VBSF-2026-00112',cccd:'048096009012',phone:'0923456789',password:'123456',club:'CLB Sông Hàn',province:'Đà Nẵng',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-10-15',points:2388,matches:43,trend:'eq',trendValue:0},
+    {rank:4,name:'Phạm Anh Tú',code:'VBSF-2026-00123',cccd:'074097003456',phone:'0934567890',password:'123456',club:'Meow Billiards',province:'Bình Dương',category:'Pool 9 bi',group:'Nam',status:'pending',expiry:'',points:2301,matches:42,trend:'up',trendValue:2},
+    {rank:5,name:'Đỗ Thành Nam',code:'VBSF-2025-00410',cccd:'031093007890',phone:'0945678901',password:'123456',club:'CLB Cảng',province:'Hải Phòng',category:'Pool 9 bi',group:'Nam',status:'expired',expiry:'2025-12-31',points:2256,matches:38,trend:'down',trendValue:1},
+    {rank:6,name:'Vũ Hoàng Sơn',code:'VBSF-2026-00201',cccd:'001096010123',phone:'0956789012',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-09-30',points:2198,matches:40,trend:'up',trendValue:1},
+    {rank:7,name:'Ngô Gia Huy',code:'VBSF-2026-00202',cccd:'092097011234',phone:'0967890123',password:'123456',club:'',province:'Cần Thơ',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-08-31',points:2154,matches:35,trend:'eq',trendValue:0},
+    {rank:8,name:'Bùi Đức Anh',code:'VBSF-2026-00203',cccd:'079095012345',phone:'0978901234',password:'123456',club:'',province:'TP.HCM',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-07-31',points:2097,matches:33,trend:'up',trendValue:3},
+    {rank:9,name:'Lý Trường Giang',code:'VBSF-2026-00204',cccd:'048096013456',phone:'0989012345',password:'123456',club:'',province:'Đà Nẵng',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-06-30',points:2041,matches:31,trend:'down',trendValue:2},
+    {rank:10,name:'Hoàng Minh Quân',code:'VBSF-2026-00205',cccd:'040097014567',phone:'0990123456',password:'123456',club:'',province:'Nghệ An',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-01-31',points:1988,matches:29,trend:'up',trendValue:1},
+    {rank:11,name:'Đặng Văn Hậu',code:'VBSF-2026-00206',cccd:'052098015678',phone:'0901987654',password:'123456',club:'',province:'Bình Định',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-02-28',points:1945,matches:28,trend:'eq',trendValue:0},
+    {rank:12,name:'Trịnh Bá Phước',code:'VBSF-2026-00207',cccd:'001095016789',phone:'0912987654',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-03-31',points:1902,matches:27,trend:'down',trendValue:1}
   ]
 };
 /** Mô phỏng một truy vấn CSDL (SELECT * FROM <table>) qua mạng. */
@@ -757,6 +815,8 @@ function fetchFromDatabase(table){
     }, DB_LATENCY_MS);
   });
 }
+
+/* ===== storage.js ===== */
 /* =========================================================
    STORAGE
    ========================================================= */
@@ -813,6 +873,8 @@ async function saveDB(){
     showToast('Không thể lưu dữ liệu (lỗi bộ nhớ)', true);
   }
 }
+
+/* ===== nav-state.js ===== */
 /* =========================================================
    NAV / STATE
    ========================================================= */
@@ -826,24 +888,23 @@ let sectionEditBuffer = null;
 
 const NAV_GROUPS = [
   {label:null, items:[{key:'dashboard', label:'Tổng quan', icon:'ti-layout-dashboard'}]},
-  {label:'Nội dung', items:[
+  {label:'Quản lý website', items:[
+    {key:'pages', label:'Trang website', icon:'ti-layout-2'},
     {key:'news', label:COLLECTIONS.news.label, icon:'ti-news'},
+    {key:'settings', label:'Thông tin tổ chức', icon:'ti-settings'},
+    {key:'contact', label:'Liên hệ', icon:'ti-address-book'},
+  ]},
+  {label:'Quản lý giải đấu', items:[
     {key:'tournaments', label:COLLECTIONS.tournaments.label, icon:'ti-trophy'},
+  ]},
+  {label:'Quản lý Hội viên', items:[
+    {key:'members', label:COLLECTIONS.members.label, icon:'ti-users'},
+    {key:'members_org', label:COLLECTIONS.members_org.label, icon:'ti-building'},
+    {key:'partners', label:COLLECTIONS.partners.label, icon:'ti-building'},
   ]},
   {label:'Thư viện', items:[
     {key:'library_docs', label:'Văn bản & Luật', icon:'ti-file-text'},
     {key:'library_media', label:'Media', icon:'ti-photo'},
-  ]},
-  {label:'Cộng đồng', items:[
-    {key:'members', label:COLLECTIONS.members.label, icon:'ti-users'},
-    {key:'partners', label:COLLECTIONS.partners.label, icon:'ti-building'},
-  ]},
-  {label:'Trang website', items:[
-    {key:'pages', label:'Trang website', icon:'ti-layout-2'},
-  ]},
-  {label:'Cấu hình chung', items:[
-    {key:'settings', label:'Thông tin tổ chức', icon:'ti-settings'},
-    {key:'contact', label:'Liên hệ', icon:'ti-address-book'},
   ]}
 ];
 
@@ -879,6 +940,8 @@ function setView(view){
   renderTopbar();
   renderContent();
 }
+
+/* ===== topbar.js ===== */
 /* =========================================================
    TOPBAR
    ========================================================= */
@@ -952,6 +1015,8 @@ function renderTopbar(){
   const importFile = document.getElementById('importFile');
   if(importFile) importFile.addEventListener('change', importData);
 }
+
+/* ===== content-render.js ===== */
 /* =========================================================
    CONTENT RENDER
    ========================================================= */
@@ -990,6 +1055,7 @@ function renderDashboard(){
     ['library_docs','Văn bản & Luật','ti-file-text'],
     ['library_media','Album Media','ti-photo'],
     ['members','Hội viên & Xếp hạng','ti-users'],
+    ['members_org','Hội viên tổ chức','ti-building'],
     ['partners','Đối tác','ti-building']
   ];
   cards.forEach(([key,label,icon])=>{
@@ -1109,6 +1175,8 @@ function attachListEvents(key){
     btn.addEventListener('click', ()=>toggleRowVisibility(key, btn.getAttribute('data-toggle-vis')));
   });
 }
+
+/* ===== singleton-form.js ===== */
 /* =========================================================
    SINGLETON FORM (settings / contact)
    ========================================================= */
@@ -1134,6 +1202,8 @@ function attachSingletonEvents(key, fields){
     renderSidebar();
   });
 }
+
+/* ===== pages-list-view.js ===== */
 /* =========================================================
    PAGES LIST VIEW
    ========================================================= */
@@ -1189,6 +1259,8 @@ function attachPagesListEvents(){
     btn.addEventListener('click', (e)=>{ e.stopPropagation(); setView('page:'+btn.getAttribute('data-edit-page')); });
   });
 }
+
+/* ===== page-sections-view.js ===== */
 /* =========================================================
    PAGE SECTIONS VIEW (mô phỏng)
    ========================================================= */
@@ -1379,6 +1451,8 @@ async function moveSectionRow(idx, dir){
   await saveDB();
   renderContent();
 }
+
+/* ===== section-detail-panel.js ===== */
 /* =========================================================
    SECTION DETAIL PANEL (mô phỏng)
    ========================================================= */
@@ -1780,6 +1854,8 @@ function attachRTEEvents(){
     });
   });
 }
+
+/* ===== modal.js ===== */
 /* =========================================================
    MODAL (add / edit for collections)
    ========================================================= */
@@ -2069,6 +2145,8 @@ function confirmDelete(key, id){
     showToast('Đã xóa');
   }
 }
+
+/* ===== news-editor.js ===== */
 /* =========================================================
    NEWS EDITOR (full-screen editor for Tin tức, thay cho modal)
    ========================================================= */
@@ -2099,6 +2177,13 @@ function renderNewsEditor(id){
       </div>
       <div class="fld span2" style="margin-top:10px"><label>Tóm tắt</label><textarea id="ne_excerpt" rows="2" placeholder="Tóm tắt ngắn gọn...">${escapeHtml(record.excerpt||'')}</textarea></div>
       <div class="fld span2" style="margin-top:10px"><label>Nội dung chi tiết</label><div class="rte-lg">${renderRichTextField({key:'content', placeholder:'Soạn nội dung bài viết...'}, record.content||'')}</div></div>
+      <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--line)">
+        <label style="font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:10px">SEO</label>
+        <div class="form-grid">
+          <div class="fld span2"><label>Meta title</label><input type="text" id="ne_metaTitle" placeholder="Để trống sẽ dùng Tiêu đề" value="${escapeAttr(record.metaTitle||'')}"></div>
+          <div class="fld span2"><label>Meta description</label><textarea id="ne_metaDescription" rows="2" placeholder="Để trống sẽ dùng Tóm tắt">${escapeHtml(record.metaDescription||'')}</textarea></div>
+        </div>
+      </div>
       <div class="form-actions" style="justify-content:space-between">
         ${!isNew ? `<button class="btn btn-danger-outline" id="neDeleteBtn"><i class="ti ti-trash"></i> Xóa bài viết</button>` : `<span></span>`}
         <div style="display:flex;gap:8px">
@@ -2164,7 +2249,9 @@ async function saveNewsEditor(){
     author: document.getElementById('ne_author').value,
     featured: document.getElementById('ne_featured').classList.contains('on'),
     excerpt: document.getElementById('ne_excerpt').value,
-    content: document.getElementById('rte_content').innerHTML
+    content: document.getElementById('rte_content').innerHTML,
+    metaTitle: document.getElementById('ne_metaTitle').value,
+    metaDescription: document.getElementById('ne_metaDescription').value
   };
   if(isNew){
     data.id = uid();
@@ -2190,6 +2277,8 @@ function deleteNewsEditor(){
     setView('news');
   }
 }
+
+/* ===== tournament-editor.js ===== */
 /* =========================================================
    TOURNAMENT EDITOR (full-screen editor for Giải đấu, thay cho modal)
    Quản lý: Thông tin giải đấu · Danh sách người chơi (upload) ·
@@ -2296,8 +2385,9 @@ function renderTeInfoTab(record, isNew){
   </div>`;
 }
 
-function teMemberOptions(){
-  return DB.members.map(m=>`<option value="${m.id}">${escapeHtml(m.name)} — ${escapeHtml(m.code||'')}${m.club?` (${escapeHtml(m.club)})`:''}</option>`).join('');
+function teAvailableMemberOptions(record){
+  const usedIds = new Set(record.players.filter(p=>p.memberId).map(p=>p.memberId));
+  return DB.members.filter(m=>!usedIds.has(m.id)).map(m=>`<option value="${m.id}">${escapeHtml(m.name)} — ${escapeHtml(m.code||'')}${m.club?` (${escapeHtml(m.club)})`:''}</option>`).join('');
 }
 
 function renderTePlayersTab(record){
@@ -2306,7 +2396,6 @@ function renderTePlayersTab(record){
     return `<tr data-pid="${p.id}">
       <td>${escapeHtml(p.name)}</td>
       <td class="cell-muted">${escapeHtml(p.club||'—')}</td>
-      <td class="cell-muted">${escapeHtml(p.category||record.category||'—')}</td>
       <td>${m ? `<span class="status green">Hội viên · ${escapeHtml(m.code||'')}</span>` : `<span class="status gray">Khách mời</span>`}</td>
       <td class="actions"><button class="btn-icon" data-te-rm-player="${p.id}" title="Xóa"><i class="ti ti-x"></i></button></td>
     </tr>`;
@@ -2314,16 +2403,22 @@ function renderTePlayersTab(record){
 
   return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
     <div class="card" style="flex:1;min-width:320px">
-      <div class="card-head"><div><h2>Thêm người chơi</h2><div class="desc">Chọn hội viên đã có trong hệ thống hoặc thêm khách mời</div></div></div>
+      <div class="card-head"><div><h2>Thêm người chơi</h2><div class="desc">Chọn nhiều hội viên để thêm cùng lúc, hoặc thêm khách mời</div></div></div>
       <div class="card-body padded">
-        <div class="form-grid">
-          <div class="fld"><label>Chọn hội viên (tùy chọn)</label><select id="te_p_member"><option value="">— Khách mời / nhập tên tự do —</option>${teMemberOptions()}</select></div>
-          <div class="fld"><label>Họ tên</label><input type="text" id="te_p_name" placeholder="Bắt buộc nếu không chọn hội viên"></div>
-          <div class="fld"><label>Câu lạc bộ</label><input type="text" id="te_p_club" placeholder="CLB / Đơn vị"></div>
-          <div class="fld"><label>Nội dung thi đấu</label><input type="text" id="te_p_category" placeholder="${escapeAttr(record.category||'Pool 9 bi')}"></div>
+        <div class="fld"><label>Chọn hội viên (giữ Ctrl/Cmd hoặc Shift để chọn nhiều)</label>
+          <select id="te_p_members" multiple size="8" style="width:100%">${teAvailableMemberOptions(record)}</select>
         </div>
         <div class="form-actions" style="justify-content:flex-end;border-top:none;padding-top:10px;margin-top:10px">
-          <button class="btn btn-primary" id="teAddPlayerBtn"><i class="ti ti-plus"></i> Thêm vào danh sách</button>
+          <button class="btn btn-primary" id="teAddPlayersBtn"><i class="ti ti-plus"></i> Thêm hội viên đã chọn</button>
+        </div>
+        <div style="border-top:1px solid var(--line);margin-top:16px;padding-top:16px">
+          <div class="form-grid">
+            <div class="fld"><label>Khách mời — Họ tên</label><input type="text" id="te_p_name" placeholder="Không phải hội viên"></div>
+            <div class="fld"><label>Câu lạc bộ</label><input type="text" id="te_p_club" placeholder="CLB / Đơn vị"></div>
+          </div>
+          <div class="form-actions" style="justify-content:flex-end;border-top:none;padding-top:10px;margin-top:10px">
+            <button class="btn btn-ghost" id="teAddGuestBtn"><i class="ti ti-user-plus"></i> Thêm khách mời</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2340,7 +2435,7 @@ function renderTePlayersTab(record){
     </div>
   </div>
   <div class="tbl-wrap" style="margin-top:20px">
-    ${record.players.length===0 ? `<div class="empty"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc nhập danh sách ở trên.</div>` : `<table><thead><tr><th>Họ tên</th><th>CLB</th><th>Nội dung</th><th>Liên kết</th><th style="width:60px"></th></tr></thead><tbody>${rows}</tbody></table>`}
+    ${record.players.length===0 ? `<div class="empty"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc nhập danh sách ở trên.</div>` : `<table><thead><tr><th>Họ tên</th><th>CLB</th><th>Liên kết</th><th style="width:60px"></th></tr></thead><tbody>${rows}</tbody></table>`}
   </div>`;
 }
 
@@ -2412,14 +2507,17 @@ function renderTeMatchesTab(record){
         const p1 = tePlayerName(record, m.p1Id);
         const p2 = m.p2Id ? tePlayerName(record, m.p2Id) : null;
         if(!p2){
-          return `<tr data-mid="${m.id}"><td colspan="4"><b>${escapeHtml(p1)}</b> <span class="badge">Miễn đấu vòng này</span></td><td class="actions"></td></tr>`;
+          return `<tr data-mid="${m.id}"><td colspan="5"><b>${escapeHtml(p1)}</b> <span class="badge">Miễn đấu vòng này</span></td><td class="actions"></td></tr>`;
         }
         if(m.status==='done'){
           const winnerName = tePlayerName(record, m.winnerId);
+          const wp = m.winPoints!=null ? m.winPoints : TE_WIN_POINTS;
+          const lp = m.lossPoints!=null ? m.lossPoints : TE_LOSS_POINTS;
           return `<tr data-mid="${m.id}">
             <td><b>${escapeHtml(p1)}</b></td>
             <td style="white-space:nowrap"><b style="color:var(--vg)">${m.score1}</b> — <b style="color:var(--vg)">${m.score2}</b></td>
             <td><b>${escapeHtml(p2)}</b></td>
+            <td style="font-size:11.5px;color:var(--hint);white-space:nowrap">Thắng ${wp>=0?'+':''}${wp}đ · Thua ${lp>=0?'+':''}${lp}đ</td>
             <td><span class="status green">Thắng: ${escapeHtml(winnerName)}</span></td>
             <td class="actions"></td>
           </tr>`;
@@ -2428,6 +2526,7 @@ function renderTeMatchesTab(record){
           <td><b>${escapeHtml(p1)}</b></td>
           <td style="white-space:nowrap"><input type="number" min="0" id="te_score1_${m.id}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:5px"> — <input type="number" min="0" id="te_score2_${m.id}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:5px"></td>
           <td><b>${escapeHtml(p2)}</b></td>
+          <td style="white-space:nowrap;font-size:11px;color:var(--hint)">Thắng<br><input type="number" id="te_wpts_${m.id}" value="${TE_WIN_POINTS}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:4px;margin-top:2px"><br>Thua<br><input type="number" id="te_lpts_${m.id}" value="${TE_LOSS_POINTS}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:4px;margin-top:2px"></td>
           <td><span class="status gold">Chưa có kết quả</span></td>
           <td class="actions">
             <button class="btn-icon" data-te-save-result="${m.id}" title="Lưu kết quả"><i class="ti ti-device-floppy"></i></button>
@@ -2436,13 +2535,13 @@ function renderTeMatchesTab(record){
         </tr>`;
       }).join('');
       return `<div style="margin-bottom:18px"><div class="gd-h" style="font-size:13.5px">Vòng ${rn}</div>
-        <div class="tbl-wrap"><table><thead><tr><th>Người chơi 1</th><th style="width:120px">Tỷ số</th><th>Người chơi 2</th><th style="width:170px">Trạng thái</th><th style="width:80px"></th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Người chơi 1</th><th style="width:120px">Tỷ số</th><th>Người chơi 2</th><th style="width:110px">Điểm xếp hạng</th><th style="width:170px">Trạng thái</th><th style="width:80px"></th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
       </div>`;
     }).join('');
   }
 
   return `<div style="font-size:12px;color:var(--hint);margin-bottom:16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px">
-      <i class="ti ti-info-circle"></i> Thắng trận: <b>+${TE_WIN_POINTS} điểm</b> · Thua trận: <b>+${TE_LOSS_POINTS} điểm</b> · Mỗi trận: <b>+1 số trận đã đấu</b>. Bảng xếp hạng hội viên (mục "Hội viên & Xếp hạng") được tính lại tự động ngay sau khi lưu kết quả. Chỉ người chơi được liên kết với hội viên mới được cộng điểm.
+      <i class="ti ti-info-circle"></i> Mặc định: Thắng trận <b>+${TE_WIN_POINTS} điểm</b> · Thua trận <b>+${TE_LOSS_POINTS} điểm</b> — có thể chỉnh điểm tăng/giảm riêng cho từng trận trước khi lưu kết quả. Mỗi trận: <b>+1 số trận đã đấu</b>. Bảng xếp hạng hội viên (mục "Hội viên & Xếp hạng") được tính lại tự động ngay sau khi lưu kết quả. Chỉ người chơi được liên kết với hội viên mới được cộng điểm.
     </div>
     ${drawSection}${manualSection}${matchesHtml}`;
 }
@@ -2489,8 +2588,10 @@ function attachTournamentEditorEvents(){
     });
   });
 
-  const addPlayerBtn = document.getElementById('teAddPlayerBtn');
-  if(addPlayerBtn) addPlayerBtn.addEventListener('click', teAddPlayer);
+  const addPlayersBtn = document.getElementById('teAddPlayersBtn');
+  if(addPlayersBtn) addPlayersBtn.addEventListener('click', teAddPlayers);
+  const addGuestBtn = document.getElementById('teAddGuestBtn');
+  if(addGuestBtn) addGuestBtn.addEventListener('click', teAddGuest);
   const csvFileBtn = document.getElementById('teCsvFileBtn');
   const csvFileInput = document.getElementById('te_csv_file');
   if(csvFileBtn && csvFileInput){
@@ -2567,32 +2668,37 @@ function teDeleteTournament(){
   }
 }
 
-function teAddPlayer(){
+function teAddPlayers(){
   const id = currentView.slice('tournament-edit:'.length);
   const record = teRecord(id);
   if(!record) return;
-  const memberId = document.getElementById('te_p_member').value;
-  const nameInput = document.getElementById('te_p_name').value.trim();
-  const clubInput = document.getElementById('te_p_club').value.trim();
-  const categoryInput = document.getElementById('te_p_category').value.trim();
-  let player;
-  if(memberId){
+  const sel = document.getElementById('te_p_members');
+  const ids = Array.from(sel.selectedOptions).map(o=>o.value);
+  if(!ids.length){ showToast('Vui lòng chọn ít nhất một hội viên', true); return; }
+  let added = 0;
+  ids.forEach(memberId=>{
+    if(record.players.some(p=>p.memberId===memberId)) return;
     const m = DB.members.find(x=>x.id===memberId);
     if(!m) return;
-    if(record.players.some(p=>p.memberId===memberId)){ showToast('Hội viên này đã có trong danh sách', true); return; }
-    player = {id:uid(), memberId, name:m.name, club:m.club||clubInput, category:categoryInput||m.category||record.category};
-  } else {
-    if(!nameInput){ showToast('Vui lòng nhập họ tên hoặc chọn hội viên', true); return; }
-    player = {id:uid(), memberId:null, name:nameInput, club:clubInput, category:categoryInput||record.category};
-  }
-  record.players.push(player);
+    record.players.push({id:uid(), memberId, name:m.name, club:m.club||''});
+    added++;
+  });
   saveDB();
   renderSidebar();
-  showToast('Đã thêm người chơi');
-  document.getElementById('te_p_name').value='';
-  document.getElementById('te_p_club').value='';
-  document.getElementById('te_p_category').value='';
-  document.getElementById('te_p_member').value='';
+  showToast(`Đã thêm ${added} hội viên vào danh sách`);
+  renderContent();
+}
+function teAddGuest(){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  const nameInput = document.getElementById('te_p_name').value.trim();
+  const clubInput = document.getElementById('te_p_club').value.trim();
+  if(!nameInput){ showToast('Vui lòng nhập họ tên khách mời', true); return; }
+  record.players.push({id:uid(), memberId:null, name:nameInput, club:clubInput});
+  saveDB();
+  renderSidebar();
+  showToast('Đã thêm khách mời');
   renderContent();
 }
 function teImportCsv(){
@@ -2617,8 +2723,7 @@ function teImportCsv(){
       id:uid(),
       memberId: member ? member.id : null,
       name: member ? member.name : name,
-      club: member ? (member.club||club) : club,
-      category: (member && member.category) || record.category
+      club: member ? (member.club||club) : club
     });
     added++;
   });
@@ -2732,19 +2837,24 @@ function teSaveMatchResult(mid){
   if(s1===''||s2===''){ showToast('Vui lòng nhập tỷ số cho cả 2 người chơi', true); return; }
   const score1 = Number(s1), score2 = Number(s2);
   if(score1===score2){ showToast('Tỷ số không được hòa — cần xác định người thắng', true); return; }
+  const wptsInput = document.getElementById('te_wpts_'+mid);
+  const lptsInput = document.getElementById('te_lpts_'+mid);
+  const winPoints = (wptsInput && wptsInput.value!=='') ? Number(wptsInput.value) : TE_WIN_POINTS;
+  const lossPoints = (lptsInput && lptsInput.value!=='') ? Number(lptsInput.value) : TE_LOSS_POINTS;
   const winnerId = score1>score2 ? match.p1Id : match.p2Id;
   const loserId = score1>score2 ? match.p2Id : match.p1Id;
   match.score1 = score1; match.score2 = score2; match.status = 'done'; match.winnerId = winnerId;
+  match.winPoints = winPoints; match.lossPoints = lossPoints;
 
   const winnerPlayer = record.players.find(p=>p.id===winnerId);
   const loserPlayer = record.players.find(p=>p.id===loserId);
   if(winnerPlayer && winnerPlayer.memberId){
     const m = DB.members.find(x=>x.id===winnerPlayer.memberId);
-    if(m){ m.points = (m.points||0) + TE_WIN_POINTS; m.matches = (m.matches||0) + 1; }
+    if(m){ m.points = (m.points||0) + winPoints; m.matches = (m.matches||0) + 1; }
   }
   if(loserPlayer && loserPlayer.memberId){
     const m = DB.members.find(x=>x.id===loserPlayer.memberId);
-    if(m){ m.points = (m.points||0) + TE_LOSS_POINTS; m.matches = (m.matches||0) + 1; }
+    if(m){ m.points = (m.points||0) + lossPoints; m.matches = (m.matches||0) + 1; }
   }
   recomputeMemberRanking();
   teCheckTournamentComplete(record);
@@ -2753,6 +2863,8 @@ function teSaveMatchResult(mid){
   showToast('Đã ghi nhận kết quả và cập nhật bảng xếp hạng');
   renderContent();
 }
+
+/* ===== add-section-modal.js ===== */
 /* =========================================================
    ADD SECTION MODAL (chọn loại section khi thêm mới)
    ========================================================= */
@@ -2827,6 +2939,8 @@ function closeAddSectionModal(){
   addSectionModal = null;
   document.getElementById('modalOverlay').classList.remove('on');
 }
+
+/* ===== page-modal.js ===== */
 /* =========================================================
    PAGE MODAL (tạo trang mới / cài đặt trang: slug, title, metadata)
    ========================================================= */
@@ -2884,6 +2998,8 @@ function closePageModal(){
   pageModal = null;
   document.getElementById('modalOverlay').classList.remove('on');
 }
+
+/* ===== export-import.js ===== */
 /* =========================================================
    EXPORT / IMPORT
    ========================================================= */
@@ -2914,6 +3030,8 @@ function importData(e){
   reader.readAsText(file);
   e.target.value = '';
 }
+
+/* ===== utils.js ===== */
 /* =========================================================
    UTILS
    ========================================================= */
@@ -2939,6 +3057,8 @@ function showToast(msg, isError){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
 }
+
+/* ===== init.js ===== */
 /* =========================================================
    INIT
    ========================================================= */
@@ -2960,5 +3080,6 @@ document.addEventListener('click', (e)=>{
   renderTopbar();
   renderContent();
 })();
-</script></body>
+</script>
+</body>
 </html>

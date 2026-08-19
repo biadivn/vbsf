@@ -14,7 +14,9 @@ const COLLECTIONS = {
       {key:'author', label:'Tác giả', type:'text', placeholder:'Ban Truyền thông VBSF'},
       {key:'featured', label:'Hiển thị ở mục "Tin nổi bật" (trang chủ)', type:'checkbox'},
       {key:'excerpt', label:'Tóm tắt', type:'textarea', span2:true},
-      {key:'content', label:'Nội dung chi tiết', type:'richtext', span2:true}
+      {key:'content', label:'Nội dung chi tiết', type:'richtext', span2:true},
+      {key:'metaTitle', label:'SEO — Meta title', type:'text', span2:true, placeholder:'Để trống sẽ dùng Tiêu đề'},
+      {key:'metaDescription', label:'SEO — Meta description', type:'textarea', span2:true, rows:2, placeholder:'Để trống sẽ dùng Tóm tắt'}
     ],
     columns:[
       {key:'image', label:'', render:r=> r.image ? `<img src="${r.image}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;display:block">` : `<div style="width:36px;height:36px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--hint)"><i class="ti ti-photo"></i></div>`},
@@ -33,9 +35,13 @@ const COLLECTIONS = {
       {key:'participants', label:'Số cơ thủ', type:'number'},
       {key:'location', label:'Địa điểm', type:'text', span2:true},
       {key:'note', label:'Trạng thái đăng ký', type:'text', placeholder:'VD: Mở đăng ký / Sắp mở'},
+      {key:'regDeadline', label:'Hạn đăng ký', type:'date'},
+      {key:'liveRound', label:'Vòng đấu hiện tại (khi đang diễn ra)', type:'text', placeholder:'VD: Vòng tứ kết'},
       {key:'champion', label:'Nhà vô địch (nếu đã kết thúc)', type:'text'},
       {key:'entryFee', label:'Lệ phí tham gia', type:'text', placeholder:'VD: 200.000đ / cơ thủ'},
-      {key:'rules', label:'Thể lệ & luật thi đấu', type:'textarea', span2:true, rows:6, placeholder:'Mỗi dòng là một điều luật...'}
+      {key:'rules', label:'Thể lệ & luật thi đấu', type:'textarea', span2:true, rows:6, placeholder:'Mỗi dòng là một điều luật...'},
+      {key:'metaTitle', label:'SEO — Meta title', type:'text', span2:true, placeholder:'Để trống sẽ dùng Tên giải đấu'},
+      {key:'metaDescription', label:'SEO — Meta description', type:'textarea', span2:true, rows:2}
     ],
     columns:[
       {key:'name', label:'Tên giải'},
@@ -80,12 +86,15 @@ const COLLECTIONS = {
     fields:[
       {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true},
       {key:'name', label:'Họ và tên', type:'text', required:true},
+      {key:'cccd', label:'Số CCCD', type:'text', required:true, placeholder:'079095001234', span2:true},
       {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx'},
       {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi'},
-      {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker']},
+      {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker','English Billiards']},
+      {key:'group', label:'Nhóm xếp hạng', type:'select', options:['Nam','Nữ','VĐV trẻ']},
       {key:'club', label:'Câu lạc bộ / Đơn vị', type:'text'},
       {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES},
       {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}},
+      {key:'expiry', label:'Ngày hết hạn', type:'date'},
       {key:'rank', label:'Hạng xếp hạng', type:'number'},
       {key:'points', label:'Điểm', type:'number'},
       {key:'matches', label:'Số trận', type:'number'},
@@ -95,10 +104,12 @@ const COLLECTIONS = {
     columns:[
       {key:'name', label:'Hội viên'},
       {key:'code', label:'Mã HV', muted:true},
-      {key:'phone', label:'SĐT', muted:true},
+      {key:'cccd', label:'CCCD', muted:true},
       {key:'category', label:'Nội dung', badge:true},
+      {key:'group', label:'Nhóm', render:r=>r.group?`<span class="badge">${escapeHtml(r.group)}</span>`:'<span class="cell-muted">—</span>'},
       {key:'rank', label:'Hạng', render:r=>`<b>${r.rank ?? '—'}</b>`},
       {key:'points', label:'Điểm', render:r=>`<b>${r.points ?? '—'}</b>`},
+      {key:'expiry', label:'Hết hạn', muted:true},
       {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
     ]
   },
