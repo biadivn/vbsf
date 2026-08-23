@@ -1,0 +1,32 @@
+{
+  "kind": "singleType",
+  "collectionName": "settings",
+  "info": {
+    "singularName": "setting",
+    "pluralName": "settings",
+    "displayName": "Thông tin tổ chức",
+    "description": "Thông tin chung của VBSF hiển thị ở trang chủ & giới thiệu"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "orgName": { "type": "string" },
+    "orgShort": { "type": "string" },
+    "foundedYear": { "type": "string" },
+    "memberCount": { "type": "string" },
+    "clubCount": { "type": "string" },
+    "provinceCount": { "type": "string" },
+    "about": { "type": "text" },
+    "heroTitle": { "type": "string" },
+    "heroSubtitle": { "type": "string" },
+    "feeFirstTime": { "type": "string" },
+    "feeAnnualFull": { "type": "string" },
+    "feeAnnualHalf": { "type": "string" },
+    "feeRenewal": { "type": "string" },
+    "bankName": { "type": "string" },
+    "bankAccount": { "type": "string" },
+    "bankHolder": { "type": "string" }
+  }
+}

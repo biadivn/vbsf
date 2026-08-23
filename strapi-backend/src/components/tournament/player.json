@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_tournament_players",
+  "info": {
+    "displayName": "Player",
+    "description": "Người chơi đăng ký tham gia một giải đấu"
+  },
+  "options": {},
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "club": { "type": "string" },
+    "registeredAt": { "type": "datetime" },
+    "feeStatus": {
+      "type": "enumeration",
+      "enum": ["unpaid", "paid"],
+      "default": "unpaid"
+    },
+    "member": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::member.member"
+    }
+  }
+}

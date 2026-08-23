@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "library_docs",
+  "info": {
+    "singularName": "library-doc",
+    "pluralName": "library-docs",
+    "displayName": "Văn bản & Luật",
+    "description": "Tài liệu, quy chế, luật thi đấu"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "fileType": {
+      "type": "enumeration",
+      "enum": ["PDF", "DOCX", "XLSX"]
+    },
+    "tag": {
+      "type": "enumeration",
+      "enum": ["Quy chế", "Luật", "Biểu mẫu", "Thông báo"]
+    },
+    "size": { "type": "string" },
+    "date": { "type": "date" },
+    "file": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files"]
+    }
+  }
+}

@@ -1,0 +1,50 @@
+services:
+  strapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vbsf-strapi:local
+    container_name: vbsf-strapi
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_CLIENT: sqlite
+      DATABASE_FILENAME: .tmp/data.db
+    ports:
+      - "1337:1337"
+    volumes:
+      - strapi_data:/opt/app/.tmp
+      - strapi_uploads:/opt/app/public/uploads
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:1337/_health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Tuỳ chọn: dùng Postgres thay cho SQLite khi chạy nhiều container/replica.
+  # Bật bằng: docker compose --profile postgres up -d
+  # rồi đổi strapi.environment: DATABASE_CLIENT=postgres, DATABASE_HOST=postgres, ...
+  postgres:
+    image: postgres:16-alpine
+    container_name: vbsf-strapi-db
+    restart: unless-stopped
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-strapi}
+      POSTGRES_USER: ${DATABASE_USERNAME:-strapi}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-strapi}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-strapi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  strapi_data:
+  strapi_uploads:
+  postgres_data:

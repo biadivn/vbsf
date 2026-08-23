@@ -11,6 +11,8 @@ function renderContent(){
   if(currentView.startsWith('page:')){ el.innerHTML = renderPageSectionsView(); attachPageSectionsEvents(); return; }
   if(currentView.startsWith('news-edit:')){ el.innerHTML = renderNewsEditor(currentView.slice('news-edit:'.length)); attachNewsEditorEvents(); return; }
   if(currentView.startsWith('tournament-edit:')){ el.innerHTML = renderTournamentEditor(currentView.slice('tournament-edit:'.length)); attachTournamentEditorEvents(); return; }
+  const pageEditKey = getPageEditKey(currentView);
+  if(pageEditKey){ el.innerHTML = renderRecordEditor(pageEditKey, currentView.slice((pageEditKey+'-edit:').length)); attachRecordEditorEvents(pageEditKey); return; }
   if(COLLECTIONS[currentView]){
     if(syncingKey===currentView){ el.innerHTML = `<div class="tbl-wrap"><div class="empty"><i class="ti ti-loader-2"></i><b>Đang truy vấn cơ sở dữ liệu...</b></div></div>`; return; }
     el.innerHTML = renderListView(currentView); attachListEvents(currentView); return;
@@ -88,7 +90,7 @@ function renderListView(key){
   const hasActionCol = !c.readOnly || c.viewDetail || c.toggleVisibility;
   html += `<div class="tbl-wrap"><table><thead><tr>`;
   c.columns.forEach(col=> html += `<th>${col.label}</th>`);
-  html += `${hasActionCol ? '<th style="width:90px"></th>' : ''}</tr></thead><tbody>`;
+  html += `${hasActionCol ? `<th style="width:${c.cloneable?120:90}px"></th>` : ''}</tr></thead><tbody>`;
   rows.forEach(r=>{
     const isHidden = c.toggleVisibility && r[c.toggleVisibility];
     html += `<tr data-id="${r.id}"${isHidden ? ' class="row-hidden"' : ''}>`;
@@ -110,6 +112,7 @@ function renderListView(key){
     if(!c.readOnly){
       html += `<td class="actions">
         ${c.viewDetail ? `<button class="btn-icon" data-view="${r.id}" title="Xem trước trên website"><i class="ti ti-eye"></i></button>` : ''}
+        ${c.cloneable ? `<button class="btn-icon" data-clone="${r.id}" title="Nhân bản"><i class="ti ti-copy"></i></button>` : ''}
         <button class="btn-icon" data-edit="${r.id}" title="Sửa"><i class="ti ti-edit"></i></button>
         <button class="btn-icon" data-del="${r.id}" title="Xóa"><i class="ti ti-trash"></i></button>
       </td>`;
@@ -144,13 +147,16 @@ function attachListEvents(key){
   }
   document.querySelectorAll('[data-edit]').forEach(btn=>{
     const id = btn.getAttribute('data-edit');
-    btn.addEventListener('click', ()=> key==='news' ? setView('news-edit:'+id) : key==='tournaments' ? setView('tournament-edit:'+id) : openModal(key, id));
+    btn.addEventListener('click', ()=> key==='news' ? setView('news-edit:'+id) : key==='tournaments' ? setView('tournament-edit:'+id) : COLLECTIONS[key].pageEdit ? setView(key+'-edit:'+id) : openModal(key, id));
   });
   document.querySelectorAll('[data-del]').forEach(btn=>{
     btn.addEventListener('click', ()=>confirmDelete(key, btn.getAttribute('data-del')));
   });
   document.querySelectorAll('[data-view]').forEach(btn=>{
     btn.addEventListener('click', ()=>openViewModal(key, btn.getAttribute('data-view')));
+  });
+  document.querySelectorAll('[data-clone]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ if(key==='tournaments') teCloneTournament(btn.getAttribute('data-clone')); });
   });
   document.querySelectorAll('[data-toggle-vis]').forEach(btn=>{
     btn.addEventListener('click', ()=>toggleRowVisibility(key, btn.getAttribute('data-toggle-vis')));

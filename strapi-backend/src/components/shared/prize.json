@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_shared_prizes",
+  "info": {
+    "displayName": "Prize",
+    "description": "Một hạng giải thưởng trong giải đấu"
+  },
+  "options": {},
+  "attributes": {
+    "rank": { "type": "string" },
+    "cash": { "type": "string" },
+    "item": { "type": "string" }
+  }
+}

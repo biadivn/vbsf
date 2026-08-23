@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "news_articles",
+  "info": {
+    "singularName": "news-article",
+    "pluralName": "news-articles",
+    "displayName": "Tin tức",
+    "description": "Bài viết tin tức VBSF"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "title": { "type": "string", "required": true },
+    "category": {
+      "type": "enumeration",
+      "enum": ["Hoạt động VBSF", "Giải đấu", "Đào tạo", "Trong nước", "Quốc tế"]
+    },
+    "date": { "type": "date" },
+    "author": { "type": "string" },
+    "featured": { "type": "boolean", "default": false },
+    "excerpt": { "type": "text" },
+    "content": { "type": "richtext" },
+    "metaTitle": { "type": "string" },
+    "metaDescription": { "type": "text" }
+  }
+}

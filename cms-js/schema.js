@@ -26,10 +26,12 @@ const COLLECTIONS = {
     ]
   },
   tournaments: {
-    label:'Giải đấu', icon:'ti-trophy', single:'giải đấu', viewDetail:true, noSync:true,
+    label:'Giải đấu', icon:'ti-trophy', single:'giải đấu', viewDetail:true, noSync:true, cloneable:true,
     fields:[
       {key:'name', label:'Tên giải đấu', type:'text', required:true, span2:true},
       {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker']},
+      {key:'format', label:'Thể thức thi đấu', type:'select', options:['SE','DE','RR','SW'], optionLabels:{SE:'Đấu loại trực tiếp',DE:'Đấu loại trực tiếp kép',RR:'Vòng tròn',SW:'Swiss (tính mạng)'}},
+      {key:'lives', label:'Số mạng (chỉ áp dụng Swiss)', type:'number', placeholder:'Mặc định 3'},
       {key:'status', label:'Trạng thái', type:'select', options:['upcoming','ongoing','completed'], optionLabels:{upcoming:'Sắp diễn ra',ongoing:'Đang diễn ra',completed:'Đã kết thúc'}},
       {key:'date', label:'Ngày thi đấu', type:'date'},
       {key:'participants', label:'Số cơ thủ', type:'number'},
@@ -46,6 +48,7 @@ const COLLECTIONS = {
     columns:[
       {key:'name', label:'Tên giải'},
       {key:'category', label:'Nội dung', badge:true},
+      {key:'format', label:'Thể thức', render:r=>({SE:'Loại trực tiếp',DE:'Loại trực tiếp kép',RR:'Vòng tròn',SW:'Swiss'}[r.format]||'Loại trực tiếp')},
       {key:'date', label:'Ngày', muted:true},
       {key:'status', label:'Trạng thái', status:true, statusMap:{upcoming:{t:'Sắp diễn ra',c:'blue'},ongoing:{t:'Đang diễn ra',c:'red'},completed:{t:'Đã kết thúc',c:'gray'}}}
     ]
@@ -82,56 +85,51 @@ const COLLECTIONS = {
     ]
   },
   members: {
-    label:'Hội viên & Xếp hạng', icon:'ti-users', single:'hội viên', filterField:'category',
+    label:'Hội viên & Xếp hạng', icon:'ti-users', single:'hội viên', filterField:'category', pageEdit:true,
     fields:[
-      {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true},
-      {key:'name', label:'Họ và tên', type:'text', required:true},
-      {key:'cccd', label:'Số CCCD', type:'text', required:true, placeholder:'079095001234', span2:true},
-      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx'},
-      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi'},
-      {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker','English Billiards']},
-      {key:'group', label:'Nhóm xếp hạng', type:'select', options:['Nam','Nữ','VĐV trẻ']},
-      {key:'club', label:'Câu lạc bộ / Đơn vị', type:'text'},
-      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES},
-      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}},
-      {key:'expiry', label:'Ngày hết hạn', type:'date'},
-      {key:'rank', label:'Hạng xếp hạng', type:'number'},
-      {key:'points', label:'Điểm', type:'number'},
-      {key:'matches', label:'Số trận', type:'number'},
-      {key:'trend', label:'Xu hướng', type:'select', options:['up','down','eq'], optionLabels:{up:'Tăng hạng',down:'Giảm hạng',eq:'Giữ nguyên'}},
-      {key:'trendValue', label:'Số bậc thay đổi', type:'number'}
+      {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true, section:'Thông tin cơ bản'},
+      {key:'name', label:'Họ và tên', type:'text', required:true, section:'Thông tin cơ bản'},
+      {key:'cccd', label:'Số CCCD', type:'text', required:true, placeholder:'079095001234', span2:true, section:'Thông tin cơ bản'},
+      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx', section:'Tài khoản đăng nhập'},
+      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi', section:'Tài khoản đăng nhập'},
+      {key:'category', label:'Nội dung thi đấu chính', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker','English Billiards'], section:'Thi đấu & câu lạc bộ'},
+      {key:'group', label:'Nhóm xếp hạng', type:'select', options:['Nam','Nữ','VĐV trẻ'], section:'Thi đấu & câu lạc bộ'},
+      {key:'club', label:'Câu lạc bộ / Đơn vị', type:'text', section:'Thi đấu & câu lạc bộ'},
+      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES, section:'Thi đấu & câu lạc bộ'},
+      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}, section:'Trạng thái hội viên'},
+      {key:'expiry', label:'Ngày hết hạn', type:'date', section:'Trạng thái hội viên'}
     ],
     columns:[
       {key:'name', label:'Hội viên'},
       {key:'code', label:'Mã HV', muted:true},
       {key:'cccd', label:'CCCD', muted:true},
-      {key:'category', label:'Nội dung', badge:true},
+      {key:'category', label:'Nội dung chính', badge:true},
       {key:'group', label:'Nhóm', render:r=>r.group?`<span class="badge">${escapeHtml(r.group)}</span>`:'<span class="cell-muted">—</span>'},
-      {key:'rank', label:'Hạng', render:r=>`<b>${r.rank ?? '—'}</b>`},
-      {key:'points', label:'Điểm', render:r=>`<b>${r.points ?? '—'}</b>`},
+      {key:'rank', label:'Hạng', render:r=>{ const d=(r.disciplines||[]).find(x=>x.category===r.category); return `<b>${d&&d.rank!=null?d.rank:'—'}</b>`; }},
+      {key:'points', label:'Điểm', render:r=>{ const d=(r.disciplines||[]).find(x=>x.category===r.category); return `<b>${d&&d.points!=null?d.points:'—'}</b>`; }},
       {key:'expiry', label:'Hết hạn', muted:true},
       {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
     ]
   },
   members_org: {
-    label:'Hội viên tổ chức', icon:'ti-building', single:'hội viên tổ chức', filterField:'orgType',
+    label:'Hội viên tổ chức', icon:'ti-building', single:'hội viên tổ chức', filterField:'orgType', pageEdit:true,
     fields:[
-      {key:'code', label:'Mã hội viên tổ chức', type:'text', placeholder:'VBSF-TC-2026-XXX', span2:true, disabled:true},
-      {key:'name', label:'Tên tổ chức / CLB', type:'text', required:true, span2:true},
-      {key:'orgType', label:'Loại hình', type:'select', options:['Câu lạc bộ','Doanh nghiệp','Trường học','Tổ chức khác']},
-      {key:'taxCode', label:'Mã số thuế', type:'text'},
-      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES},
-      {key:'address', label:'Địa chỉ', type:'text', span2:true},
-      {key:'repName', label:'Người đại diện', type:'text'},
-      {key:'repTitle', label:'Chức vụ', type:'text', placeholder:'VD: Chủ nhiệm CLB'},
-      {key:'repPhone', label:'SĐT người đại diện', type:'text'},
-      {key:'repEmail', label:'Email liên hệ', type:'text'},
-      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx'},
-      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi'},
-      {key:'package', label:'Gói hội viên', type:'select', options:['Gói Cơ bản','Gói Tiêu chuẩn','Gói Nâng cao']},
-      {key:'joinDate', label:'Ngày gia nhập', type:'date'},
-      {key:'expiry', label:'Ngày hết hạn', type:'date'},
-      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}}
+      {key:'code', label:'Mã hội viên tổ chức', type:'text', placeholder:'VBSF-TC-2026-XXX', span2:true, disabled:true, section:'Thông tin tổ chức'},
+      {key:'name', label:'Tên tổ chức / CLB', type:'text', required:true, span2:true, section:'Thông tin tổ chức'},
+      {key:'orgType', label:'Loại hình', type:'select', options:['Câu lạc bộ','Doanh nghiệp','Trường học','Tổ chức khác'], section:'Thông tin tổ chức'},
+      {key:'taxCode', label:'Mã số thuế', type:'text', section:'Thông tin tổ chức'},
+      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES, section:'Thông tin tổ chức'},
+      {key:'address', label:'Địa chỉ', type:'text', span2:true, section:'Thông tin tổ chức'},
+      {key:'repName', label:'Người đại diện', type:'text', section:'Người đại diện'},
+      {key:'repTitle', label:'Chức vụ', type:'text', placeholder:'VD: Chủ nhiệm CLB', section:'Người đại diện'},
+      {key:'repPhone', label:'SĐT người đại diện', type:'text', section:'Người đại diện'},
+      {key:'repEmail', label:'Email liên hệ', type:'text', section:'Người đại diện'},
+      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx', section:'Tài khoản đăng nhập'},
+      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi', section:'Tài khoản đăng nhập'},
+      {key:'package', label:'Gói hội viên', type:'select', options:['Gói Cơ bản','Gói Tiêu chuẩn','Gói Nâng cao'], section:'Gói & trạng thái'},
+      {key:'joinDate', label:'Ngày gia nhập', type:'date', section:'Gói & trạng thái'},
+      {key:'expiry', label:'Ngày hết hạn', type:'date', section:'Gói & trạng thái'},
+      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}, section:'Gói & trạng thái'}
     ],
     columns:[
       {key:'name', label:'Tổ chức'},

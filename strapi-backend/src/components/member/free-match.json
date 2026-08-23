@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_member_free_matches",
+  "info": {
+    "displayName": "Free Match",
+    "description": "Trận đấu tự do (không thuộc giải đấu) — cộng/trừ điểm xếp hạng trực tiếp"
+  },
+  "options": {},
+  "attributes": {
+    "category": {
+      "type": "enumeration",
+      "enum": ["Pool 8 bi", "Pool 9 bi", "Pool 10 bi", "Carom 1 băng", "Carom 3 băng", "Snooker", "English Billiards"],
+      "required": true
+    },
+    "opponent": { "type": "string", "required": true },
+    "score1": { "type": "integer", "required": true },
+    "score2": { "type": "integer", "required": true },
+    "points": { "type": "integer", "required": true },
+    "date": { "type": "date" }
+  }
+}

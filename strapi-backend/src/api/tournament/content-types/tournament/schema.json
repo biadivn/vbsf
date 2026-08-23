@@ -1,0 +1,70 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tournaments",
+  "info": {
+    "singularName": "tournament",
+    "pluralName": "tournaments",
+    "displayName": "Giải đấu",
+    "description": "Giải đấu billiards/snooker — hỗ trợ 4 thể thức: SE, DE, RR, Swiss"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "category": {
+      "type": "enumeration",
+      "enum": ["Pool 8 bi", "Pool 9 bi", "Pool 10 bi", "Carom 1 băng", "Carom 3 băng", "Snooker"]
+    },
+    "format": {
+      "type": "enumeration",
+      "enum": ["SE", "DE", "RR", "SW"],
+      "default": "SE"
+    },
+    "lives": { "type": "integer", "default": 3 },
+    "status": {
+      "type": "enumeration",
+      "enum": ["upcoming", "ongoing", "completed"],
+      "default": "upcoming"
+    },
+    "mode": {
+      "type": "enumeration",
+      "enum": ["op", "sim"],
+      "default": "op"
+    },
+    "date": { "type": "date" },
+    "participants": { "type": "integer" },
+    "location": { "type": "string" },
+    "note": { "type": "string" },
+    "regDeadline": { "type": "date" },
+    "liveRound": { "type": "string" },
+    "champion": { "type": "string" },
+    "entryFee": { "type": "string" },
+    "rules": { "type": "text" },
+    "metaTitle": { "type": "string" },
+    "metaDescription": { "type": "text" },
+    "players": {
+      "type": "component",
+      "repeatable": true,
+      "component": "tournament.player"
+    },
+    "prizes": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.prize"
+    },
+    "bracket": {
+      "type": "json",
+      "description": "Trạng thái bracket cho thể thức SE/DE (matches, rounds/WB/LB, gfId, gf2Id) — sinh ra bởi tournament engine"
+    },
+    "rr": {
+      "type": "json",
+      "description": "Trạng thái vòng tròn (matches, rounds) — sinh ra bởi tournament engine"
+    },
+    "sw": {
+      "type": "json",
+      "description": "Trạng thái Swiss (round, matches, seq) — sinh ra bởi tournament engine"
+    }
+  }
+}

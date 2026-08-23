@@ -1,0 +1,23 @@
+{
+  "kind": "singleType",
+  "collectionName": "contact_info",
+  "info": {
+    "singularName": "contact-info",
+    "pluralName": "contact-infos",
+    "displayName": "Liên hệ",
+    "description": "Thông tin liên hệ hiển thị ở Footer & trang Liên hệ"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "address": { "type": "string" },
+    "email": { "type": "email" },
+    "phone": { "type": "string" },
+    "hours": { "type": "string" },
+    "facebook": { "type": "string" },
+    "youtube": { "type": "string" },
+    "tiktok": { "type": "string" }
+  }
+}

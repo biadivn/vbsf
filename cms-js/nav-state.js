@@ -42,7 +42,7 @@ function renderSidebar(){
     const label = group.label ? `<div class="sb-group-label">${group.label}</div>` : '';
     const items = group.items.map(it=>{
       const c = countFor(it.key);
-      const active = (currentView===it.key || (it.key==='pages' && currentView.startsWith('page:')) || (it.key==='news' && currentView.startsWith('news-edit:')) || (it.key==='tournaments' && currentView.startsWith('tournament-edit:'))) ? 'active' : '';
+      const active = (currentView===it.key || (it.key==='pages' && currentView.startsWith('page:')) || (it.key==='news' && currentView.startsWith('news-edit:')) || (it.key==='tournaments' && currentView.startsWith('tournament-edit:')) || (COLLECTIONS[it.key] && COLLECTIONS[it.key].pageEdit && currentView.startsWith(it.key+'-edit:'))) ? 'active' : '';
       return `<div class="sb-item ${active}" data-nav="${it.key}">
         <span class="lft"><i class="ti ${it.icon}"></i>${it.label}</span>
         ${c!==null ? `<span class="sb-count">${c}</span>` : ''}
@@ -53,6 +53,10 @@ function renderSidebar(){
   nav.querySelectorAll('[data-nav]').forEach(el=>{
     el.addEventListener('click', ()=>{ setView(el.getAttribute('data-nav')); document.getElementById('sidebar').classList.remove('open'); });
   });
+}
+
+function getPageEditKey(view){
+  return Object.keys(COLLECTIONS).find(key=> COLLECTIONS[key].pageEdit && view.startsWith(key+'-edit:')) || null;
 }
 
 function setView(view){

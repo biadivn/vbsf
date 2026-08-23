@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "partners",
+  "info": {
+    "singularName": "partner",
+    "pluralName": "partners",
+    "displayName": "Đối tác & Tài trợ",
+    "description": "Đối tác và nhà tài trợ VBSF"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "name": { "type": "string", "required": true },
+    "tier": {
+      "type": "enumeration",
+      "enum": ["Đối tác chiến lược", "Nhà tài trợ Kim cương", "Nhà tài trợ Vàng", "Đối tác đồng hành"]
+    },
+    "description": { "type": "richtext" }
+  }
+}

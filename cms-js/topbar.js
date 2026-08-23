@@ -18,8 +18,16 @@ function renderTopbar(){
       ? `Dữ liệu truy vấn từ cơ sở dữ liệu VBSF${c.readOnly ? ' — chỉ xem, không thể chỉnh sửa trực tiếp' : ''}`
       : `Quản lý ${c.single} hiển thị trên website`;
     const syncBtn = (DB_TABLES[currentView] && !c.noSync) ? `<button class="btn btn-ghost" id="syncBtn" ${syncingKey===currentView?'disabled':''}><i class="ti ti-refresh"></i> ${syncingKey===currentView?'Đang đồng bộ...':'Đồng bộ từ CSDL'}</button>` : '';
-    const addBtnHtml = c.readOnly ? '' : (currentView==='news' ? `<button class="btn btn-primary" id="addNewsBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : currentView==='tournaments' ? `<button class="btn btn-primary" id="addTourneyBtn"><i class="ti ti-plus"></i> Tạo giải đấu</button>` : `<button class="btn btn-primary" id="addNewBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>`);
+    const addBtnHtml = c.readOnly ? '' : (currentView==='news' ? `<button class="btn btn-primary" id="addNewsBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : currentView==='tournaments' ? `<button class="btn btn-primary" id="addTourneyBtn"><i class="ti ti-plus"></i> Tạo giải đấu</button>` : c.pageEdit ? `<button class="btn btn-primary" id="addRecordBtn" data-key="${currentView}"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : `<button class="btn btn-primary" id="addNewBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>`);
     actions.innerHTML = `${syncBtn}${addBtnHtml}`;
+  } else if(getPageEditKey(currentView)){
+    const key = getPageEditKey(currentView);
+    const c = COLLECTIONS[key];
+    const id = currentView.slice((key+'-edit:').length);
+    const rec = id!=='new' ? DB[key].find(r=>r.id===id) : null;
+    title.textContent = rec ? `Sửa ${c.single}` : `Thêm ${c.single}`;
+    sub.textContent = rec ? (rec.name||rec.title||c.label) : `Thêm ${c.single} mới`;
+    actions.innerHTML = `<button class="btn btn-ghost" id="recordEditorBack" data-key="${key}"><i class="ti ti-arrow-left"></i> Quay lại danh sách</button>`;
   } else if(currentView.startsWith('news-edit:')){
     const id = currentView.slice('news-edit:'.length);
     const rec = id!=='new' ? DB.news.find(r=>r.id===id) : null;
@@ -54,6 +62,10 @@ function renderTopbar(){
 
   const addBtn = document.getElementById('addNewBtn');
   if(addBtn) addBtn.addEventListener('click', ()=>openModal(currentView, null));
+  const addRecordBtn = document.getElementById('addRecordBtn');
+  if(addRecordBtn) addRecordBtn.addEventListener('click', ()=>setView(addRecordBtn.getAttribute('data-key')+'-edit:new'));
+  const recordEditorBack = document.getElementById('recordEditorBack');
+  if(recordEditorBack) recordEditorBack.addEventListener('click', ()=>setView(recordEditorBack.getAttribute('data-key')));
   const addNewsBtn = document.getElementById('addNewsBtn');
   if(addNewsBtn) addNewsBtn.addEventListener('click', ()=>setView('news-edit:new'));
   const newsEditorBack = document.getElementById('newsEditorBack');

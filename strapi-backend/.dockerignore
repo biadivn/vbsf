@@ -1,0 +1,12 @@
+node_modules
+.tmp
+.cache
+dist
+build
+.git
+.env
+.env.*
+!.env.example
+npm-debug.log*
+.DS_Store
+scripts/*.log

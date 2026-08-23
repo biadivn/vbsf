@@ -1,0 +1,149 @@
+{
+  "kind": "collectionType",
+  "collectionName": "member_orgs",
+  "info": {
+    "singularName": "member-org",
+    "pluralName": "member-orgs",
+    "displayName": "Hội viên tổ chức",
+    "description": "Hội viên tổ chức (CLB, doanh nghiệp, trường học...)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "code": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "orgType": {
+      "type": "enumeration",
+      "enum": [
+        "Câu lạc bộ",
+        "Doanh nghiệp",
+        "Trường học",
+        "Tổ chức khác"
+      ]
+    },
+    "taxCode": {
+      "type": "string"
+    },
+    "province": {
+      "type": "enumeration",
+      "enum": [
+        "Hà Nội",
+        "TP.HCM",
+        "Đà Nẵng",
+        "Hải Phòng",
+        "Cần Thơ",
+        "An Giang",
+        "Bà Rịa - Vũng Tàu",
+        "Bạc Liêu",
+        "Bắc Giang",
+        "Bắc Kạn",
+        "Bắc Ninh",
+        "Bến Tre",
+        "Bình Định",
+        "Bình Dương",
+        "Bình Phước",
+        "Bình Thuận",
+        "Cà Mau",
+        "Cao Bằng",
+        "Đắk Lắk",
+        "Đắk Nông",
+        "Điện Biên",
+        "Đồng Nai",
+        "Đồng Tháp",
+        "Gia Lai",
+        "Hà Giang",
+        "Hà Nam",
+        "Hà Tĩnh",
+        "Hải Dương",
+        "Hậu Giang",
+        "Hòa Bình",
+        "Hưng Yên",
+        "Khánh Hòa",
+        "Kiên Giang",
+        "Kon Tum",
+        "Lai Châu",
+        "Lâm Đồng",
+        "Lạng Sơn",
+        "Lào Cai",
+        "Long An",
+        "Nam Định",
+        "Nghệ An",
+        "Ninh Bình",
+        "Ninh Thuận",
+        "Phú Thọ",
+        "Phú Yên",
+        "Quảng Bình",
+        "Quảng Nam",
+        "Quảng Ngãi",
+        "Quảng Ninh",
+        "Quảng Trị",
+        "Sóc Trăng",
+        "Sơn La",
+        "Tây Ninh",
+        "Thái Bình",
+        "Thái Nguyên",
+        "Thanh Hóa",
+        "Thừa Thiên Huế",
+        "Tiền Giang",
+        "Trà Vinh",
+        "Tuyên Quang",
+        "Vĩnh Long",
+        "Vĩnh Phúc",
+        "Yên Bái"
+      ]
+    },
+    "address": {
+      "type": "string"
+    },
+    "repName": {
+      "type": "string"
+    },
+    "repTitle": {
+      "type": "string"
+    },
+    "repPhone": {
+      "type": "string"
+    },
+    "repEmail": {
+      "type": "email"
+    },
+    "phone": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "password": {
+      "type": "password"
+    },
+    "package": {
+      "type": "enumeration",
+      "enum": [
+        "Gói Cơ bản",
+        "Gói Tiêu chuẩn",
+        "Gói Nâng cao"
+      ]
+    },
+    "joinDate": {
+      "type": "date"
+    },
+    "expiry": {
+      "type": "date"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "active",
+        "pending",
+        "expired"
+      ],
+      "default": "active"
+    }
+  }
+}

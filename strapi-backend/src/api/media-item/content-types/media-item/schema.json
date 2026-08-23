@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "media_items",
+  "info": {
+    "singularName": "media-item",
+    "pluralName": "media-items",
+    "displayName": "Thư viện Media",
+    "description": "Album hình ảnh / video"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "mediaType": {
+      "type": "enumeration",
+      "enum": ["photo", "video"]
+    },
+    "count": { "type": "integer" },
+    "date": { "type": "date" },
+    "assets": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images", "videos"]
+    }
+  }
+}
