@@ -174,6 +174,68 @@ tr.row-hidden{opacity:.5}
 .gd-pod{flex:1;min-width:110px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 8px;text-align:center}
 .gd-pod .av{width:46px;height:46px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;margin:8px auto;color:var(--hint)}
 .gd-pod .nm{font-size:12.5px;font-weight:500;color:var(--ink);margin-top:2px}
+/* Tournament bracket engine (SE/DE/RR/Swiss) */
+.tbk-ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:11px 14px;margin-bottom:14px}
+.tbk-badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:4px 10px;border-radius:99px}
+.tbk-badge.sim{color:var(--gold);border:1px solid #E8D8A8;background:#FBF5E6}
+.tbk-badge.op{color:var(--tag-green);border:1px solid #BFE6D2;background:var(--tag-green-soft)}
+.tbk-wrap{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;height:560px}
+.tbk-view{position:absolute;inset:0;overflow:hidden;cursor:grab}
+.tbk-view.drag{cursor:grabbing}
+.tbk-stage{position:absolute;top:0;left:0;transform-origin:0 0}
+.tbk-conn{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
+.tbk-rlabel{position:absolute;font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.tbk-m{position:absolute;width:188px;background:#fff;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden;cursor:pointer;box-shadow:var(--shadow-card);transition:border-color .12s}
+.tbk-m:hover{border-color:var(--vd)}
+.tbk-m.ready{border-color:var(--vd)}
+.tbk-m .br{display:flex;align-items:center;gap:7px;padding:6px 9px;height:30px}
+.tbk-m .br+.br{border-top:1px solid var(--line)}
+.tbk-m .sd{font-size:9.5px;color:var(--hint);font-weight:700;width:16px;flex:none}
+.tbk-m .pn{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;color:var(--ink)}
+.tbk-m .sc{font-variant-numeric:tabular-nums;font-weight:800;font-size:13px;color:var(--hint);width:18px;text-align:center;flex:none}
+.tbk-m .br.w .pn{color:var(--gold)}.tbk-m .br.w .sc{color:var(--gold)}
+.tbk-m .br.bye .pn{color:var(--hint);font-style:italic}
+.tbk-m.gf{border-color:var(--gold)}
+.tbk-zoom{position:absolute;right:12px;bottom:12px;display:flex;gap:6px;z-index:5}
+.tbk-zoom button{padding:8px 11px;background:#ffffffe6;border:1px solid var(--line-strong);color:var(--ink);font-size:14px;backdrop-filter:blur(4px);border-radius:8px}
+.tbk-label{position:absolute;left:12px;top:12px;font-size:11.5px;color:var(--muted);background:#ffffffcc;border:1px solid var(--line);padding:5px 10px;border-radius:8px;z-index:5}
+.tbk-champ{color:var(--gold);font-weight:700}
+.tbk-modline{display:flex;align-items:center;gap:10px;padding:9px 0}
+.tbk-modline .pn{flex:1;font-weight:600;font-size:14.5px}
+.tbk-modline input{width:64px;text-align:center}
+.tbk-fix{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;background:var(--surface);margin:6px 0;flex-wrap:wrap;border:1px solid var(--line)}
+.tbk-fix .pn{flex:1;min-width:90px;font-weight:600;font-size:13.5px;color:var(--ink)}
+.tbk-fix .pn.r{text-align:right}
+.tbk-fix .pn.w{color:var(--vd)}.tbk-fix .pn.l{color:var(--hint)}
+.tbk-fix input{width:48px;text-align:center;padding:7px 4px;border:1px solid var(--line-strong);border-radius:6px}
+.tbk-fix .vs{color:var(--hint);font-weight:700;font-size:12px}
+.tbk-rrtab{display:flex;gap:6px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.tbk-rrtab button{background:var(--surface);color:var(--muted);border:1px solid var(--line);font-size:12.5px;padding:6px 11px;border-radius:99px}
+.tbk-rrtab button.on{background:var(--vd);color:#fff;border-color:transparent}
+.tbk-row{display:grid;grid-template-columns:26px 1fr 90px 56px auto;align-items:center;gap:7px;padding:8px 10px;border-radius:10px;margin:3px 0;background:var(--surface)}
+.tbk-row.dead{opacity:.45;filter:grayscale(.4)}
+.tbk-row .rk{font-weight:700;color:var(--hint);font-size:13px;text-align:center}
+.tbk-row .who{display:flex;align-items:center;gap:8px;min-width:0}
+.tbk-row .nm{font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.tbk-grp{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap;text-align:center}
+.tbk-wl{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px;color:var(--muted);text-align:center}
+.tbk-wl b{color:var(--ink)}
+.tbk-lives{display:flex;gap:3px;justify-content:flex-end;flex-wrap:wrap}
+.tbk-ball{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#f3d985,var(--gold) 60%,#9c7a2c)}
+.tbk-ball.gone{background:var(--line-strong);opacity:.7}
+.tbk-deadtag{font-size:10px;font-weight:700;color:var(--danger);text-align:right}
+.tbk-res{font-variant-numeric:tabular-nums;font-weight:800;font-size:15px;background:var(--surface);border:1px solid var(--line);padding:4px 10px;border-radius:8px}
+.tbk-winner{color:var(--vd)}.tbk-loser{color:var(--hint)}
+.tbk-champbar{background:linear-gradient(90deg,#FBF5E6,#F1EEFB);border:1px solid var(--gold);border-radius:10px;padding:11px 13px;margin:10px 0;display:flex;align-items:center;gap:10px;font-weight:700;color:var(--ink)}
+.tbk-byebadge{font-size:11px;font-weight:700;color:var(--tag-green);border:1px solid #BFE6D2;background:var(--tag-green-soft);padding:3px 9px;border-radius:99px}
+.tbk-logtools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.tbk-logtools input{flex:1;min-width:150px}
+.tbk-logtable{max-height:280px;overflow:auto}
+.tbk-lg{display:grid;grid-template-columns:70px 46px 1fr;gap:10px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-size:13px}
+.tbk-lg .t{color:var(--hint);font-size:11px}
+.tbk-lg .rr{font-size:11px;font-weight:700;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:2px 7px;border-radius:7px;text-align:center}
+.tbk-grid2{display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start}
+@media(max-width:980px){.tbk-grid2{grid-template-columns:1fr}}
 .news-editor{max-width:100%}
 .ne-title-wrap{border-bottom:1px solid var(--line);padding-bottom:10px}
 .news-editor-title{width:100%;border:none;outline:none;background:none;font-size:24px;font-weight:600;color:var(--ink);font-family:inherit;padding:4px 0}
@@ -326,7 +388,7 @@ tr.row-hidden{opacity:.5}
 <div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="toastMsg"></span></div>
 
 <script>
-/* ===== schema.js ===== */
+
 /* =========================================================
    SCHEMA DEFINITIONS
    ========================================================= */
@@ -355,10 +417,12 @@ const COLLECTIONS = {
     ]
   },
   tournaments: {
-    label:'Giải đấu', icon:'ti-trophy', single:'giải đấu', viewDetail:true, noSync:true,
+    label:'Giải đấu', icon:'ti-trophy', single:'giải đấu', viewDetail:true, noSync:true, cloneable:true,
     fields:[
       {key:'name', label:'Tên giải đấu', type:'text', required:true, span2:true},
       {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker']},
+      {key:'format', label:'Thể thức thi đấu', type:'select', options:['SE','DE','RR','SW'], optionLabels:{SE:'Đấu loại trực tiếp',DE:'Đấu loại trực tiếp kép',RR:'Vòng tròn',SW:'Swiss (tính mạng)'}},
+      {key:'lives', label:'Số mạng (chỉ áp dụng Swiss)', type:'number', placeholder:'Mặc định 3'},
       {key:'status', label:'Trạng thái', type:'select', options:['upcoming','ongoing','completed'], optionLabels:{upcoming:'Sắp diễn ra',ongoing:'Đang diễn ra',completed:'Đã kết thúc'}},
       {key:'date', label:'Ngày thi đấu', type:'date'},
       {key:'participants', label:'Số cơ thủ', type:'number'},
@@ -375,6 +439,7 @@ const COLLECTIONS = {
     columns:[
       {key:'name', label:'Tên giải'},
       {key:'category', label:'Nội dung', badge:true},
+      {key:'format', label:'Thể thức', render:r=>({SE:'Loại trực tiếp',DE:'Loại trực tiếp kép',RR:'Vòng tròn',SW:'Swiss'}[r.format]||'Loại trực tiếp')},
       {key:'date', label:'Ngày', muted:true},
       {key:'status', label:'Trạng thái', status:true, statusMap:{upcoming:{t:'Sắp diễn ra',c:'blue'},ongoing:{t:'Đang diễn ra',c:'red'},completed:{t:'Đã kết thúc',c:'gray'}}}
     ]
@@ -411,56 +476,51 @@ const COLLECTIONS = {
     ]
   },
   members: {
-    label:'Hội viên & Xếp hạng', icon:'ti-users', single:'hội viên', filterField:'category',
+    label:'Hội viên & Xếp hạng', icon:'ti-users', single:'hội viên', filterField:'category', pageEdit:true,
     fields:[
-      {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true},
-      {key:'name', label:'Họ và tên', type:'text', required:true},
-      {key:'cccd', label:'Số CCCD', type:'text', required:true, placeholder:'079095001234', span2:true},
-      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx'},
-      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi'},
-      {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker','English Billiards']},
-      {key:'group', label:'Nhóm xếp hạng', type:'select', options:['Nam','Nữ','VĐV trẻ']},
-      {key:'club', label:'Câu lạc bộ / Đơn vị', type:'text'},
-      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES},
-      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}},
-      {key:'expiry', label:'Ngày hết hạn', type:'date'},
-      {key:'rank', label:'Hạng xếp hạng', type:'number'},
-      {key:'points', label:'Điểm', type:'number'},
-      {key:'matches', label:'Số trận', type:'number'},
-      {key:'trend', label:'Xu hướng', type:'select', options:['up','down','eq'], optionLabels:{up:'Tăng hạng',down:'Giảm hạng',eq:'Giữ nguyên'}},
-      {key:'trendValue', label:'Số bậc thay đổi', type:'number'}
+      {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true, section:'Thông tin cơ bản'},
+      {key:'name', label:'Họ và tên', type:'text', required:true, section:'Thông tin cơ bản'},
+      {key:'cccd', label:'Số CCCD', type:'text', required:true, placeholder:'079095001234', span2:true, section:'Thông tin cơ bản'},
+      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx', section:'Tài khoản đăng nhập'},
+      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi', section:'Tài khoản đăng nhập'},
+      {key:'category', label:'Nội dung thi đấu chính', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker','English Billiards'], section:'Thi đấu & câu lạc bộ'},
+      {key:'group', label:'Nhóm xếp hạng', type:'select', options:['Nam','Nữ','VĐV trẻ'], section:'Thi đấu & câu lạc bộ'},
+      {key:'club', label:'Câu lạc bộ / Đơn vị', type:'text', section:'Thi đấu & câu lạc bộ'},
+      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES, section:'Thi đấu & câu lạc bộ'},
+      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}, section:'Trạng thái hội viên'},
+      {key:'expiry', label:'Ngày hết hạn', type:'date', section:'Trạng thái hội viên'}
     ],
     columns:[
       {key:'name', label:'Hội viên'},
       {key:'code', label:'Mã HV', muted:true},
       {key:'cccd', label:'CCCD', muted:true},
-      {key:'category', label:'Nội dung', badge:true},
+      {key:'category', label:'Nội dung chính', badge:true},
       {key:'group', label:'Nhóm', render:r=>r.group?`<span class="badge">${escapeHtml(r.group)}</span>`:'<span class="cell-muted">—</span>'},
-      {key:'rank', label:'Hạng', render:r=>`<b>${r.rank ?? '—'}</b>`},
-      {key:'points', label:'Điểm', render:r=>`<b>${r.points ?? '—'}</b>`},
+      {key:'rank', label:'Hạng', render:r=>{ const d=(r.disciplines||[]).find(x=>x.category===r.category); return `<b>${d&&d.rank!=null?d.rank:'—'}</b>`; }},
+      {key:'points', label:'Điểm', render:r=>{ const d=(r.disciplines||[]).find(x=>x.category===r.category); return `<b>${d&&d.points!=null?d.points:'—'}</b>`; }},
       {key:'expiry', label:'Hết hạn', muted:true},
       {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
     ]
   },
   members_org: {
-    label:'Hội viên tổ chức', icon:'ti-building', single:'hội viên tổ chức', filterField:'orgType',
+    label:'Hội viên tổ chức', icon:'ti-building', single:'hội viên tổ chức', filterField:'orgType', pageEdit:true,
     fields:[
-      {key:'code', label:'Mã hội viên tổ chức', type:'text', placeholder:'VBSF-TC-2026-XXX', span2:true, disabled:true},
-      {key:'name', label:'Tên tổ chức / CLB', type:'text', required:true, span2:true},
-      {key:'orgType', label:'Loại hình', type:'select', options:['Câu lạc bộ','Doanh nghiệp','Trường học','Tổ chức khác']},
-      {key:'taxCode', label:'Mã số thuế', type:'text'},
-      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES},
-      {key:'address', label:'Địa chỉ', type:'text', span2:true},
-      {key:'repName', label:'Người đại diện', type:'text'},
-      {key:'repTitle', label:'Chức vụ', type:'text', placeholder:'VD: Chủ nhiệm CLB'},
-      {key:'repPhone', label:'SĐT người đại diện', type:'text'},
-      {key:'repEmail', label:'Email liên hệ', type:'text'},
-      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx'},
-      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi'},
-      {key:'package', label:'Gói hội viên', type:'select', options:['Gói Cơ bản','Gói Tiêu chuẩn','Gói Nâng cao']},
-      {key:'joinDate', label:'Ngày gia nhập', type:'date'},
-      {key:'expiry', label:'Ngày hết hạn', type:'date'},
-      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}}
+      {key:'code', label:'Mã hội viên tổ chức', type:'text', placeholder:'VBSF-TC-2026-XXX', span2:true, disabled:true, section:'Thông tin tổ chức'},
+      {key:'name', label:'Tên tổ chức / CLB', type:'text', required:true, span2:true, section:'Thông tin tổ chức'},
+      {key:'orgType', label:'Loại hình', type:'select', options:['Câu lạc bộ','Doanh nghiệp','Trường học','Tổ chức khác'], section:'Thông tin tổ chức'},
+      {key:'taxCode', label:'Mã số thuế', type:'text', section:'Thông tin tổ chức'},
+      {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES, section:'Thông tin tổ chức'},
+      {key:'address', label:'Địa chỉ', type:'text', span2:true, section:'Thông tin tổ chức'},
+      {key:'repName', label:'Người đại diện', type:'text', section:'Người đại diện'},
+      {key:'repTitle', label:'Chức vụ', type:'text', placeholder:'VD: Chủ nhiệm CLB', section:'Người đại diện'},
+      {key:'repPhone', label:'SĐT người đại diện', type:'text', section:'Người đại diện'},
+      {key:'repEmail', label:'Email liên hệ', type:'text', section:'Người đại diện'},
+      {key:'phone', label:'Số điện thoại (đăng nhập)', type:'text', required:true, placeholder:'09xx xxx xxx', section:'Tài khoản đăng nhập'},
+      {key:'password', label:'Mật khẩu', type:'password', placeholder:'Để trống nếu không đổi', section:'Tài khoản đăng nhập'},
+      {key:'package', label:'Gói hội viên', type:'select', options:['Gói Cơ bản','Gói Tiêu chuẩn','Gói Nâng cao'], section:'Gói & trạng thái'},
+      {key:'joinDate', label:'Ngày gia nhập', type:'date', section:'Gói & trạng thái'},
+      {key:'expiry', label:'Ngày hết hạn', type:'date', section:'Gói & trạng thái'},
+      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}, section:'Gói & trạng thái'}
     ],
     columns:[
       {key:'name', label:'Tổ chức'},
@@ -488,7 +548,7 @@ const COLLECTIONS = {
   }
 };
 
-/* ===== page-sections-registry.js ===== */
+
 /* =========================================================
    PAGE SECTIONS (mô phỏng — chưa kết nối thật với index.html)
    ========================================================= */
@@ -711,7 +771,7 @@ const CONTACT_FIELDS = [
   {key:'tiktok', label:'TikTok (URL)', type:'text'}
 ];
 
-/* ===== seed-data.js ===== */
+
 /* =========================================================
    SEED DATA (matches current prototype website content)
    ========================================================= */
@@ -775,7 +835,7 @@ function seedData(){
 }
 function uid(){return 'id_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 
-/* ===== database-queries.js ===== */
+
 /* =========================================================
    DATABASE QUERIES
    Giải đấu và Hội viên không được nhập tay trong seedData —
@@ -792,21 +852,88 @@ const DB_TABLES = {
     {name:'Giải Pool 9 bi các tỉnh phía Bắc 2026',category:'Pool 9 bi',status:'completed',date:'2026-03-30',location:'',participants:'',note:'',champion:'Nguyễn Phúc Long'},
     {name:'Giải Snooker Cúp CLB toàn quốc 2025',category:'Snooker',status:'completed',date:'2025-12-12',location:'',participants:'',note:'',champion:'Lê Minh Khôi'}
   ],
-  members:[
-    {rank:1,name:'Nguyễn Phúc Long',code:'VBSF-2026-00098',cccd:'079095001234',phone:'0901234567',password:'123456',club:'CLB Sài Gòn',province:'TP.HCM',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-12-31',points:2485,matches:45,trend:'up',trendValue:1},
-    {rank:2,name:'Trần Quốc Bảo',code:'VBSF-2026-00071',cccd:'001094005678',phone:'0912345678',password:'123456',club:'CLB Thủ Đô',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-11-30',points:2410,matches:44,trend:'down',trendValue:1},
-    {rank:3,name:'Lê Minh Khôi',code:'VBSF-2026-00112',cccd:'048096009012',phone:'0923456789',password:'123456',club:'CLB Sông Hàn',province:'Đà Nẵng',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-10-15',points:2388,matches:43,trend:'eq',trendValue:0},
-    {rank:4,name:'Phạm Anh Tú',code:'VBSF-2026-00123',cccd:'074097003456',phone:'0934567890',password:'123456',club:'Meow Billiards',province:'Bình Dương',category:'Pool 9 bi',group:'Nam',status:'pending',expiry:'',points:2301,matches:42,trend:'up',trendValue:2},
-    {rank:5,name:'Đỗ Thành Nam',code:'VBSF-2025-00410',cccd:'031093007890',phone:'0945678901',password:'123456',club:'CLB Cảng',province:'Hải Phòng',category:'Pool 9 bi',group:'Nam',status:'expired',expiry:'2025-12-31',points:2256,matches:38,trend:'down',trendValue:1},
-    {rank:6,name:'Vũ Hoàng Sơn',code:'VBSF-2026-00201',cccd:'001096010123',phone:'0956789012',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-09-30',points:2198,matches:40,trend:'up',trendValue:1},
-    {rank:7,name:'Ngô Gia Huy',code:'VBSF-2026-00202',cccd:'092097011234',phone:'0967890123',password:'123456',club:'',province:'Cần Thơ',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-08-31',points:2154,matches:35,trend:'eq',trendValue:0},
-    {rank:8,name:'Bùi Đức Anh',code:'VBSF-2026-00203',cccd:'079095012345',phone:'0978901234',password:'123456',club:'',province:'TP.HCM',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-07-31',points:2097,matches:33,trend:'up',trendValue:3},
-    {rank:9,name:'Lý Trường Giang',code:'VBSF-2026-00204',cccd:'048096013456',phone:'0989012345',password:'123456',club:'',province:'Đà Nẵng',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-06-30',points:2041,matches:31,trend:'down',trendValue:2},
-    {rank:10,name:'Hoàng Minh Quân',code:'VBSF-2026-00205',cccd:'040097014567',phone:'0990123456',password:'123456',club:'',province:'Nghệ An',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-01-31',points:1988,matches:29,trend:'up',trendValue:1},
-    {rank:11,name:'Đặng Văn Hậu',code:'VBSF-2026-00206',cccd:'052098015678',phone:'0901987654',password:'123456',club:'',province:'Bình Định',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-02-28',points:1945,matches:28,trend:'eq',trendValue:0},
-    {rank:12,name:'Trịnh Bá Phước',code:'VBSF-2026-00207',cccd:'001095016789',phone:'0912987654',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-03-31',points:1902,matches:27,trend:'down',trendValue:1}
-  ]
+  members: buildMemberRows([
+    {rank:1,name:'Nguyễn Phúc Long',code:'VBSF-2026-00098',cccd:'079095001234',phone:'0901234567',password:'123456',club:'CLB Sài Gòn',province:'TP.HCM',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-12-31',points:2485,matches:45,trend:'up',trendValue:1,freeMatches:memberDemoHistory([
+      ['Pool 9 bi','Trần Quốc Bảo',5,3,8,'2026-07-20'],
+      ['Carom 3 băng','Đỗ Thành Nam',4,2,6,'2026-06-15'],
+      ['Pool 9 bi','Lê Minh Khôi',3,5,-4,'2026-05-02']
+    ])},
+    {rank:2,name:'Trần Quốc Bảo',code:'VBSF-2026-00071',cccd:'001094005678',phone:'0912345678',password:'123456',club:'CLB Thủ Đô',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-11-30',points:2410,matches:44,trend:'down',trendValue:1,freeMatches:memberDemoHistory([
+      ['Pool 9 bi','Nguyễn Phúc Long',3,5,-4,'2026-07-20'],
+      ['Pool 8 bi','Vũ Hoàng Sơn',5,1,7,'2026-06-28'],
+      ['Carom 3 băng','Phạm Anh Tú',4,3,5,'2026-05-19']
+    ])},
+    {rank:3,name:'Lê Minh Khôi',code:'VBSF-2026-00112',cccd:'048096009012',phone:'0923456789',password:'123456',club:'CLB Sông Hàn',province:'Đà Nẵng',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-10-15',points:2388,matches:43,trend:'eq',trendValue:0,freeMatches:memberDemoHistory([
+      ['Pool 9 bi','Nguyễn Phúc Long',5,3,8,'2026-05-02'],
+      ['Snooker','Ngô Gia Huy',3,1,6,'2026-06-10'],
+      ['Pool 9 bi','Bùi Đức Anh',2,5,-3,'2026-07-05']
+    ])},
+    {rank:4,name:'Phạm Anh Tú',code:'VBSF-2026-00123',cccd:'074097003456',phone:'0934567890',password:'123456',club:'Meow Billiards',province:'Bình Dương',category:'Pool 9 bi',group:'Nam',status:'pending',expiry:'',points:2301,matches:42,trend:'up',trendValue:2,freeMatches:memberDemoHistory([
+      ['Carom 3 băng','Trần Quốc Bảo',3,4,-4,'2026-05-19'],
+      ['Pool 9 bi','Đỗ Thành Nam',5,2,7,'2026-06-22'],
+      ['Pool 10 bi','Lý Trường Giang',4,1,6,'2026-07-14']
+    ])},
+    {rank:5,name:'Đỗ Thành Nam',code:'VBSF-2025-00410',cccd:'031093007890',phone:'0945678901',password:'123456',club:'CLB Cảng',province:'Hải Phòng',category:'Pool 9 bi',group:'Nam',status:'expired',expiry:'2025-12-31',points:2256,matches:38,trend:'down',trendValue:1,freeMatches:memberDemoHistory([
+      ['Carom 3 băng','Nguyễn Phúc Long',2,4,-3,'2026-06-15'],
+      ['Pool 9 bi','Phạm Anh Tú',2,5,-3,'2026-06-22'],
+      ['Pool 9 bi','Hoàng Minh Quân',5,4,6,'2026-07-30']
+    ])},
+    {rank:6,name:'Vũ Hoàng Sơn',code:'VBSF-2026-00201',cccd:'001096010123',phone:'0956789012',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-09-30',points:2198,matches:40,trend:'up',trendValue:1,freeMatches:memberDemoHistory([
+      ['Pool 8 bi','Trần Quốc Bảo',1,5,-3,'2026-06-28'],
+      ['Pool 9 bi','Đặng Văn Hậu',5,2,7,'2026-07-08'],
+      ['Snooker','Trịnh Bá Phước',3,2,5,'2026-08-01']
+    ])},
+    {rank:7,name:'Ngô Gia Huy',code:'VBSF-2026-00202',cccd:'092097011234',phone:'0967890123',password:'123456',club:'',province:'Cần Thơ',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-08-31',points:2154,matches:35,trend:'eq',trendValue:0,freeMatches:memberDemoHistory([
+      ['Snooker','Lê Minh Khôi',1,3,-3,'2026-06-10'],
+      ['Pool 9 bi','Lý Trường Giang',4,2,6,'2026-07-12'],
+      ['Pool 9 bi','Bùi Đức Anh',4,3,5,'2026-08-05']
+    ])},
+    {rank:8,name:'Bùi Đức Anh',code:'VBSF-2026-00203',cccd:'079095012345',phone:'0978901234',password:'123456',club:'',province:'TP.HCM',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-07-31',points:2097,matches:33,trend:'up',trendValue:3,freeMatches:memberDemoHistory([
+      ['Pool 9 bi','Lê Minh Khôi',5,2,8,'2026-07-05'],
+      ['Pool 9 bi','Ngô Gia Huy',3,4,-4,'2026-08-05'],
+      ['Pool 8 bi','Hoàng Minh Quân',5,3,6,'2026-08-10']
+    ])},
+    {rank:9,name:'Lý Trường Giang',code:'VBSF-2026-00204',cccd:'048096013456',phone:'0989012345',password:'123456',club:'',province:'Đà Nẵng',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-06-30',points:2041,matches:31,trend:'down',trendValue:2,freeMatches:memberDemoHistory([
+      ['Pool 10 bi','Phạm Anh Tú',1,4,-3,'2026-07-14'],
+      ['Pool 9 bi','Ngô Gia Huy',2,4,-3,'2026-07-12'],
+      ['Carom 1 băng','Đặng Văn Hậu',4,3,6,'2026-08-02']
+    ])},
+    {rank:10,name:'Hoàng Minh Quân',code:'VBSF-2026-00205',cccd:'040097014567',phone:'0990123456',password:'123456',club:'',province:'Nghệ An',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-01-31',points:1988,matches:29,trend:'up',trendValue:1,freeMatches:memberDemoHistory([
+      ['Pool 9 bi','Đỗ Thành Nam',4,5,-3,'2026-07-30'],
+      ['Pool 8 bi','Bùi Đức Anh',3,5,-3,'2026-08-10'],
+      ['Pool 9 bi','Trịnh Bá Phước',5,3,7,'2026-08-12']
+    ])},
+    {rank:11,name:'Đặng Văn Hậu',code:'VBSF-2026-00206',cccd:'052098015678',phone:'0901987654',password:'123456',club:'',province:'Bình Định',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-02-28',points:1945,matches:28,trend:'eq',trendValue:0,freeMatches:memberDemoHistory([
+      ['Pool 9 bi','Vũ Hoàng Sơn',2,5,-3,'2026-07-08'],
+      ['Carom 1 băng','Lý Trường Giang',3,4,-4,'2026-08-02'],
+      ['Pool 9 bi','Trịnh Bá Phước',4,2,6,'2026-08-14']
+    ])},
+    {rank:12,name:'Trịnh Bá Phước',code:'VBSF-2026-00207',cccd:'001095016789',phone:'0912987654',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-03-31',points:1902,matches:27,trend:'down',trendValue:1,freeMatches:memberDemoHistory([
+      ['Snooker','Vũ Hoàng Sơn',2,3,-3,'2026-08-01'],
+      ['Pool 9 bi','Hoàng Minh Quân',3,5,-4,'2026-08-12'],
+      ['Pool 9 bi','Đặng Văn Hậu',2,4,-3,'2026-08-14']
+    ])}
+  ])
 };
+function memberDemoHistory(rows){
+  return rows.map(([category,opponent,score1,score2,points,date])=>({id:uid(),category,opponent,score1,score2,points,date,ts:new Date(date).getTime()}));
+}
+/* Chuyển hồ sơ xếp hạng phẳng (rank/points/matches/trend) thành mảng disciplines —
+   mỗi bộ môn có điểm/hạng/lịch sử riêng. Bộ môn phụ được suy ra từ freeMatches. */
+function buildMemberRows(rows){
+  return rows.map(row=>{
+    const {rank, points, matches, trend, trendValue, freeMatches, ...rest} = row;
+    const disciplines = [{category:rest.category, rank, points, matches, trend, trendValue}];
+    (freeMatches||[]).forEach(fm=>{
+      if(fm.category===rest.category) return;
+      let d = disciplines.find(x=>x.category===fm.category);
+      if(!d){ d = {category:fm.category, points:0, rank:null, matches:0, trend:'eq', trendValue:0}; disciplines.push(d); }
+      d.points += fm.points;
+      d.matches += 1;
+    });
+    return {...rest, freeMatches, disciplines};
+  });
+}
 /** Mô phỏng một truy vấn CSDL (SELECT * FROM <table>) qua mạng. */
 function fetchFromDatabase(table){
   return new Promise(resolve=>{
@@ -816,7 +943,7 @@ function fetchFromDatabase(table){
   });
 }
 
-/* ===== storage.js ===== */
+
 /* =========================================================
    STORAGE
    ========================================================= */
@@ -874,7 +1001,7 @@ async function saveDB(){
   }
 }
 
-/* ===== nav-state.js ===== */
+
 /* =========================================================
    NAV / STATE
    ========================================================= */
@@ -919,7 +1046,7 @@ function renderSidebar(){
     const label = group.label ? `<div class="sb-group-label">${group.label}</div>` : '';
     const items = group.items.map(it=>{
       const c = countFor(it.key);
-      const active = (currentView===it.key || (it.key==='pages' && currentView.startsWith('page:')) || (it.key==='news' && currentView.startsWith('news-edit:')) || (it.key==='tournaments' && currentView.startsWith('tournament-edit:'))) ? 'active' : '';
+      const active = (currentView===it.key || (it.key==='pages' && currentView.startsWith('page:')) || (it.key==='news' && currentView.startsWith('news-edit:')) || (it.key==='tournaments' && currentView.startsWith('tournament-edit:')) || (COLLECTIONS[it.key] && COLLECTIONS[it.key].pageEdit && currentView.startsWith(it.key+'-edit:'))) ? 'active' : '';
       return `<div class="sb-item ${active}" data-nav="${it.key}">
         <span class="lft"><i class="ti ${it.icon}"></i>${it.label}</span>
         ${c!==null ? `<span class="sb-count">${c}</span>` : ''}
@@ -932,6 +1059,10 @@ function renderSidebar(){
   });
 }
 
+function getPageEditKey(view){
+  return Object.keys(COLLECTIONS).find(key=> COLLECTIONS[key].pageEdit && view.startsWith(key+'-edit:')) || null;
+}
+
 function setView(view){
   currentView = view;
   searchTerm = '';
@@ -941,7 +1072,7 @@ function setView(view){
   renderContent();
 }
 
-/* ===== topbar.js ===== */
+
 /* =========================================================
    TOPBAR
    ========================================================= */
@@ -962,8 +1093,16 @@ function renderTopbar(){
       ? `Dữ liệu truy vấn từ cơ sở dữ liệu VBSF${c.readOnly ? ' — chỉ xem, không thể chỉnh sửa trực tiếp' : ''}`
       : `Quản lý ${c.single} hiển thị trên website`;
     const syncBtn = (DB_TABLES[currentView] && !c.noSync) ? `<button class="btn btn-ghost" id="syncBtn" ${syncingKey===currentView?'disabled':''}><i class="ti ti-refresh"></i> ${syncingKey===currentView?'Đang đồng bộ...':'Đồng bộ từ CSDL'}</button>` : '';
-    const addBtnHtml = c.readOnly ? '' : (currentView==='news' ? `<button class="btn btn-primary" id="addNewsBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : currentView==='tournaments' ? `<button class="btn btn-primary" id="addTourneyBtn"><i class="ti ti-plus"></i> Tạo giải đấu</button>` : `<button class="btn btn-primary" id="addNewBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>`);
+    const addBtnHtml = c.readOnly ? '' : (currentView==='news' ? `<button class="btn btn-primary" id="addNewsBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : currentView==='tournaments' ? `<button class="btn btn-primary" id="addTourneyBtn"><i class="ti ti-plus"></i> Tạo giải đấu</button>` : c.pageEdit ? `<button class="btn btn-primary" id="addRecordBtn" data-key="${currentView}"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : `<button class="btn btn-primary" id="addNewBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>`);
     actions.innerHTML = `${syncBtn}${addBtnHtml}`;
+  } else if(getPageEditKey(currentView)){
+    const key = getPageEditKey(currentView);
+    const c = COLLECTIONS[key];
+    const id = currentView.slice((key+'-edit:').length);
+    const rec = id!=='new' ? DB[key].find(r=>r.id===id) : null;
+    title.textContent = rec ? `Sửa ${c.single}` : `Thêm ${c.single}`;
+    sub.textContent = rec ? (rec.name||rec.title||c.label) : `Thêm ${c.single} mới`;
+    actions.innerHTML = `<button class="btn btn-ghost" id="recordEditorBack" data-key="${key}"><i class="ti ti-arrow-left"></i> Quay lại danh sách</button>`;
   } else if(currentView.startsWith('news-edit:')){
     const id = currentView.slice('news-edit:'.length);
     const rec = id!=='new' ? DB.news.find(r=>r.id===id) : null;
@@ -998,6 +1137,10 @@ function renderTopbar(){
 
   const addBtn = document.getElementById('addNewBtn');
   if(addBtn) addBtn.addEventListener('click', ()=>openModal(currentView, null));
+  const addRecordBtn = document.getElementById('addRecordBtn');
+  if(addRecordBtn) addRecordBtn.addEventListener('click', ()=>setView(addRecordBtn.getAttribute('data-key')+'-edit:new'));
+  const recordEditorBack = document.getElementById('recordEditorBack');
+  if(recordEditorBack) recordEditorBack.addEventListener('click', ()=>setView(recordEditorBack.getAttribute('data-key')));
   const addNewsBtn = document.getElementById('addNewsBtn');
   if(addNewsBtn) addNewsBtn.addEventListener('click', ()=>setView('news-edit:new'));
   const newsEditorBack = document.getElementById('newsEditorBack');
@@ -1016,7 +1159,7 @@ function renderTopbar(){
   if(importFile) importFile.addEventListener('change', importData);
 }
 
-/* ===== content-render.js ===== */
+
 /* =========================================================
    CONTENT RENDER
    ========================================================= */
@@ -1030,6 +1173,8 @@ function renderContent(){
   if(currentView.startsWith('page:')){ el.innerHTML = renderPageSectionsView(); attachPageSectionsEvents(); return; }
   if(currentView.startsWith('news-edit:')){ el.innerHTML = renderNewsEditor(currentView.slice('news-edit:'.length)); attachNewsEditorEvents(); return; }
   if(currentView.startsWith('tournament-edit:')){ el.innerHTML = renderTournamentEditor(currentView.slice('tournament-edit:'.length)); attachTournamentEditorEvents(); return; }
+  const pageEditKey = getPageEditKey(currentView);
+  if(pageEditKey){ el.innerHTML = renderRecordEditor(pageEditKey, currentView.slice((pageEditKey+'-edit:').length)); attachRecordEditorEvents(pageEditKey); return; }
   if(COLLECTIONS[currentView]){
     if(syncingKey===currentView){ el.innerHTML = `<div class="tbl-wrap"><div class="empty"><i class="ti ti-loader-2"></i><b>Đang truy vấn cơ sở dữ liệu...</b></div></div>`; return; }
     el.innerHTML = renderListView(currentView); attachListEvents(currentView); return;
@@ -1107,7 +1252,7 @@ function renderListView(key){
   const hasActionCol = !c.readOnly || c.viewDetail || c.toggleVisibility;
   html += `<div class="tbl-wrap"><table><thead><tr>`;
   c.columns.forEach(col=> html += `<th>${col.label}</th>`);
-  html += `${hasActionCol ? '<th style="width:90px"></th>' : ''}</tr></thead><tbody>`;
+  html += `${hasActionCol ? `<th style="width:${c.cloneable?120:90}px"></th>` : ''}</tr></thead><tbody>`;
   rows.forEach(r=>{
     const isHidden = c.toggleVisibility && r[c.toggleVisibility];
     html += `<tr data-id="${r.id}"${isHidden ? ' class="row-hidden"' : ''}>`;
@@ -1129,6 +1274,7 @@ function renderListView(key){
     if(!c.readOnly){
       html += `<td class="actions">
         ${c.viewDetail ? `<button class="btn-icon" data-view="${r.id}" title="Xem trước trên website"><i class="ti ti-eye"></i></button>` : ''}
+        ${c.cloneable ? `<button class="btn-icon" data-clone="${r.id}" title="Nhân bản"><i class="ti ti-copy"></i></button>` : ''}
         <button class="btn-icon" data-edit="${r.id}" title="Sửa"><i class="ti ti-edit"></i></button>
         <button class="btn-icon" data-del="${r.id}" title="Xóa"><i class="ti ti-trash"></i></button>
       </td>`;
@@ -1163,7 +1309,7 @@ function attachListEvents(key){
   }
   document.querySelectorAll('[data-edit]').forEach(btn=>{
     const id = btn.getAttribute('data-edit');
-    btn.addEventListener('click', ()=> key==='news' ? setView('news-edit:'+id) : key==='tournaments' ? setView('tournament-edit:'+id) : openModal(key, id));
+    btn.addEventListener('click', ()=> key==='news' ? setView('news-edit:'+id) : key==='tournaments' ? setView('tournament-edit:'+id) : COLLECTIONS[key].pageEdit ? setView(key+'-edit:'+id) : openModal(key, id));
   });
   document.querySelectorAll('[data-del]').forEach(btn=>{
     btn.addEventListener('click', ()=>confirmDelete(key, btn.getAttribute('data-del')));
@@ -1171,12 +1317,15 @@ function attachListEvents(key){
   document.querySelectorAll('[data-view]').forEach(btn=>{
     btn.addEventListener('click', ()=>openViewModal(key, btn.getAttribute('data-view')));
   });
+  document.querySelectorAll('[data-clone]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ if(key==='tournaments') teCloneTournament(btn.getAttribute('data-clone')); });
+  });
   document.querySelectorAll('[data-toggle-vis]').forEach(btn=>{
     btn.addEventListener('click', ()=>toggleRowVisibility(key, btn.getAttribute('data-toggle-vis')));
   });
 }
 
-/* ===== singleton-form.js ===== */
+
 /* =========================================================
    SINGLETON FORM (settings / contact)
    ========================================================= */
@@ -1203,7 +1352,7 @@ function attachSingletonEvents(key, fields){
   });
 }
 
-/* ===== pages-list-view.js ===== */
+
 /* =========================================================
    PAGES LIST VIEW
    ========================================================= */
@@ -1260,7 +1409,7 @@ function attachPagesListEvents(){
   });
 }
 
-/* ===== page-sections-view.js ===== */
+
 /* =========================================================
    PAGE SECTIONS VIEW (mô phỏng)
    ========================================================= */
@@ -1452,7 +1601,7 @@ async function moveSectionRow(idx, dir){
   renderContent();
 }
 
-/* ===== section-detail-panel.js ===== */
+
 /* =========================================================
    SECTION DETAIL PANEL (mô phỏng)
    ========================================================= */
@@ -1855,7 +2004,7 @@ function attachRTEEvents(){
   });
 }
 
-/* ===== modal.js ===== */
+
 /* =========================================================
    MODAL (add / edit for collections)
    ========================================================= */
@@ -2146,7 +2295,333 @@ function confirmDelete(key, id){
   }
 }
 
-/* ===== news-editor.js ===== */
+
+/* =========================================================
+   RECORD EDITOR (full-page add/edit for collections with pageEdit:true,
+   thay cho modal — hiện dùng cho Hội viên & Hội viên tổ chức)
+   Hội viên có thêm tab "Lịch sử thi đấu" (giải đấu + đấu tự do).
+   ========================================================= */
+let reTab = 'info';
+let reHistFilter = '';
+
+function renderRecordEditor(key, id){
+  const c = COLLECTIONS[key];
+  const isNew = id==='new';
+  const record = isNew ? {} : (DB[key].find(r=>r.id===id) || {});
+  const hasHistory = key==='members' && !isNew;
+  if(isNew) reTab = 'info';
+  if(!hasHistory && reTab==='history') reTab = 'info';
+
+  const tabsHtml = hasHistory ? `<div style="display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:20px">
+    <span class="gd-tab ${reTab==='info'?'on':''}" data-retab="info"><i class="ti ti-info-circle" style="margin-right:5px"></i>Thông tin</span>
+    <span class="gd-tab ${reTab==='history'?'on':''}" data-retab="history"><i class="ti ti-history" style="margin-right:5px"></i>Lịch sử thi đấu</span>
+  </div>` : '';
+
+  const body = reTab==='history' ? renderMemberHistoryTab(record) : renderRecordInfoTab(key, record, isNew);
+  return hasHistory ? `<div class="news-editor">${tabsHtml}${body}</div>` : body;
+}
+
+function renderRecordInfoTab(key, record, isNew){
+  const c = COLLECTIONS[key];
+  modalImageValues = {};
+  c.fields.forEach(f=>{ if(f.type==='image') modalImageValues[f.key] = record[f.key] || null; });
+  const sections = [];
+  c.fields.forEach(f=>{
+    const title = f.section || null;
+    let group = sections.find(s=>s.title===title);
+    if(!group){ group = {title, fields:[]}; sections.push(group); }
+    group.fields.push(f);
+  });
+  return `<div class="record-editor">
+    <div class="form-card" style="max-width:840px">
+      ${sections.map((s,i)=>`<div class="re-section" style="${i>0?'margin-top:22px;padding-top:18px;border-top:1px solid var(--line)':''}">
+        ${s.title ? `<label style="font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:12px">${s.title}</label>` : ''}
+        <div class="form-grid">${s.fields.map(f=>{
+          return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${f.type==='richtext' ? renderRichTextField(f, record[f.key]) : renderField(f, record[f.key])}</div>`;
+        }).join('')}</div>
+      </div>`).join('')}
+      ${key==='members' && !isNew ? renderMemberDisciplinesSection(record) : ''}
+      <div class="form-actions" style="justify-content:space-between">
+        ${!isNew ? `<button class="btn btn-danger-outline" id="reDeleteBtn"><i class="ti ti-trash"></i> Xóa ${c.single}</button>` : `<span></span>`}
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" id="reCancelBtn">Hủy</button>
+          <button class="btn btn-primary" id="reSaveBtn"><i class="ti ti-check"></i> ${isNew?'Thêm mới':'Lưu thay đổi'}</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Xếp hạng theo bộ môn ---------- */
+function renderMemberDisciplinesSection(record){
+  const catOptions = COLLECTIONS.members.fields.find(f=>f.key==='category').options;
+  const disciplines = record.disciplines || [];
+  const rows = disciplines.map((d,i)=>`<tr>
+    <td><b>${escapeHtml(d.category)}</b>${record.category===d.category?' <span class="badge">Chính</span>':''}</td>
+    <td><input type="number" data-re-disc-points="${i}" value="${d.points||0}" style="width:90px;border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px"></td>
+    <td class="cell-muted">${d.rank!=null?('#'+d.rank):'—'}</td>
+    <td><input type="number" min="0" data-re-disc-matches="${i}" value="${d.matches||0}" style="width:70px;border:1px solid var(--line-strong);border-radius:6px;padding:6px 8px"></td>
+    <td class="actions"><button class="btn-icon" data-re-rm-disc="${i}" title="Xóa hồ sơ"><i class="ti ti-trash"></i></button></td>
+  </tr>`).join('');
+  const available = catOptions.filter(o=>!disciplines.some(d=>d.category===o));
+  return `<div class="re-section" style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)">
+    <label style="font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:12px">Xếp hạng theo bộ môn</label>
+    ${disciplines.length ? `<div class="tbl-wrap"><table><thead><tr><th>Bộ môn</th><th>Điểm</th><th>Hạng</th><th>Số trận</th><th style="width:50px"></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="cell-muted" style="margin-bottom:10px">Chưa có hồ sơ xếp hạng bộ môn nào.</div>`}
+    ${available.length ? `<div style="display:flex;gap:8px;align-items:flex-end;margin-top:12px;flex-wrap:wrap">
+      <div class="fld" style="flex:1;min-width:180px"><label>Thêm bộ môn</label><select id="re_disc_new_cat"><option value="">— Chọn —</option>${available.map(o=>`<option value="${escapeAttr(o)}">${escapeHtml(o)}</option>`).join('')}</select></div>
+      <button class="btn btn-ghost" id="reAddDisciplineBtn"><i class="ti ti-plus"></i> Thêm bộ môn</button>
+    </div>` : ''}
+  </div>`;
+}
+function reAddDiscipline(record){
+  const sel = document.getElementById('re_disc_new_cat');
+  const cat = sel ? sel.value : '';
+  if(!cat){ showToast('Vui lòng chọn bộ môn', true); return; }
+  if(!record.disciplines) record.disciplines = [];
+  if(record.disciplines.some(d=>d.category===cat)) return;
+  record.disciplines.push({category:cat, points:0, rank:null, matches:0, trend:'eq', trendValue:0});
+  recomputeMemberRanking();
+  saveDB();
+  renderSidebar();
+  showToast('Đã thêm hồ sơ bộ môn');
+  renderContent();
+}
+function reUpdateDisciplinePoints(record, idx, value){
+  const d = record.disciplines && record.disciplines[idx]; if(!d) return;
+  d.points = Number(value)||0;
+  recomputeMemberRanking();
+  saveDB();
+  renderSidebar();
+  renderContent();
+}
+function reUpdateDisciplineMatches(record, idx, value){
+  const d = record.disciplines && record.disciplines[idx]; if(!d) return;
+  d.matches = Math.max(0, Number(value)||0);
+  saveDB();
+}
+function reRemoveDiscipline(record, idx){
+  const d = record.disciplines && record.disciplines[idx]; if(!d) return;
+  if(!confirm(`Xóa hồ sơ xếp hạng "${d.category}"? Lịch sử thi đấu bộ môn này vẫn được giữ lại.`)) return;
+  record.disciplines.splice(idx,1);
+  recomputeMemberRanking();
+  saveDB();
+  renderSidebar();
+  showToast('Đã xóa hồ sơ bộ môn');
+  renderContent();
+}
+
+/* ---------- Lịch sử thi đấu (giải đấu + đấu tự do) ---------- */
+function reMemberMatchHistory(memberId){
+  const rows = [];
+  DB.tournaments.forEach(t=>{
+    if(t.mode==='sim') return;
+    const players = t.players||[];
+    const me = players.find(p=>p.memberId===memberId);
+    if(!me) return;
+    const nameOf = pid=>{ if(pid==='BYE') return 'BYE'; const p=players.find(x=>x.id===pid); return p?p.name:'—'; };
+    if(t.bracket){
+      Object.values(t.bracket.matches).forEach(m=>{
+        if(m.status!=='done' || m.p1==null || m.p2==null || m.p1==='BYE' || m.p2==='BYE') return;
+        if(m.p1!==me.id && m.p2!==me.id) return;
+        const isP1 = m.p1===me.id;
+        const won = m.win===me.id;
+        rows.push({category:t.category, event:t.name, opponent:nameOf(isP1?m.p2:m.p1), score:`${isP1?m.s1:m.s2}–${isP1?m.s2:m.s1}`, points:won?(m.winPoints||0):(m.lossPoints||0), won, ts:m.decidedAt||null, free:false});
+      });
+    }
+    if(t.rr){
+      Object.values(t.rr.matches).forEach(m=>{
+        if(m.win==null || (m.a!==me.id && m.b!==me.id)) return;
+        const isA = m.a===me.id;
+        const won = m.win===me.id;
+        rows.push({category:t.category, event:t.name, opponent:nameOf(isA?m.b:m.a), score:`${isA?m.s1:m.s2}–${isA?m.s2:m.s1}`, points:won?(m.winPoints!=null?m.winPoints:TE_WIN_POINTS):(m.lossPoints!=null?m.lossPoints:TE_LOSS_POINTS), won, ts:m.decidedAt||null, free:false});
+      });
+    }
+    if(t.sw){
+      t.sw.matches.filter(m=>m.confirmed && !m.bye && (m.aId===me.id || m.bId===me.id)).forEach(m=>{
+        const isA = m.aId===me.id;
+        const won = m.winnerId===me.id;
+        rows.push({category:t.category, event:t.name, opponent:nameOf(isA?m.bId:m.aId), score:`${isA?m.sa:m.sb}–${isA?m.sb:m.sa}`, points:won?(m.winPoints!=null?m.winPoints:TE_WIN_POINTS):(m.lossPoints!=null?m.lossPoints:TE_LOSS_POINTS), won, ts:m.ts||null, free:false});
+      });
+    }
+  });
+  const member = DB.members.find(x=>x.id===memberId);
+  (member && member.freeMatches || []).forEach(fm=>{
+    rows.push({category:fm.category, event:'Đấu tự do', opponent:fm.opponent, score:`${fm.score1}–${fm.score2}`, points:fm.points, won:fm.score1>fm.score2, ts:fm.ts, free:true, id:fm.id});
+  });
+  rows.sort((a,b)=>(b.ts||0)-(a.ts||0));
+  return rows;
+}
+function reFmtHistTime(ts){
+  if(!ts) return '—';
+  const d = new Date(ts), p = x=>String(x).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function renderMemberHistoryTab(record){
+  const allRows = reMemberMatchHistory(record.id);
+  const catOptions = COLLECTIONS.members.fields.find(f=>f.key==='category').options;
+  const histCats = [...new Set(allRows.map(r=>r.category).filter(Boolean))];
+  if(reHistFilter && !histCats.includes(reHistFilter)) reHistFilter = '';
+  const filterBar = histCats.length>1 ? `<div class="tbk-rrtab" style="border-bottom:none;padding:0 0 14px">
+    <button class="${reHistFilter===''?'on':''}" data-re-hist-filter="">Tất cả</button>
+    ${histCats.map(c=>`<button class="${reHistFilter===c?'on':''}" data-re-hist-filter="${escapeAttr(c)}">${escapeHtml(c)}</button>`).join('')}
+  </div>` : '';
+  const rows = reHistFilter ? allRows.filter(r=>r.category===reHistFilter) : allRows;
+  const rowsHtml = rows.map(r=>`<tr>
+    <td>${escapeHtml(r.category||'—')}</td>
+    <td class="cell-muted">${escapeHtml(r.opponent||'—')}</td>
+    <td style="white-space:nowrap"><b style="color:${r.won?'var(--tag-green)':'var(--danger)'}">${escapeHtml(r.score)}</b></td>
+    <td><b style="color:${r.points>=0?'var(--tag-green)':'var(--danger)'}">${r.points>=0?'+':''}${r.points}</b></td>
+    <td class="cell-muted">${reFmtHistTime(r.ts)}</td>
+    <td>${r.free ? `<span class="badge">Đấu tự do</span>` : `<span class="status blue">${escapeHtml(r.event)}</span>`}</td>
+    <td class="actions">${r.free ? `<button class="btn-icon" data-re-rm-free="${r.id}" title="Xóa"><i class="ti ti-x"></i></button>` : ''}</td>
+  </tr>`).join('');
+
+  return `<div class="card"><div class="card-head"><div><h2>Ghi nhận trận đấu tự do</h2><div class="desc">Trận không thuộc giải đấu nào — cộng/trừ điểm xếp hạng trực tiếp</div></div></div>
+    <div class="card-body padded">
+      <div class="form-grid">
+        <div class="fld"><label>Nội dung thi đấu</label><select id="re_fm_category"><option value="">— Chọn —</option>${catOptions.map(o=>`<option value="${escapeAttr(o)}">${escapeHtml(o)}</option>`).join('')}</select></div>
+        <div class="fld"><label>Đối thủ</label><input type="text" id="re_fm_opponent" placeholder="Tên đối thủ"></div>
+        <div class="fld"><label>Tỷ số của tôi</label><input type="number" min="0" id="re_fm_score1"></div>
+        <div class="fld"><label>Tỷ số đối thủ</label><input type="number" min="0" id="re_fm_score2"></div>
+        <div class="fld"><label>Điểm hạng thay đổi</label><input type="number" id="re_fm_points" placeholder="VD: 10 hoặc -5"></div>
+        <div class="fld"><label>Ngày thi đấu</label><input type="date" id="re_fm_date"></div>
+      </div>
+      <div class="form-actions" style="justify-content:flex-end;border-top:none;padding-top:10px;margin-top:10px">
+        <button class="btn btn-primary" id="reAddFreeMatchBtn"><i class="ti ti-plus"></i> Thêm trận đấu tự do</button>
+      </div>
+    </div>
+  </div>
+  ${filterBar}
+  <div class="tbl-wrap" style="margin-top:${histCats.length>1?0:16}px">
+    ${rows.length===0 ? `<div class="empty"><i class="ti ti-history"></i><b>Chưa có lịch sử thi đấu</b>${allRows.length?'Không có trận nào ở bộ môn này.':'Hội viên chưa tham gia trận đấu nào trong giải hoặc đấu tự do.'}</div>` : `<table><thead><tr><th>Nội dung thi đấu</th><th>Đối thủ</th><th>Tỷ số</th><th>Điểm hạng thay đổi</th><th>Thời gian thi đấu</th><th>Sự kiện</th><th style="width:50px"></th></tr></thead><tbody>${rowsHtml}</tbody></table>`}
+  </div>`;
+}
+function reAddFreeMatch(record){
+  const category = document.getElementById('re_fm_category').value;
+  const opponent = document.getElementById('re_fm_opponent').value.trim();
+  const score1 = document.getElementById('re_fm_score1').value;
+  const score2 = document.getElementById('re_fm_score2').value;
+  const points = document.getElementById('re_fm_points').value;
+  const date = document.getElementById('re_fm_date').value;
+  if(!opponent || score1==='' || score2==='' || points===''){ showToast('Vui lòng nhập đầy đủ đối thủ, tỷ số và điểm thay đổi', true); return; }
+  const s1 = Number(score1), s2 = Number(score2), pts = Number(points);
+  if(!Number.isFinite(s1) || !Number.isFinite(s2) || s1===s2){ showToast('Tỷ số không hợp lệ — phải có người thắng', true); return; }
+  if(!category){ showToast('Vui lòng chọn nội dung thi đấu', true); return; }
+  record.freeMatches = [...(record.freeMatches||[]), {id:uid(), category, opponent, score1:s1, score2:s2, points:pts, date, ts:date?new Date(date).getTime():Date.now()}];
+  applyDisciplinePoints(record, category, pts, 1);
+  recomputeMemberRanking();
+  saveDB();
+  showToast('Đã ghi nhận trận đấu tự do và cập nhật điểm xếp hạng');
+  renderContent();
+}
+function reRemoveFreeMatch(record, fmId){
+  const fm = (record.freeMatches||[]).find(x=>x.id===fmId);
+  if(!fm) return;
+  if(!confirm('Xóa trận đấu tự do này? Điểm xếp hạng đã cộng sẽ được hoàn tác.')) return;
+  applyDisciplinePoints(record, fm.category, -fm.points, -1);
+  record.freeMatches = record.freeMatches.filter(x=>x.id!==fmId);
+  recomputeMemberRanking();
+  saveDB();
+  showToast('Đã xóa trận đấu tự do');
+  renderContent();
+}
+
+function attachRecordEditorEvents(key){
+  document.querySelectorAll('[data-retab]').forEach(t=>{
+    t.addEventListener('click', ()=>{ reTab = t.getAttribute('data-retab'); renderContent(); });
+  });
+  if(reTab==='history' && key==='members'){
+    const id = currentView.slice((key+'-edit:').length);
+    const record = DB.members.find(r=>r.id===id);
+    if(!record) return;
+    const addBtn = document.getElementById('reAddFreeMatchBtn');
+    if(addBtn) addBtn.addEventListener('click', ()=>reAddFreeMatch(record));
+    document.querySelectorAll('[data-re-rm-free]').forEach(btn=>{
+      btn.addEventListener('click', ()=>reRemoveFreeMatch(record, btn.getAttribute('data-re-rm-free')));
+    });
+    document.querySelectorAll('[data-re-hist-filter]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ reHistFilter = btn.getAttribute('data-re-hist-filter'); renderContent(); });
+    });
+    return;
+  }
+  attachRTEEvents();
+  attachModalImageEvents();
+  document.querySelectorAll('[data-multiselect]').forEach(chip=>{
+    chip.addEventListener('click', ()=> chip.classList.toggle('on'));
+  });
+  const cancelBtn = document.getElementById('reCancelBtn');
+  if(cancelBtn) cancelBtn.addEventListener('click', ()=>setView(key));
+  const saveBtn = document.getElementById('reSaveBtn');
+  if(saveBtn) saveBtn.addEventListener('click', ()=>saveRecordEditor(key));
+  const delBtn = document.getElementById('reDeleteBtn');
+  if(delBtn) delBtn.addEventListener('click', ()=>deleteRecordEditor(key));
+  if(key==='members'){
+    const id = currentView.slice((key+'-edit:').length);
+    const record = DB.members.find(r=>r.id===id);
+    if(record){
+      const addDiscBtn = document.getElementById('reAddDisciplineBtn');
+      if(addDiscBtn) addDiscBtn.addEventListener('click', ()=>reAddDiscipline(record));
+      document.querySelectorAll('[data-re-disc-points]').forEach(input=>{
+        input.addEventListener('change', ()=>reUpdateDisciplinePoints(record, Number(input.getAttribute('data-re-disc-points')), input.value));
+      });
+      document.querySelectorAll('[data-re-disc-matches]').forEach(input=>{
+        input.addEventListener('change', ()=>reUpdateDisciplineMatches(record, Number(input.getAttribute('data-re-disc-matches')), input.value));
+      });
+      document.querySelectorAll('[data-re-rm-disc]').forEach(btn=>{
+        btn.addEventListener('click', ()=>reRemoveDiscipline(record, Number(btn.getAttribute('data-re-rm-disc'))));
+      });
+    }
+  }
+}
+async function saveRecordEditor(key){
+  const c = COLLECTIONS[key];
+  const id = currentView.slice((key+'-edit:').length);
+  const isNew = id==='new';
+  const data = {};
+  let missingRequired = false;
+  c.fields.forEach(f=>{
+    let val;
+    if(f.type==='checkbox'){ val = document.getElementById('f_'+f.key).classList.contains('on'); }
+    else if(f.type==='image'){ val = modalImageValues[f.key] || ''; }
+    else if(f.type==='richtext'){ val = document.getElementById('rte_'+f.key).innerHTML; }
+    else if(f.type==='multiselect'){
+      val = Array.from(document.querySelectorAll(`[data-multiselect="${f.key}"].on`)).map(el=>el.getAttribute('data-value'));
+    }
+    else {
+      val = document.getElementById('f_'+f.key).value;
+      if(f.type==='number' && val!=='') val = Number(val);
+    }
+    if(f.required && (val===''||val===undefined||val===null)) missingRequired = true;
+    data[f.key] = val;
+  });
+  if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
+
+  if(isNew){
+    data.id = uid();
+    DB[key].push(data);
+  } else {
+    const idx = DB[key].findIndex(r=>r.id===id);
+    DB[key][idx] = {...DB[key][idx], ...data};
+  }
+  await saveDB();
+  renderSidebar();
+  showToast(isNew ? 'Đã thêm mới' : 'Đã lưu thay đổi');
+  setView(key);
+}
+function deleteRecordEditor(key){
+  const id = currentView.slice((key+'-edit:').length);
+  const c = COLLECTIONS[key];
+  const record = DB[key].find(r=>r.id===id);
+  const label = record ? (record.name||record.title||`${c.single} này`) : `${c.single} này`;
+  if(confirm(`Xóa "${label}" khỏi ${c.label}? Hành động này không thể hoàn tác.`)){
+    DB[key] = DB[key].filter(r=>r.id!==id);
+    saveDB();
+    renderSidebar();
+    showToast('Đã xóa');
+    setView(key);
+  }
+}
+
 /* =========================================================
    NEWS EDITOR (full-screen editor for Tin tức, thay cho modal)
    ========================================================= */
@@ -2278,7 +2753,166 @@ function deleteNewsEditor(){
   }
 }
 
-/* ===== tournament-editor.js ===== */
+/* =========================================================
+   TOURNAMENT ENGINE (pure, no DOM)
+   4 thể thức: Đấu loại trực tiếp (SE) · Đấu loại trực tiếp kép (DE) ·
+   Vòng tròn (RR) · Swiss tính mạng (SW).
+   Thuật toán port từ Biadi Tournament Manager (đã kiểm chứng) —
+   xem Biadi_Tournament_Manager_SPEC.md.
+   ========================================================= */
+function tbkNextPow2(n){ let s=1; while(s<n) s*=2; return s; }
+function tbkBracketSeeds(size){
+  let s=[1,2];
+  while(s.length<size){ const n=s.length*2, nx=[]; for(const x of s){ nx.push(x); nx.push(n+1-x); } s=nx; }
+  return s;
+}
+function tbkPlace(M,tid,slot,pid){
+  const m=M[tid]; if(slot===1) m.p1=pid; else m.p2=pid;
+  if(m.p1!=null && m.p2!=null) m.status='ready';
+}
+function tbkDecide(M,mid,winId,s1,s2){
+  const m=M[mid]; m.win=winId;
+  if(s1!=null){ m.s1=s1; m.s2=s2; }
+  m.status='done';
+  const lose=(m.p1===winId?m.p2:m.p1);
+  if(m.winTo) tbkPlace(M,m.winTo[0],m.winTo[1],winId);
+  if(m.loseTo) tbkPlace(M,m.loseTo[0],m.loseTo[1],lose);
+  return lose;
+}
+function tbkResolveByes(M){
+  let chg=true;
+  while(chg){ chg=false;
+    for(const id in M){ const m=M[id];
+      if(m.status==='ready' && (m.p1==='BYE'||m.p2==='BYE')){
+        const w=(m.p1==='BYE'&&m.p2==='BYE')?'BYE':(m.p1==='BYE'?m.p2:m.p1);
+        tbkDecide(M,m.id,w); chg=true;
+      }
+    }
+  }
+}
+function tbkGenSE(seedIds){
+  const N=seedIds.length, size=tbkNextPow2(N), seeds=tbkBracketSeeds(size), k=Math.log2(size);
+  const M={}, rounds=[]; let id=0; const pid=s=>(s<=N?seedIds[s-1]:'BYE');
+  let r0=[];
+  for(let i=0;i<size/2;i++){ M[id]={id,br:'W',round:0,idx:i,p1:pid(seeds[2*i]),p2:pid(seeds[2*i+1]),win:null,s1:null,s2:null,status:'ready',winTo:null,loseTo:null}; r0.push(id); id++; }
+  rounds.push(r0);
+  for(let r=1;r<k;r++){ const cur=[], cnt=size/2**(r+1);
+    for(let i=0;i<cnt;i++){ M[id]={id,br:'W',round:r,idx:i,p1:null,p2:null,win:null,s1:null,s2:null,status:'wait',winTo:null,loseTo:null}; cur.push(id); id++; }
+    rounds[r-1].forEach((mid,i)=>M[mid].winTo=[cur[Math.floor(i/2)],(i%2)+1]); rounds.push(cur);
+  }
+  tbkResolveByes(M);
+  return {matches:M, rounds, type:'SE', size, k};
+}
+function tbkGenDE(seedIds){
+  const N=seedIds.length, size=tbkNextPow2(N), seeds=tbkBracketSeeds(size), k=Math.log2(size);
+  const M={}; let id=0; const pid=s=>(s<=N?seedIds[s-1]:'BYE'); const WB=[], LB=[];
+  let r0=[];
+  for(let i=0;i<size/2;i++){ M[id]={id,br:'W',round:0,idx:i,p1:pid(seeds[2*i]),p2:pid(seeds[2*i+1]),win:null,s1:null,s2:null,status:'ready',winTo:null,loseTo:null}; r0.push(id); id++; }
+  WB.push(r0);
+  for(let r=1;r<k;r++){ const cur=[], cnt=size/2**(r+1);
+    for(let i=0;i<cnt;i++){ M[id]={id,br:'W',round:r,idx:i,p1:null,p2:null,win:null,s1:null,s2:null,status:'wait',winTo:null,loseTo:null}; cur.push(id); id++; }
+    WB[r-1].forEach((mid,i)=>M[mid].winTo=[cur[Math.floor(i/2)],(i%2)+1]); WB.push(cur);
+  }
+  let lbr=0;
+  const mk=cnt=>{ const a=[]; for(let i=0;i<cnt;i++){ M[id]={id,br:'L',round:lbr,idx:i,p1:null,p2:null,win:null,s1:null,s2:null,status:'wait',winTo:null,loseTo:null}; a.push(id); id++; } LB.push(a); lbr++; return a; };
+  let minor=mk(size/4);
+  WB[0].forEach((mid,i)=>M[mid].loseTo=[minor[Math.floor(i/2)],(i%2)+1]);
+  let prev=minor;
+  for(let r=1;r<k;r++){ const major=mk(prev.length);
+    prev.forEach((mid,i)=>M[mid].winTo=[major[i],1]); WB[r].forEach((mid,i)=>M[mid].loseTo=[major[i],2]); prev=major;
+    if(r<k-1){ const mn=mk(prev.length/2); prev.forEach((mid,i)=>M[mid].winTo=[mn[Math.floor(i/2)],(i%2)+1]); prev=mn; }
+  }
+  const lbFinal=prev[0];
+  M[id]={id,br:'GF',round:0,idx:0,p1:null,p2:null,win:null,s1:null,s2:null,status:'wait',winTo:null,loseTo:null}; const gfId=id; id++;
+  M[id]={id,br:'GF2',round:0,idx:0,p1:null,p2:null,win:null,s1:null,s2:null,status:'void',winTo:null,loseTo:null}; const gf2Id=id; id++;
+  M[WB[k-1][0]].winTo=[gfId,1]; M[lbFinal].winTo=[gfId,2]; M[gfId]._gf2=gf2Id;
+  tbkResolveByes(M);
+  return {matches:M, WB, LB, gfId, gf2Id, type:'DE', size, k};
+}
+function tbkGenRR(ids){
+  let arr=ids.slice(); if(arr.length%2) arr.push('BYE');
+  const n=arr.length, rounds=[]; let id=0; const M={};
+  for(let r=0;r<n-1;r++){ const rd=[];
+    for(let i=0;i<n/2;i++){ const a=arr[i], b=arr[n-1-i];
+      if(a!=='BYE'&&b!=='BYE'){ M[id]={id,round:r,a,b,win:null,s1:null,s2:null}; rd.push(id); id++; }
+    }
+    rounds.push(rd); arr.splice(1,0,arr.pop());
+  }
+  return {matches:M, rounds, type:'RR'};
+}
+function tbkRoundName(r,total){
+  const fromEnd=total-1-r;
+  if(fromEnd===0) return 'Chung kết';
+  if(fromEnd===1) return 'Bán kết';
+  if(fromEnd===2) return 'Tứ kết';
+  return 'Vòng '+(2**(total-r));
+}
+function tbkElimChampion(eng){
+  if(eng.type==='SE'){ const last=eng.rounds[eng.rounds.length-1][0]; const m=eng.matches[last]; return m&&m.status==='done'?m.win:null; }
+  const M=eng.matches, gf=M[eng.gfId], gf2=M[eng.gf2Id];
+  if(gf2.status==='done') return gf2.win;
+  if(gf.status==='done' && gf.win===gf.p1) return gf.win;
+  return null;
+}
+function tbkShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ---- Round Robin standings ---- */
+function tbkRrStandings(rr, ids, nameOf){
+  const st={}; ids.forEach(id=>st[id]={id,w:0,l:0,gd:0,pts:0,opp:{}});
+  Object.values(rr.matches).forEach(m=>{ if(m.win==null) return; const lose=m.win===m.a?m.b:m.a;
+    st[m.win].w++; st[lose].l++; st[m.win].pts++; st[m.a].gd+=(m.s1-m.s2); st[m.b].gd+=(m.s2-m.s1); st[m.win].opp[lose]=1; });
+  return ids.map(id=>st[id]).sort((a,b)=>b.pts-a.pts || b.gd-a.gd || (b.opp[a.id]?1:-1));
+}
+
+/* ---- Swiss (lives) ---- */
+function tbkSwDerive(playerIds, lives, matches){
+  const st={}; playerIds.forEach(id=>st[id]={id,wins:0,losses:0,gw:0,gl:0,opps:new Set()});
+  matches.filter(m=>m.confirmed).forEach(m=>{
+    if(m.bye){ st[m.winnerId].wins++; return; }
+    const w=m.winnerId, l=(m.aId===w?m.bId:m.aId);
+    st[w].wins++; st[l].losses++;
+    st[m.aId].gw+=m.sa; st[m.aId].gl+=m.sb; st[m.bId].gw+=m.sb; st[m.bId].gl+=m.sa;
+    st[m.aId].opps.add(m.bId); st[m.bId].opps.add(m.aId);
+  });
+  playerIds.forEach(id=>{ const s=st[id]; s.alive=s.losses<lives; s.left=lives-s.losses; });
+  return st;
+}
+function tbkSwSos(st,id){ let s=0; st[id].opps.forEach(o=>s+=st[o].wins); return s; }
+function tbkSwRoundMatches(sw){ return sw.matches.filter(m=>m.round===sw.round); }
+function tbkSwissDrawn(sw){ return tbkSwRoundMatches(sw).length>0; }
+function tbkSwRoundComplete(sw){ const ms=tbkSwRoundMatches(sw); return ms.length>0 && ms.every(m=>m.confirmed); }
+function tbkSwissDraw(sw, players, lives, nameOf){
+  const ids=players.map(p=>p.id);
+  const st=tbkSwDerive(ids, lives, sw.matches);
+  const active=players.filter(p=>st[p.id].alive);
+  const groups={}; for(let L=0;L<lives;L++) groups[L]=[];
+  active.forEach(p=>groups[st[p.id].losses].push(p));
+  const inner=g=>g.sort((a,b)=>st[b.id].wins-st[a.id].wins || tbkSwSos(st,b.id)-tbkSwSos(st,a.id) || nameOf(a.id).localeCompare(nameOf(b.id),'vi'));
+  let pairs=[], fl=null;
+  for(let L=0;L<lives;L++){ let g=inner(groups[L].slice()); if(sw.round===1) g=tbkShuffle(g); if(fl){ g=[fl,...g]; fl=null; }
+    while(g.length>=2){ const a=g.shift(); let j=0; while(j<g.length && st[a.id].opps.has(g[j].id)) j++; if(j>=g.length) j=0; const b=g.splice(j,1)[0]; pairs.push([a,b]); }
+    if(g.length) fl=g[0];
+  }
+  pairs.forEach(([a,b])=>sw.matches.push({id:sw.seq++, round:sw.round, aId:a.id, bId:b.id, winnerId:null, sa:null, sb:null, bye:false, confirmed:false, ts:null}));
+  if(fl) sw.matches.push({id:sw.seq++, round:sw.round, aId:fl.id, bId:null, winnerId:fl.id, sa:null, sb:null, bye:true, confirmed:true, ts:Date.now()});
+}
+function tbkSwissNext(sw, players, lives){
+  if(!tbkSwRoundComplete(sw)) return false;
+  const st=tbkSwDerive(players.map(p=>p.id), lives, sw.matches);
+  if(players.filter(p=>st[p.id].alive).length<=1) return false;
+  sw.round++; return true;
+}
+
+/* ---- Simulator ---- */
+function tbkWinProb(ra,rb){ return 1/(1+Math.exp(-(ra-rb)/180)); }
+function tbkSimScore(aId,bId,ratingOf){
+  const p=tbkWinProb(ratingOf(aId), ratingOf(bId));
+  const win=Math.random()<p?aId:bId, lose=win===aId?bId:aId;
+  const close=1-Math.abs(p-.5)*2;
+  const ls=Math.min(4, Math.floor(Math.random()*5*(0.45+0.5*close)));
+  return {win,lose,ws:5,ls};
+}
+
 /* =========================================================
    TOURNAMENT EDITOR (full-screen editor for Giải đấu, thay cho modal)
    Quản lý: Thông tin giải đấu · Danh sách người chơi (upload) ·
@@ -2288,6 +2922,10 @@ const TE_WIN_POINTS = 25;
 const TE_LOSS_POINTS = 5;
 let teTab = 'info';
 let teCsvText = '';
+let teRrTab = 0;
+let teView = {tx:40, ty:30, scale:1};
+let teDragInfo = null;
+let teMatchModal = null;
 
 const TE_DEFAULT_PRIZES = [
   {rank:'1', cash:'20.000.000đ', item:'Cúp + Huy chương'},
@@ -2321,26 +2959,40 @@ function teSyncInfoFieldsIntoRecord(record){
     if(el) record[f.key] = el.value;
   });
 }
+function teEnsureDefaults(record){
+  if(!record.format) record.format = 'SE';
+  if(!record.lives) record.lives = 3;
+  if(!record.mode) record.mode = 'op';
+  if(!record.players) record.players = [];
+  if(!record.prizes || !record.prizes.length) record.prizes = TE_DEFAULT_PRIZES.map(p=>({...p}));
+}
+function teFormatLabel(fmt){
+  return {SE:'Đấu loại trực tiếp',DE:'Đấu loại trực tiếp kép',RR:'Vòng tròn',SW:'Swiss (tính mạng)'}[fmt] || 'Đấu loại trực tiếp';
+}
+function teMatchCount(record){
+  if(record.bracket) return Object.values(record.bracket.matches).filter(m=>m.status==='done').length;
+  if(record.rr) return Object.values(record.rr.matches).filter(m=>m.win!=null).length;
+  if(record.sw) return record.sw.matches.filter(m=>m.confirmed).length;
+  return 0;
+}
 
 function renderTournamentEditor(id){
   const isNew = id==='new';
   let record;
   if(isNew){
-    if(!teNewDraft) teNewDraft = {name:'',category:'',status:'upcoming',date:'',participants:'',location:'',note:'',champion:'',entryFee:TE_DEFAULT_ENTRY_FEE,rules:TE_DEFAULT_RULES,prizes:TE_DEFAULT_PRIZES.map(p=>({...p})),players:[],matches:[]};
+    if(!teNewDraft) teNewDraft = {name:'',category:'',format:'SE',lives:3,mode:'op',status:'upcoming',date:'',participants:'',location:'',note:'',champion:'',entryFee:TE_DEFAULT_ENTRY_FEE,rules:TE_DEFAULT_RULES,prizes:TE_DEFAULT_PRIZES.map(p=>({...p})),players:[]};
     record = teNewDraft;
   } else {
     record = teRecord(id) || {};
   }
-  if(!record.players) record.players = [];
-  if(!record.matches) record.matches = [];
-  if(!record.prizes || !record.prizes.length) record.prizes = TE_DEFAULT_PRIZES.map(p=>({...p}));
+  teEnsureDefaults(record);
   if(isNew) teTab = 'info';
   if(!isNew && teTab!=='info' && teTab!=='players' && teTab!=='matches') teTab = 'info';
 
   const tabs = [
     {key:'info', label:'Thông tin', icon:'ti-info-circle'},
     {key:'players', label:`Danh sách người chơi${record.players.length?` (${record.players.length})`:''}`, icon:'ti-users', disabled:isNew},
-    {key:'matches', label:`Cặp đấu & Kết quả${record.matches.length?` (${record.matches.length})`:''}`, icon:'ti-swords', disabled:isNew}
+    {key:'matches', label:`Cặp đấu & Kết quả${teMatchCount(record)?` (${teMatchCount(record)})`:''}`, icon:'ti-swords', disabled:isNew}
   ];
 
   const tabsHtml = `<div style="display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:20px">
@@ -2390,18 +3042,33 @@ function teAvailableMemberOptions(record){
   return DB.members.filter(m=>!usedIds.has(m.id)).map(m=>`<option value="${m.id}">${escapeHtml(m.name)} — ${escapeHtml(m.code||'')}${m.club?` (${escapeHtml(m.club)})`:''}</option>`).join('');
 }
 
+function teFmtDateTime(ts){
+  if(!ts) return '—';
+  const d = new Date(ts), p = x=>String(x).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 function renderTePlayersTab(record){
   const rows = record.players.map(p=>{
     const m = p.memberId ? DB.members.find(x=>x.id===p.memberId) : null;
+    const paid = p.feeStatus==='paid';
     return `<tr data-pid="${p.id}">
       <td>${escapeHtml(p.name)}</td>
       <td class="cell-muted">${escapeHtml(p.club||'—')}</td>
       <td>${m ? `<span class="status green">Hội viên · ${escapeHtml(m.code||'')}</span>` : `<span class="status gray">Khách mời</span>`}</td>
+      <td class="cell-muted">${teFmtDateTime(p.registeredAt)}</td>
+      <td><select data-te-fee="${p.id}" style="width:auto;height:28px;border:1px solid var(--line-strong);border-radius:99px;padding:0 10px;font-size:12px;font-weight:600;color:${paid?'var(--tag-green)':'var(--tag-amber)'};background:${paid?'var(--tag-green-soft)':'var(--tag-amber-soft)'}">
+        <option value="unpaid" ${!paid?'selected':''}>Chưa đóng phí</option>
+        <option value="paid" ${paid?'selected':''}>Đã đóng phí</option>
+      </select></td>
       <td class="actions"><button class="btn-icon" data-te-rm-player="${p.id}" title="Xóa"><i class="ti ti-x"></i></button></td>
     </tr>`;
   }).join('');
 
-  return `<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+  const cap = Number(record.participants)||0;
+  const over = cap>0 && record.players.length>cap;
+  const capNote = (cap>0 && record.players.length>0) ? `<div style="font-size:12.5px;color:${over?'var(--tag-amber)':'var(--hint)'};margin-bottom:12px"><i class="ti ${over?'ti-alert-triangle':'ti-users'}"></i> Đã đăng ký ${record.players.length} / ${cap} người${over?' — vượt số lượng dự kiến, vẫn cho phép tiếp tục đăng ký':''}</div>` : '';
+
+  return `${capNote}<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
     <div class="card" style="flex:1;min-width:320px">
       <div class="card-head"><div><h2>Thêm người chơi</h2><div class="desc">Chọn nhiều hội viên để thêm cùng lúc, hoặc thêm khách mời</div></div></div>
       <div class="card-body padded">
@@ -2435,115 +3102,603 @@ function renderTePlayersTab(record){
     </div>
   </div>
   <div class="tbl-wrap" style="margin-top:20px">
-    ${record.players.length===0 ? `<div class="empty"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc nhập danh sách ở trên.</div>` : `<table><thead><tr><th>Họ tên</th><th>CLB</th><th>Liên kết</th><th style="width:60px"></th></tr></thead><tbody>${rows}</tbody></table>`}
+    ${record.players.length===0 ? `<div class="empty"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc nhập danh sách ở trên.</div>` : `<table><thead><tr><th>Họ tên</th><th>CLB</th><th>Liên kết</th><th>Thời gian đăng ký</th><th>Đóng phí</th><th style="width:60px"></th></tr></thead><tbody>${rows}</tbody></table>`}
   </div>`;
 }
 
-function teNextRound(record){
-  return record.matches.length ? Math.max(...record.matches.map(m=>m.round||1)) + (teLatestRoundDone(record) ? 1 : 0) : 1;
-}
-function teLatestRound(record){
-  return record.matches.length ? Math.max(...record.matches.map(m=>m.round||1)) : 0;
-}
-function teLatestRoundDone(record){
-  const lr = teLatestRound(record);
-  if(!lr) return true;
-  return record.matches.filter(m=>m.round===lr).every(m=>m.status==='done');
-}
-function tePlayerName(record, pid){
-  if(!pid) return null;
+/* ---------- Cặp đấu & Kết quả — engine-driven (SE/DE/RR/Swiss) ---------- */
+function teName(record, pid){
+  if(pid==null) return '—';
+  if(pid==='BYE') return '(Miễn đấu)';
   const p = record.players.find(x=>x.id===pid);
   return p ? p.name : '—';
 }
-function tePairedPlayerIds(record, round){
-  const set = new Set();
-  record.matches.filter(m=>m.round===round).forEach(m=>{ set.add(m.p1Id); if(m.p2Id) set.add(m.p2Id); });
-  return set;
+function tePlayerRating(record, pid){
+  if(pid==='BYE' || pid==null) return 1000;
+  const p = record.players.find(x=>x.id===pid);
+  if(!p) return 1000;
+  if(p.rating) return p.rating;
+  let r = 1000;
+  if(p.memberId){
+    const m = DB.members.find(x=>x.id===p.memberId);
+    const d = m && (m.disciplines||[]).find(x=>x.category===record.category);
+    if(d && d.points) r = 800 + Math.min(1400, d.points/2);
+  } else r = 1000 + Math.round((Math.random()*2-1)*220);
+  p.rating = r;
+  return r;
 }
-function teRoundContenders(record){
-  const lr = teLatestRound(record);
-  if(!lr) return record.players.map(p=>p.id);
-  if(!teLatestRoundDone(record)) return [];
-  return record.matches.filter(m=>m.round===lr).map(m=>m.winnerId).filter(Boolean);
+function teFmtTime(ts){ const d = new Date(ts), p = x=>String(x).padStart(2,'0'); return `${p(d.getHours())}:${p(d.getMinutes())}`; }
+function teRecordFromView(){
+  const id = currentView.slice('tournament-edit:'.length);
+  return teRecord(id);
+}
+function applyDisciplinePoints(member, category, pointsDelta, matchesDelta){
+  if(!member || !category) return;
+  if(!member.disciplines) member.disciplines = [];
+  let d = member.disciplines.find(x=>x.category===category);
+  if(!d){ d = {category, points:0, rank:null, matches:0, trend:'eq', trendValue:0}; member.disciplines.push(d); }
+  d.points = (d.points||0) + pointsDelta;
+  d.matches = Math.max(0, (d.matches||0) + matchesDelta);
+}
+function teAwardPoints(record, winnerPid, loserPid, winPoints, lossPoints){
+  if(record.mode==='sim') return;
+  const winnerPlayer = record.players.find(p=>p.id===winnerPid);
+  const loserPlayer = loserPid ? record.players.find(p=>p.id===loserPid) : null;
+  if(winnerPlayer && winnerPlayer.memberId){ applyDisciplinePoints(DB.members.find(x=>x.id===winnerPlayer.memberId), record.category, winPoints, 1); }
+  if(loserPlayer && loserPlayer.memberId){ applyDisciplinePoints(DB.members.find(x=>x.id===loserPlayer.memberId), record.category, lossPoints, 1); }
+}
+function teReversePoints(record, winnerPid, loserPid, winPoints, lossPoints){
+  if(record.mode==='sim') return;
+  const winnerPlayer = record.players.find(p=>p.id===winnerPid);
+  const loserPlayer = loserPid ? record.players.find(p=>p.id===loserPid) : null;
+  if(winnerPlayer && winnerPlayer.memberId){ applyDisciplinePoints(DB.members.find(x=>x.id===winnerPlayer.memberId), record.category, -winPoints, -1); }
+  if(loserPlayer && loserPlayer.memberId){ applyDisciplinePoints(DB.members.find(x=>x.id===loserPlayer.memberId), record.category, -lossPoints, -1); }
+}
+function teReverseAllPoints(record){
+  if(record.bracket){
+    Object.values(record.bracket.matches).forEach(m=>{
+      if(m.status==='done' && m.p2!=null && m.p1!=='BYE' && m.p2!=='BYE'){
+        const loserId = m.win===m.p1?m.p2:m.p1;
+        teReversePoints(record, m.win, loserId, m.winPoints||0, m.lossPoints||0);
+      }
+    });
+  }
+  if(record.rr){
+    Object.values(record.rr.matches).forEach(m=>{
+      if(m.win!=null) teReversePoints(record, m.win, m.win===m.a?m.b:m.a, m.winPoints!=null?m.winPoints:TE_WIN_POINTS, m.lossPoints!=null?m.lossPoints:TE_LOSS_POINTS);
+    });
+  }
+  if(record.sw){
+    record.sw.matches.filter(m=>m.confirmed && !m.bye).forEach(m=>{
+      teReversePoints(record, m.winnerId, m.winnerId===m.aId?m.bId:m.aId, m.winPoints!=null?m.winPoints:TE_WIN_POINTS, m.lossPoints!=null?m.lossPoints:TE_LOSS_POINTS);
+    });
+  }
+}
+function teGetChampion(record){
+  if(record.format==='SE'||record.format==='DE'){ if(!record.bracket) return null; return tbkElimChampion(record.bracket); }
+  if(record.format==='RR'){
+    if(!record.rr) return null;
+    const ids = record.players.map(p=>p.id);
+    const total = Object.keys(record.rr.matches).length;
+    if(!total) return null;
+    const done = Object.values(record.rr.matches).filter(m=>m.win!=null).length;
+    if(done<total) return null;
+    const st = tbkRrStandings(record.rr, ids, id=>teName(record,id));
+    return st[0] ? st[0].id : null;
+  }
+  if(record.format==='SW'){
+    if(!record.sw || !tbkSwissDrawn(record.sw)) return null;
+    const lives = record.lives||3;
+    const st = tbkSwDerive(record.players.map(p=>p.id), lives, record.sw.matches);
+    const alive = record.players.filter(p=>st[p.id].alive);
+    return alive.length===1 ? alive[0].id : null;
+  }
+  return null;
+}
+function teCheckComplete(record){
+  const champId = teGetChampion(record);
+  if(champId){ record.champion = teName(record, champId); record.status = 'completed'; }
 }
 
 function renderTeMatchesTab(record){
-  const lr = teLatestRound(record);
-  const roundDone = teLatestRoundDone(record);
-  const contenders = teRoundContenders(record);
-  const nextRoundNum = lr ? lr+1 : 1;
-  const canDrawNext = record.status!=='completed' && (lr===0 ? record.players.length>=2 : (roundDone && contenders.length>=2));
+  const generated = record.bracket || record.rr || record.sw;
+  if(!generated) return teRenderMatchesSetup(record);
 
-  const drawSection = canDrawNext ? `<div class="card" style="margin-bottom:20px">
-      <div class="card-head"><div><h2>${lr===0?'Bốc thăm vòng 1':`Bốc thăm vòng ${nextRoundNum}`}</h2><div class="desc">${lr===0?`Ghép ngẫu nhiên ${record.players.length} người chơi thành các cặp đấu`:`Ghép ngẫu nhiên ${contenders.length} người thắng vòng ${lr} vào vòng tiếp theo`}</div></div>
-      <button class="btn btn-primary" id="teDrawBtn"><i class="ti ti-dice"></i> Bốc thăm tự động</button></div>
-    </div>` : (record.status==='completed' ? '' : (lr>0 && !roundDone ? `<div class="card" style="margin-bottom:20px"><div class="card-body padded" style="color:var(--hint);font-size:13px"><i class="ti ti-clock"></i> Hoàn tất kết quả vòng ${lr} trước khi bốc thăm vòng tiếp theo.</div></div>` : ''));
+  const ctl = `<div class="tbk-ctl">
+    <span class="tbk-badge ${record.mode==='sim'?'sim':'op'}">${record.mode==='sim'?'Mô phỏng':'Vận hành'}</span>
+    <b>${teFormatLabel(record.format)}</b><span class="cell-muted">· ${record.players.length} người chơi</span>
+    ${record.mode==='sim' ? `<button class="btn btn-ghost" id="tbSimNext" style="margin-left:auto"><i class="ti ti-player-play"></i> Chạy 1 trận</button><button class="btn btn-primary" id="tbSimAll"><i class="ti ti-player-track-next"></i> Chạy hết</button>` : ''}
+    <button class="btn btn-danger-outline" id="tbResetBtn" style="${record.mode==='sim'?'':'margin-left:auto'}"><i class="ti ti-refresh"></i> Tạo lại sơ đồ</button>
+  </div>`;
 
-  const manualOptions = (excludeId)=> record.players.filter(p=>p.id!==excludeId).map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
-  const manualSection = record.status!=='completed' ? `<div class="card" style="margin-bottom:20px">
-    <div class="card-head"><div><h2>Ghép cặp thủ công</h2><div class="desc">Tự chọn 2 người chơi và vòng đấu</div></div></div>
-    <div class="card-body padded">
-      <div class="form-grid">
-        <div class="fld"><label>Người chơi 1</label><select id="te_m_p1"><option value="">— Chọn —</option>${manualOptions()}</select></div>
-        <div class="fld"><label>Người chơi 2</label><select id="te_m_p2"><option value="">— Chọn —</option>${manualOptions()}</select></div>
-        <div class="fld"><label>Vòng đấu</label><input type="number" id="te_m_round" min="1" value="${nextRoundNum}"></div>
-      </div>
-      <div class="form-actions" style="justify-content:flex-end;border-top:none;padding-top:10px;margin-top:10px">
-        <button class="btn btn-primary" id="teManualPairBtn"><i class="ti ti-plus"></i> Tạo cặp đấu</button>
-      </div>
-    </div>
-  </div>` : '';
-
-  const rounds = {};
-  record.matches.forEach(m=>{ (rounds[m.round]=rounds[m.round]||[]).push(m); });
-  const roundKeys = Object.keys(rounds).map(Number).sort((a,b)=>a-b);
-
-  let matchesHtml = '';
-  if(roundKeys.length===0){
-    matchesHtml = `<div class="tbl-wrap"><div class="empty"><i class="ti ti-swords"></i><b>Chưa có cặp đấu</b>Bốc thăm tự động hoặc ghép cặp thủ công ở trên.</div></div>`;
+  let body = '';
+  if(record.format==='SE' || record.format==='DE'){
+    body = `<div class="card" style="padding:0;overflow:hidden"><div class="tbk-wrap">
+      <div class="tbk-view" id="tbkView"><div class="tbk-stage" id="tbkStage"></div></div>
+      <div class="tbk-label" id="tbkLabel"></div>
+      <div class="tbk-zoom"><button data-tbz="out" title="Thu nhỏ"><i class="ti ti-zoom-out"></i></button><button data-tbz="fit" title="Vừa khung"><i class="ti ti-focus-2"></i></button><button data-tbz="in" title="Phóng to"><i class="ti ti-zoom-in"></i></button></div>
+    </div></div>`;
+  } else if(record.format==='RR'){
+    body = teRenderRR(record);
   } else {
-    matchesHtml = roundKeys.map(rn=>{
-      const rowsHtml = rounds[rn].map(m=>{
-        const p1 = tePlayerName(record, m.p1Id);
-        const p2 = m.p2Id ? tePlayerName(record, m.p2Id) : null;
-        if(!p2){
-          return `<tr data-mid="${m.id}"><td colspan="5"><b>${escapeHtml(p1)}</b> <span class="badge">Miễn đấu vòng này</span></td><td class="actions"></td></tr>`;
-        }
-        if(m.status==='done'){
-          const winnerName = tePlayerName(record, m.winnerId);
-          const wp = m.winPoints!=null ? m.winPoints : TE_WIN_POINTS;
-          const lp = m.lossPoints!=null ? m.lossPoints : TE_LOSS_POINTS;
-          return `<tr data-mid="${m.id}">
-            <td><b>${escapeHtml(p1)}</b></td>
-            <td style="white-space:nowrap"><b style="color:var(--vg)">${m.score1}</b> — <b style="color:var(--vg)">${m.score2}</b></td>
-            <td><b>${escapeHtml(p2)}</b></td>
-            <td style="font-size:11.5px;color:var(--hint);white-space:nowrap">Thắng ${wp>=0?'+':''}${wp}đ · Thua ${lp>=0?'+':''}${lp}đ</td>
-            <td><span class="status green">Thắng: ${escapeHtml(winnerName)}</span></td>
-            <td class="actions"></td>
-          </tr>`;
-        }
-        return `<tr data-mid="${m.id}">
-          <td><b>${escapeHtml(p1)}</b></td>
-          <td style="white-space:nowrap"><input type="number" min="0" id="te_score1_${m.id}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:5px"> — <input type="number" min="0" id="te_score2_${m.id}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:5px"></td>
-          <td><b>${escapeHtml(p2)}</b></td>
-          <td style="white-space:nowrap;font-size:11px;color:var(--hint)">Thắng<br><input type="number" id="te_wpts_${m.id}" value="${TE_WIN_POINTS}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:4px;margin-top:2px"><br>Thua<br><input type="number" id="te_lpts_${m.id}" value="${TE_LOSS_POINTS}" style="width:52px;text-align:center;border:1px solid var(--line-strong);border-radius:6px;padding:4px;margin-top:2px"></td>
-          <td><span class="status gold">Chưa có kết quả</span></td>
-          <td class="actions">
-            <button class="btn-icon" data-te-save-result="${m.id}" title="Lưu kết quả"><i class="ti ti-device-floppy"></i></button>
-            <button class="btn-icon" data-te-rm-match="${m.id}" title="Xóa cặp đấu"><i class="ti ti-trash"></i></button>
-          </td>
-        </tr>`;
-      }).join('');
-      return `<div style="margin-bottom:18px"><div class="gd-h" style="font-size:13.5px">Vòng ${rn}</div>
-        <div class="tbl-wrap"><table><thead><tr><th>Người chơi 1</th><th style="width:120px">Tỷ số</th><th>Người chơi 2</th><th style="width:110px">Điểm xếp hạng</th><th style="width:170px">Trạng thái</th><th style="width:80px"></th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
-      </div>`;
-    }).join('');
+    body = teRenderSwiss(record);
   }
+  return ctl+body;
+}
 
-  return `<div style="font-size:12px;color:var(--hint);margin-bottom:16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px">
-      <i class="ti ti-info-circle"></i> Mặc định: Thắng trận <b>+${TE_WIN_POINTS} điểm</b> · Thua trận <b>+${TE_LOSS_POINTS} điểm</b> — có thể chỉnh điểm tăng/giảm riêng cho từng trận trước khi lưu kết quả. Mỗi trận: <b>+1 số trận đã đấu</b>. Bảng xếp hạng hội viên (mục "Hội viên & Xếp hạng") được tính lại tự động ngay sau khi lưu kết quả. Chỉ người chơi được liên kết với hội viên mới được cộng điểm.
+function teRenderMatchesSetup(record){
+  const fmt = record.format || 'SE';
+  const min = fmt==='DE' ? 3 : 2;
+  const can = record.players.length>=min;
+  const modeCard = (key,title,desc)=>{
+    const on = (record.mode||'op')===key;
+    return `<div data-tbmode="${key}" style="flex:1;min-width:220px;cursor:pointer;border:1px solid ${on?'var(--vd)':'var(--line-strong)'};background:${on?'var(--surface)':'#fff'};border-radius:10px;padding:14px">
+      <b style="color:${on?'var(--vd)':'var(--ink)'}">${title}</b>
+      <div class="cell-muted" style="margin-top:4px;font-size:12.5px">${desc}</div>
+    </div>`;
+  };
+  return `<div class="card"><div class="card-head"><div><h2>Chế độ</h2><div class="desc">Chọn cách vận hành trước khi tạo sơ đồ thi đấu</div></div></div>
+    <div class="card-body padded" style="display:flex;gap:10px;flex-wrap:wrap">
+      ${modeCard('op','Vận hành giải thật','Ban tổ chức tự nhập kết quả từng trận, cộng điểm xếp hạng hội viên thật')}
+      ${modeCard('sim','Mô phỏng','Tự sinh kết quả ngẫu nhiên để xem trước sơ đồ hoạt động — không cộng điểm thật')}
     </div>
-    ${drawSection}${manualSection}${matchesHtml}`;
+  </div>
+  ${teRenderPlayerSeedList(record)}
+  ${(fmt==='SE'||fmt==='DE') ? teRenderSeedPairPreview(record) : ''}
+  <div class="card" style="margin-top:16px"><div class="card-body padded" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div class="cell-muted">${can?`Sẵn sàng tạo sơ đồ cho ${record.players.length} người chơi theo thể thức <b>${teFormatLabel(fmt)}</b>. Danh sách người chơi sẽ khóa lại sau khi tạo.`:`Cần tối thiểu ${min} người chơi để tạo sơ đồ theo thể thức ${teFormatLabel(fmt)} (hiện có ${record.players.length}).`}</div>
+    <button class="btn btn-primary" id="tbStartBtn" ${can?'':'disabled'}><i class="ti ti-swords"></i> Tạo sơ đồ thi đấu</button>
+  </div></div>`;
+}
+function teRenderPlayerSeedList(record){
+  if(!record.players.length){
+    return `<div class="card" style="margin-top:16px"><div class="card-body padded"><div class="empty" style="padding:20px"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc khách mời ở tab "Danh sách người chơi" trước khi tạo sơ đồ.</div></div></div>`;
+  }
+  const chips = record.players.map((p,i)=>`<span class="badge" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;font-size:12.5px">
+    <span style="color:var(--hint);font-weight:700">#${i+1}</span> <b>${escapeHtml(p.name)}</b>${p.club?` <span class="cell-muted">· ${escapeHtml(p.club)}</span>`:''}
+  </span>`).join('');
+  return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Danh sách người chơi</h2><div class="desc">${record.players.length} người · Thứ tự hạt giống theo thứ tự thêm vào danh sách</div></div></div>
+    <div class="card-body padded" style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div>
+  </div>`;
+}
+function teRenderSeedPairPreview(record){
+  const n = record.players.length;
+  if(n<2) return '';
+  const size = tbkNextPow2(n);
+  const seeds = tbkBracketSeeds(size);
+  const pid = s=>(s<=n?record.players[s-1]:null);
+  const rows = [];
+  for(let i=0;i<size/2;i++){
+    const a = pid(seeds[2*i]), b = pid(seeds[2*i+1]);
+    rows.push({a,b});
+  }
+  const fixtures = rows.map(r=>`<div class="tbk-fix">
+    <span class="pn">${r.a?`<span style="color:var(--hint);font-weight:700">#${record.players.indexOf(r.a)+1}</span> ${escapeHtml(r.a.name)}`:''}</span>
+    <span class="vs">vs</span>
+    <span class="pn r">${r.b?`${escapeHtml(r.b.name)} <span style="color:var(--hint);font-weight:700">#${record.players.indexOf(r.b)+1}</span>`:'<span class="cell-muted">(miễn đấu — BYE)</span>'}</span>
+  </div>`).join('');
+  return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Xem trước bắt cặp vòng 1</h2><div class="desc">Ghép theo hạt giống${size>n?` · ${size-n} người được miễn đấu (BYE) vòng đầu`:''} — sẽ được chốt khi tạo sơ đồ</div></div></div>
+    <div class="card-body padded">${fixtures}</div>
+  </div>`;
+}
+function teStartBracket(record){
+  record.players.forEach((p,i)=>{ p.seed=i+1; });
+  const fmt = record.format || 'SE';
+  const seedIds = record.players.map(p=>p.id);
+  if(fmt==='SE') record.bracket = tbkGenSE(seedIds);
+  else if(fmt==='DE') record.bracket = tbkGenDE(seedIds);
+  else if(fmt==='RR') record.rr = tbkGenRR(seedIds);
+  else record.sw = {round:1, matches:[], seq:1};
+  if(record.status==='upcoming') record.status = 'ongoing';
+  teRrTab = 0;
+  teView = {tx:40, ty:30, scale:1};
+  saveDB();
+  renderSidebar();
+  showToast('Đã tạo sơ đồ thi đấu');
+  renderContent();
+  if(fmt==='SE'||fmt==='DE') setTimeout(()=>teFitBracket(record), 30);
+}
+function teResetBracket(record){
+  if(!confirm('Tạo lại sơ đồ sẽ xóa toàn bộ kết quả đã nhập và hoàn tác điểm xếp hạng đã cộng (nếu có). Danh sách người chơi được giữ nguyên. Tiếp tục?')) return;
+  teReverseAllPoints(record);
+  record.bracket = null; record.rr = null; record.sw = null;
+  if(record.status==='completed') record.status = 'ongoing';
+  record.champion = '';
+  recomputeMemberRanking();
+  saveDB();
+  renderSidebar();
+  showToast('Đã đặt lại sơ đồ thi đấu');
+  renderContent();
+}
+
+/* ---- SE / DE bracket ---- */
+function teLayoutSE(eng){
+  const rounds=eng.rounds, CW=188, CH=62, GX=66, GY=20;
+  const pos={}; const rh=CH+GY;
+  rounds[0].forEach((id,i)=>pos[id]={x:0,y:i*rh});
+  for(let r=1;r<rounds.length;r++) rounds[r].forEach((id,i)=>{
+    const c1=pos[rounds[r-1][2*i]], c2=pos[rounds[r-1][2*i+1]]; pos[id]={x:r*(CW+GX), y:(c1.y+c2.y)/2};
+  });
+  const labels = rounds.map((rd,r)=>({x:r*(CW+GX), txt:tbkRoundName(r, rounds.length)}));
+  return {pos, W:rounds.length*(CW+GX), H:rounds[0].length*rh, labels, CW, CH};
+}
+function teLayoutDE(eng){
+  const WB=eng.WB, LB=eng.LB, CW=188, CH=62, GX=66, GY=18;
+  const pos={}; const rh=CH+GY;
+  WB[0].forEach((id,i)=>pos[id]={x:0,y:i*rh});
+  for(let r=1;r<WB.length;r++) WB[r].forEach((id,i)=>{ const c1=pos[WB[r-1][2*i]], c2=pos[WB[r-1][2*i+1]]; pos[id]={x:r*(CW+GX), y:(c1.y+c2.y)/2}; });
+  const wbH=WB[0].length*rh, band=wbH+50;
+  LB.forEach((col,r)=>{ const x=r*(CW+GX); col.forEach((id,i)=>pos[id]={x, y:band+i*rh}); });
+  const gfx = Math.max(WB.length, LB.length)*(CW+GX);
+  pos[eng.gfId] = {x:gfx, y:(wbH)/2-CH/2};
+  if(eng.matches[eng.gf2Id].status!=='void') pos[eng.gf2Id] = {x:gfx, y:wbH/2+rh};
+  const labels=[]; WB.forEach((c,r)=>labels.push({x:r*(CW+GX), y:-22, txt:'WB '+tbkRoundName(r, WB.length)}));
+  LB.forEach((c,r)=>labels.push({x:r*(CW+GX), y:band-22, txt:'LB Vòng '+(r+1)}));
+  labels.push({x:gfx, y:-22, txt:'Chung kết'});
+  const maxLBy = band + Math.max(...LB.map(c=>c.length))*rh;
+  return {pos, W:gfx+CW, H:Math.max(wbH, maxLBy), labels, CW, CH};
+}
+function teMatchCardHtml(record, m, p, CW){
+  const row=(pid,won)=>{
+    const bye = pid==='BYE';
+    const nm = pid==null ? '<span style="color:var(--hint)">— chờ —</span>' : (bye?'BYE':escapeHtml(teName(record,pid)));
+    const player = (pid && pid!=='BYE') ? record.players.find(x=>x.id===pid) : null;
+    const seed = player ? `#${player.seed}` : '';
+    const sc = pid===m.p1 ? m.s1 : (pid===m.p2 ? m.s2 : null);
+    return `<div class="br ${won?'w':''} ${bye?'bye':''}"><span class="sd">${seed}</span><span class="pn">${nm}</span><span class="sc">${sc!=null?sc:''}</span></div>`;
+  };
+  const aw = m.win!=null && m.win===m.p1, bw = m.win!=null && m.win===m.p2;
+  const cls = (m.br==='GF'||m.br==='GF2') ? 'tbk-m gf' : 'tbk-m '+(m.status==='ready'?'ready':'');
+  return `<div class="${cls}" data-tbm="${m.id}" style="left:${p.x}px;top:${p.y}px;width:${CW}px">${row(m.p1,aw)}${row(m.p2,bw)}</div>`;
+}
+function teDrawBracket(record){
+  const eng = record.bracket;
+  const stage = document.getElementById('tbkStage');
+  if(!stage || !eng) return;
+  const L = eng.type==='SE' ? teLayoutSE(eng) : teLayoutDE(eng);
+  const M = eng.matches;
+  let svg = `<svg class="tbk-conn" width="${L.W+200}" height="${L.H+120}">`;
+  for(const id in M){
+    const m=M[id]; const p=L.pos[id]; if(!p) continue;
+    [['winTo','#22A56F'],['loseTo','#CD5B45']].forEach(([key,col])=>{
+      const t=m[key]; if(!t || !L.pos[t[0]]) return;
+      const tp=L.pos[t[0]];
+      const x1=p.x+L.CW, y1=p.y+L.CH/2, x2=tp.x, y2=tp.y+(t[1]===1?16:46);
+      const mx=(x1+x2)/2;
+      svg += `<path d="M${x1} ${y1} H${mx} V${y2} H${x2}" stroke="${col}" stroke-width="1.5" fill="none" opacity="${key==='loseTo'?0.5:0.85}"/>`;
+    });
+  }
+  svg += `</svg>`;
+  let cards='';
+  for(const id in M){ const m=M[id]; const p=L.pos[id]; if(!p) continue; if(m.br==='GF2'&&m.status==='void') continue; cards += teMatchCardHtml(record, m, p, L.CW); }
+  const labs = L.labels.map(l=>`<div class="tbk-rlabel" style="left:${l.x}px;top:${(l.y!=null?l.y:-22)}px">${escapeHtml(l.txt)}</div>`).join('');
+  stage.style.transform = `translate(${teView.tx}px,${teView.ty}px) scale(${teView.scale})`;
+  stage.style.paddingTop = '28px';
+  stage.innerHTML = svg+labs+cards;
+  const champId = tbkElimChampion(eng);
+  const label = document.getElementById('tbkLabel');
+  if(label) label.innerHTML = champId ? `<i class="ti ti-trophy" style="color:var(--gold)"></i> Vô địch: <span class="tbk-champ">${escapeHtml(teName(record,champId))}</span>` : 'Kéo để di chuyển · cuộn để phóng to · bấm trận để nhập kết quả';
+}
+function teBindBracketView(record){
+  teDrawBracket(record);
+  const viewEl = document.getElementById('tbkView');
+  if(!viewEl) return;
+  viewEl.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const r = viewEl.getBoundingClientRect();
+    const mx=e.clientX-r.left, my=e.clientY-r.top;
+    const ns = Math.min(2, Math.max(.35, teView.scale*(e.deltaY<0?1.12:0.89)));
+    teView.tx = mx-(mx-teView.tx)*(ns/teView.scale);
+    teView.ty = my-(my-teView.ty)*(ns/teView.scale);
+    teView.scale = ns;
+    teApplyView();
+  }, {passive:false});
+  viewEl.onpointerdown = e=>{ teDragInfo={x:e.clientX,y:e.clientY,tx:teView.tx,ty:teView.ty,moved:false}; viewEl.classList.add('drag'); viewEl.setPointerCapture(e.pointerId); };
+  viewEl.onpointermove = e=>{ if(!teDragInfo) return; const dx=e.clientX-teDragInfo.x, dy=e.clientY-teDragInfo.y; if(Math.abs(dx)+Math.abs(dy)>4) teDragInfo.moved=true; teView.tx=teDragInfo.tx+dx; teView.ty=teDragInfo.ty+dy; teApplyView(); };
+  viewEl.onpointerup = e=>{
+    const moved = teDragInfo && teDragInfo.moved;
+    viewEl.classList.remove('drag'); teDragInfo=null;
+    if(!moved){ const card=e.target.closest('.tbk-m'); if(card) teOpenMatchModal(card.getAttribute('data-tbm')); }
+  };
+  document.querySelectorAll('[data-tbz]').forEach(b=>b.addEventListener('click', ()=>{
+    const z=b.getAttribute('data-tbz');
+    if(z==='in') teView.scale=Math.min(2, teView.scale*1.2);
+    else if(z==='out') teView.scale=Math.max(.35, teView.scale/1.2);
+    else return teFitBracket(record);
+    teApplyView();
+  }));
+}
+function teApplyView(){ const st=document.getElementById('tbkStage'); if(st) st.style.transform=`translate(${teView.tx}px,${teView.ty}px) scale(${teView.scale})`; }
+function teFitBracket(record){
+  const eng = record.bracket; if(!eng) return;
+  const L = eng.type==='SE' ? teLayoutSE(eng) : teLayoutDE(eng);
+  const v = document.getElementById('tbkView'); if(!v) return;
+  const r = v.getBoundingClientRect();
+  const sc = Math.min((r.width-40)/(L.W+40), (r.height-60)/(L.H+60), 1.1);
+  teView.scale = Math.max(.35, sc); teView.tx = 20; teView.ty = 40; teApplyView();
+}
+function teOpenMatchModal(mid){
+  const record = teRecordFromView();
+  if(!record || !record.bracket) return;
+  const M = record.bracket.matches; const m = M[mid];
+  if(!m || m.p1==null || m.p2==null || m.p1==='BYE' || m.p2==='BYE') return;
+  teMatchModal = {mid};
+  const row=(pid,won)=>{
+    const p = record.players.find(x=>x.id===pid);
+    const sc = pid===m.p1 ? m.s1 : m.s2;
+    return `<div class="tbk-modline"><span class="pn ${won?'tbk-winner':''}">${escapeHtml(p?p.name:'—')}</span><input type="number" min="0" id="tbm_s_${pid}" value="${sc!=null?sc:''}"></div>`;
+  };
+  document.getElementById('modalTitle').textContent = m.br==='GF'?'Chung kết':m.br==='GF2'?'Chung kết (tái đấu)':m.br==='L'?'Nhánh thua':'Trận đấu';
+  document.getElementById('modalBody').innerHTML = `
+    ${row(m.p1, m.win===m.p1)}${row(m.p2, m.win===m.p2)}
+    <div class="form-grid" style="margin-top:14px">
+      <div class="fld"><label>Điểm xếp hạng — Thắng</label><input type="number" id="tbm_wpts" value="${m.winPoints!=null?m.winPoints:TE_WIN_POINTS}"></div>
+      <div class="fld"><label>Điểm xếp hạng — Thua</label><input type="number" id="tbm_lpts" value="${m.lossPoints!=null?m.lossPoints:TE_LOSS_POINTS}"></div>
+    </div>
+    ${record.mode==='sim' ? `<div style="margin-top:14px"><button type="button" class="btn btn-ghost" id="tbmAutoBtn"><i class="ti ti-dice-5"></i> Tự xử (mô phỏng ngẫu nhiên)</button></div>` : ''}
+  `;
+  document.querySelector('#modalOverlay .modal').classList.remove('wide');
+  document.getElementById('modalDeleteBtn').style.display = 'none';
+  document.getElementById('modalSaveBtn').style.display = '';
+  document.getElementById('modalOverlay').classList.add('on');
+  const auto = document.getElementById('tbmAutoBtn');
+  if(auto) auto.addEventListener('click', ()=>{
+    const r = tbkSimScore(m.p1, m.p2, pid=>tePlayerRating(record,pid));
+    document.getElementById('tbm_s_'+m.p1).value = r.win===m.p1?r.ws:r.ls;
+    document.getElementById('tbm_s_'+m.p2).value = r.win===m.p2?r.ws:r.ls;
+  });
+}
+function closeTeMatchModal(){ document.getElementById('modalOverlay').classList.remove('on'); teMatchModal=null; }
+function saveTeMatchModal(){
+  const record = teRecordFromView();
+  if(!record || !teMatchModal || !record.bracket) return;
+  const mid = teMatchModal.mid;
+  const M = record.bracket.matches; const m = M[mid];
+  if(!m) return;
+  const s1 = Number(document.getElementById('tbm_s_'+m.p1).value);
+  const s2 = Number(document.getElementById('tbm_s_'+m.p2).value);
+  if(!Number.isFinite(s1) || !Number.isFinite(s2) || s1===s2){ showToast('Vui lòng nhập tỷ số hợp lệ, phải có người thắng.', true); return; }
+  const winPoints = Number(document.getElementById('tbm_wpts').value)||0;
+  const lossPoints = Number(document.getElementById('tbm_lpts').value)||0;
+  teSubmitElimResult(record, mid, s1, s2, winPoints, lossPoints);
+  closeTeMatchModal();
+}
+function teSubmitElimResult(record, mid, s1, s2, winPoints, lossPoints){
+  const M = record.bracket.matches; const m = M[mid];
+  const winId = s1>s2 ? m.p1 : m.p2;
+  if(m.status==='done'){
+    const t = m.winTo && M[m.winTo[0]];
+    if(t && t.status==='done'){ showToast('Không thể sửa: trận sau đã có kết quả. Hãy sửa từ trận muộn nhất.', true); return; }
+    const oldLoserId = (m.win===m.p1?m.p2:m.p1);
+    teReversePoints(record, m.win, oldLoserId, m.winPoints||0, m.lossPoints||0);
+    if(m.winTo){ const tm=M[m.winTo[0]]; if(m.winTo[1]===1) tm.p1=null; else tm.p2=null; tm.status='wait'; }
+    if(m.loseTo){ const tm=M[m.loseTo[0]]; if(m.loseTo[1]===1) tm.p1=null; else tm.p2=null; tm.status='wait'; }
+  }
+  const loseId = tbkDecide(M, mid, winId, s1, s2);
+  m.winPoints = winPoints; m.lossPoints = lossPoints; m.decidedAt = Date.now();
+  if(m.br==='GF'){
+    const g2 = M[record.bracket.gf2Id];
+    if(winId===m.p2){ g2.status='ready'; g2.p1=m.p1; g2.p2=m.p2; } else { g2.status='void'; }
+  }
+  tbkResolveByes(M);
+  teAwardPoints(record, winId, loseId, winPoints, lossPoints);
+  recomputeMemberRanking();
+  teCheckComplete(record);
+  saveDB();
+  renderSidebar();
+  showToast('Đã ghi nhận kết quả và cập nhật bảng xếp hạng');
+  renderContent();
+}
+
+/* ---- Round Robin ---- */
+function teRenderRR(record){
+  const rr = record.rr;
+  const ids = record.players.map(p=>p.id);
+  const total = Object.keys(rr.matches).length;
+  const done = Object.values(rr.matches).filter(m=>m.win!=null).length;
+  const st = tbkRrStandings(rr, ids, id=>teName(record,id));
+  const tbl = `<div class="card"><div class="card-head"><div><h2>Bảng xếp hạng</h2><div class="desc">${done}/${total} trận</div></div></div>
+    <div class="tbl-wrap"><table><thead><tr><th style="width:34px">#</th><th>Người chơi</th><th style="width:60px">Thắng</th><th style="width:60px">Thua</th><th style="width:60px">+/−</th><th style="width:60px">Điểm</th></tr></thead>
+    <tbody>${st.map((s,i)=>`<tr><td class="cell-muted">${i+1}</td><td><b>${escapeHtml(teName(record,s.id))}</b></td><td style="text-align:center">${s.w}</td><td style="text-align:center">${s.l}</td><td style="text-align:center">${s.gd>0?'+':''}${s.gd}</td><td style="text-align:center"><b>${s.pts}</b></td></tr>`).join('')}</tbody></table></div></div>`;
+  const rounds = rr.rounds;
+  if(teRrTab>=rounds.length) teRrTab=0;
+  const tabs = `<div class="tbk-rrtab">${rounds.map((r,i)=>`<button class="${teRrTab===i?'on':''}" data-tbrt="${i}">Vòng ${i+1}</button>`).join('')}</div>`;
+  const cur = rounds[teRrTab] || [];
+  const fixtures = cur.map(id=>{
+    const m=rr.matches[id]; const isDone=m.win!=null; const aw=m.win===m.a;
+    if(isDone) return `<div class="tbk-fix"><span class="pn ${aw?'w':'l'}">${escapeHtml(teName(record,m.a))}</span><span class="tbk-res" style="padding:3px 9px;font-size:13px">${m.s1}–${m.s2}</span><span class="pn r ${aw?'l':'w'}">${escapeHtml(teName(record,m.b))}</span><button class="btn-icon" data-tbredit="${id}" title="Sửa"><i class="ti ti-edit"></i></button></div>`;
+    return `<div class="tbk-fix"><span class="pn">${escapeHtml(teName(record,m.a))}</span><input type="number" min="0" id="tb_ra_${id}"><span class="vs">–</span><input type="number" min="0" id="tb_rb_${id}"><span class="pn r">${escapeHtml(teName(record,m.b))}</span><button class="btn-icon" data-tbrsave="${id}" title="Lưu"><i class="ti ti-device-floppy"></i></button></div>`;
+  }).join('') || `<div class="empty">Vòng này không có trận.</div>`;
+  const fix = `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Lịch thi đấu</h2></div></div>${tabs}<div class="card-body padded">${fixtures}</div></div>`;
+  return tbl+fix;
+}
+function teSaveRRResult(mid){
+  const record = teRecordFromView(); if(!record) return;
+  const m = record.rr.matches[mid]; if(!m) return;
+  const s1 = Number(document.getElementById('tb_ra_'+mid).value);
+  const s2 = Number(document.getElementById('tb_rb_'+mid).value);
+  if(!Number.isFinite(s1) || !Number.isFinite(s2) || s1===s2){ showToast('Vui lòng nhập tỷ số hợp lệ.', true); return; }
+  m.s1=s1; m.s2=s2; m.win = s1>s2 ? m.a : m.b;
+  m.winPoints = TE_WIN_POINTS; m.lossPoints = TE_LOSS_POINTS; m.decidedAt = Date.now();
+  teAwardPoints(record, m.win, m.win===m.a?m.b:m.a, m.winPoints, m.lossPoints);
+  recomputeMemberRanking();
+  teCheckComplete(record);
+  saveDB();
+  renderSidebar();
+  showToast('Đã ghi nhận kết quả và cập nhật bảng xếp hạng');
+  renderContent();
+}
+function teEditRRResult(mid){
+  const record = teRecordFromView(); if(!record) return;
+  const m = record.rr.matches[mid]; if(!m) return;
+  if(m.win!=null){
+    teReversePoints(record, m.win, m.win===m.a?m.b:m.a, m.winPoints!=null?m.winPoints:TE_WIN_POINTS, m.lossPoints!=null?m.lossPoints:TE_LOSS_POINTS);
+    recomputeMemberRanking();
+  }
+  m.win=null; m.s1=null; m.s2=null;
+  saveDB();
+  renderSidebar();
+  renderContent();
+}
+
+/* ---- Swiss (lives) ---- */
+function teRenderSwiss(record){
+  const lives = record.lives||3;
+  const sw = record.sw;
+  const st = tbkSwDerive(record.players.map(p=>p.id), lives, sw.matches);
+  const sorted = record.players.slice().sort((A,B)=>{
+    const a=st[A.id], b=st[B.id];
+    if(a.alive!==b.alive) return a.alive?-1:1;
+    if(a.alive){ if(a.losses!==b.losses) return a.losses-b.losses; if(a.wins!==b.wins) return b.wins-a.wins; return tbkSwSos(st,b.id)-tbkSwSos(st,a.id); }
+    return b.wins-a.wins;
+  });
+  const aliveCount = record.players.filter(p=>st[p.id].alive).length;
+  let champHtml = '';
+  if(aliveCount<=1 && tbkSwissDrawn(sw)){ const c=sorted[0]; champHtml = `<div class="tbk-champbar"><i class="ti ti-trophy" style="color:var(--gold)"></i> Vô địch: ${escapeHtml(c.name)}</div>`; }
+  const lb = `<div class="card"><div class="card-head"><div><h2>Bảng xếp hạng</h2><div class="desc">${record.players.length} người · ${lives} mạng</div></div></div>
+    <div class="card-body padded" style="padding-top:8px">${champHtml}${sorted.map((p,i)=>{
+      const s=st[p.id]; const dead=!s.alive;
+      const t = lives<=1?0:s.losses/(lives-1); const h=Math.round(150-t*142);
+      let balls='<div class="tbk-lives">'; for(let k=0;k<lives;k++) balls+=`<div class="tbk-ball ${k<s.left?'':'gone'}"></div>`; balls+='</div>';
+      return `<div class="tbk-row ${dead?'dead':''}"><div class="rk">${i+1}</div><div class="who"><b>${escapeHtml(p.name)}</b></div>
+        ${dead?'<span class="tbk-grp" style="color:var(--hint);background:var(--surface)">—</span>':`<span class="tbk-grp" style="color:hsl(${h} 62% 34%);background:hsl(${h} 55% 92%)">${s.losses} thua</span>`}
+        <div class="tbk-wl"><b>${s.wins}</b>–${s.losses}</div>${dead?'<div class="tbk-deadtag">Loại</div>':balls}</div>`;
+    }).join('')}</div></div>`;
+
+  const ms = tbkSwRoundMatches(sw);
+  const roundDone = tbkSwRoundComplete(sw);
+  const filled = ms.filter(m=>m.confirmed).length;
+  let rp;
+  if(!tbkSwissDrawn(sw)){
+    rp = `<div class="card-body padded" style="text-align:center"><div style="font-weight:700;margin-bottom:4px">Vòng ${sw.round}</div><div class="cell-muted" style="margin-bottom:14px">${aliveCount} người còn trong giải.</div><button class="btn btn-primary" id="tbSwDrawBtn"><i class="ti ti-dice-5"></i> Bốc thăm vòng ${sw.round}</button></div>`;
+  } else {
+    rp = `<div class="card-body padded">${ms.map(m=>teSwMatchCard(record,m)).join('')}</div>`;
+    if(roundDone && aliveCount>1) rp += `<div class="form-actions" style="justify-content:center;border-top:1px solid var(--line);padding:14px"><button class="btn btn-primary" id="tbSwNextBtn">Vòng tiếp theo <i class="ti ti-arrow-right"></i> (Vòng ${sw.round+1})</button></div>`;
+  }
+  const panel = `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Vòng ${sw.round}</h2><div class="desc">${!tbkSwissDrawn(sw)?'chưa bốc thăm':roundDone?'Hoàn tất '+filled+'/'+ms.length:'Đã nhập '+filled+'/'+ms.length}</div></div></div>${rp}</div>`;
+  return `<div class="tbk-grid2"><div>${lb}</div><div>${panel}${teSwLog(record)}</div></div>`;
+}
+function teSwMatchCard(record,m){
+  const A = record.players.find(p=>p.id===m.aId);
+  if(m.bye) return `<div class="tbk-fix"><span class="pn w">${escapeHtml(A?A.name:'—')}</span><span class="tbk-byebadge">Miễn đấu</span></div>`;
+  const B = record.players.find(p=>p.id===m.bId);
+  if(m.confirmed){
+    const aw = m.winnerId===m.aId;
+    return `<div class="tbk-fix"><span class="pn ${aw?'w':'l'}">${escapeHtml(A?A.name:'—')}</span><span class="tbk-res" style="padding:3px 9px;font-size:13px">${m.sa}–${m.sb}</span><span class="pn r ${aw?'l':'w'}">${escapeHtml(B?B.name:'—')}</span><button class="btn-icon" data-tbswedit="${m.id}" title="Sửa"><i class="ti ti-edit"></i></button></div>`;
+  }
+  return `<div class="tbk-fix"><span class="pn">${escapeHtml(A?A.name:'—')}</span><input type="number" min="0" id="tb_sa_${m.id}"><span class="vs">–</span><input type="number" min="0" id="tb_sb_${m.id}"><span class="pn r">${escapeHtml(B?B.name:'—')}</span><button class="btn-icon" data-tbswsave="${m.id}" title="Lưu"><i class="ti ti-device-floppy"></i></button></div>`;
+}
+function teSwLog(record){
+  const sw = record.sw;
+  const conf = sw.matches.filter(m=>m.confirmed);
+  const rows = conf.slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const body = rows.length ? rows.map(r=>{
+    const A = record.players.find(p=>p.id===r.aId);
+    let d;
+    if(r.bye) d = `<span class="tbk-winner">${escapeHtml(A?A.name:'—')}</span> <span class="tbk-loser">— miễn đấu</span>`;
+    else { const B=record.players.find(p=>p.id===r.bId); const aw=r.winnerId===r.aId;
+      d = `<span class="${aw?'tbk-winner':'tbk-loser'}">${escapeHtml(A?A.name:'—')}</span> <b>${r.sa}–${r.sb}</b> <span class="${aw?'tbk-loser':'tbk-winner'}">${escapeHtml(B?B.name:'—')}</span>`; }
+    return `<div class="tbk-lg"><div class="t">${r.ts?teFmtTime(r.ts):''}</div><div class="rr">V${r.round}</div><div>${d}</div></div>`;
+  }).join('') : `<div class="empty" style="padding:20px">Chưa có trận.</div>`;
+  return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Nhật ký trận đấu</h2><div class="desc">${rows.length} trận</div></div></div><div class="tbk-logtable">${body}</div></div>`;
+}
+function teSaveSwissResult(mid){
+  const record = teRecordFromView(); if(!record) return;
+  const m = record.sw.matches.find(x=>x.id===Number(mid)); if(!m) return;
+  const sa = Number(document.getElementById('tb_sa_'+mid).value);
+  const sb = Number(document.getElementById('tb_sb_'+mid).value);
+  if(!Number.isFinite(sa) || !Number.isFinite(sb) || sa===sb){ showToast('Vui lòng nhập tỷ số hợp lệ.', true); return; }
+  m.sa=sa; m.sb=sb; m.winnerId = sa>sb ? m.aId : m.bId; m.confirmed=true; m.ts=Date.now();
+  m.winPoints = TE_WIN_POINTS; m.lossPoints = TE_LOSS_POINTS;
+  teAwardPoints(record, m.winnerId, m.winnerId===m.aId?m.bId:m.aId, m.winPoints, m.lossPoints);
+  recomputeMemberRanking();
+  teCheckComplete(record);
+  saveDB();
+  renderSidebar();
+  showToast('Đã ghi nhận kết quả và cập nhật bảng xếp hạng');
+  renderContent();
+}
+function teEditSwissResult(mid){
+  const record = teRecordFromView(); if(!record) return;
+  const m = record.sw.matches.find(x=>x.id===Number(mid)); if(!m) return;
+  if(m.confirmed && !m.bye){
+    teReversePoints(record, m.winnerId, m.winnerId===m.aId?m.bId:m.aId, m.winPoints!=null?m.winPoints:TE_WIN_POINTS, m.lossPoints!=null?m.lossPoints:TE_LOSS_POINTS);
+    recomputeMemberRanking();
+  }
+  m.confirmed=false; m.sa=null; m.sb=null; m.winnerId=null;
+  saveDB();
+  renderSidebar();
+  renderContent();
+}
+
+/* ---- Simulator ---- */
+function teSimStep(n){
+  const record = teRecordFromView();
+  if(!record) return;
+  for(let c=0;c<n;c++){
+    if(record.format==='SE' || record.format==='DE'){
+      const M = record.bracket.matches;
+      const ready = Object.values(M).filter(m=>m.status==='ready' && m.p1!=='BYE' && m.p2!=='BYE' && m.p1!=null && m.p2!=null);
+      if(!ready.length) break;
+      const m = ready[0];
+      const r = tbkSimScore(m.p1, m.p2, pid=>tePlayerRating(record,pid));
+      tbkDecide(M, m.id, r.win, r.win===m.p1?r.ws:r.ls, r.win===m.p1?r.ls:r.ws);
+      if(m.br==='GF'){ const g2=M[record.bracket.gf2Id]; if(r.win===m.p2){ g2.status='ready'; g2.p1=m.p1; g2.p2=m.p2; } else g2.status='void'; }
+      tbkResolveByes(M);
+    } else if(record.format==='RR'){
+      const M = record.rr.matches;
+      const open = Object.values(M).filter(m=>m.win==null);
+      if(!open.length) break;
+      const m = open[0];
+      const r = tbkSimScore(m.a, m.b, pid=>tePlayerRating(record,pid));
+      m.win=r.win; m.s1=r.win===m.a?r.ws:r.ls; m.s2=r.win===m.a?r.ls:r.ws;
+    } else if(record.format==='SW'){
+      if(!tbkSwissDrawn(record.sw)) tbkSwissDraw(record.sw, record.players, record.lives||3, id=>teName(record,id));
+      const open = tbkSwRoundMatches(record.sw).filter(m=>!m.confirmed && !m.bye);
+      if(open.length){
+        const m = open[0];
+        const r = tbkSimScore(m.aId, m.bId, pid=>tePlayerRating(record,pid));
+        m.sa=r.win===m.aId?r.ws:r.ls; m.sb=r.win===m.aId?r.ls:r.ws; m.winnerId=r.win; m.confirmed=true; m.ts=Date.now();
+      } else if(tbkSwRoundComplete(record.sw)){
+        if(!tbkSwissNext(record.sw, record.players, record.lives||3)) break;
+      }
+    }
+  }
+  teCheckComplete(record);
+  saveDB();
+  renderSidebar();
+  renderContent();
+  if(record.format==='SE'||record.format==='DE') teApplyView();
+}
+
+function attachTeMatchesTab(record){
+  if(!record) return;
+  document.querySelectorAll('[data-tbmode]').forEach(el=>el.addEventListener('click', ()=>{
+    record.mode = el.getAttribute('data-tbmode'); saveDB(); renderContent();
+  }));
+  const startBtn = document.getElementById('tbStartBtn');
+  if(startBtn) startBtn.addEventListener('click', ()=>teStartBracket(record));
+  const resetBtn = document.getElementById('tbResetBtn');
+  if(resetBtn) resetBtn.addEventListener('click', ()=>teResetBracket(record));
+  const simNext = document.getElementById('tbSimNext');
+  if(simNext) simNext.addEventListener('click', ()=>teSimStep(1));
+  const simAll = document.getElementById('tbSimAll');
+  if(simAll) simAll.addEventListener('click', ()=>teSimStep(9999));
+
+  if(record.bracket) teBindBracketView(record);
+  if(record.rr){
+    document.querySelectorAll('[data-tbrt]').forEach(b=>b.addEventListener('click', ()=>{ teRrTab=+b.getAttribute('data-tbrt'); renderContent(); }));
+    document.querySelectorAll('[data-tbrsave]').forEach(b=>b.addEventListener('click', ()=>teSaveRRResult(b.getAttribute('data-tbrsave'))));
+    document.querySelectorAll('[data-tbredit]').forEach(b=>b.addEventListener('click', ()=>teEditRRResult(b.getAttribute('data-tbredit'))));
+  }
+  if(record.sw){
+    const d = document.getElementById('tbSwDrawBtn');
+    if(d) d.addEventListener('click', ()=>{ tbkSwissDraw(record.sw, record.players, record.lives||3, id=>teName(record,id)); saveDB(); renderContent(); });
+    const nx = document.getElementById('tbSwNextBtn');
+    if(nx) nx.addEventListener('click', ()=>{ tbkSwissNext(record.sw, record.players, record.lives||3); saveDB(); renderContent(); });
+    document.querySelectorAll('[data-tbswsave]').forEach(b=>b.addEventListener('click', ()=>teSaveSwissResult(b.getAttribute('data-tbswsave'))));
+    document.querySelectorAll('[data-tbswedit]').forEach(b=>b.addEventListener('click', ()=>teEditSwissResult(b.getAttribute('data-tbswedit'))));
+  }
 }
 
 function attachTournamentEditorEvents(){
@@ -2609,17 +3764,11 @@ function attachTournamentEditorEvents(){
   document.querySelectorAll('[data-te-rm-player]').forEach(btn=>{
     btn.addEventListener('click', ()=>teRemovePlayer(btn.getAttribute('data-te-rm-player')));
   });
+  document.querySelectorAll('[data-te-fee]').forEach(sel=>{
+    sel.addEventListener('change', ()=>teSetPlayerFeeStatus(sel.getAttribute('data-te-fee'), sel.value));
+  });
 
-  const drawBtn = document.getElementById('teDrawBtn');
-  if(drawBtn) drawBtn.addEventListener('click', teDrawRound);
-  const manualPairBtn = document.getElementById('teManualPairBtn');
-  if(manualPairBtn) manualPairBtn.addEventListener('click', teManualPair);
-  document.querySelectorAll('[data-te-save-result]').forEach(btn=>{
-    btn.addEventListener('click', ()=>teSaveMatchResult(btn.getAttribute('data-te-save-result')));
-  });
-  document.querySelectorAll('[data-te-rm-match]').forEach(btn=>{
-    btn.addEventListener('click', ()=>teRemoveMatch(btn.getAttribute('data-te-rm-match')));
-  });
+  if(teTab==='matches') attachTeMatchesTab(teCurrentRecord());
 }
 
 async function teSaveInfo(){
@@ -2638,7 +3787,6 @@ async function teSaveInfo(){
   if(isNew){
     data.id = uid();
     data.players = [];
-    data.matches = [];
     data.prizes = (teNewDraft && teNewDraft.prizes) ? teNewDraft.prizes : TE_DEFAULT_PRIZES.map(p=>({...p}));
     DB.tournaments.push(data);
     teResetNewDraft();
@@ -2654,6 +3802,25 @@ async function teSaveInfo(){
     showToast('Đã lưu thông tin giải đấu');
     renderContent();
   }
+}
+function teCloneTournament(id){
+  const src = teRecord(id);
+  if(!src) return;
+  const clone = JSON.parse(JSON.stringify(src));
+  clone.id = uid();
+  clone.name = src.name + ' (Bản sao)';
+  clone.status = 'upcoming';
+  clone.champion = '';
+  clone.bracket = null;
+  clone.rr = null;
+  clone.sw = null;
+  clone.mode = 'op';
+  clone.players = (src.players||[]).map(p=>({...p, id:uid(), registeredAt:Date.now(), feeStatus:'unpaid'}));
+  DB.tournaments.push(clone);
+  saveDB();
+  renderSidebar();
+  showToast('Đã nhân bản giải đấu — danh sách người chơi được giữ nguyên, chưa ghép cặp vòng đầu');
+  setView('tournament-edit:'+clone.id);
 }
 function teDeleteTournament(){
   const id = currentView.slice('tournament-edit:'.length);
@@ -2680,7 +3847,7 @@ function teAddPlayers(){
     if(record.players.some(p=>p.memberId===memberId)) return;
     const m = DB.members.find(x=>x.id===memberId);
     if(!m) return;
-    record.players.push({id:uid(), memberId, name:m.name, club:m.club||''});
+    record.players.push({id:uid(), memberId, name:m.name, club:m.club||'', registeredAt:Date.now(), feeStatus:'unpaid'});
     added++;
   });
   saveDB();
@@ -2695,7 +3862,7 @@ function teAddGuest(){
   const nameInput = document.getElementById('te_p_name').value.trim();
   const clubInput = document.getElementById('te_p_club').value.trim();
   if(!nameInput){ showToast('Vui lòng nhập họ tên khách mời', true); return; }
-  record.players.push({id:uid(), memberId:null, name:nameInput, club:clubInput});
+  record.players.push({id:uid(), memberId:null, name:nameInput, club:clubInput, registeredAt:Date.now(), feeStatus:'unpaid'});
   saveDB();
   renderSidebar();
   showToast('Đã thêm khách mời');
@@ -2723,7 +3890,9 @@ function teImportCsv(){
       id:uid(),
       memberId: member ? member.id : null,
       name: member ? member.name : name,
-      club: member ? (member.club||club) : club
+      club: member ? (member.club||club) : club,
+      registeredAt: Date.now(),
+      feeStatus: 'unpaid'
     });
     added++;
   });
@@ -2733,12 +3902,25 @@ function teImportCsv(){
   showToast(`Đã nhập ${added} người chơi từ danh sách`);
   renderContent();
 }
+function teSetPlayerFeeStatus(pid, status){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  const p = record.players.find(x=>x.id===pid);
+  if(!p) return;
+  p.feeStatus = status;
+  saveDB();
+  renderContent();
+}
 function teRemovePlayer(pid){
   const id = currentView.slice('tournament-edit:'.length);
   const record = teRecord(id);
   if(!record) return;
-  if(record.matches.some(m=>m.p1Id===pid || m.p2Id===pid)){
-    showToast('Không thể xóa: người chơi đã có trong cặp đấu. Hãy xóa cặp đấu liên quan trước.', true);
+  const inBracket = record.bracket && Object.values(record.bracket.matches).some(m=>m.p1===pid || m.p2===pid);
+  const inRR = record.rr && Object.values(record.rr.matches).some(m=>m.a===pid || m.b===pid);
+  const inSw = record.sw && record.sw.matches.some(m=>m.aId===pid || m.bId===pid);
+  if(inBracket || inRR || inSw){
+    showToast('Không thể xóa: người chơi đã có trong sơ đồ thi đấu. Hãy "Tạo lại sơ đồ" trước.', true);
     return;
   }
   record.players = record.players.filter(p=>p.id!==pid);
@@ -2748,123 +3930,26 @@ function teRemovePlayer(pid){
   renderContent();
 }
 
-function teDrawRound(){
-  const id = currentView.slice('tournament-edit:'.length);
-  const record = teRecord(id);
-  if(!record) return;
-  const lr = teLatestRound(record);
-  const round = lr ? lr+1 : 1;
-  let pool;
-  if(!lr){
-    pool = record.players.map(p=>p.id);
-  } else {
-    pool = teRoundContenders(record);
-  }
-  if(pool.length<2){ showToast('Không đủ người chơi để bốc thăm', true); return; }
-  const shuffled = [...pool];
-  for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
-  const newMatches = [];
-  for(let i=0;i<shuffled.length;i+=2){
-    if(i+1<shuffled.length){
-      newMatches.push({id:uid(), round, p1Id:shuffled[i], p2Id:shuffled[i+1], score1:null, score2:null, status:'pending', winnerId:null});
-    } else {
-      newMatches.push({id:uid(), round, p1Id:shuffled[i], p2Id:null, score1:null, score2:null, status:'done', winnerId:shuffled[i]});
-    }
-  }
-  record.matches.push(...newMatches);
-  teCheckTournamentComplete(record);
-  saveDB();
-  showToast(`Đã bốc thăm ${newMatches.length} cặp đấu cho vòng ${round}`);
-  renderContent();
-}
-function teManualPair(){
-  const id = currentView.slice('tournament-edit:'.length);
-  const record = teRecord(id);
-  if(!record) return;
-  const p1 = document.getElementById('te_m_p1').value;
-  const p2 = document.getElementById('te_m_p2').value;
-  const round = Number(document.getElementById('te_m_round').value) || 1;
-  if(!p1 || !p2){ showToast('Vui lòng chọn đủ 2 người chơi', true); return; }
-  if(p1===p2){ showToast('Vui lòng chọn 2 người chơi khác nhau', true); return; }
-  record.matches.push({id:uid(), round, p1Id:p1, p2Id:p2, score1:null, score2:null, status:'pending', winnerId:null});
-  saveDB();
-  showToast('Đã tạo cặp đấu');
-  renderContent();
-}
-function teRemoveMatch(mid){
-  const id = currentView.slice('tournament-edit:'.length);
-  const record = teRecord(id);
-  if(!record) return;
-  record.matches = record.matches.filter(m=>m.id!==mid);
-  saveDB();
-  showToast('Đã xóa cặp đấu');
-  renderContent();
-}
-
 function recomputeMemberRanking(){
-  const prevRank = {};
-  DB.members.forEach(m=>{ prevRank[m.id] = m.rank; });
-  const sorted = [...DB.members].sort((a,b)=>(b.points||0)-(a.points||0));
-  sorted.forEach((m,i)=>{
-    const newRank = i+1;
-    const oldRank = prevRank[m.id] ?? newRank;
-    const delta = oldRank - newRank;
-    m.rank = newRank;
-    m.trend = delta>0 ? 'up' : (delta<0 ? 'down' : 'eq');
-    m.trendValue = Math.abs(delta);
+  const categories = new Set();
+  DB.members.forEach(m=>(m.disciplines||[]).forEach(d=>categories.add(d.category)));
+  categories.forEach(cat=>{
+    const entries = [];
+    DB.members.forEach(m=>{ const d=(m.disciplines||[]).find(x=>x.category===cat); if(d) entries.push(d); });
+    const prevRank = new Map(entries.map(d=>[d, d.rank]));
+    entries.sort((a,b)=>(b.points||0)-(a.points||0));
+    entries.forEach((d,i)=>{
+      const newRank = i+1;
+      const oldRank = prevRank.get(d) ?? newRank;
+      const delta = oldRank - newRank;
+      d.rank = newRank;
+      d.trend = delta>0 ? 'up' : (delta<0 ? 'down' : 'eq');
+      d.trendValue = Math.abs(delta);
+    });
   });
 }
 
-function teCheckTournamentComplete(record){
-  const lr = teLatestRound(record);
-  if(!lr) return;
-  const roundMatches = record.matches.filter(m=>m.round===lr);
-  if(roundMatches.length===1 && roundMatches[0].status==='done' && roundMatches[0].p2Id){
-    const championName = tePlayerName(record, roundMatches[0].winnerId);
-    record.champion = championName;
-    record.status = 'completed';
-  }
-}
 
-function teSaveMatchResult(mid){
-  const id = currentView.slice('tournament-edit:'.length);
-  const record = teRecord(id);
-  if(!record) return;
-  const match = record.matches.find(m=>m.id===mid);
-  if(!match) return;
-  const s1 = document.getElementById('te_score1_'+mid).value;
-  const s2 = document.getElementById('te_score2_'+mid).value;
-  if(s1===''||s2===''){ showToast('Vui lòng nhập tỷ số cho cả 2 người chơi', true); return; }
-  const score1 = Number(s1), score2 = Number(s2);
-  if(score1===score2){ showToast('Tỷ số không được hòa — cần xác định người thắng', true); return; }
-  const wptsInput = document.getElementById('te_wpts_'+mid);
-  const lptsInput = document.getElementById('te_lpts_'+mid);
-  const winPoints = (wptsInput && wptsInput.value!=='') ? Number(wptsInput.value) : TE_WIN_POINTS;
-  const lossPoints = (lptsInput && lptsInput.value!=='') ? Number(lptsInput.value) : TE_LOSS_POINTS;
-  const winnerId = score1>score2 ? match.p1Id : match.p2Id;
-  const loserId = score1>score2 ? match.p2Id : match.p1Id;
-  match.score1 = score1; match.score2 = score2; match.status = 'done'; match.winnerId = winnerId;
-  match.winPoints = winPoints; match.lossPoints = lossPoints;
-
-  const winnerPlayer = record.players.find(p=>p.id===winnerId);
-  const loserPlayer = record.players.find(p=>p.id===loserId);
-  if(winnerPlayer && winnerPlayer.memberId){
-    const m = DB.members.find(x=>x.id===winnerPlayer.memberId);
-    if(m){ m.points = (m.points||0) + winPoints; m.matches = (m.matches||0) + 1; }
-  }
-  if(loserPlayer && loserPlayer.memberId){
-    const m = DB.members.find(x=>x.id===loserPlayer.memberId);
-    if(m){ m.points = (m.points||0) + lossPoints; m.matches = (m.matches||0) + 1; }
-  }
-  recomputeMemberRanking();
-  teCheckTournamentComplete(record);
-  saveDB();
-  renderSidebar();
-  showToast('Đã ghi nhận kết quả và cập nhật bảng xếp hạng');
-  renderContent();
-}
-
-/* ===== add-section-modal.js ===== */
 /* =========================================================
    ADD SECTION MODAL (chọn loại section khi thêm mới)
    ========================================================= */
@@ -2940,7 +4025,7 @@ function closeAddSectionModal(){
   document.getElementById('modalOverlay').classList.remove('on');
 }
 
-/* ===== page-modal.js ===== */
+
 /* =========================================================
    PAGE MODAL (tạo trang mới / cài đặt trang: slug, title, metadata)
    ========================================================= */
@@ -2999,7 +4084,7 @@ function closePageModal(){
   document.getElementById('modalOverlay').classList.remove('on');
 }
 
-/* ===== export-import.js ===== */
+
 /* =========================================================
    EXPORT / IMPORT
    ========================================================= */
@@ -3031,7 +4116,7 @@ function importData(e){
   e.target.value = '';
 }
 
-/* ===== utils.js ===== */
+
 /* =========================================================
    UTILS
    ========================================================= */
@@ -3058,15 +4143,15 @@ function showToast(msg, isError){
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
 }
 
-/* ===== init.js ===== */
+
 /* =========================================================
    INIT
    ========================================================= */
-function closeActiveModal(){ addSectionModal ? closeAddSectionModal() : (pageModal ? closePageModal() : closeModal()); }
+function closeActiveModal(){ addSectionModal ? closeAddSectionModal() : (pageModal ? closePageModal() : (teMatchModal ? closeTeMatchModal() : closeModal())); }
 document.getElementById('modalClose').addEventListener('click', closeActiveModal);
 document.getElementById('modalCancelBtn').addEventListener('click', closeActiveModal);
-document.getElementById('modalSaveBtn').addEventListener('click', ()=> addSectionModal ? saveAddSectionModal() : (pageModal ? savePageModal() : saveModal()));
-document.getElementById('modalDeleteBtn').addEventListener('click', ()=>{ if(addSectionModal || pageModal) return; deleteModal(); });
+document.getElementById('modalSaveBtn').addEventListener('click', ()=> addSectionModal ? saveAddSectionModal() : (pageModal ? savePageModal() : (teMatchModal ? saveTeMatchModal() : saveModal())));
+document.getElementById('modalDeleteBtn').addEventListener('click', ()=>{ if(addSectionModal || pageModal || teMatchModal) return; deleteModal(); });
 document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='modalOverlay') closeActiveModal(); });
 document.getElementById('navtgl').addEventListener('click', ()=>document.getElementById('sidebar').classList.toggle('open'));
 document.addEventListener('click', (e)=>{
