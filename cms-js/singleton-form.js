@@ -17,8 +17,9 @@ function attachSingletonEvents(key, fields){
       const el = document.getElementById('f_'+f.key);
       data[f.key] = f.type==='checkbox' ? el.classList.contains('on') : el.value;
     });
+    const ok = await saveSingletonToApi(key, data);
+    if(!ok) return;
     DB[key] = data;
-    await saveDB();
     showToast('Đã lưu thay đổi');
     renderSidebar();
   });

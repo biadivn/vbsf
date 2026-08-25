@@ -26,6 +26,20 @@ const AUTHENTICATED_USER_ACTIONS = [
   'plugin::users-permissions.user.count',
 ];
 
+// Các collection CMS quản lý trực tiếp (module "Tin tức", "Đối tác",
+// "Văn bản & Luật", "Thư viện Media") — tài khoản CMS (role Authenticated)
+// cần đủ quyền CRUD trên các content-type này.
+const CONTENT_MANAGE_UIDS = [
+  'api::news-article.news-article',
+  'api::partner.partner',
+  'api::library-doc.library-doc',
+  'api::media-item.media-item',
+];
+const CONTENT_MANAGE_SINGLE_TYPE_UIDS = ['api::setting.setting', 'api::contact-info.contact-info'];
+
+// Cho phép tài khoản CMS upload ảnh (news.image, partner.image) qua /api/upload.
+const UPLOAD_ACTIONS = ['plugin::upload.content-api.upload'];
+
 async function grantPermissions(strapi, roleId, actions) {
   for (const action of actions) {
     const existing = await strapi.query('plugin::users-permissions.permission').findOne({
@@ -66,7 +80,12 @@ module.exports = {
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: 'authenticated' } });
     if (authenticatedRole) {
-      await grantPermissions(strapi, authenticatedRole.id, AUTHENTICATED_USER_ACTIONS);
+      const contentActions = [];
+      CONTENT_MANAGE_UIDS.forEach((uid) =>
+        contentActions.push(`${uid}.find`, `${uid}.findOne`, `${uid}.create`, `${uid}.update`, `${uid}.delete`)
+      );
+      CONTENT_MANAGE_SINGLE_TYPE_UIDS.forEach((uid) => contentActions.push(`${uid}.find`, `${uid}.update`));
+      await grantPermissions(strapi, authenticatedRole.id, [...AUTHENTICATED_USER_ACTIONS, ...contentActions, ...UPLOAD_ACTIONS]);
     }
   },
 };

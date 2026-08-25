@@ -449,7 +449,7 @@ const VN_PROVINCES = ['Hà Nội','TP.HCM','Đà Nẵng','Hải Phòng','Cần T
 
 const COLLECTIONS = {
   news: {
-    label:'Tin tức', icon:'ti-news', single:'bài viết',
+    label:'Tin tức', icon:'ti-news', single:'bài viết', remote:true, apiPath:'news-articles',
     fields:[
       {key:'image', label:'Ảnh banner', type:'image', span2:true},
       {key:'title', label:'Tiêu đề', type:'text', required:true, span2:true},
@@ -498,7 +498,7 @@ const COLLECTIONS = {
     ]
   },
   library_docs: {
-    label:'Văn bản & Luật', icon:'ti-file-text', single:'tài liệu',
+    label:'Văn bản & Luật', icon:'ti-file-text', single:'tài liệu', remote:true, apiPath:'library-docs',
     fields:[
       {key:'title', label:'Tên tài liệu', type:'text', required:true, span2:true},
       {key:'fileType', label:'Định dạng', type:'select', options:['PDF','DOCX','XLSX']},
@@ -514,7 +514,7 @@ const COLLECTIONS = {
     ]
   },
   library_media: {
-    label:'Thư viện Media', icon:'ti-photo', single:'album',
+    label:'Thư viện Media', icon:'ti-photo', single:'album', remote:true, apiPath:'media-items',
     fields:[
       {key:'title', label:'Tên album', type:'text', required:true, span2:true},
       {key:'mediaType', label:'Loại', type:'select', options:['photo','video'], optionLabels:{photo:'Hình ảnh',video:'Video'}},
@@ -585,7 +585,7 @@ const COLLECTIONS = {
     ]
   },
   accounts: {
-    label:'Tài khoản CMS', icon:'ti-user-shield', single:'tài khoản', resetPassword:true, remote:true,
+    label:'Tài khoản CMS', icon:'ti-user-shield', single:'tài khoản', resetPassword:true, remote:true, strapiUsers:true,
     fields:[
       {key:'displayName', label:'Tên hiển thị', type:'text', required:true, span2:true},
       {key:'username', label:'Tên đăng nhập', type:'text', required:true, span2:true, placeholder:'admin@vbsf.local'},
@@ -597,7 +597,7 @@ const COLLECTIONS = {
     ]
   },
   partners: {
-    label:'Đối tác & Tài trợ', icon:'ti-building', single:'đối tác',
+    label:'Đối tác & Tài trợ', icon:'ti-building', single:'đối tác', remote:true, apiPath:'partners',
     fields:[
       {key:'image', label:'Hình minh họa', type:'image', span2:true},
       {key:'name', label:'Tên đối tác', type:'text', required:true, span2:true},
@@ -855,30 +855,9 @@ function seedData(){
       address:'Số ..., Quận ..., Hà Nội, Việt Nam', email:'info@billiards.org.vn', phone:'024 xxxx xxxx',
       hours:'Thứ 2 – Thứ 6 · 08:00 – 17:00', facebook:'', youtube:'', tiktok:''
     },
-    news:[
-      {id:uid(),title:'VBSF công bố hệ thống thi đấu quốc gia năm 2026',category:'Hoạt động VBSF',date:'2026-06-02',author:'Ban Truyền thông VBSF',featured:false,excerpt:'VBSF chính thức công bố hệ thống thi đấu quốc gia năm 2026 với cấu trúc ba cấp độ.',content:'Liên đoàn Billiards & Snooker Việt Nam (VBSF) vừa chính thức công bố hệ thống thi đấu quốc gia năm 2026, với cấu trúc giải đấu xuyên suốt và cơ chế tích điểm xếp hạng áp dụng cho tất cả các nội dung.'},
-      {id:uid(),title:'Khởi tranh vòng loại khu vực phía Nam',category:'Giải đấu',date:'2026-06-02',author:'Ban Truyền thông VBSF',featured:false,excerpt:'Hơn 120 cơ thủ tranh tài tại vòng loại khu vực.',content:''},
-      {id:uid(),title:'VBSF công bố khung chuẩn trọng tài cấp quốc gia',category:'Đào tạo',date:'2026-05-28',author:'Ban Truyền thông VBSF',featured:true,excerpt:'Chương trình đào tạo và cấp chứng nhận trọng tài.',content:''},
-      {id:uid(),title:'Cơ thủ Việt Nam giành vé dự giải vô địch châu Á',category:'Quốc tế',date:'2026-05-20',author:'Ban Truyền thông VBSF',featured:true,excerpt:'Thành tích ấn tượng tại vòng loại Đông Nam Á.',content:''},
-      {id:uid(),title:'Giải Carom 3 băng các CLB toàn quốc khởi động',category:'Trong nước',date:'2026-05-16',author:'Ban Truyền thông VBSF',featured:false,excerpt:'Mùa giải mới quy tụ các CLB mạnh cả nước.',content:''},
-      {id:uid(),title:'Ký kết hợp tác phát triển hệ thống xếp hạng',category:'Hoạt động VBSF',date:'2026-05-10',author:'Ban Truyền thông VBSF',featured:false,excerpt:'Hướng tới chuẩn hóa dữ liệu và minh bạch xếp hạng.',content:''},
-      {id:uid(),title:'Lịch thi đấu hệ thống quốc gia quý III/2026',category:'Giải đấu',date:'2026-05-15',author:'Ban Truyền thông VBSF',featured:true,excerpt:'',content:''},
-      {id:uid(),title:'Tổng kết mùa giải Pool 2025',category:'Giải đấu',date:'2026-04-28',author:'Ban Truyền thông VBSF',featured:false,excerpt:'Nhìn lại những dấu ấn của mùa giải vừa qua.',content:''}
-    ],
-    library_docs:[
-      {id:uid(),title:'Quy chế hệ thống thi đấu quốc gia 2026',fileType:'PDF',tag:'Quy chế',size:'1,2 MB',date:'2026-05-12'},
-      {id:uid(),title:'Luật thi đấu Pool (8 / 9 / 10 bi)',fileType:'PDF',tag:'Luật',size:'2,4 MB',date:'2026-03-01'},
-      {id:uid(),title:'Luật thi đấu Carom (1 băng & 3 băng)',fileType:'PDF',tag:'Luật',size:'1,8 MB',date:'2026-03-01'},
-      {id:uid(),title:'Luật thi đấu Snooker',fileType:'PDF',tag:'Luật',size:'2,1 MB',date:'2026-03-01'},
-      {id:uid(),title:'Đơn đăng ký hội viên (biểu mẫu)',fileType:'DOCX',tag:'Biểu mẫu',size:'240 KB',date:'2026-01-10'},
-      {id:uid(),title:'Thông báo lịch thi đấu quý III/2026',fileType:'PDF',tag:'Thông báo',size:'560 KB',date:'2026-05-20'}
-    ],
-    library_media:[
-      {id:uid(),title:'Giải VĐQG Pool 2025',mediaType:'photo',count:48,date:'2025-12-20'},
-      {id:uid(),title:'Lễ ký kết hợp tác',mediaType:'photo',count:12,date:'2026-05-10'},
-      {id:uid(),title:'Chung kết Carom 3 băng 2025',mediaType:'video',count:1,date:'2025-12-12'},
-      {id:uid(),title:'Hướng dẫn luật Snooker',mediaType:'video',count:1,date:'2026-03-05'}
-    ],
+    news:[],
+    library_docs:[],
+    library_media:[],
     members_org:[
       {id:uid(),code:'VBSF-TC-2019-001',name:'CLB Sài Gòn',orgType:'Câu lạc bộ',taxCode:'',province:'TP.HCM',address:'Quận 1, TP.HCM',repName:'Nguyễn Văn Hòa',repTitle:'Chủ nhiệm CLB',repPhone:'0901112233',repEmail:'clbsaigon@vbsf.org.vn',phone:'0901112233',password:'123456',package:'Gói Tiêu chuẩn',joinDate:'2019-03-10',expiry:'2026-12-31',status:'active'},
       {id:uid(),code:'VBSF-TC-2020-002',name:'CLB Thủ Đô',orgType:'Câu lạc bộ',taxCode:'',province:'Hà Nội',address:'Cầu Giấy, Hà Nội',repName:'Trần Thị Mai',repTitle:'Chủ nhiệm CLB',repPhone:'0912223344',repEmail:'clbthudo@vbsf.org.vn',phone:'0912223344',password:'123456',package:'Gói Tiêu chuẩn',joinDate:'2020-05-18',expiry:'2026-11-30',status:'active'},
@@ -886,16 +865,7 @@ function seedData(){
       {id:uid(),code:'VBSF-TC-2022-004',name:'Meow Billiards',orgType:'Doanh nghiệp',taxCode:'0312345678',province:'Bình Dương',address:'Thủ Dầu Một, Bình Dương',repName:'Phạm Anh Tuấn',repTitle:'Giám đốc',repPhone:'0934445566',repEmail:'meowbilliards@vbsf.org.vn',phone:'0934445566',password:'123456',package:'Gói Nâng cao',joinDate:'2022-01-20',expiry:'',status:'pending'},
       {id:uid(),code:'VBSF-TC-2023-005',name:'CLB Cảng',orgType:'Câu lạc bộ',taxCode:'',province:'Hải Phòng',address:'Hồng Bàng, Hải Phòng',repName:'Đỗ Thành Long',repTitle:'Chủ nhiệm CLB',repPhone:'0945556677',repEmail:'clbcang@vbsf.org.vn',phone:'0945556677',password:'123456',package:'Gói Cơ bản',joinDate:'2023-09-12',expiry:'2025-12-31',status:'expired'}
     ],
-    partners:[
-      {id:uid(),name:'Tên đối tác',tier:'Đối tác chiến lược',description:'Đối tác công nghệ & hệ thống xếp hạng'},
-      {id:uid(),name:'Tên đối tác',tier:'Đối tác chiến lược',description:'Đối tác hệ thống câu lạc bộ'},
-      {id:uid(),name:'Nhà tài trợ Kim cương 1',tier:'Nhà tài trợ Kim cương',description:''},
-      {id:uid(),name:'Nhà tài trợ Kim cương 2',tier:'Nhà tài trợ Kim cương',description:''},
-      {id:uid(),name:'Nhà tài trợ Vàng 1',tier:'Nhà tài trợ Vàng',description:''},
-      {id:uid(),name:'Nhà tài trợ Vàng 2',tier:'Nhà tài trợ Vàng',description:''},
-      {id:uid(),name:'Đối tác đồng hành 1',tier:'Đối tác đồng hành',description:''},
-      {id:uid(),name:'Đối tác đồng hành 2',tier:'Đối tác đồng hành',description:''}
-    ]
+    partners:[]
   };
 }
 function uid(){return 'id_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
@@ -1420,8 +1390,9 @@ function attachSingletonEvents(key, fields){
       const el = document.getElementById('f_'+f.key);
       data[f.key] = f.type==='checkbox' ? el.classList.contains('on') : el.value;
     });
+    const ok = await saveSingletonToApi(key, data);
+    if(!ok) return;
     DB[key] = data;
-    await saveDB();
     showToast('Đã lưu thay đổi');
     renderSidebar();
   });
@@ -2335,7 +2306,7 @@ async function saveModal(){
   if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
 
   if(c.remote){
-    const ok = await saveRemoteAccount(editingId, data);
+    const ok = c.strapiUsers ? await saveRemoteAccount(editingId, data) : await saveRemoteCollectionRecord(key, editingId, data);
     if(!ok) return;
     closeModal();
     renderSidebar();
@@ -2362,7 +2333,7 @@ async function deleteModal(){
   if(!editingCollection || !editingId) return;
   const c = COLLECTIONS[editingCollection];
   if(c.remote){
-    const ok = await deleteRemoteAccount(editingId);
+    const ok = c.strapiUsers ? await deleteRemoteAccount(editingId) : await deleteRemoteCollectionRecord(editingCollection, editingId);
     if(!ok) return;
   } else {
     DB[editingCollection] = DB[editingCollection].filter(r=>r.id!==editingId);
@@ -2380,7 +2351,7 @@ async function confirmDelete(key, id){
   const label = record ? (record.name||record.title||record.displayName||'mục này') : 'mục này';
   if(!confirm(`Xóa "${label}" khỏi ${c.label}? Hành động này không thể hoàn tác.`)) return;
   if(c.remote){
-    const ok = await deleteRemoteAccount(id);
+    const ok = c.strapiUsers ? await deleteRemoteAccount(id) : await deleteRemoteCollectionRecord(key, id);
     if(!ok) return;
   } else {
     DB[key] = DB[key].filter(r=>r.id!==id);
@@ -4256,6 +4227,133 @@ document.addEventListener('click', (e)=>{
 });
 
 /* =========================================================
+   STRAPI DATA — đồng bộ các collection nội dung (news, partners,
+   library_docs, library_media) và 2 singleton (settings, contact)
+   với Strapi. Dùng chung apiFetch()/getStoredTokens() từ auth.js.
+
+   Ghi chú: tournaments, members, members_org CHƯA được nối vào Strapi
+   ở đây — các collection này còn phụ thuộc dữ liệu component/quan hệ
+   phức tạp (giải đấu: bracket/players/prizes; hội viên: disciplines/
+   freeMatches) và bộ máy giải đấu cục bộ (tournament-editor.js), nên
+   việc đồng bộ đầy đủ để lại cho một lần làm riêng.
+   ========================================================= */
+const SINGLETON_API_PATH = { settings:'setting', contact:'contact-info' };
+
+async function uploadDataUri(dataUri, filenameHint){
+  const blobRes = await fetch(dataUri);
+  const blob = await blobRes.blob();
+  const ext = (blob.type.split('/')[1] || 'png');
+  const form = new FormData();
+  form.append('files', blob, `${filenameHint}-${Date.now()}.${ext}`);
+  const { jwt } = getStoredTokens();
+  const headers = {};
+  if(jwt) headers['Authorization'] = 'Bearer '+jwt;
+  const res = await fetch(STRAPI_URL+'/api/upload', { method:'POST', headers, body: form });
+  if(!res.ok) throw new Error('upload failed');
+  const out = await res.json();
+  return out[0].id;
+}
+
+function mediaUrl(media){
+  if(!media || !media.url) return '';
+  return media.url.startsWith('http') ? media.url : STRAPI_URL + media.url;
+}
+
+function mapStrapiEntryToRecord(c, item){
+  const rec = { id: item.documentId };
+  c.fields.forEach(f=>{
+    rec[f.key] = f.type==='image' ? mediaUrl(item[f.key]) : item[f.key];
+  });
+  return rec;
+}
+
+async function refreshRemoteCollection(key){
+  const c = COLLECTIONS[key];
+  try{
+    let page = 1, all = [], pageCount = 1;
+    do{
+      const res = await apiFetch(`/api/${c.apiPath}?pagination[page]=${page}&pagination[pageSize]=100&populate=*`);
+      if(!res.ok) break;
+      const out = await res.json();
+      all = all.concat(out.data || []);
+      pageCount = (out.meta && out.meta.pagination && out.meta.pagination.pageCount) || 1;
+      page++;
+    } while(page <= pageCount);
+    DB[key] = all.map(item=>mapStrapiEntryToRecord(c, item));
+  }catch(e){
+    DB[key] = DB[key] || [];
+  }
+}
+
+async function saveRemoteCollectionRecord(key, id, data){
+  const c = COLLECTIONS[key];
+  try{
+    const payload = {};
+    for(const f of c.fields){
+      if(f.type==='image'){
+        const val = data[f.key];
+        if(val && val.startsWith('data:')) payload[f.key] = await uploadDataUri(val, f.key);
+        else if(val === '') payload[f.key] = null;
+        continue;
+      }
+      payload[f.key] = data[f.key];
+    }
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/${c.apiPath}/${id}` : `/api/${c.apiPath}`;
+    const res = await apiFetch(url, { method, body: JSON.stringify({ data: payload }) });
+    if(!res.ok){
+      const out = await res.json().catch(()=>({}));
+      showToast((out.error && out.error.message) || 'Không thể lưu', true);
+      return false;
+    }
+    await refreshRemoteCollection(key);
+    return true;
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+    return false;
+  }
+}
+
+async function deleteRemoteCollectionRecord(key, id){
+  const c = COLLECTIONS[key];
+  try{
+    const res = await apiFetch(`/api/${c.apiPath}/${id}`, { method:'DELETE' });
+    if(!res.ok){ showToast('Không thể xóa', true); return false; }
+    await refreshRemoteCollection(key);
+    return true;
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+    return false;
+  }
+}
+
+async function refreshSingletonFromApi(key){
+  const apiPath = SINGLETON_API_PATH[key];
+  try{
+    const res = await apiFetch(`/api/${apiPath}`);
+    if(!res.ok) return; // singleton chưa có dữ liệu — giữ nguyên seed mặc định
+    const out = await res.json();
+    if(out.data) DB[key] = Object.assign({}, DB[key], out.data);
+  }catch(e){ /* Strapi không truy cập được — giữ dữ liệu hiện có */ }
+}
+
+async function saveSingletonToApi(key, data){
+  const apiPath = SINGLETON_API_PATH[key];
+  try{
+    const res = await apiFetch(`/api/${apiPath}`, { method:'PUT', body: JSON.stringify({ data }) });
+    if(!res.ok){
+      const out = await res.json().catch(()=>({}));
+      showToast((out.error && out.error.message) || 'Không thể lưu', true);
+      return false;
+    }
+    return true;
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+    return false;
+  }
+}
+
+/* =========================================================
    AUTH — Đăng nhập, đăng xuất, đổi/đặt lại mật khẩu, quản lý tài khoản
    Xác thực thật qua Strapi (plugin Users & Permissions), KHÔNG dùng dữ liệu giả.
    ========================================================= */
@@ -4388,6 +4486,12 @@ async function showCmsApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = '';
   await refreshAccountsFromApi();
+  const remoteKeys = Object.keys(COLLECTIONS).filter(k=>COLLECTIONS[k].remote && !COLLECTIONS[k].strapiUsers);
+  await Promise.all([
+    ...remoteKeys.map(k=>refreshRemoteCollection(k)),
+    refreshSingletonFromApi('settings'),
+    refreshSingletonFromApi('contact')
+  ]);
   renderSidebar();
   renderTopbar();
   renderContent();

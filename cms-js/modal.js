@@ -253,7 +253,7 @@ async function saveModal(){
   if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
 
   if(c.remote){
-    const ok = await saveRemoteAccount(editingId, data);
+    const ok = c.strapiUsers ? await saveRemoteAccount(editingId, data) : await saveRemoteCollectionRecord(key, editingId, data);
     if(!ok) return;
     closeModal();
     renderSidebar();
@@ -280,7 +280,7 @@ async function deleteModal(){
   if(!editingCollection || !editingId) return;
   const c = COLLECTIONS[editingCollection];
   if(c.remote){
-    const ok = await deleteRemoteAccount(editingId);
+    const ok = c.strapiUsers ? await deleteRemoteAccount(editingId) : await deleteRemoteCollectionRecord(editingCollection, editingId);
     if(!ok) return;
   } else {
     DB[editingCollection] = DB[editingCollection].filter(r=>r.id!==editingId);
@@ -298,7 +298,7 @@ async function confirmDelete(key, id){
   const label = record ? (record.name||record.title||record.displayName||'mục này') : 'mục này';
   if(!confirm(`Xóa "${label}" khỏi ${c.label}? Hành động này không thể hoàn tác.`)) return;
   if(c.remote){
-    const ok = await deleteRemoteAccount(id);
+    const ok = c.strapiUsers ? await deleteRemoteAccount(id) : await deleteRemoteCollectionRecord(key, id);
     if(!ok) return;
   } else {
     DB[key] = DB[key].filter(r=>r.id!==id);

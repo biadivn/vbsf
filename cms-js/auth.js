@@ -131,6 +131,12 @@ async function showCmsApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = '';
   await refreshAccountsFromApi();
+  const remoteKeys = Object.keys(COLLECTIONS).filter(k=>COLLECTIONS[k].remote && !COLLECTIONS[k].strapiUsers);
+  await Promise.all([
+    ...remoteKeys.map(k=>refreshRemoteCollection(k)),
+    refreshSingletonFromApi('settings'),
+    refreshSingletonFromApi('contact')
+  ]);
   renderSidebar();
   renderTopbar();
   renderContent();

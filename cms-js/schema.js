@@ -5,7 +5,7 @@ const VN_PROVINCES = ['Hà Nội','TP.HCM','Đà Nẵng','Hải Phòng','Cần T
 
 const COLLECTIONS = {
   news: {
-    label:'Tin tức', icon:'ti-news', single:'bài viết',
+    label:'Tin tức', icon:'ti-news', single:'bài viết', remote:true, apiPath:'news-articles',
     fields:[
       {key:'image', label:'Ảnh banner', type:'image', span2:true},
       {key:'title', label:'Tiêu đề', type:'text', required:true, span2:true},
@@ -54,7 +54,7 @@ const COLLECTIONS = {
     ]
   },
   library_docs: {
-    label:'Văn bản & Luật', icon:'ti-file-text', single:'tài liệu',
+    label:'Văn bản & Luật', icon:'ti-file-text', single:'tài liệu', remote:true, apiPath:'library-docs',
     fields:[
       {key:'title', label:'Tên tài liệu', type:'text', required:true, span2:true},
       {key:'fileType', label:'Định dạng', type:'select', options:['PDF','DOCX','XLSX']},
@@ -70,7 +70,7 @@ const COLLECTIONS = {
     ]
   },
   library_media: {
-    label:'Thư viện Media', icon:'ti-photo', single:'album',
+    label:'Thư viện Media', icon:'ti-photo', single:'album', remote:true, apiPath:'media-items',
     fields:[
       {key:'title', label:'Tên album', type:'text', required:true, span2:true},
       {key:'mediaType', label:'Loại', type:'select', options:['photo','video'], optionLabels:{photo:'Hình ảnh',video:'Video'}},
@@ -141,7 +141,7 @@ const COLLECTIONS = {
     ]
   },
   accounts: {
-    label:'Tài khoản CMS', icon:'ti-user-shield', single:'tài khoản', resetPassword:true, remote:true,
+    label:'Tài khoản CMS', icon:'ti-user-shield', single:'tài khoản', resetPassword:true, remote:true, strapiUsers:true,
     fields:[
       {key:'displayName', label:'Tên hiển thị', type:'text', required:true, span2:true},
       {key:'username', label:'Tên đăng nhập', type:'text', required:true, span2:true, placeholder:'admin@vbsf.local'},
@@ -153,7 +153,7 @@ const COLLECTIONS = {
     ]
   },
   partners: {
-    label:'Đối tác & Tài trợ', icon:'ti-building', single:'đối tác',
+    label:'Đối tác & Tài trợ', icon:'ti-building', single:'đối tác', remote:true, apiPath:'partners',
     fields:[
       {key:'image', label:'Hình minh họa', type:'image', span2:true},
       {key:'name', label:'Tên đối tác', type:'text', required:true, span2:true},
