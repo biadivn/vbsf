@@ -127,9 +127,25 @@ async function tryRestoreSession(){
   }catch(e){ return false; }
 }
 
+function renderAvatarMenu(){
+  const label = (CMS_CURRENT_USER && (CMS_CURRENT_USER.displayName || CMS_CURRENT_USER.username)) || '';
+  document.getElementById('avatarBtn').textContent = label ? label.trim().charAt(0).toUpperCase() : '?';
+  document.getElementById('avatarMenuName').textContent = label;
+}
+
+function toggleAvatarMenu(e){
+  e.stopPropagation();
+  document.getElementById('avatarMenu').classList.toggle('on');
+}
+
+function closeAvatarMenu(){
+  document.getElementById('avatarMenu').classList.remove('on');
+}
+
 async function showCmsApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = '';
+  renderAvatarMenu();
   await refreshAccountsFromApi();
   const remoteKeys = Object.keys(COLLECTIONS).filter(k=>COLLECTIONS[k].remote && !COLLECTIONS[k].strapiUsers);
   await Promise.all([
@@ -187,6 +203,7 @@ async function handleCmsLogout(e){
 
 function openChangePasswordModal(e){
   if(e) e.preventDefault();
+  closeAvatarMenu();
   document.getElementById('pwCurrent').value = '';
   document.getElementById('pwNew').value = '';
   document.getElementById('pwConfirm').value = '';
@@ -228,6 +245,8 @@ async function saveChangePassword(){
 document.getElementById('loginForm').addEventListener('submit', handleCmsLogin);
 document.getElementById('logoutLink').addEventListener('click', handleCmsLogout);
 document.getElementById('changePasswordLink').addEventListener('click', openChangePasswordModal);
+document.getElementById('avatarBtn').addEventListener('click', toggleAvatarMenu);
+document.addEventListener('click', (e)=>{ if(!document.getElementById('topbarUser').contains(e.target)) closeAvatarMenu(); });
 document.getElementById('pwModalClose').addEventListener('click', closeChangePasswordModal);
 document.getElementById('pwCancelBtn').addEventListener('click', closeChangePasswordModal);
 document.getElementById('pwSaveBtn').addEventListener('click', saveChangePassword);

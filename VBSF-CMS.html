@@ -53,6 +53,13 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .topbar h1{font-size:20px;font-weight:600;color:var(--ink)}
 .topbar .sub{font-size:13px;color:var(--hint);margin-top:2px}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.topbar-user{position:relative;flex-shrink:0}
+.avatar-btn{width:38px;height:38px;border-radius:50%;background:var(--vd,#1a2332);color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.avatar-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:200px;padding:6px;display:none;z-index:20}
+.avatar-menu.on{display:block}
+.avatar-menu-name{padding:8px 10px;font-size:13px;font-weight:600;color:var(--ink);border-bottom:1px solid var(--line);margin-bottom:4px;word-break:break-all}
+.avatar-menu a{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;color:var(--ink);text-decoration:none;border-radius:6px}
+.avatar-menu a:hover{background:#f2f4f7}
 
 /* Buttons */
 .btn{border:1px solid transparent;border-radius:var(--radius);height:32px;padding:0 15px;font-size:14px;font-weight:400;display:inline-flex;align-items:center;gap:6px;transition:color .15s,border-color .15s,background .15s}
@@ -385,7 +392,7 @@ tr.row-hidden{opacity:.5}
       </div>
     </div>
     <nav class="sb-nav" id="sbNav"></nav>
-    <div class="sb-footer">Dữ liệu lưu tự động trên thiết bị này<a href="#" id="changePasswordLink"><i class="ti ti-key"></i> Đổi mật khẩu</a><a href="#" id="logoutLink"><i class="ti ti-logout"></i> Đăng xuất</a></div>
+    <div class="sb-footer">Dữ liệu lưu tự động trên thiết bị này</div>
   </aside>
 
   <div class="main">
@@ -396,6 +403,14 @@ tr.row-hidden{opacity:.5}
         <div class="sub" id="pageSub">Toàn cảnh nội dung trên website VBSF</div>
       </div>
       <div class="topbar-actions" id="topbarActions"></div>
+      <div class="topbar-user" id="topbarUser">
+        <button class="avatar-btn" id="avatarBtn" type="button"></button>
+        <div class="avatar-menu" id="avatarMenu">
+          <div class="avatar-menu-name" id="avatarMenuName"></div>
+          <a href="#" id="changePasswordLink"><i class="ti ti-key"></i> Đổi mật khẩu</a>
+          <a href="#" id="logoutLink"><i class="ti ti-logout"></i> Đăng xuất</a>
+        </div>
+      </div>
     </header>
     <div class="content" id="content"></div>
   </div>
@@ -441,7 +456,6 @@ tr.row-hidden{opacity:.5}
 <div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="toastMsg"></span></div>
 
 <script>
-
 /* =========================================================
    SCHEMA DEFINITIONS
    ========================================================= */
@@ -1277,7 +1291,7 @@ function renderListView(key){
   const filterField = c.filterField ? c.fields.find(f=>f.key===c.filterField) : null;
   const rows = filterRows(DB[key], c, searchTerm, filterField, filterValue);
   let html = `<div class="toolbar">
-    <div class="search"><i class="ti ti-search"></i><input type="text" id="searchInput" placeholder="Tìm ${c.single}..." value="${escapeAttr(searchTerm)}"></div>
+    <div class="search"><i class="ti ti-search"></i><input type="text" id="searchInput" name="cmsListSearch_${key}" autocomplete="off" placeholder="Tìm ${c.single}..." value="${escapeAttr(searchTerm)}"></div>
     ${filterField ? `<select id="filterSelect" class="fld select" style="width:auto;height:32px;border:1px solid var(--line-strong);border-radius:var(--radius);padding:0 11px;color:var(--ink);background:#fff">
       <option value="">Tất cả ${filterField.label.toLowerCase()}</option>
       ${filterField.options.map(o=>`<option value="${escapeAttr(o)}" ${filterValue===o?'selected':''}>${escapeHtml(o)}</option>`).join('')}
@@ -4482,9 +4496,25 @@ async function tryRestoreSession(){
   }catch(e){ return false; }
 }
 
+function renderAvatarMenu(){
+  const label = (CMS_CURRENT_USER && (CMS_CURRENT_USER.displayName || CMS_CURRENT_USER.username)) || '';
+  document.getElementById('avatarBtn').textContent = label ? label.trim().charAt(0).toUpperCase() : '?';
+  document.getElementById('avatarMenuName').textContent = label;
+}
+
+function toggleAvatarMenu(e){
+  e.stopPropagation();
+  document.getElementById('avatarMenu').classList.toggle('on');
+}
+
+function closeAvatarMenu(){
+  document.getElementById('avatarMenu').classList.remove('on');
+}
+
 async function showCmsApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = '';
+  renderAvatarMenu();
   await refreshAccountsFromApi();
   const remoteKeys = Object.keys(COLLECTIONS).filter(k=>COLLECTIONS[k].remote && !COLLECTIONS[k].strapiUsers);
   await Promise.all([
@@ -4542,6 +4572,7 @@ async function handleCmsLogout(e){
 
 function openChangePasswordModal(e){
   if(e) e.preventDefault();
+  closeAvatarMenu();
   document.getElementById('pwCurrent').value = '';
   document.getElementById('pwNew').value = '';
   document.getElementById('pwConfirm').value = '';
@@ -4583,6 +4614,8 @@ async function saveChangePassword(){
 document.getElementById('loginForm').addEventListener('submit', handleCmsLogin);
 document.getElementById('logoutLink').addEventListener('click', handleCmsLogout);
 document.getElementById('changePasswordLink').addEventListener('click', openChangePasswordModal);
+document.getElementById('avatarBtn').addEventListener('click', toggleAvatarMenu);
+document.addEventListener('click', (e)=>{ if(!document.getElementById('topbarUser').contains(e.target)) closeAvatarMenu(); });
 document.getElementById('pwModalClose').addEventListener('click', closeChangePasswordModal);
 document.getElementById('pwCancelBtn').addEventListener('click', closeChangePasswordModal);
 document.getElementById('pwSaveBtn').addEventListener('click', saveChangePassword);
@@ -4592,6 +4625,7 @@ document.getElementById('pwModalOverlay').addEventListener('click', (e)=>{ if(e.
   await loadDB();
   if(await tryRestoreSession()) showCmsApp(); else showCmsLogin();
 })();
+
 </script>
 </body>
 </html>

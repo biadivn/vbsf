@@ -53,6 +53,13 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .topbar h1{font-size:20px;font-weight:600;color:var(--ink)}
 .topbar .sub{font-size:13px;color:var(--hint);margin-top:2px}
 .topbar-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.topbar-user{position:relative;flex-shrink:0}
+.avatar-btn{width:38px;height:38px;border-radius:50%;background:var(--vd,#1a2332);color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.avatar-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:200px;padding:6px;display:none;z-index:20}
+.avatar-menu.on{display:block}
+.avatar-menu-name{padding:8px 10px;font-size:13px;font-weight:600;color:var(--ink);border-bottom:1px solid var(--line);margin-bottom:4px;word-break:break-all}
+.avatar-menu a{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;color:var(--ink);text-decoration:none;border-radius:6px}
+.avatar-menu a:hover{background:#f2f4f7}
 
 /* Buttons */
 .btn{border:1px solid transparent;border-radius:var(--radius);height:32px;padding:0 15px;font-size:14px;font-weight:400;display:inline-flex;align-items:center;gap:6px;transition:color .15s,border-color .15s,background .15s}
@@ -385,7 +392,7 @@ tr.row-hidden{opacity:.5}
       </div>
     </div>
     <nav class="sb-nav" id="sbNav"></nav>
-    <div class="sb-footer">Dữ liệu lưu tự động trên thiết bị này<a href="#" id="changePasswordLink"><i class="ti ti-key"></i> Đổi mật khẩu</a><a href="#" id="logoutLink"><i class="ti ti-logout"></i> Đăng xuất</a></div>
+    <div class="sb-footer">Dữ liệu lưu tự động trên thiết bị này</div>
   </aside>
 
   <div class="main">
@@ -396,6 +403,14 @@ tr.row-hidden{opacity:.5}
         <div class="sub" id="pageSub">Toàn cảnh nội dung trên website VBSF</div>
       </div>
       <div class="topbar-actions" id="topbarActions"></div>
+      <div class="topbar-user" id="topbarUser">
+        <button class="avatar-btn" id="avatarBtn" type="button"></button>
+        <div class="avatar-menu" id="avatarMenu">
+          <div class="avatar-menu-name" id="avatarMenuName"></div>
+          <a href="#" id="changePasswordLink"><i class="ti ti-key"></i> Đổi mật khẩu</a>
+          <a href="#" id="logoutLink"><i class="ti ti-logout"></i> Đăng xuất</a>
+        </div>
+      </div>
     </header>
     <div class="content" id="content"></div>
   </div>

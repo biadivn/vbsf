@@ -74,7 +74,7 @@ function renderListView(key){
   const filterField = c.filterField ? c.fields.find(f=>f.key===c.filterField) : null;
   const rows = filterRows(DB[key], c, searchTerm, filterField, filterValue);
   let html = `<div class="toolbar">
-    <div class="search"><i class="ti ti-search"></i><input type="text" id="searchInput" placeholder="Tìm ${c.single}..." value="${escapeAttr(searchTerm)}"></div>
+    <div class="search"><i class="ti ti-search"></i><input type="text" id="searchInput" name="cmsListSearch_${key}" autocomplete="off" placeholder="Tìm ${c.single}..." value="${escapeAttr(searchTerm)}"></div>
     ${filterField ? `<select id="filterSelect" class="fld select" style="width:auto;height:32px;border:1px solid var(--line-strong);border-radius:var(--radius);padding:0 11px;color:var(--ink);background:#fff">
       <option value="">Tất cả ${filterField.label.toLowerCase()}</option>
       ${filterField.options.map(o=>`<option value="${escapeAttr(o)}" ${filterValue===o?'selected':''}>${escapeHtml(o)}</option>`).join('')}
