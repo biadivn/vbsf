@@ -4259,7 +4259,11 @@ document.addEventListener('click', (e)=>{
    AUTH — Đăng nhập, đăng xuất, đổi/đặt lại mật khẩu, quản lý tài khoản
    Xác thực thật qua Strapi (plugin Users & Permissions), KHÔNG dùng dữ liệu giả.
    ========================================================= */
-const STRAPI_URL = 'http://localhost:1337';
+// Local dev (file:// hoặc localhost): Strapi chạy riêng ở cổng 1337.
+// Trên live: Strapi được nginx reverse-proxy dưới CÙNG domain với CMS
+// (xem deploy/nginx/vbsf-cms.biadi.vn.conf), nên dùng path tương đối (same-origin).
+const STRAPI_URL = (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:1337' : '';
 const CMS_JWT_KEY = 'vbsf_cms_jwt';
 const CMS_REFRESH_KEY = 'vbsf_cms_refresh';
 // Vai trò "Authenticated" mặc định của Strapi users-permissions (id=1 trên cài đặt mới).
@@ -4418,7 +4422,7 @@ async function handleCmsLogin(e){
     CMS_CURRENT_USER = out.user;
     await showCmsApp();
   }catch(err){
-    showCmsLogin('Không thể kết nối máy chủ Strapi tại '+STRAPI_URL);
+    showCmsLogin('Không thể kết nối máy chủ Strapi'+(STRAPI_URL ? ' tại '+STRAPI_URL : ''));
   }finally{
     submitBtn.disabled = false;
   }
