@@ -16,6 +16,7 @@ function renderTopbar(){
     title.textContent = c.label;
     sub.textContent = DB_TABLES[currentView]
       ? `Dữ liệu truy vấn từ cơ sở dữ liệu VBSF${c.readOnly ? ' — chỉ xem, không thể chỉnh sửa trực tiếp' : ''}`
+      : currentView==='accounts' ? 'Quản lý tài khoản đăng nhập CMS'
       : `Quản lý ${c.single} hiển thị trên website`;
     const syncBtn = (DB_TABLES[currentView] && !c.noSync) ? `<button class="btn btn-ghost" id="syncBtn" ${syncingKey===currentView?'disabled':''}><i class="ti ti-refresh"></i> ${syncingKey===currentView?'Đang đồng bộ...':'Đồng bộ từ CSDL'}</button>` : '';
     const addBtnHtml = c.readOnly ? '' : (currentView==='news' ? `<button class="btn btn-primary" id="addNewsBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : currentView==='tournaments' ? `<button class="btn btn-primary" id="addTourneyBtn"><i class="ti ti-plus"></i> Tạo giải đấu</button>` : c.pageEdit ? `<button class="btn btn-primary" id="addRecordBtn" data-key="${currentView}"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : `<button class="btn btn-primary" id="addNewBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>`);

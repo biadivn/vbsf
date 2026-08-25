@@ -90,7 +90,7 @@ function renderListView(key){
   const hasActionCol = !c.readOnly || c.viewDetail || c.toggleVisibility;
   html += `<div class="tbl-wrap"><table><thead><tr>`;
   c.columns.forEach(col=> html += `<th>${col.label}</th>`);
-  html += `${hasActionCol ? `<th style="width:${c.cloneable?120:90}px"></th>` : ''}</tr></thead><tbody>`;
+  html += `${hasActionCol ? `<th style="width:${(c.cloneable?120:90)+(c.resetPassword?30:0)}px"></th>` : ''}</tr></thead><tbody>`;
   rows.forEach(r=>{
     const isHidden = c.toggleVisibility && r[c.toggleVisibility];
     html += `<tr data-id="${r.id}"${isHidden ? ' class="row-hidden"' : ''}>`;
@@ -113,6 +113,7 @@ function renderListView(key){
       html += `<td class="actions">
         ${c.viewDetail ? `<button class="btn-icon" data-view="${r.id}" title="Xem trước trên website"><i class="ti ti-eye"></i></button>` : ''}
         ${c.cloneable ? `<button class="btn-icon" data-clone="${r.id}" title="Nhân bản"><i class="ti ti-copy"></i></button>` : ''}
+        ${c.resetPassword ? `<button class="btn-icon" data-reset-pwd="${r.id}" title="Đặt lại mật khẩu"><i class="ti ti-key"></i></button>` : ''}
         <button class="btn-icon" data-edit="${r.id}" title="Sửa"><i class="ti ti-edit"></i></button>
         <button class="btn-icon" data-del="${r.id}" title="Xóa"><i class="ti ti-trash"></i></button>
       </td>`;
@@ -160,6 +161,9 @@ function attachListEvents(key){
   });
   document.querySelectorAll('[data-toggle-vis]').forEach(btn=>{
     btn.addEventListener('click', ()=>toggleRowVisibility(key, btn.getAttribute('data-toggle-vis')));
+  });
+  document.querySelectorAll('[data-reset-pwd]').forEach(btn=>{
+    btn.addEventListener('click', ()=>resetAccountPassword(key, btn.getAttribute('data-reset-pwd')));
   });
 }
 

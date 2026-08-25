@@ -25,7 +25,11 @@ module.exports = () => ({
     config: {
       jwtManagement: 'refresh',
       sessions: {
-        httpOnly: true,
+        // CMS chạy trên origin khác Strapi (vd. mở qua file:// hoặc localhost:8080),
+        // nên dùng refreshToken trả về trong JSON (localStorage) thay vì cookie
+        // httpOnly liên-origin để tránh vướng CORS/SameSite khi chạy local.
+        httpOnly: false,
+        accessTokenLifespan: 60 * 60,
       },
     },
   },

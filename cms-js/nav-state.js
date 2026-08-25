@@ -28,6 +28,9 @@ const NAV_GROUPS = [
   {label:'Thư viện', items:[
     {key:'library_docs', label:'Văn bản & Luật', icon:'ti-file-text'},
     {key:'library_media', label:'Media', icon:'ti-photo'},
+  ]},
+  {label:'Quản trị hệ thống', items:[
+    {key:'accounts', label:COLLECTIONS.accounts.label, icon:'ti-user-shield'},
   ]}
 ];
 

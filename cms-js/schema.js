@@ -140,6 +140,18 @@ const COLLECTIONS = {
       {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
     ]
   },
+  accounts: {
+    label:'Tài khoản CMS', icon:'ti-user-shield', single:'tài khoản', resetPassword:true, remote:true,
+    fields:[
+      {key:'displayName', label:'Tên hiển thị', type:'text', required:true, span2:true},
+      {key:'username', label:'Tên đăng nhập', type:'text', required:true, span2:true, placeholder:'admin@vbsf.local'},
+      {key:'password', label:'Mật khẩu', type:'password', required:true, placeholder:'Để trống nếu không đổi khi sửa'}
+    ],
+    columns:[
+      {key:'displayName', label:'Tên hiển thị'},
+      {key:'username', label:'Tên đăng nhập', muted:true}
+    ]
+  },
   partners: {
     label:'Đối tác & Tài trợ', icon:'ti-building', single:'đối tác',
     fields:[

@@ -17,6 +17,7 @@ async function loadDB(){
       normalizePageSections();
       needsSave = true;
       if(needsSave) await saveDB();
+      DB.accounts = [];
       return;
     }
   }catch(e){ /* key not found or storage unavailable */ }
@@ -27,6 +28,7 @@ async function loadDB(){
   DB.pageSections = {}; DB.customPages = {}; DB.customSections = {}; DB.pageMeta = {}; DB.pageSectionKeysEverAdded = {};
   normalizePageSections();
   await saveDB();
+  DB.accounts = [];
 }
 
 async function syncFromDatabase(key){

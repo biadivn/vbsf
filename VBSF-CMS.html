@@ -117,7 +117,7 @@ td.actions{text-align:right;white-space:nowrap}
 .fld{margin-bottom:2px}
 .fld.span2{grid-column:1/3}
 .fld label{font-size:12.5px;color:var(--ink);margin-bottom:6px;display:block;font-weight:600}
-.fld input[type=text],.fld input[type=number],.fld input[type=date],.fld select,.fld textarea{
+.fld input[type=text],.fld input[type=number],.fld input[type=date],.fld input[type=password],.fld select,.fld textarea{
   width:100%;border:1px solid var(--line-strong);border-radius:7px;padding:8px 11px;font-size:13.5px;color:var(--ink);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;
 }
 .fld select{appearance:none;-webkit-appearance:none;padding-right:32px;cursor:pointer;
@@ -328,6 +328,19 @@ tr.row-hidden{opacity:.5}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast i{color:var(--tag-green)}
 
+/* Login */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--vd),var(--vd2));display:flex;align-items:center;justify-content:center;padding:20px;z-index:500}
+.login-card{background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-pop);padding:36px 32px;width:100%;max-width:360px}
+.login-badge{width:48px;height:48px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--vg);font-size:13px;font-weight:600;margin:0 auto 16px}
+.login-card h2{font-size:18px;font-weight:600;color:var(--ink);text-align:center}
+.login-card p.sub-txt{font-size:13px;color:var(--muted);text-align:center;margin-top:4px;margin-bottom:24px}
+.login-card .fld{margin-bottom:16px}
+.login-error{font-size:12.5px;color:var(--danger);background:var(--danger-soft);border-radius:7px;padding:8px 11px;margin-bottom:16px;display:none}
+.login-card .btn-primary{width:100%;justify-content:center;height:38px}
+.login-card .btn-primary i{transform:rotate(180deg)}
+.sb-footer a{color:rgba(255,255,255,.75);text-decoration:none;display:block;margin-top:4px}
+.sb-footer a:hover{color:#fff}
+
 .navtgl{display:none}
 @media(max-width:860px){
   .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .2s}
@@ -342,7 +355,27 @@ tr.row-hidden{opacity:.5}
 </head>
 <body>
 
-<div class="app">
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-badge">VBSF</div>
+    <h2>Đăng nhập CMS</h2>
+    <p class="sub-txt">Quản trị nội dung website VBSF</p>
+    <div class="login-error" id="loginError"></div>
+    <form id="loginForm">
+      <div class="fld">
+        <label for="loginUsername">Tên đăng nhập</label>
+        <input type="text" id="loginUsername" autocomplete="username" placeholder="admin@vbsf.local">
+      </div>
+      <div class="fld">
+        <label for="loginPassword">Mật khẩu</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="ti ti-login"></i> Đăng nhập</button>
+    </form>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none">
   <aside class="sidebar" id="sidebar">
     <div class="sb-brand">
       <div class="sb-badge">VBSF</div>
@@ -352,7 +385,7 @@ tr.row-hidden{opacity:.5}
       </div>
     </div>
     <nav class="sb-nav" id="sbNav"></nav>
-    <div class="sb-footer">Dữ liệu lưu tự động trên thiết bị này</div>
+    <div class="sb-footer">Dữ liệu lưu tự động trên thiết bị này<a href="#" id="changePasswordLink"><i class="ti ti-key"></i> Đổi mật khẩu</a><a href="#" id="logoutLink"><i class="ti ti-logout"></i> Đăng xuất</a></div>
   </aside>
 
   <div class="main">
@@ -380,6 +413,26 @@ tr.row-hidden{opacity:.5}
       <div style="margin-left:auto;display:flex;gap:8px">
         <button class="btn btn-ghost" id="modalCancelBtn">Hủy</button>
         <button class="btn btn-primary" id="modalSaveBtn"><i class="ti ti-check"></i> Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pwModalOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hd">
+      <h3>Đổi mật khẩu</h3>
+      <button class="modal-close" id="pwModalClose"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="fld"><label for="pwCurrent">Mật khẩu hiện tại</label><input type="password" id="pwCurrent" autocomplete="current-password"></div>
+      <div class="fld"><label for="pwNew">Mật khẩu mới</label><input type="password" id="pwNew" autocomplete="new-password"></div>
+      <div class="fld"><label for="pwConfirm">Xác nhận mật khẩu mới</label><input type="password" id="pwConfirm" autocomplete="new-password"></div>
+    </div>
+    <div class="modal-ft">
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-ghost" id="pwCancelBtn">Hủy</button>
+        <button class="btn btn-primary" id="pwSaveBtn"><i class="ti ti-check"></i> Lưu</button>
       </div>
     </div>
   </div>
@@ -529,6 +582,18 @@ const COLLECTIONS = {
       {key:'province', label:'Tỉnh / Thành', muted:true},
       {key:'repName', label:'Người đại diện', muted:true},
       {key:'status', label:'Trạng thái', status:true, statusMap:{active:{t:'Đang hiệu lực',c:'green'},pending:{t:'Chờ thanh toán',c:'gold'},expired:{t:'Hết hạn',c:'gray'}}}
+    ]
+  },
+  accounts: {
+    label:'Tài khoản CMS', icon:'ti-user-shield', single:'tài khoản', resetPassword:true, remote:true,
+    fields:[
+      {key:'displayName', label:'Tên hiển thị', type:'text', required:true, span2:true},
+      {key:'username', label:'Tên đăng nhập', type:'text', required:true, span2:true, placeholder:'admin@vbsf.local'},
+      {key:'password', label:'Mật khẩu', type:'password', required:true, placeholder:'Để trống nếu không đổi khi sửa'}
+    ],
+    columns:[
+      {key:'displayName', label:'Tên hiển thị'},
+      {key:'username', label:'Tên đăng nhập', muted:true}
     ]
   },
   partners: {
@@ -963,6 +1028,7 @@ async function loadDB(){
       normalizePageSections();
       needsSave = true;
       if(needsSave) await saveDB();
+      DB.accounts = [];
       return;
     }
   }catch(e){ /* key not found or storage unavailable */ }
@@ -973,6 +1039,7 @@ async function loadDB(){
   DB.pageSections = {}; DB.customPages = {}; DB.customSections = {}; DB.pageMeta = {}; DB.pageSectionKeysEverAdded = {};
   normalizePageSections();
   await saveDB();
+  DB.accounts = [];
 }
 
 async function syncFromDatabase(key){
@@ -1032,6 +1099,9 @@ const NAV_GROUPS = [
   {label:'Thư viện', items:[
     {key:'library_docs', label:'Văn bản & Luật', icon:'ti-file-text'},
     {key:'library_media', label:'Media', icon:'ti-photo'},
+  ]},
+  {label:'Quản trị hệ thống', items:[
+    {key:'accounts', label:COLLECTIONS.accounts.label, icon:'ti-user-shield'},
   ]}
 ];
 
@@ -1091,6 +1161,7 @@ function renderTopbar(){
     title.textContent = c.label;
     sub.textContent = DB_TABLES[currentView]
       ? `Dữ liệu truy vấn từ cơ sở dữ liệu VBSF${c.readOnly ? ' — chỉ xem, không thể chỉnh sửa trực tiếp' : ''}`
+      : currentView==='accounts' ? 'Quản lý tài khoản đăng nhập CMS'
       : `Quản lý ${c.single} hiển thị trên website`;
     const syncBtn = (DB_TABLES[currentView] && !c.noSync) ? `<button class="btn btn-ghost" id="syncBtn" ${syncingKey===currentView?'disabled':''}><i class="ti ti-refresh"></i> ${syncingKey===currentView?'Đang đồng bộ...':'Đồng bộ từ CSDL'}</button>` : '';
     const addBtnHtml = c.readOnly ? '' : (currentView==='news' ? `<button class="btn btn-primary" id="addNewsBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : currentView==='tournaments' ? `<button class="btn btn-primary" id="addTourneyBtn"><i class="ti ti-plus"></i> Tạo giải đấu</button>` : c.pageEdit ? `<button class="btn btn-primary" id="addRecordBtn" data-key="${currentView}"><i class="ti ti-plus"></i> Thêm ${c.single}</button>` : `<button class="btn btn-primary" id="addNewBtn"><i class="ti ti-plus"></i> Thêm ${c.single}</button>`);
@@ -1252,7 +1323,7 @@ function renderListView(key){
   const hasActionCol = !c.readOnly || c.viewDetail || c.toggleVisibility;
   html += `<div class="tbl-wrap"><table><thead><tr>`;
   c.columns.forEach(col=> html += `<th>${col.label}</th>`);
-  html += `${hasActionCol ? `<th style="width:${c.cloneable?120:90}px"></th>` : ''}</tr></thead><tbody>`;
+  html += `${hasActionCol ? `<th style="width:${(c.cloneable?120:90)+(c.resetPassword?30:0)}px"></th>` : ''}</tr></thead><tbody>`;
   rows.forEach(r=>{
     const isHidden = c.toggleVisibility && r[c.toggleVisibility];
     html += `<tr data-id="${r.id}"${isHidden ? ' class="row-hidden"' : ''}>`;
@@ -1275,6 +1346,7 @@ function renderListView(key){
       html += `<td class="actions">
         ${c.viewDetail ? `<button class="btn-icon" data-view="${r.id}" title="Xem trước trên website"><i class="ti ti-eye"></i></button>` : ''}
         ${c.cloneable ? `<button class="btn-icon" data-clone="${r.id}" title="Nhân bản"><i class="ti ti-copy"></i></button>` : ''}
+        ${c.resetPassword ? `<button class="btn-icon" data-reset-pwd="${r.id}" title="Đặt lại mật khẩu"><i class="ti ti-key"></i></button>` : ''}
         <button class="btn-icon" data-edit="${r.id}" title="Sửa"><i class="ti ti-edit"></i></button>
         <button class="btn-icon" data-del="${r.id}" title="Xóa"><i class="ti ti-trash"></i></button>
       </td>`;
@@ -1322,6 +1394,9 @@ function attachListEvents(key){
   });
   document.querySelectorAll('[data-toggle-vis]').forEach(btn=>{
     btn.addEventListener('click', ()=>toggleRowVisibility(key, btn.getAttribute('data-toggle-vis')));
+  });
+  document.querySelectorAll('[data-reset-pwd]').forEach(btn=>{
+    btn.addEventListener('click', ()=>resetAccountPassword(key, btn.getAttribute('data-reset-pwd')));
   });
 }
 
@@ -2253,10 +2328,21 @@ async function saveModal(){
       val = document.getElementById('f_'+f.key).value;
       if(f.type==='number' && val!=='') val = Number(val);
     }
+    if(f.type==='password' && val==='' && editingId) return;
     if(f.required && (val===''||val===undefined||val===null)) missingRequired = true;
     data[f.key] = val;
   });
   if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
+
+  if(c.remote){
+    const ok = await saveRemoteAccount(editingId, data);
+    if(!ok) return;
+    closeModal();
+    renderSidebar();
+    renderContent();
+    showToast(editingId ? 'Đã cập nhật' : 'Đã thêm mới');
+    return;
+  }
 
   if(editingId){
     const idx = DB[key].findIndex(r=>r.id===editingId);
@@ -2274,25 +2360,35 @@ async function saveModal(){
 
 async function deleteModal(){
   if(!editingCollection || !editingId) return;
-  DB[editingCollection] = DB[editingCollection].filter(r=>r.id!==editingId);
-  await saveDB();
+  const c = COLLECTIONS[editingCollection];
+  if(c.remote){
+    const ok = await deleteRemoteAccount(editingId);
+    if(!ok) return;
+  } else {
+    DB[editingCollection] = DB[editingCollection].filter(r=>r.id!==editingId);
+    await saveDB();
+  }
   closeModal();
   renderSidebar();
   renderContent();
   showToast('Đã xóa');
 }
 
-function confirmDelete(key, id){
+async function confirmDelete(key, id){
   const c = COLLECTIONS[key];
   const record = DB[key].find(r=>r.id===id);
-  const label = record ? (record.name||record.title||'mục này') : 'mục này';
-  if(confirm(`Xóa "${label}" khỏi ${c.label}? Hành động này không thể hoàn tác.`)){
+  const label = record ? (record.name||record.title||record.displayName||'mục này') : 'mục này';
+  if(!confirm(`Xóa "${label}" khỏi ${c.label}? Hành động này không thể hoàn tác.`)) return;
+  if(c.remote){
+    const ok = await deleteRemoteAccount(id);
+    if(!ok) return;
+  } else {
     DB[key] = DB[key].filter(r=>r.id!==id);
-    saveDB();
-    renderSidebar();
-    renderContent();
-    showToast('Đã xóa');
+    await saveDB();
   }
+  renderSidebar();
+  renderContent();
+  showToast('Đã xóa');
 }
 
 
@@ -4159,11 +4255,234 @@ document.addEventListener('click', (e)=>{
   if(sw) sw.classList.toggle('on');
 });
 
-(async function init(){
-  await loadDB();
+/* =========================================================
+   AUTH — Đăng nhập, đăng xuất, đổi/đặt lại mật khẩu, quản lý tài khoản
+   Xác thực thật qua Strapi (plugin Users & Permissions), KHÔNG dùng dữ liệu giả.
+   ========================================================= */
+const STRAPI_URL = 'http://localhost:1337';
+const CMS_JWT_KEY = 'vbsf_cms_jwt';
+const CMS_REFRESH_KEY = 'vbsf_cms_refresh';
+// Vai trò "Authenticated" mặc định của Strapi users-permissions (id=1 trên cài đặt mới).
+const CMS_ACCOUNT_ROLE_ID = 1;
+
+let CMS_CURRENT_USER = null;
+
+function getStoredTokens(){
+  try{
+    return { jwt: localStorage.getItem(CMS_JWT_KEY), refreshToken: localStorage.getItem(CMS_REFRESH_KEY) };
+  }catch(e){ return { jwt:null, refreshToken:null }; }
+}
+function storeTokens(jwt, refreshToken){
+  try{
+    if(jwt) localStorage.setItem(CMS_JWT_KEY, jwt);
+    if(refreshToken) localStorage.setItem(CMS_REFRESH_KEY, refreshToken);
+  }catch(e){}
+}
+function clearTokens(){
+  try{ localStorage.removeItem(CMS_JWT_KEY); localStorage.removeItem(CMS_REFRESH_KEY); }catch(e){}
+}
+
+async function refreshAccessToken(){
+  const { refreshToken } = getStoredTokens();
+  if(!refreshToken) return false;
+  try{
+    const res = await fetch(STRAPI_URL+'/api/auth/refresh', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ refreshToken })
+    });
+    if(!res.ok) return false;
+    const out = await res.json();
+    storeTokens(out.jwt, out.refreshToken);
+    return true;
+  }catch(e){ return false; }
+}
+
+async function apiFetch(path, options, retry){
+  options = options || {};
+  if(retry===undefined) retry = true;
+  const { jwt } = getStoredTokens();
+  const headers = Object.assign({'Content-Type':'application/json'}, options.headers||{});
+  if(jwt) headers['Authorization'] = 'Bearer '+jwt;
+  const res = await fetch(STRAPI_URL+path, Object.assign({}, options, { headers }));
+  if(res.status===401 && retry){
+    const refreshed = await refreshAccessToken();
+    if(refreshed) return apiFetch(path, options, false);
+  }
+  return res;
+}
+
+async function refreshAccountsFromApi(){
+  try{
+    const res = await apiFetch('/api/users');
+    if(!res.ok){ DB.accounts = []; return; }
+    const users = await res.json();
+    DB.accounts = users.map(u=>({ id:String(u.id), displayName:u.displayName||'', username:u.username }));
+  }catch(e){ DB.accounts = []; }
+}
+
+async function saveRemoteAccount(id, data){
+  try{
+    let res;
+    if(id){
+      const body = { displayName: data.displayName, username: data.username, email: data.username };
+      if(data.password) body.password = data.password;
+      res = await apiFetch('/api/users/'+id, { method:'PUT', body: JSON.stringify(body) });
+    } else {
+      res = await apiFetch('/api/users', { method:'POST', body: JSON.stringify({
+        username: data.username, email: data.username, password: data.password,
+        displayName: data.displayName, confirmed: true, role: CMS_ACCOUNT_ROLE_ID
+      })});
+    }
+    if(!res.ok){
+      const out = await res.json().catch(()=>({}));
+      showToast(out.error && out.error.message || 'Không thể lưu tài khoản', true);
+      return false;
+    }
+    await refreshAccountsFromApi();
+    return true;
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+    return false;
+  }
+}
+
+async function deleteRemoteAccount(id){
+  try{
+    const res = await apiFetch('/api/users/'+id, { method:'DELETE' });
+    if(!res.ok){ showToast('Không thể xóa tài khoản', true); return false; }
+    await refreshAccountsFromApi();
+    return true;
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+    return false;
+  }
+}
+
+async function resetAccountPassword(key, id){
+  const record = DB[key].find(r=>r.id===id);
+  if(!record) return;
+  const next = prompt(`Nhập mật khẩu mới cho tài khoản "${record.displayName || record.username}":`);
+  if(next===null) return;
+  if(next.length < 6){ showToast('Mật khẩu phải có ít nhất 6 ký tự', true); return; }
+  const res = await apiFetch('/api/users/'+id, { method:'PUT', body: JSON.stringify({ password: next }) });
+  if(!res.ok){ showToast('Không thể đặt lại mật khẩu', true); return; }
+  showToast('Đã đặt lại mật khẩu');
+}
+
+async function tryRestoreSession(){
+  const { jwt } = getStoredTokens();
+  if(!jwt) return false;
+  try{
+    const res = await apiFetch('/api/users/me');
+    if(!res.ok){ clearTokens(); return false; }
+    CMS_CURRENT_USER = await res.json();
+    return true;
+  }catch(e){ return false; }
+}
+
+async function showCmsApp(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  await refreshAccountsFromApi();
   renderSidebar();
   renderTopbar();
   renderContent();
+}
+
+function showCmsLogin(message){
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  const err = document.getElementById('loginError');
+  err.textContent = message || '';
+  err.style.display = message ? 'block' : 'none';
+  document.getElementById('loginUsername').focus();
+}
+
+async function handleCmsLogin(e){
+  e.preventDefault();
+  const identifier = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const submitBtn = document.querySelector('#loginForm button[type=submit]');
+  submitBtn.disabled = true;
+  try{
+    const res = await fetch(STRAPI_URL+'/api/auth/local', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ identifier, password })
+    });
+    const out = await res.json().catch(()=>({}));
+    if(!res.ok){
+      showCmsLogin(out.error && out.error.status===400 ? 'Tên đăng nhập hoặc mật khẩu không đúng' : 'Không thể đăng nhập. Vui lòng thử lại.');
+      return;
+    }
+    storeTokens(out.jwt, out.refreshToken);
+    CMS_CURRENT_USER = out.user;
+    await showCmsApp();
+  }catch(err){
+    showCmsLogin('Không thể kết nối máy chủ Strapi tại '+STRAPI_URL);
+  }finally{
+    submitBtn.disabled = false;
+  }
+}
+
+async function handleCmsLogout(e){
+  e.preventDefault();
+  try{ await apiFetch('/api/auth/logout', { method:'POST' }); }catch(e){}
+  clearTokens();
+  CMS_CURRENT_USER = null;
+  location.reload();
+}
+
+function openChangePasswordModal(e){
+  if(e) e.preventDefault();
+  document.getElementById('pwCurrent').value = '';
+  document.getElementById('pwNew').value = '';
+  document.getElementById('pwConfirm').value = '';
+  document.getElementById('pwModalOverlay').classList.add('on');
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function closeChangePasswordModal(){
+  document.getElementById('pwModalOverlay').classList.remove('on');
+}
+
+async function saveChangePassword(){
+  const current = document.getElementById('pwCurrent').value;
+  const next = document.getElementById('pwNew').value;
+  const confirmVal = document.getElementById('pwConfirm').value;
+  if(next.length < 6){ showToast('Mật khẩu mới phải có ít nhất 6 ký tự', true); return; }
+  if(next !== confirmVal){ showToast('Xác nhận mật khẩu mới không khớp', true); return; }
+  try{
+    const res = await apiFetch('/api/auth/change-password', {
+      method:'POST',
+      body: JSON.stringify({ currentPassword: current, password: next, passwordConfirmation: confirmVal })
+    });
+    const out = await res.json().catch(()=>({}));
+    if(!res.ok){
+      const msg = out.error && out.error.message==='The provided current password is invalid'
+        ? 'Mật khẩu hiện tại không đúng' : (out.error && out.error.message) || 'Không thể đổi mật khẩu';
+      showToast(msg, true);
+      return;
+    }
+    storeTokens(out.jwt, out.refreshToken);
+    CMS_CURRENT_USER = out.user;
+    closeChangePasswordModal();
+    showToast('Đã đổi mật khẩu');
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+  }
+}
+
+document.getElementById('loginForm').addEventListener('submit', handleCmsLogin);
+document.getElementById('logoutLink').addEventListener('click', handleCmsLogout);
+document.getElementById('changePasswordLink').addEventListener('click', openChangePasswordModal);
+document.getElementById('pwModalClose').addEventListener('click', closeChangePasswordModal);
+document.getElementById('pwCancelBtn').addEventListener('click', closeChangePasswordModal);
+document.getElementById('pwSaveBtn').addEventListener('click', saveChangePassword);
+document.getElementById('pwModalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='pwModalOverlay') closeChangePasswordModal(); });
+
+(async function initCms(){
+  await loadDB();
+  if(await tryRestoreSession()) showCmsApp(); else showCmsLogin();
 })();
 </script>
 </body>

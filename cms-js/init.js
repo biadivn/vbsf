@@ -12,10 +12,3 @@ document.addEventListener('click', (e)=>{
   const sw = e.target.closest('.switch[data-toggle]');
   if(sw) sw.classList.toggle('on');
 });
-
-(async function init(){
-  await loadDB();
-  renderSidebar();
-  renderTopbar();
-  renderContent();
-})();

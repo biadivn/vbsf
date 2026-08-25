@@ -246,10 +246,21 @@ async function saveModal(){
       val = document.getElementById('f_'+f.key).value;
       if(f.type==='number' && val!=='') val = Number(val);
     }
+    if(f.type==='password' && val==='' && editingId) return;
     if(f.required && (val===''||val===undefined||val===null)) missingRequired = true;
     data[f.key] = val;
   });
   if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
+
+  if(c.remote){
+    const ok = await saveRemoteAccount(editingId, data);
+    if(!ok) return;
+    closeModal();
+    renderSidebar();
+    renderContent();
+    showToast(editingId ? 'Đã cập nhật' : 'Đã thêm mới');
+    return;
+  }
 
   if(editingId){
     const idx = DB[key].findIndex(r=>r.id===editingId);
@@ -267,24 +278,34 @@ async function saveModal(){
 
 async function deleteModal(){
   if(!editingCollection || !editingId) return;
-  DB[editingCollection] = DB[editingCollection].filter(r=>r.id!==editingId);
-  await saveDB();
+  const c = COLLECTIONS[editingCollection];
+  if(c.remote){
+    const ok = await deleteRemoteAccount(editingId);
+    if(!ok) return;
+  } else {
+    DB[editingCollection] = DB[editingCollection].filter(r=>r.id!==editingId);
+    await saveDB();
+  }
   closeModal();
   renderSidebar();
   renderContent();
   showToast('Đã xóa');
 }
 
-function confirmDelete(key, id){
+async function confirmDelete(key, id){
   const c = COLLECTIONS[key];
   const record = DB[key].find(r=>r.id===id);
-  const label = record ? (record.name||record.title||'mục này') : 'mục này';
-  if(confirm(`Xóa "${label}" khỏi ${c.label}? Hành động này không thể hoàn tác.`)){
+  const label = record ? (record.name||record.title||record.displayName||'mục này') : 'mục này';
+  if(!confirm(`Xóa "${label}" khỏi ${c.label}? Hành động này không thể hoàn tác.`)) return;
+  if(c.remote){
+    const ok = await deleteRemoteAccount(id);
+    if(!ok) return;
+  } else {
     DB[key] = DB[key].filter(r=>r.id!==id);
-    saveDB();
-    renderSidebar();
-    renderContent();
-    showToast('Đã xóa');
+    await saveDB();
   }
+  renderSidebar();
+  renderContent();
+  showToast('Đã xóa');
 }
 
