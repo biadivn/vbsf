@@ -40,6 +40,8 @@ jobs:
           # (chạy rsync trên chính server, tránh round-trip file qua runner).
           ssh -p "$port" "$DEPLOY_USER@$DEPLOY_HOST" "
             set -euo pipefail
+            exec 200>'$REPO_PATH/.deploy.lock'
+            flock 200
             cd '$REPO_PATH'
             git fetch origin main
             git reset --hard origin/main
