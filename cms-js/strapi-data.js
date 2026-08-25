@@ -77,7 +77,10 @@ async function saveRemoteCollectionRecord(key, id, data){
         else if(val === '') payload[f.key] = null;
         continue;
       }
-      payload[f.key] = data[f.key];
+      const val = data[f.key];
+      // Strapi enumeration/date fields từ chối chuỗi rỗng ("") — chỉ nhận đúng
+      // một giá trị enum hoặc null. Select/date chưa chọn luôn gửi lên "".
+      payload[f.key] = val === '' ? null : val;
     }
     const method = id ? 'PUT' : 'POST';
     const url = id ? `/api/${c.apiPath}/${id}` : `/api/${c.apiPath}`;
