@@ -6,6 +6,8 @@
   },
   "options": {},
   "attributes": {
+    "localId": { "type": "string", "required": true },
+    "memberId": { "type": "string" },
     "name": { "type": "string", "required": true },
     "club": { "type": "string" },
     "registeredAt": { "type": "datetime" },
@@ -14,10 +16,7 @@
       "enum": ["unpaid", "paid"],
       "default": "unpaid"
     },
-    "member": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::member.member"
-    }
+    "seed": { "type": "integer" },
+    "rating": { "type": "integer" }
   }
 }

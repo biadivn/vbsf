@@ -27,6 +27,7 @@ const COLLECTIONS = {
   },
   tournaments: {
     label:'Giải đấu', icon:'ti-trophy', single:'giải đấu', viewDetail:true, noSync:true, cloneable:true,
+    remote:true, apiPath:'tournaments', extraFields:['bracket','rr','sw','mode'],
     fields:[
       {key:'name', label:'Tên giải đấu', type:'text', required:true, span2:true},
       {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker']},
@@ -85,7 +86,7 @@ const COLLECTIONS = {
     ]
   },
   members: {
-    label:'Hội viên & Xếp hạng', icon:'ti-users', single:'hội viên', filterField:'category', pageEdit:true, remote:true, apiPath:'members', noSync:true,
+    label:'Hội viên & Xếp hạng', icon:'ti-users', single:'hội viên', filterField:'category', pageEdit:true, remote:true, apiPath:'members', noSync:true, extraFields:['disciplines','freeMatches'],
     fields:[
       {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true, section:'Thông tin cơ bản'},
       {key:'name', label:'Họ và tên', type:'text', required:true, section:'Thông tin cơ bản'},

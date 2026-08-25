@@ -1,18 +1,21 @@
 /* =========================================================
    STRAPI DATA — đồng bộ các collection nội dung (news, partners,
-   library_docs, library_media, members, members_org) và 2 singleton
-   (settings, contact) với Strapi. Dùng chung apiFetch()/getStoredTokens()
-   từ auth.js.
+   library_docs, library_media, members, members_org, tournaments) và
+   2 singleton (settings, contact) với Strapi. Dùng chung
+   apiFetch()/getStoredTokens() từ auth.js.
 
-   Ghi chú: tournaments CHƯA được nối vào Strapi ở đây — mặc dù Strapi đã
-   có content-type "tournament" đầy đủ (bracket/players/prizes json/component),
-   bộ máy giải đấu cục bộ (tournament-editor.js + tournament-engine.js) ghi
-   trực tiếp vào DB.tournaments qua ~20 điểm gọi saveDB() rải rác trong logic
-   sinh bracket/Swiss/vòng tròn — nối đầy đủ cần một lần làm riêng, không
-   bolt-on an toàn trong lượt sửa này. Tương tự, phần chỉnh sửa "disciplines"
-   (Hạng/Điểm) trong hồ sơ hội viên vẫn chỉ lưu cục bộ — CRUD hồ sơ chính đã
-   nối Strapi nhưng sub-editor điểm/hạng theo từng nội dung thi đấu là tính
-   năng nested phức tạp hơn, để lại làm sau nếu cần.
+   tournaments: engine cục bộ (tournament-editor.js) vẫn mutate trực tiếp
+   record trong DB.tournaments (bracket/Swiss/vòng tròn, ~20 điểm gọi
+   saveDB()) — mỗi điểm đó gọi thêm teSyncTournamentToStrapi(record) để
+   đẩy toàn bộ trạng thái (info + players + prizes + bracket/rr/sw) lên
+   Strapi. players là Strapi component, không lưu được field "id" tùy ý
+   nên dùng "localId" làm id ổn định — xem mapStrapiEntryToRecord.
+
+   members: CRUD hồ sơ chính đi qua saveRemoteCollectionRecord (record-editor.js).
+   Sub-editor "Xếp hạng theo bộ môn" + "Lịch sử thi đấu tự do" chỉnh
+   disciplines/freeMatches riêng, không nằm trong c.fields, nên đồng bộ
+   qua pushMemberDisciplinesPatch()/syncAllMemberDisciplines() thay vì
+   saveRemoteCollectionRecord.
    ========================================================= */
 const SINGLETON_API_PATH = { settings:'setting', contact:'contact-info' };
 
@@ -41,11 +44,98 @@ function mapStrapiEntryToRecord(c, item){
   c.fields.forEach(f=>{
     rec[f.key] = f.type==='image' ? mediaUrl(item[f.key]) : item[f.key];
   });
-  // Không phải field chỉnh sửa qua form nhưng cần hiển thị (cột Hạng/Điểm ở
-  // danh sách hội viên đọc trực tiếp từ disciplines).
-  if(item.disciplines) rec.disciplines = item.disciplines;
-  if(item.freeMatches) rec.freeMatches = item.freeMatches;
+  // Field không nằm trong form chỉnh sửa (c.fields) nhưng CMS vẫn cần đọc để
+  // hiển thị/vận hành — vd. disciplines/freeMatches (hội viên), bracket/rr/sw/mode
+  // (giải đấu). Khai báo qua COLLECTIONS[key].extraFields, copy trực tiếp.
+  (c.extraFields||[]).forEach(k=>{ if(item[k]!==undefined) rec[k] = item[k]; });
+  // players/prizes là Strapi component (repeatable) — cần map lại hình dạng vì
+  // component không lưu được field "id" tùy ý (Strapi reserve tên này); dùng
+  // "localId" làm id ổn định cho player, khớp với tham chiếu p1/p2/a/b/aId/bId
+  // bên trong bracket/rr/sw JSON.
+  if(item.players) rec.players = item.players.map(p=>({
+    id: p.localId, memberId: p.memberId || null, name: p.name, club: p.club || '',
+    registeredAt: p.registeredAt ? new Date(p.registeredAt).getTime() : Date.now(),
+    feeStatus: p.feeStatus || 'unpaid', seed: p.seed || undefined, rating: p.rating || undefined
+  }));
+  if(item.prizes) rec.prizes = item.prizes.map(p=>({ rank: p.rank||'', cash: p.cash||'', item: p.item||'' }));
   return rec;
+}
+
+/* ---------- Giải đấu — đồng bộ toàn bộ trạng thái (info + players + prizes +
+   bracket/rr/sw) lên Strapi. Engine cục bộ (tournament-editor.js) mutate trực
+   tiếp record trong DB.tournaments rồi gọi các hàm dưới đây để đẩy lên server. ---------- */
+function teNz(v){ return (v===''||v===undefined) ? null : v; }
+function tePlayersToStrapiPayload(players){
+  return (players||[]).map(p=>({
+    localId: p.id, memberId: p.memberId||null, name: p.name, club: p.club||null,
+    registeredAt: p.registeredAt ? new Date(p.registeredAt).toISOString() : null,
+    feeStatus: p.feeStatus||'unpaid', seed: p.seed||null, rating: p.rating||null
+  }));
+}
+function tePrizesToStrapiPayload(prizes){
+  return (prizes||[]).map(p=>({ rank: p.rank||'', cash: p.cash||'', item: p.item||'' }));
+}
+function teBuildTournamentPayload(record){
+  return {
+    name: record.name, category: teNz(record.category), format: teNz(record.format),
+    lives: (record.lives!=null && record.lives!=='') ? Number(record.lives) : null,
+    status: teNz(record.status), mode: teNz(record.mode),
+    date: teNz(record.date),
+    participants: (record.participants!=null && record.participants!=='') ? Number(record.participants) : null,
+    location: teNz(record.location), note: teNz(record.note), regDeadline: teNz(record.regDeadline),
+    liveRound: teNz(record.liveRound), champion: teNz(record.champion), entryFee: teNz(record.entryFee),
+    rules: teNz(record.rules), metaTitle: teNz(record.metaTitle), metaDescription: teNz(record.metaDescription),
+    players: tePlayersToStrapiPayload(record.players), prizes: tePrizesToStrapiPayload(record.prizes),
+    bracket: record.bracket||null, rr: record.rr||null, sw: record.sw||null
+  };
+}
+async function teCreateTournamentOnStrapi(data){
+  try{
+    const res = await apiFetch('/api/tournaments', { method:'POST', body: JSON.stringify({ data: teBuildTournamentPayload(data) }) });
+    if(!res.ok){
+      const out = await res.json().catch(()=>({}));
+      showToast((out.error && out.error.message) || 'Không thể tạo giải đấu', true);
+      return null;
+    }
+    const out = await res.json();
+    return out.data.documentId;
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+    return null;
+  }
+}
+async function teSyncTournamentToStrapi(record){
+  if(!record || !record.id) return;
+  try{
+    const res = await apiFetch(`/api/tournaments/${record.id}`, { method:'PUT', body: JSON.stringify({ data: teBuildTournamentPayload(record) }) });
+    if(!res.ok) showToast('Không thể đồng bộ giải đấu lên máy chủ', true);
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+  }
+}
+
+/* ---------- Hội viên — đồng bộ disciplines/freeMatches (chỉnh sửa trong
+   sub-editor "Xếp hạng theo bộ môn" / "Lịch sử thi đấu", tách khỏi CRUD
+   trường chính đã có ở saveRemoteCollectionRecord). ---------- */
+async function pushMemberDisciplinesPatch(member){
+  if(!member || !member.id) return;
+  const disciplines = (member.disciplines||[]).map(d=>({
+    category: d.category, points: d.points||0, rank: d.rank!=null?d.rank:null,
+    matches: d.matches||0, trend: d.trend||'eq', trendValue: d.trendValue||0
+  }));
+  const freeMatches = (member.freeMatches||[]).map(fm=>({
+    category: fm.category, opponent: fm.opponent, score1: fm.score1, score2: fm.score2,
+    points: fm.points, date: fm.date||null
+  }));
+  try{
+    const res = await apiFetch(`/api/members/${member.id}`, { method:'PUT', body: JSON.stringify({ data: { disciplines, freeMatches } }) });
+    if(!res.ok) showToast('Không thể đồng bộ xếp hạng hội viên lên máy chủ', true);
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+  }
+}
+async function syncAllMemberDisciplines(){
+  await Promise.all((DB.members||[]).map(m=>pushMemberDisciplinesPatch(m)));
 }
 
 async function refreshRemoteCollection(key){

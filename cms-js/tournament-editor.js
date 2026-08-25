@@ -378,6 +378,7 @@ function teStartBracket(record){
   teRrTab = 0;
   teView = {tx:40, ty:30, scale:1};
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   showToast('Đã tạo sơ đồ thi đấu');
   renderContent();
@@ -390,7 +391,9 @@ function teResetBracket(record){
   if(record.status==='completed') record.status = 'ongoing';
   record.champion = '';
   recomputeMemberRanking();
+  syncAllMemberDisciplines();
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   showToast('Đã đặt lại sơ đồ thi đấu');
   renderContent();
@@ -568,8 +571,10 @@ function teSubmitElimResult(record, mid, s1, s2, winPoints, lossPoints){
   tbkResolveByes(M);
   teAwardPoints(record, winId, loseId, winPoints, lossPoints);
   recomputeMemberRanking();
+  syncAllMemberDisciplines();
   teCheckComplete(record);
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   showToast('Đã ghi nhận kết quả và cập nhật bảng xếp hạng');
   renderContent();
@@ -607,8 +612,10 @@ function teSaveRRResult(mid){
   m.winPoints = TE_WIN_POINTS; m.lossPoints = TE_LOSS_POINTS; m.decidedAt = Date.now();
   teAwardPoints(record, m.win, m.win===m.a?m.b:m.a, m.winPoints, m.lossPoints);
   recomputeMemberRanking();
+  syncAllMemberDisciplines();
   teCheckComplete(record);
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   showToast('Đã ghi nhận kết quả và cập nhật bảng xếp hạng');
   renderContent();
@@ -619,9 +626,11 @@ function teEditRRResult(mid){
   if(m.win!=null){
     teReversePoints(record, m.win, m.win===m.a?m.b:m.a, m.winPoints!=null?m.winPoints:TE_WIN_POINTS, m.lossPoints!=null?m.lossPoints:TE_LOSS_POINTS);
     recomputeMemberRanking();
+    syncAllMemberDisciplines();
   }
   m.win=null; m.s1=null; m.s2=null;
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   renderContent();
 }
@@ -697,8 +706,10 @@ function teSaveSwissResult(mid){
   m.winPoints = TE_WIN_POINTS; m.lossPoints = TE_LOSS_POINTS;
   teAwardPoints(record, m.winnerId, m.winnerId===m.aId?m.bId:m.aId, m.winPoints, m.lossPoints);
   recomputeMemberRanking();
+  syncAllMemberDisciplines();
   teCheckComplete(record);
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   showToast('Đã ghi nhận kết quả và cập nhật bảng xếp hạng');
   renderContent();
@@ -709,9 +720,11 @@ function teEditSwissResult(mid){
   if(m.confirmed && !m.bye){
     teReversePoints(record, m.winnerId, m.winnerId===m.aId?m.bId:m.aId, m.winPoints!=null?m.winPoints:TE_WIN_POINTS, m.lossPoints!=null?m.lossPoints:TE_LOSS_POINTS);
     recomputeMemberRanking();
+    syncAllMemberDisciplines();
   }
   m.confirmed=false; m.sa=null; m.sb=null; m.winnerId=null;
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   renderContent();
 }
@@ -751,6 +764,8 @@ function teSimStep(n){
   }
   teCheckComplete(record);
   saveDB();
+  teSyncTournamentToStrapi(record);
+  syncAllMemberDisciplines();
   renderSidebar();
   renderContent();
   if(record.format==='SE'||record.format==='DE') teApplyView();
@@ -759,7 +774,7 @@ function teSimStep(n){
 function attachTeMatchesTab(record){
   if(!record) return;
   document.querySelectorAll('[data-tbmode]').forEach(el=>el.addEventListener('click', ()=>{
-    record.mode = el.getAttribute('data-tbmode'); saveDB(); renderContent();
+    record.mode = el.getAttribute('data-tbmode'); saveDB(); teSyncTournamentToStrapi(record); renderContent();
   }));
   const startBtn = document.getElementById('tbStartBtn');
   if(startBtn) startBtn.addEventListener('click', ()=>teStartBracket(record));
@@ -778,9 +793,9 @@ function attachTeMatchesTab(record){
   }
   if(record.sw){
     const d = document.getElementById('tbSwDrawBtn');
-    if(d) d.addEventListener('click', ()=>{ tbkSwissDraw(record.sw, record.players, record.lives||3, id=>teName(record,id)); saveDB(); renderContent(); });
+    if(d) d.addEventListener('click', ()=>{ tbkSwissDraw(record.sw, record.players, record.lives||3, id=>teName(record,id)); saveDB(); teSyncTournamentToStrapi(record); renderContent(); });
     const nx = document.getElementById('tbSwNextBtn');
-    if(nx) nx.addEventListener('click', ()=>{ tbkSwissNext(record.sw, record.players, record.lives||3); saveDB(); renderContent(); });
+    if(nx) nx.addEventListener('click', ()=>{ tbkSwissNext(record.sw, record.players, record.lives||3); saveDB(); teSyncTournamentToStrapi(record); renderContent(); });
     document.querySelectorAll('[data-tbswsave]').forEach(b=>b.addEventListener('click', ()=>teSaveSwissResult(b.getAttribute('data-tbswsave'))));
     document.querySelectorAll('[data-tbswedit]').forEach(b=>b.addEventListener('click', ()=>teEditSwissResult(b.getAttribute('data-tbswedit'))));
   }
@@ -804,7 +819,7 @@ function attachTournamentEditorEvents(){
       const idx = Number(input.getAttribute('data-prize-idx'));
       const field = input.getAttribute('data-prize-field');
       record.prizes[idx][field] = input.value;
-      if(!teNewDraft || currentView!=='tournament-edit:new') saveDB();
+      if(!teNewDraft || currentView!=='tournament-edit:new'){ saveDB(); teSyncTournamentToStrapi(record); }
     });
   });
   const addPrizeBtn = document.getElementById('teAddPrizeBtn');
@@ -813,7 +828,7 @@ function attachTournamentEditorEvents(){
     if(!record) return;
     teSyncInfoFieldsIntoRecord(record);
     record.prizes.push({rank:'', cash:'', item:''});
-    if(currentView!=='tournament-edit:new') saveDB();
+    if(currentView!=='tournament-edit:new'){ saveDB(); teSyncTournamentToStrapi(record); }
     renderContent();
   });
   document.querySelectorAll('[data-te-rm-prize]').forEach(btn=>{
@@ -823,7 +838,7 @@ function attachTournamentEditorEvents(){
       teSyncInfoFieldsIntoRecord(record);
       const idx = Number(btn.getAttribute('data-te-rm-prize'));
       record.prizes.splice(idx,1);
-      if(currentView!=='tournament-edit:new') saveDB();
+      if(currentView!=='tournament-edit:new'){ saveDB(); teSyncTournamentToStrapi(record); }
       renderContent();
     });
   });
@@ -870,9 +885,12 @@ async function teSaveInfo(){
   });
   if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
   if(isNew){
-    data.id = uid();
     data.players = [];
     data.prizes = (teNewDraft && teNewDraft.prizes) ? teNewDraft.prizes : TE_DEFAULT_PRIZES.map(p=>({...p}));
+    data.mode = 'op';
+    const createdId = await teCreateTournamentOnStrapi(data);
+    if(!createdId) return;
+    data.id = createdId;
     DB.tournaments.push(data);
     teResetNewDraft();
     await saveDB();
@@ -883,16 +901,17 @@ async function teSaveInfo(){
     const idx = DB.tournaments.findIndex(r=>r.id===id);
     DB.tournaments[idx] = {...DB.tournaments[idx], ...data};
     await saveDB();
+    await teSyncTournamentToStrapi(DB.tournaments[idx]);
     renderSidebar();
     showToast('Đã lưu thông tin giải đấu');
     renderContent();
   }
 }
-function teCloneTournament(id){
+async function teCloneTournament(id){
   const src = teRecord(id);
   if(!src) return;
   const clone = JSON.parse(JSON.stringify(src));
-  clone.id = uid();
+  delete clone.id;
   clone.name = src.name + ' (Bản sao)';
   clone.status = 'upcoming';
   clone.champion = '';
@@ -901,19 +920,22 @@ function teCloneTournament(id){
   clone.sw = null;
   clone.mode = 'op';
   clone.players = (src.players||[]).map(p=>({...p, id:uid(), registeredAt:Date.now(), feeStatus:'unpaid'}));
+  const createdId = await teCreateTournamentOnStrapi(clone);
+  if(!createdId) return;
+  clone.id = createdId;
   DB.tournaments.push(clone);
-  saveDB();
+  await saveDB();
   renderSidebar();
   showToast('Đã nhân bản giải đấu — danh sách người chơi được giữ nguyên, chưa ghép cặp vòng đầu');
   setView('tournament-edit:'+clone.id);
 }
-function teDeleteTournament(){
+async function teDeleteTournament(){
   const id = currentView.slice('tournament-edit:'.length);
   const record = teRecord(id);
   const label = record ? record.name : 'giải đấu này';
   if(confirm(`Xóa "${label}" khỏi Giải đấu? Toàn bộ danh sách người chơi và kết quả sẽ bị xóa. Hành động này không thể hoàn tác.`)){
-    DB.tournaments = DB.tournaments.filter(r=>r.id!==id);
-    saveDB();
+    const ok = await deleteRemoteCollectionRecord('tournaments', id);
+    if(!ok) return;
     renderSidebar();
     showToast('Đã xóa giải đấu');
     setView('tournaments');
@@ -936,6 +958,7 @@ function teAddPlayers(){
     added++;
   });
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   showToast(`Đã thêm ${added} hội viên vào danh sách`);
   renderContent();
@@ -949,6 +972,7 @@ function teAddGuest(){
   if(!nameInput){ showToast('Vui lòng nhập họ tên khách mời', true); return; }
   record.players.push({id:uid(), memberId:null, name:nameInput, club:clubInput, registeredAt:Date.now(), feeStatus:'unpaid'});
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   showToast('Đã thêm khách mời');
   renderContent();
@@ -983,6 +1007,7 @@ function teImportCsv(){
   });
   teCsvText = '';
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   showToast(`Đã nhập ${added} người chơi từ danh sách`);
   renderContent();
@@ -995,6 +1020,7 @@ function teSetPlayerFeeStatus(pid, status){
   if(!p) return;
   p.feeStatus = status;
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderContent();
 }
 function teRemovePlayer(pid){
@@ -1010,6 +1036,7 @@ function teRemovePlayer(pid){
   }
   record.players = record.players.filter(p=>p.id!==pid);
   saveDB();
+  teSyncTournamentToStrapi(record);
   renderSidebar();
   showToast('Đã xóa người chơi');
   renderContent();

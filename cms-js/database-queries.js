@@ -1,107 +1,17 @@
 /* =========================================================
    DATABASE QUERIES
-   Giải đấu và Hội viên không được nhập tay trong seedData —
-   hai danh mục này được truy vấn từ CSDL qua fetchFromDatabase().
+   Trước đây "Giải đấu" và "Hội viên" được mô phỏng qua fetchFromDatabase()
+   (dữ liệu demo cứng trong DB_TABLES) — nay cả hai đã nối thẳng vào Strapi
+   (xem strapi-data.js), nên DB_TABLES để trống. Giữ lại loadDB()'s hook vào
+   fetchFromDatabase() phòng khi có collection khác cần mô phỏng tương tự.
    ========================================================= */
 const DB_LATENCY_MS = 500;
-const DB_TABLES = {
-  tournaments:[
-    {name:'Giải Vô địch Quốc gia Pool 2026',category:'Pool 9 bi',status:'ongoing',date:'2026-06-12',location:'Nhà thi đấu Phú Thọ, TP.HCM',participants:128,note:'Vòng tứ kết',champion:''},
-    {name:'Cúp Carom 3 băng Hà Nội Mở rộng',category:'Carom 3 băng',status:'upcoming',date:'2026-06-28',location:'CLB Meow Billiards, Hà Nội',participants:64,note:'Mở đăng ký',champion:''},
-    {name:'Giải Snooker Toàn quốc 2026',category:'Snooker',status:'upcoming',date:'2026-07-15',location:'Cung Thể thao Đà Nẵng',participants:48,note:'Mở đăng ký',champion:''},
-    {name:'Giải các CLB mạnh toàn quốc',category:'Pool 10 bi',status:'upcoming',date:'2026-08-02',location:'TP. Thủ Dầu Một, Bình Dương',participants:'',note:'Sắp mở',champion:''},
-    {name:'Giải Carom 3 băng Cúp Mùa Xuân 2026',category:'Carom 3 băng',status:'completed',date:'2026-04-18',location:'',participants:'',note:'',champion:'Trần Quốc Bảo'},
-    {name:'Giải Pool 9 bi các tỉnh phía Bắc 2026',category:'Pool 9 bi',status:'completed',date:'2026-03-30',location:'',participants:'',note:'',champion:'Nguyễn Phúc Long'},
-    {name:'Giải Snooker Cúp CLB toàn quốc 2025',category:'Snooker',status:'completed',date:'2025-12-12',location:'',participants:'',note:'',champion:'Lê Minh Khôi'}
-  ],
-  members: buildMemberRows([
-    {rank:1,name:'Nguyễn Phúc Long',code:'VBSF-2026-00098',cccd:'079095001234',phone:'0901234567',password:'123456',club:'CLB Sài Gòn',province:'TP.HCM',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-12-31',points:2485,matches:45,trend:'up',trendValue:1,freeMatches:memberDemoHistory([
-      ['Pool 9 bi','Trần Quốc Bảo',5,3,8,'2026-07-20'],
-      ['Carom 3 băng','Đỗ Thành Nam',4,2,6,'2026-06-15'],
-      ['Pool 9 bi','Lê Minh Khôi',3,5,-4,'2026-05-02']
-    ])},
-    {rank:2,name:'Trần Quốc Bảo',code:'VBSF-2026-00071',cccd:'001094005678',phone:'0912345678',password:'123456',club:'CLB Thủ Đô',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-11-30',points:2410,matches:44,trend:'down',trendValue:1,freeMatches:memberDemoHistory([
-      ['Pool 9 bi','Nguyễn Phúc Long',3,5,-4,'2026-07-20'],
-      ['Pool 8 bi','Vũ Hoàng Sơn',5,1,7,'2026-06-28'],
-      ['Carom 3 băng','Phạm Anh Tú',4,3,5,'2026-05-19']
-    ])},
-    {rank:3,name:'Lê Minh Khôi',code:'VBSF-2026-00112',cccd:'048096009012',phone:'0923456789',password:'123456',club:'CLB Sông Hàn',province:'Đà Nẵng',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-10-15',points:2388,matches:43,trend:'eq',trendValue:0,freeMatches:memberDemoHistory([
-      ['Pool 9 bi','Nguyễn Phúc Long',5,3,8,'2026-05-02'],
-      ['Snooker','Ngô Gia Huy',3,1,6,'2026-06-10'],
-      ['Pool 9 bi','Bùi Đức Anh',2,5,-3,'2026-07-05']
-    ])},
-    {rank:4,name:'Phạm Anh Tú',code:'VBSF-2026-00123',cccd:'074097003456',phone:'0934567890',password:'123456',club:'Meow Billiards',province:'Bình Dương',category:'Pool 9 bi',group:'Nam',status:'pending',expiry:'',points:2301,matches:42,trend:'up',trendValue:2,freeMatches:memberDemoHistory([
-      ['Carom 3 băng','Trần Quốc Bảo',3,4,-4,'2026-05-19'],
-      ['Pool 9 bi','Đỗ Thành Nam',5,2,7,'2026-06-22'],
-      ['Pool 10 bi','Lý Trường Giang',4,1,6,'2026-07-14']
-    ])},
-    {rank:5,name:'Đỗ Thành Nam',code:'VBSF-2025-00410',cccd:'031093007890',phone:'0945678901',password:'123456',club:'CLB Cảng',province:'Hải Phòng',category:'Pool 9 bi',group:'Nam',status:'expired',expiry:'2025-12-31',points:2256,matches:38,trend:'down',trendValue:1,freeMatches:memberDemoHistory([
-      ['Carom 3 băng','Nguyễn Phúc Long',2,4,-3,'2026-06-15'],
-      ['Pool 9 bi','Phạm Anh Tú',2,5,-3,'2026-06-22'],
-      ['Pool 9 bi','Hoàng Minh Quân',5,4,6,'2026-07-30']
-    ])},
-    {rank:6,name:'Vũ Hoàng Sơn',code:'VBSF-2026-00201',cccd:'001096010123',phone:'0956789012',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-09-30',points:2198,matches:40,trend:'up',trendValue:1,freeMatches:memberDemoHistory([
-      ['Pool 8 bi','Trần Quốc Bảo',1,5,-3,'2026-06-28'],
-      ['Pool 9 bi','Đặng Văn Hậu',5,2,7,'2026-07-08'],
-      ['Snooker','Trịnh Bá Phước',3,2,5,'2026-08-01']
-    ])},
-    {rank:7,name:'Ngô Gia Huy',code:'VBSF-2026-00202',cccd:'092097011234',phone:'0967890123',password:'123456',club:'',province:'Cần Thơ',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-08-31',points:2154,matches:35,trend:'eq',trendValue:0,freeMatches:memberDemoHistory([
-      ['Snooker','Lê Minh Khôi',1,3,-3,'2026-06-10'],
-      ['Pool 9 bi','Lý Trường Giang',4,2,6,'2026-07-12'],
-      ['Pool 9 bi','Bùi Đức Anh',4,3,5,'2026-08-05']
-    ])},
-    {rank:8,name:'Bùi Đức Anh',code:'VBSF-2026-00203',cccd:'079095012345',phone:'0978901234',password:'123456',club:'',province:'TP.HCM',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-07-31',points:2097,matches:33,trend:'up',trendValue:3,freeMatches:memberDemoHistory([
-      ['Pool 9 bi','Lê Minh Khôi',5,2,8,'2026-07-05'],
-      ['Pool 9 bi','Ngô Gia Huy',3,4,-4,'2026-08-05'],
-      ['Pool 8 bi','Hoàng Minh Quân',5,3,6,'2026-08-10']
-    ])},
-    {rank:9,name:'Lý Trường Giang',code:'VBSF-2026-00204',cccd:'048096013456',phone:'0989012345',password:'123456',club:'',province:'Đà Nẵng',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2026-06-30',points:2041,matches:31,trend:'down',trendValue:2,freeMatches:memberDemoHistory([
-      ['Pool 10 bi','Phạm Anh Tú',1,4,-3,'2026-07-14'],
-      ['Pool 9 bi','Ngô Gia Huy',2,4,-3,'2026-07-12'],
-      ['Carom 1 băng','Đặng Văn Hậu',4,3,6,'2026-08-02']
-    ])},
-    {rank:10,name:'Hoàng Minh Quân',code:'VBSF-2026-00205',cccd:'040097014567',phone:'0990123456',password:'123456',club:'',province:'Nghệ An',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-01-31',points:1988,matches:29,trend:'up',trendValue:1,freeMatches:memberDemoHistory([
-      ['Pool 9 bi','Đỗ Thành Nam',4,5,-3,'2026-07-30'],
-      ['Pool 8 bi','Bùi Đức Anh',3,5,-3,'2026-08-10'],
-      ['Pool 9 bi','Trịnh Bá Phước',5,3,7,'2026-08-12']
-    ])},
-    {rank:11,name:'Đặng Văn Hậu',code:'VBSF-2026-00206',cccd:'052098015678',phone:'0901987654',password:'123456',club:'',province:'Bình Định',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-02-28',points:1945,matches:28,trend:'eq',trendValue:0,freeMatches:memberDemoHistory([
-      ['Pool 9 bi','Vũ Hoàng Sơn',2,5,-3,'2026-07-08'],
-      ['Carom 1 băng','Lý Trường Giang',3,4,-4,'2026-08-02'],
-      ['Pool 9 bi','Trịnh Bá Phước',4,2,6,'2026-08-14']
-    ])},
-    {rank:12,name:'Trịnh Bá Phước',code:'VBSF-2026-00207',cccd:'001095016789',phone:'0912987654',password:'123456',club:'',province:'Hà Nội',category:'Pool 9 bi',group:'Nam',status:'active',expiry:'2027-03-31',points:1902,matches:27,trend:'down',trendValue:1,freeMatches:memberDemoHistory([
-      ['Snooker','Vũ Hoàng Sơn',2,3,-3,'2026-08-01'],
-      ['Pool 9 bi','Hoàng Minh Quân',3,5,-4,'2026-08-12'],
-      ['Pool 9 bi','Đặng Văn Hậu',2,4,-3,'2026-08-14']
-    ])}
-  ])
-};
-function memberDemoHistory(rows){
-  return rows.map(([category,opponent,score1,score2,points,date])=>({id:uid(),category,opponent,score1,score2,points,date,ts:new Date(date).getTime()}));
-}
-/* Chuyển hồ sơ xếp hạng phẳng (rank/points/matches/trend) thành mảng disciplines —
-   mỗi bộ môn có điểm/hạng/lịch sử riêng. Bộ môn phụ được suy ra từ freeMatches. */
-function buildMemberRows(rows){
-  return rows.map(row=>{
-    const {rank, points, matches, trend, trendValue, freeMatches, ...rest} = row;
-    const disciplines = [{category:rest.category, rank, points, matches, trend, trendValue}];
-    (freeMatches||[]).forEach(fm=>{
-      if(fm.category===rest.category) return;
-      let d = disciplines.find(x=>x.category===fm.category);
-      if(!d){ d = {category:fm.category, points:0, rank:null, matches:0, trend:'eq', trendValue:0}; disciplines.push(d); }
-      d.points += fm.points;
-      d.matches += 1;
-    });
-    return {...rest, freeMatches, disciplines};
-  });
-}
+const DB_TABLES = {};
 /** Mô phỏng một truy vấn CSDL (SELECT * FROM <table>) qua mạng. */
 function fetchFromDatabase(table){
   return new Promise(resolve=>{
     setTimeout(()=>{
-      resolve(DB_TABLES[table].map(row=>({...row, id:uid()})));
+      resolve((DB_TABLES[table]||[]).map(row=>({...row, id:uid()})));
     }, DB_LATENCY_MS);
   });
 }
-

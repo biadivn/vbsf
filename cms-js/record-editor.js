@@ -84,6 +84,7 @@ function reAddDiscipline(record){
   record.disciplines.push({category:cat, points:0, rank:null, matches:0, trend:'eq', trendValue:0});
   recomputeMemberRanking();
   saveDB();
+  syncAllMemberDisciplines();
   renderSidebar();
   showToast('Đã thêm hồ sơ bộ môn');
   renderContent();
@@ -93,6 +94,7 @@ function reUpdateDisciplinePoints(record, idx, value){
   d.points = Number(value)||0;
   recomputeMemberRanking();
   saveDB();
+  syncAllMemberDisciplines();
   renderSidebar();
   renderContent();
 }
@@ -100,6 +102,7 @@ function reUpdateDisciplineMatches(record, idx, value){
   const d = record.disciplines && record.disciplines[idx]; if(!d) return;
   d.matches = Math.max(0, Number(value)||0);
   saveDB();
+  pushMemberDisciplinesPatch(record);
 }
 function reRemoveDiscipline(record, idx){
   const d = record.disciplines && record.disciplines[idx]; if(!d) return;
@@ -107,6 +110,7 @@ function reRemoveDiscipline(record, idx){
   record.disciplines.splice(idx,1);
   recomputeMemberRanking();
   saveDB();
+  syncAllMemberDisciplines();
   renderSidebar();
   showToast('Đã xóa hồ sơ bộ môn');
   renderContent();
@@ -213,6 +217,7 @@ function reAddFreeMatch(record){
   applyDisciplinePoints(record, category, pts, 1);
   recomputeMemberRanking();
   saveDB();
+  syncAllMemberDisciplines();
   showToast('Đã ghi nhận trận đấu tự do và cập nhật điểm xếp hạng');
   renderContent();
 }
@@ -224,6 +229,7 @@ function reRemoveFreeMatch(record, fmId){
   record.freeMatches = record.freeMatches.filter(x=>x.id!==fmId);
   recomputeMemberRanking();
   saveDB();
+  syncAllMemberDisciplines();
   showToast('Đã xóa trận đấu tự do');
   renderContent();
 }

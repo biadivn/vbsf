@@ -40,6 +40,7 @@ const CONTENT_MANAGE_UIDS = [
   'api::media-item.media-item',
   'api::member.member',
   'api::member-org.member-org',
+  'api::tournament.tournament',
 ];
 const CONTENT_MANAGE_SINGLE_TYPE_UIDS = ['api::setting.setting', 'api::contact-info.contact-info'];
 
