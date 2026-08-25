@@ -129,8 +129,8 @@ không build lại trên server nữa.
 ```bash
 sudo cp deploy/nginx/vbsf.biadi.vn.conf /etc/nginx/sites-available/
 sudo cp deploy/nginx/vbsf-cms.biadi.vn.conf /etc/nginx/sites-available/
-sudo ln -s /etc/nginx/sites-available/vbsf.biadi.vn /etc/nginx/sites-enabled/
-sudo ln -s /etc/nginx/sites-available/vbsf-cms.biadi.vn /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/vbsf.biadi.vn.conf /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/vbsf-cms.biadi.vn.conf /etc/nginx/sites-enabled/
 sudo mkdir -p /var/www/vbsf-web /var/www/vbsf-cms
 sudo nginx -t && sudo systemctl reload nginx
 sudo certbot --nginx -d vbsf.biadi.vn -d vbsf-cms.biadi.vn
