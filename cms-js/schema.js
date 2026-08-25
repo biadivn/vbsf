@@ -85,7 +85,7 @@ const COLLECTIONS = {
     ]
   },
   members: {
-    label:'Hội viên & Xếp hạng', icon:'ti-users', single:'hội viên', filterField:'category', pageEdit:true,
+    label:'Hội viên & Xếp hạng', icon:'ti-users', single:'hội viên', filterField:'category', pageEdit:true, remote:true, apiPath:'members', noSync:true,
     fields:[
       {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true, section:'Thông tin cơ bản'},
       {key:'name', label:'Họ và tên', type:'text', required:true, section:'Thông tin cơ bản'},
@@ -112,7 +112,7 @@ const COLLECTIONS = {
     ]
   },
   members_org: {
-    label:'Hội viên tổ chức', icon:'ti-building', single:'hội viên tổ chức', filterField:'orgType', pageEdit:true,
+    label:'Hội viên tổ chức', icon:'ti-building', single:'hội viên tổ chức', filterField:'orgType', pageEdit:true, remote:true, apiPath:'member-orgs',
     fields:[
       {key:'code', label:'Mã hội viên tổ chức', type:'text', placeholder:'VBSF-TC-2026-XXX', span2:true, disabled:true, section:'Thông tin tổ chức'},
       {key:'name', label:'Tên tổ chức / CLB', type:'text', required:true, span2:true, section:'Thông tin tổ chức'},

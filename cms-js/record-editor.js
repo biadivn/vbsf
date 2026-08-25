@@ -293,10 +293,20 @@ async function saveRecordEditor(key){
       val = document.getElementById('f_'+f.key).value;
       if(f.type==='number' && val!=='') val = Number(val);
     }
+    if(f.type==='password' && val==='' && !isNew) return;
     if(f.required && (val===''||val===undefined||val===null)) missingRequired = true;
     data[f.key] = val;
   });
   if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
+
+  if(c.remote){
+    const ok = await saveRemoteCollectionRecord(key, isNew?null:id, data);
+    if(!ok) return;
+    renderSidebar();
+    showToast(isNew ? 'Đã thêm mới' : 'Đã lưu thay đổi');
+    setView(key);
+    return;
+  }
 
   if(isNew){
     data.id = uid();
@@ -310,12 +320,20 @@ async function saveRecordEditor(key){
   showToast(isNew ? 'Đã thêm mới' : 'Đã lưu thay đổi');
   setView(key);
 }
-function deleteRecordEditor(key){
+async function deleteRecordEditor(key){
   const id = currentView.slice((key+'-edit:').length);
   const c = COLLECTIONS[key];
   const record = DB[key].find(r=>r.id===id);
   const label = record ? (record.name||record.title||`${c.single} này`) : `${c.single} này`;
   if(confirm(`Xóa "${label}" khỏi ${c.label}? Hành động này không thể hoàn tác.`)){
+    if(c.remote){
+      const ok = await deleteRemoteCollectionRecord(key, id);
+      if(!ok) return;
+      renderSidebar();
+      showToast('Đã xóa');
+      setView(key);
+      return;
+    }
     DB[key] = DB[key].filter(r=>r.id!==id);
     saveDB();
     renderSidebar();

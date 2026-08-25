@@ -1,13 +1,18 @@
 /* =========================================================
    STRAPI DATA — đồng bộ các collection nội dung (news, partners,
-   library_docs, library_media) và 2 singleton (settings, contact)
-   với Strapi. Dùng chung apiFetch()/getStoredTokens() từ auth.js.
+   library_docs, library_media, members, members_org) và 2 singleton
+   (settings, contact) với Strapi. Dùng chung apiFetch()/getStoredTokens()
+   từ auth.js.
 
-   Ghi chú: tournaments, members, members_org CHƯA được nối vào Strapi
-   ở đây — các collection này còn phụ thuộc dữ liệu component/quan hệ
-   phức tạp (giải đấu: bracket/players/prizes; hội viên: disciplines/
-   freeMatches) và bộ máy giải đấu cục bộ (tournament-editor.js), nên
-   việc đồng bộ đầy đủ để lại cho một lần làm riêng.
+   Ghi chú: tournaments CHƯA được nối vào Strapi ở đây — mặc dù Strapi đã
+   có content-type "tournament" đầy đủ (bracket/players/prizes json/component),
+   bộ máy giải đấu cục bộ (tournament-editor.js + tournament-engine.js) ghi
+   trực tiếp vào DB.tournaments qua ~20 điểm gọi saveDB() rải rác trong logic
+   sinh bracket/Swiss/vòng tròn — nối đầy đủ cần một lần làm riêng, không
+   bolt-on an toàn trong lượt sửa này. Tương tự, phần chỉnh sửa "disciplines"
+   (Hạng/Điểm) trong hồ sơ hội viên vẫn chỉ lưu cục bộ — CRUD hồ sơ chính đã
+   nối Strapi nhưng sub-editor điểm/hạng theo từng nội dung thi đấu là tính
+   năng nested phức tạp hơn, để lại làm sau nếu cần.
    ========================================================= */
 const SINGLETON_API_PATH = { settings:'setting', contact:'contact-info' };
 
@@ -36,6 +41,10 @@ function mapStrapiEntryToRecord(c, item){
   c.fields.forEach(f=>{
     rec[f.key] = f.type==='image' ? mediaUrl(item[f.key]) : item[f.key];
   });
+  // Không phải field chỉnh sửa qua form nhưng cần hiển thị (cột Hạng/Điểm ở
+  // danh sách hội viên đọc trực tiếp từ disciplines).
+  if(item.disciplines) rec.disciplines = item.disciplines;
+  if(item.freeMatches) rec.freeMatches = item.freeMatches;
   return rec;
 }
 

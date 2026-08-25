@@ -7,9 +7,9 @@ let syncingKey=null;
 
 async function loadDB(){
   try{
-    const res = await window.storage.get(STORAGE_KEY, false);
-    if(res && res.value){
-      DB = JSON.parse(res.value);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      DB = JSON.parse(raw);
       let needsSave=false;
       for(const table of Object.keys(DB_TABLES)){
         if(!Array.isArray(DB[table])){ DB[table] = await fetchFromDatabase(table); needsSave=true; }
@@ -50,7 +50,7 @@ async function syncFromDatabase(key){
 }
 async function saveDB(){
   try{
-    await window.storage.set(STORAGE_KEY, JSON.stringify(DB), false);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
   }catch(e){
     console.error('Storage save failed', e);
     showToast('Không thể lưu dữ liệu (lỗi bộ nhớ)', true);

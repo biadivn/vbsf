@@ -24,16 +24,22 @@ const AUTHENTICATED_USER_ACTIONS = [
   'plugin::users-permissions.user.update',
   'plugin::users-permissions.user.destroy',
   'plugin::users-permissions.user.count',
+  // "me" là action riêng (không nằm trong find/findOne) — thiếu quyền này khiến
+  // GET /api/users/me trả 403, làm phiên đăng nhập không khôi phục được sau khi
+  // reload trang CMS (luôn bị đẩy về màn hình đăng nhập).
+  'plugin::users-permissions.user.me',
 ];
 
 // Các collection CMS quản lý trực tiếp (module "Tin tức", "Đối tác",
-// "Văn bản & Luật", "Thư viện Media") — tài khoản CMS (role Authenticated)
-// cần đủ quyền CRUD trên các content-type này.
+// "Văn bản & Luật", "Thư viện Media", "Hội viên & Xếp hạng", "Hội viên tổ chức") —
+// tài khoản CMS (role Authenticated) cần đủ quyền CRUD trên các content-type này.
 const CONTENT_MANAGE_UIDS = [
   'api::news-article.news-article',
   'api::partner.partner',
   'api::library-doc.library-doc',
   'api::media-item.media-item',
+  'api::member.member',
+  'api::member-org.member-org',
 ];
 const CONTENT_MANAGE_SINGLE_TYPE_UIDS = ['api::setting.setting', 'api::contact-info.contact-info'];
 
