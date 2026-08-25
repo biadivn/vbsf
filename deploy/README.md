@@ -43,6 +43,33 @@ CMS là nơi gọi tới API/admin của Strapi.
 
 ### 1. Checkout Git dùng chung cho mọi workflow
 
+Repo `biadivn/vbsf` là private nên server cần tự xác thực được với GitHub để
+`git clone`/`git pull`. Dùng **Deploy Key** của GitHub (SSH key gắn riêng cho
+đúng 1 repo, chỉ đọc) — không dùng SSH key cá nhân hay PAT cho việc này.
+
+> Lưu ý: đây là key **khác** với `DEPLOY_SSH_KEY` (secret GitHub Actions dùng để
+> CI SSH **vào** server). Deploy Key dưới đây dùng để server tự `git clone`/`pull`
+> **từ** GitHub — hai chiều xác thực khác nhau, không dùng chung một cặp key.
+
+```bash
+# Tạo cặp key riêng cho việc clone repo (chạy ngay trên server)
+ssh-keygen -t ed25519 -f ~/.ssh/vbsf_deploy_key -N "" -C "vbsf-server-git-pull"
+
+# Trỏ SSH dùng key này khi kết nối tới github.com
+cat >> ~/.ssh/config <<'EOF'
+Host github.com
+  IdentityFile ~/.ssh/vbsf_deploy_key
+  IdentitiesOnly yes
+EOF
+chmod 600 ~/.ssh/config
+
+cat ~/.ssh/vbsf_deploy_key.pub   # copy nội dung này
+```
+
+Vào repo `biadivn/vbsf` trên GitHub → **Settings → Deploy keys → Add deploy key**
+→ dán public key vừa copy → **để trống "Allow write access"** (server chỉ cần
+đọc, không bao giờ push) → Add key.
+
 ```bash
 sudo mkdir -p /opt/vbsf
 sudo chown $USER:$USER /opt/vbsf
