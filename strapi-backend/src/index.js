@@ -113,12 +113,16 @@ module.exports = {
 
       // Tài khoản CMS được quản lý thủ công (qua module Tài khoản trong CMS / Strapi Admin),
       // không cho phép người ngoài tự đăng ký qua API công khai.
-      const registerPermission = await strapi.query('plugin::users-permissions.permission').findOne({
-        where: { action: 'plugin::users-permissions.auth.register', role: publicRole.id },
-      });
-      if (registerPermission) {
-        await strapi.query('plugin::users-permissions.permission').delete({ where: { id: registerPermission.id } });
-      }
+      // TẠM THỜI TẮT (cấp lại quyền thay vì xoá): đang dùng /api/auth/local/register
+      // để tạo tài khoản CMS đầu tiên vì chưa có cách nào khác truy cập server.
+      // Xoá dòng grantPermissions bên dưới và bật lại đoạn xoá quyền ngay sau khi tạo xong.
+      await grantPermissions(strapi, publicRole.id, ['plugin::users-permissions.auth.register']);
+      // const registerPermission = await strapi.query('plugin::users-permissions.permission').findOne({
+      //   where: { action: 'plugin::users-permissions.auth.register', role: publicRole.id },
+      // });
+      // if (registerPermission) {
+      //   await strapi.query('plugin::users-permissions.permission').delete({ where: { id: registerPermission.id } });
+      // }
     }
 
     const authenticatedRole = await strapi
