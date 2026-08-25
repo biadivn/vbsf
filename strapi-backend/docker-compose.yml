@@ -10,10 +10,15 @@ services:
       - .env
     environment:
       NODE_ENV: production
-      DATABASE_CLIENT: sqlite
-      DATABASE_FILENAME: .tmp/data.db
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "1337:1337"
+    # strapi_uploads là dữ liệu KHÔNG thể mất (file upload thật của người dùng) —
+    # bắt buộc phải là named volume, không mount vào layer container. strapi_data
+    # (.tmp) chỉ là cache/cấu hình runtime nhưng vẫn persist để tránh mất tiến trình
+    # build/cache giữa các lần restart container.
     volumes:
       - strapi_data:/opt/app/.tmp
       - strapi_uploads:/opt/app/public/uploads
@@ -24,14 +29,13 @@ services:
       retries: 10
       start_period: 30s
 
-  # Tuỳ chọn: dùng Postgres thay cho SQLite khi chạy nhiều container/replica.
-  # Bật bằng: docker compose --profile postgres up -d
-  # rồi đổi strapi.environment: DATABASE_CLIENT=postgres, DATABASE_HOST=postgres, ...
+  # Postgres chạy cùng trong docker-compose (không phải MySQL/Postgres cài trên host) —
+  # data lưu ở named volume postgres_data, persistent qua rebuild/restart container,
+  # chỉ mất khi chủ động chạy `docker compose down -v`.
   postgres:
     image: postgres:16-alpine
     container_name: vbsf-strapi-db
     restart: unless-stopped
-    profiles: ["postgres"]
     environment:
       POSTGRES_DB: ${DATABASE_NAME:-strapi}
       POSTGRES_USER: ${DATABASE_USERNAME:-strapi}

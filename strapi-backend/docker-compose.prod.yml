@@ -1,0 +1,11 @@
+# Overlay dùng trên server production: thay vì build image tại chỗ, kéo image đã
+# được CI build sẵn và push lên GitHub Container Registry (xem
+# .github/workflows/deploy-strapi.yml). Dùng cùng lúc với docker-compose.yml:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# GHCR_IMAGE mặc định lấy theo repo GitHub biadivn/vbsf — đổi nếu fork sang repo khác.
+services:
+  strapi:
+    image: ${GHCR_IMAGE:-ghcr.io/biadivn/vbsf-strapi:latest}

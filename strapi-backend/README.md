@@ -24,9 +24,26 @@ docker compose build
 docker compose up -d
 ```
 
-- Mặc định dùng SQLite, dữ liệu lưu ở Docker volume `strapi_data` (khớp
-  `DATABASE_FILENAME=.tmp/data.db`) và file upload ở `strapi_uploads`.
+- Mặc định trong `.env.example` dùng **Postgres chạy trong cùng docker-compose**
+  (service `postgres`, image `postgres:16-alpine`) — không cần cài Postgres/MySQL
+  gì trên host. Strapi kết nối qua tên service `postgres` trong mạng Docker nội bộ.
+  Đổi `DATABASE_CLIENT=sqlite` trong `.env` nếu chỉ muốn chạy demo/local nhanh
+  không cần Postgres.
+- Dữ liệu Postgres lưu ở Docker volume `postgres_data`, file upload thật lưu ở
+  `strapi_uploads` — cả hai đều persistent, sống ngoài vòng đời container (chỉ mất
+  khi chủ động chạy `docker compose down -v`). Xem `deploy/README.md` ở thư mục gốc
+  repo để biết toàn bộ quy trình CI/CD + thiết lập server production (nginx, GHCR,
+  SSH deploy key).
+- `strapi` service dùng `depends_on: postgres: condition: service_healthy` nên
+  luôn chờ Postgres sẵn sàng trước khi khởi động — không cần chạy `docker compose up`
+  nhiều lần vì lỗi kết nối DB lúc container postgres chưa kịp init.
 - Container có healthcheck (`/_health`) — theo dõi bằng `docker compose ps`.
+- **Đã kiểm thử thật với cấu hình Postgres hiện tại** (2026-08-24): `docker compose
+  build && docker compose up -d` chạy được, `vbsf-strapi-db` đạt `healthy` trước,
+  `vbsf-strapi` chờ đúng rồi mới start và đạt `healthy`; `npm run seed` nạp đủ dữ
+  liệu vào Postgres (kiểm tra bằng `\dt` thấy đúng bảng, API trả đúng số bản ghi);
+  `docker compose down` (không `-v`) rồi `up -d` lại — dữ liệu vẫn còn nguyên, xác
+  nhận `postgres_data` persistent đúng như kỳ vọng.
 - Nạp dữ liệu demo vào container đang chạy (volume mới sẽ trống, khác biệt với
   `.tmp/data.db` chạy ngoài host):
   ```bash
@@ -40,22 +57,9 @@ docker compose up -d
 - Xem log: `docker compose logs -f strapi`
 - Dừng: `docker compose down` (thêm `-v` để xoá luôn volume dữ liệu)
 
-**Postgres thay vì SQLite (tuỳ chọn, chưa được kiểm thử trong môi trường này vì
-máy dùng để build không cài Docker):**
-```bash
-docker compose --profile postgres up -d
-```
-rồi sửa `strapi.environment` trong `docker-compose.yml` (hoặc `.env`) thành
-`DATABASE_CLIENT=postgres`, `DATABASE_HOST=postgres`, cùng
-`DATABASE_NAME/USERNAME/PASSWORD` khớp với service `postgres`, và `docker compose up -d --build strapi` lại.
-
-> **Đã kiểm thử thật:** `docker compose build && docker compose up -d` chạy được (qua
-> Colima trên máy Apple Silicon), container `vbsf-strapi` đạt trạng thái `healthy`,
-> `docker compose exec strapi npm run seed` nạp đủ 9 collection, và toàn bộ endpoint
-> API công khai trả về đúng số bản ghi/đúng cấu trúc (kể cả components lồng nhau như
-> `disciplines`). Lưu ý một fix đã áp dụng: healthcheck dùng `127.0.0.1` thay vì
-> `localhost` vì `localhost` trong container phân giải ra `::1` (IPv6) trong khi Strapi
-> chỉ lắng nghe IPv4.
+> Lưu ý: healthcheck của service `strapi` dùng `127.0.0.1` thay vì `localhost` vì
+> `localhost` trong container phân giải ra `::1` (IPv6) trong khi Strapi chỉ lắng
+> nghe IPv4.
 
 ## Collections
 

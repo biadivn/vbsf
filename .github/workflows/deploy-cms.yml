@@ -1,0 +1,49 @@
+name: Deploy VBSF CMS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cms.html"
+      - "cms-js/**"
+      - ".github/workflows/deploy-cms.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-cms
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Load deploy SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Sync static files to server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          REPO_PATH: ${{ vars.DEPLOY_REPO_PATH || '/opt/vbsf' }}
+          CMS_ROOT: ${{ vars.CMS_ROOT || '/var/www/vbsf-cms' }}
+        run: |
+          set -euo pipefail
+          port="${DEPLOY_PORT:-22}"
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "$port" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+          # Cập nhật checkout Git trên server, rồi đồng bộ ra thư mục nginx serve
+          # (chạy rsync trên chính server, tránh round-trip file qua runner).
+          ssh -p "$port" "$DEPLOY_USER@$DEPLOY_HOST" "
+            set -euo pipefail
+            cd '$REPO_PATH'
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p '$CMS_ROOT/cms-js'
+            rsync -a '$REPO_PATH/cms.html' '$CMS_ROOT/cms.html'
+            rsync -a --delete '$REPO_PATH/cms-js/' '$CMS_ROOT/cms-js/'
+          "
