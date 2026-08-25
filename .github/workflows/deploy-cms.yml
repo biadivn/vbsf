@@ -6,6 +6,7 @@ on:
     paths:
       - "cms.html"
       - "cms-js/**"
+      - "deploy/nginx/vbsf-cms.biadi.vn.conf"
       - ".github/workflows/deploy-cms.yml"
   workflow_dispatch: {}
 
@@ -48,4 +49,13 @@ jobs:
             mkdir -p '$CMS_ROOT/cms-js'
             rsync -a '$REPO_PATH/cms.html' '$CMS_ROOT/cms.html'
             rsync -a --delete '$REPO_PATH/cms-js/' '$CMS_ROOT/cms-js/'
+
+            # Đồng bộ nginx config + reload nếu deploy user có quyền sudo không cần
+            # mật khẩu cho đúng 2 lệnh này (xem README/setup). Nếu chưa cấp quyền,
+            # bước này sẽ báo lỗi rõ ràng trong log CI thay vì treo chờ mật khẩu.
+            if [ -f '$REPO_PATH/deploy/nginx/vbsf-cms.biadi.vn.conf' ]; then
+              sudo -n cp '$REPO_PATH/deploy/nginx/vbsf-cms.biadi.vn.conf' /etc/nginx/sites-available/vbsf-cms.biadi.vn
+              sudo -n nginx -t
+              sudo -n systemctl reload nginx
+            fi
           "
