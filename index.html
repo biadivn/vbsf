@@ -240,7 +240,9 @@ body{background:#E4E8E5}
     return '<div style="display:flex;gap:20px;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:240px;border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff">'
         +'<div style="display:flex;align-items:center;gap:14px">'
-          +'<div class="vb-ph" style="width:56px;height:56px;border-radius:50%;flex-shrink:0"><i class="ti ti-user" style="font-size:24px"></i></div>'
+          +(m.avatar
+            ? '<div style="width:56px;height:56px;border-radius:50%;flex-shrink:0;background-image:url(\''+escapeHtmlSite(m.avatar)+'\');background-size:cover;background-position:center"></div>'
+            : '<div class="vb-ph" style="width:56px;height:56px;border-radius:50%;flex-shrink:0"><i class="ti ti-user" style="font-size:24px"></i></div>')
           +'<div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;color:#1B2A24">'+escapeHtmlSite(m.name)+'</div><div style="font-size:12px;color:#8A968F;margin-top:2px">'+escapeHtmlSite(m.code)+'</div></div>'
           +'<span class="vb-badge" style="background:'+st[1]+';color:'+st[2]+'">'+st[0]+'</span>'
         +'</div>'
@@ -249,7 +251,11 @@ body{background:#E4E8E5}
           +memberInfoRow('Tỉnh / Thành',m.province||'—')
           +memberInfoRow('Nội dung thi đấu',m.category||'—')
         +'</div>'
-        +'<button class="btn-out" data-member-logout style="margin-top:18px">Đăng xuất</button>'
+        +'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;align-items:center">'
+          +'<label class="btn-out" style="cursor:pointer;margin:0">Đổi ảnh đại diện<input type="file" data-member-avatar accept="image/*" style="display:none"></label>'
+          +'<button class="btn-out" data-member-logout>Đăng xuất</button>'
+        +'</div>'
+        +'<div data-member-avatar-msg style="display:none;font-size:11.5px;margin-top:8px"></div>'
       +'</div>'
       +'<div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:20px">'
         +'<div style="border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff">'
@@ -657,6 +663,19 @@ body{background:#E4E8E5}
           CURRENT_MEMBER=null;
           renderAuthState();
         });
+        var avatarPick=profileBox.querySelector('[data-member-avatar]');
+        var avatarMsg=profileBox.querySelector('[data-member-avatar-msg]');
+        if(avatarPick) avatarPick.addEventListener('change',async function(){
+          var f=avatarPick.files&&avatarPick.files[0];
+          if(!f) return;
+          avatarMsg.style.display=''; avatarMsg.style.color='#5C6B63'; avatarMsg.textContent='Đang tải ảnh…';
+          try{
+            CURRENT_MEMBER=await window.VBSF_AUTH.uploadAvatar(f);
+            renderAuthState();
+          }catch(e){
+            avatarMsg.style.color='#C0392B'; avatarMsg.textContent=e.message;
+          }
+        });
       }else{
         loginBox.style.display='';
         formSections.forEach(function(s){s.style.display='';});
@@ -668,6 +687,54 @@ body{background:#E4E8E5}
       if(!el) return;
       el.textContent=text||'';
       el.style.display=text?'':'none';
+    }
+
+    /* Khối "Quên mật khẩu?" — 2 bước: gửi yêu cầu rồi nhập mã + mật khẩu mới.
+       Dùng chung cho hội viên cá nhân (kind 'member') và tổ chức (kind 'org'). */
+    function wireForgotPassword(kind){
+      var q=function(sel){ return joinPage.querySelector('[data-'+kind+'-'+sel+']'); };
+      var link=q('forgot-link'), panel=q('forgot-panel');
+      if(!link||!panel) return null;
+      var stepRequest=joinPage.querySelector('[data-'+kind+'-forgot-step="request"]');
+      var stepReset=joinPage.querySelector('[data-'+kind+'-forgot-step="reset"]');
+      var err=q('forgot-error'), ok=q('forgot-success');
+      var phoneInput=q('forgot-phone'), sendBtn=q('forgot-submit');
+      var tokenInput=q('reset-token'), passInput=q('reset-password'), resetBtn=q('reset-submit');
+
+      function openPanel(showReset){
+        panel.style.display='';
+        if(stepRequest) stepRequest.style.display=showReset?'none':'';
+        if(stepReset) stepReset.style.display=showReset?'':'none';
+      }
+      link.addEventListener('click',function(){
+        var opened=panel.style.display!=='none';
+        if(opened){ panel.style.display='none'; return; }
+        openPanel(false);
+      });
+      if(sendBtn) sendBtn.addEventListener('click',async function(){
+        showFormMsg(err,''); showFormMsg(ok,'');
+        var phone=(phoneInput.value||'').trim();
+        if(!phone){ showFormMsg(err,'Vui lòng nhập số điện thoại.'); return; }
+        sendBtn.disabled=true;
+        try{
+          showFormMsg(ok,await window.VBSF_AUTH.forgotPassword(kind,phone));
+          openPanel(true);
+        }catch(e){ showFormMsg(err,e.message); }
+        finally{ sendBtn.disabled=false; }
+      });
+      if(resetBtn) resetBtn.addEventListener('click',async function(){
+        showFormMsg(err,''); showFormMsg(ok,'');
+        var token=(tokenInput.value||'').trim();
+        var password=(passInput.value||'').trim();
+        if(!token||!password){ showFormMsg(err,'Vui lòng nhập mã đặt lại và mật khẩu mới.'); return; }
+        resetBtn.disabled=true;
+        try{
+          showFormMsg(ok,await window.VBSF_AUTH.resetPassword(kind,token,password));
+          tokenInput.value=''; passInput.value='';
+        }catch(e){ showFormMsg(err,e.message); }
+        finally{ resetBtn.disabled=false; }
+      });
+      return { openReset:function(token){ openPanel(true); if(tokenInput) tokenInput.value=token; } };
     }
     if(loginBtn) loginBtn.addEventListener('click',async function(){
       var phone=(loginPhone.value||'').trim();
@@ -723,12 +790,37 @@ body{background:#E4E8E5}
       regSubmit.disabled=true;
       try{
         CURRENT_MEMBER=await window.VBSF_AUTH.registerMember(payload);
-        showFormMsg(regOk,'Đăng ký thành công! Mã hội viên của bạn: '+CURRENT_MEMBER.code+'. Hồ sơ đang chờ xác nhận hội phí.');
+        var msg='Đăng ký thành công! Mã hội viên của bạn: '+CURRENT_MEMBER.code+'. Hồ sơ đang chờ xác nhận hội phí.';
+        var avatarFile=avatarInput&&avatarInput.files&&avatarInput.files[0];
+        if(avatarFile){
+          try{ CURRENT_MEMBER=await window.VBSF_AUTH.uploadAvatar(avatarFile); }
+          catch(e){ msg+=' (Ảnh đại diện chưa tải lên được: '+e.message+')'; }
+        }
+        showFormMsg(regOk,msg);
         clearForm('[data-section="form-dang-ky"]');
+        if(avatarLabel) avatarLabel.textContent='Tải ảnh lên (tối đa 3 MB)';
         renderAuthState();
       }catch(err){
         showFormMsg(regErr,err.message);
       }finally{ regSubmit.disabled=false; }
+    });
+
+    /* Link trong email có dạng /?reset=<token>#hoi-vien — mở sẵn bước nhập mật
+       khẩu mới và điền mã, rồi xoá query khỏi URL để không dán lại nhầm. */
+    var memberForgot=wireForgotPassword('member');
+    var resetToken=new URLSearchParams(location.search).get('reset');
+    if(resetToken && memberForgot){
+      memberForgot.openReset(resetToken);
+      history.replaceState(null,'',location.pathname+location.hash);
+    }
+
+    /* Ảnh đại diện: chỉ tải lên được sau khi có tài khoản, nên nếu người dùng
+       chọn ảnh lúc đang điền form thì giữ lại và gửi ngay sau khi đăng ký xong. */
+    var avatarInput=joinPage.querySelector('[data-reg-avatar]');
+    var avatarLabel=joinPage.querySelector('[data-reg-avatar-label]');
+    if(avatarInput) avatarInput.addEventListener('change',function(){
+      var f=avatarInput.files&&avatarInput.files[0];
+      if(avatarLabel) avatarLabel.textContent=f?f.name:'Tải ảnh lên (tối đa 3 MB)';
     });
 
     renderAuthState();
@@ -821,6 +913,7 @@ body{background:#E4E8E5}
       }finally{ orgRegSubmit.disabled=false; }
     });
 
+    wireForgotPassword('org');
     renderOrgAuthState();
   }
 

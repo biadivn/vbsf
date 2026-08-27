@@ -75,6 +75,19 @@
     );
   }
 
+  /** Ảnh đại diện tròn — dùng ảnh thật nếu hội viên đã tải lên, không thì giữ
+      ô placeholder .vb-ph như prototype. */
+  function avatarCircle(media, size, border, iconSize, margin) {
+    var base = 'width:' + size + ';height:' + size + ';border-radius:50%;margin:' + (margin || '10px auto') +
+      (border ? ';border:' + border : '');
+    var url = mediaUrl(media);
+    if (url) {
+      return '<div style="' + base + ';background-image:url(\'' + esc(url) + '\');background-size:cover;background-position:center"></div>';
+    }
+    return '<div class="vb-ph" style="' + base + '"><i class="ti ti-user"' +
+      (iconSize ? ' style="font-size:' + iconSize + '"' : '') + '></i></div>';
+  }
+
   /** '200.000đ' -> 200000 (đọc mức phí trong Thông tin tổ chức). */
   function parseVnd(s) {
     var digits = String(s == null ? '' : s).replace(/[^\d]/g, '');
@@ -152,7 +165,7 @@
         api('contact-info'),
         list('news-articles', 'sort=date:desc&populate=image'),
         list('tournaments', 'populate=prizes&populate=players'),
-        list('members', 'populate=disciplines'),
+        list('members', 'populate=disciplines&populate=avatar'),
         list('member-orgs'),
         list('partners', 'populate=image'),
         list('library-docs', 'populate=file'),
@@ -203,6 +216,7 @@
         rows.push({
           rank: d.rank,
           name: m.name,
+          avatar: m.avatar,
           club: m.club || m.province || '',
           province: m.province || '',
           points: d.points,
@@ -452,7 +466,7 @@
           top3.map(function (r, i) {
             return (
               '<div class="tp-slide' + (i === 0 ? ' on' : '') + '">' +
-              '<div class="vb-ph" style="width:44px;height:44px;border-radius:50%;margin:0 auto 6px"><i class="ti ti-user"></i></div>' +
+              avatarCircle(r.avatar, '44px', '', '', '0 auto 6px') +
               '<div style="font-size:11px;font-weight:600;color:#21428E">HẠNG ' + (r.rank || i + 1) + '</div>' +
               '<div style="font-size:12px;margin-top:2px">' + esc(r.name) + '</div>' +
               '<div style="font-size:12.5px;font-weight:600;color:#21428E;margin-top:2px">' + fmtPoints(r.points) + ' đ</div></div>'
@@ -638,7 +652,7 @@
             return (
               '<div class="pod" style="border-top:3px solid var(--gold);box-shadow:0 6px 20px rgba(12,58,42,.10);padding-top:22px;padding-bottom:22px">' +
               '<div style="font-size:11px;font-weight:700;color:#21428E"><i class="ti ti-crown"></i> HẠNG 1</div>' +
-              '<div class="vb-ph" style="width:66px;height:66px;border-radius:50%;margin:10px auto;border:2px solid #21428E"><i class="ti ti-user" style="font-size:28px"></i></div>' +
+              avatarCircle(r.avatar, '66px', '2px solid #21428E', '28px') +
               '<div style="font-size:14px;font-weight:600;color:#1B2A24">' + esc(r.name) + '</div>' +
               '<div style="font-size:11px;color:#8A968F;margin-top:1px">' + esc(r.club || r.province) + '</div>' +
               '<div style="font-size:18px;font-weight:700;color:#21428E;margin-top:6px">' + fmtPoints(r.points) + '</div></div>'
@@ -649,7 +663,7 @@
           return (
             '<div class="pod" style="border-top:3px solid ' + border + '">' +
             '<div style="font-size:11px;font-weight:600;color:' + color + '"><i class="ti ti-medal"></i> HẠNG ' + place + '</div>' +
-            '<div class="vb-ph" style="width:52px;height:52px;border-radius:50%;margin:10px auto"><i class="ti ti-user" style="font-size:22px"></i></div>' +
+            avatarCircle(r.avatar, '52px', '', '22px') +
             '<div style="font-size:13px;font-weight:500;color:#1B2A24">' + esc(r.name) + '</div>' +
             '<div style="font-size:11px;color:#8A968F;margin-top:1px">' + esc(r.club || r.province) + '</div>' +
             '<div style="font-size:15px;font-weight:600;color:#21428E;margin-top:6px">' + fmtPoints(r.points) + '</div></div>'
@@ -932,9 +946,13 @@
       name: m.name, code: m.code || '', club: m.club || '', province: m.province || '',
       status: m.status, statuslabel: st[0], expiry: m.expiry ? fmtDate(m.expiry) : '—',
     };
+    var url = mediaUrl(m.avatar);
+    var av = url
+      ? '<span class="av" style="background-image:url(\'' + esc(url) + '\');background-size:cover;background-position:center"></span>'
+      : '<span class="av"><i class="ti ti-user" style="font-size:15px"></i></span>';
     return (
       '<tr style="cursor:pointer" data-go="hoi-vien-chi-tiet" ' + dsAttrs(ds) + '>' +
-      '<td><span class="av"><i class="ti ti-user" style="font-size:15px"></i></span>' + esc(m.name) + '</td>' +
+      '<td>' + av + esc(m.name) + '</td>' +
       '<td style="color:#5C6B63">' + esc(m.code || '') + '</td>' +
       '<td><span class="vb-badge" style="' + st[1] + '">' + st[0] + '</span></td></tr>'
     );
@@ -972,6 +990,7 @@
       async function show() {
         tbody.innerHTML = '<tr><td colspan="4" style="color:#8A968F">Đang tải…</td></tr>';
         var res = await apiPage(opts.path, {
+          'populate': opts.populate || undefined,
           'sort': 'name:asc',
           'pagination[page]': state.page,
           'pagination[pageSize]': MEMBER_PAGE_SIZE,
@@ -999,7 +1018,7 @@
       show();
     }
 
-    wirePanel({ tab: 'ca-nhan', path: 'members', row: memberRow, searchSelector: '[data-member-search]', noun: 'hội viên cá nhân' });
+    wirePanel({ tab: 'ca-nhan', path: 'members', row: memberRow, searchSelector: '[data-member-search]', noun: 'hội viên cá nhân', populate: 'avatar' });
     wirePanel({ tab: 'to-chuc', path: 'member-orgs', row: orgRow, searchSelector: '[data-org-search]', noun: 'hội viên tổ chức' });
   };
 

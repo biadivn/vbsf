@@ -69,6 +69,7 @@
       code: m.code, name: m.name, phone: m.phone, cccd: m.cccd, email: m.email || '',
       club: m.club || '', province: m.province || '', category: m.category || top.category || '',
       status: m.status, expiry: m.expiry ? fmtDate(m.expiry) : '',
+      avatar: m.avatar && m.avatar.url ? (m.avatar.url.indexOf('http') === 0 ? m.avatar.url : STRAPI_URL + m.avatar.url) : '',
       rank: top.rank, points: top.points, matches: top.matches,
       trend: top.trend, trendValue: top.trendValue,
       disciplines: m.disciplines || [],
@@ -137,6 +138,41 @@
 
     logoutMember() { writeToken(MEMBER_TOKEN_KEY, null); },
     logoutOrg() { writeToken(ORG_TOKEN_KEY, null); },
+
+    /* Quên mật khẩu — backend luôn trả cùng một thông báo dù số có tài khoản
+       hay không, nên phía site cũng chỉ hiển thị nguyên văn thông báo đó. */
+    async forgotPassword(kind, phone) {
+      var out = await post((kind === 'org' ? 'org-auth' : 'member-auth') + '/forgot-password', { phone: phone });
+      return out.message;
+    },
+
+    async resetPassword(kind, token, password) {
+      var out = await post((kind === 'org' ? 'org-auth' : 'member-auth') + '/reset-password', {
+        token: token, password: password,
+      });
+      return out.message;
+    },
+
+    /** Đổi ảnh đại diện — chỉ chủ tài khoản, gửi kèm token đang đăng nhập. */
+    async uploadAvatar(file) {
+      var token = readToken(MEMBER_TOKEN_KEY);
+      if (!token) throw new Error('Bạn cần đăng nhập để đổi ảnh đại diện.');
+      var form = new FormData();
+      form.append('file', file);
+      var res;
+      try {
+        res = await fetch(STRAPI_URL + '/api/member-auth/avatar', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token },
+          body: form,
+        });
+      } catch (err) {
+        throw new Error('Không kết nối được máy chủ. Vui lòng thử lại.');
+      }
+      var out = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw new Error((out.error && out.error.message) || 'Không tải được ảnh lên.');
+      return flattenMember(out.member);
+    },
 
     /** {found, status} — dùng để tính mức hội phí, không trả danh tính. */
     async cccdStatus(cccd) {

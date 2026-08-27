@@ -1,8 +1,10 @@
 'use strict';
 /* Đăng ký / đăng nhập hội viên cá nhân từ site public. */
 const auth = require('../../../utils/public-auth');
+const passwordReset = require('../../../utils/password-reset');
 
 const UID = 'api::member.member';
+const MAX_AVATAR_BYTES = 3 * 1024 * 1024;
 
 /* Tỉnh/thành và bộ môn là enumeration trong schema — giá trị gửi lên phải nằm
    trong danh sách, nếu không Strapi sẽ trả lỗi 500 khó hiểu. */
@@ -83,7 +85,7 @@ module.exports = {
 
     const doc = await strapi.documents(UID).findOne({
       documentId: row.documentId,
-      populate: ['disciplines', 'freeMatches'],
+      populate: ['disciplines', 'freeMatches', 'avatar'],
     });
     ctx.body = {
       token: auth.signToken({ kind: 'member', documentId: row.documentId }),
@@ -102,12 +104,59 @@ module.exports = {
     ctx.body = { found: !!row, status: row ? row.status : null };
   },
 
+  /* Quên mật khẩu — luôn trả cùng một kết quả dù số điện thoại có tài khoản hay
+     không, để endpoint này không dùng để dò xem số nào đã đăng ký. */
+  async forgotPassword(ctx) {
+    const phone = (ctx.request.body || {}).phone;
+    await passwordReset.requestReset(strapi, { uid: UID, phone: phone, emailField: 'email' });
+    ctx.body = {
+      ok: true,
+      message: 'Nếu số điện thoại này có tài khoản, chúng tôi đã gửi hướng dẫn đặt lại mật khẩu tới email đã đăng ký.',
+    };
+  },
+
+  async resetPassword(ctx) {
+    const body = ctx.request.body || {};
+    const res = await passwordReset.performReset(strapi, {
+      uid: UID,
+      token: body.token,
+      password: body.password,
+    });
+    if (res.error) return ctx.badRequest(res.error);
+    ctx.body = { ok: true, message: 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới.' };
+  },
+
+  /* Ảnh đại diện: chỉ chủ tài khoản mới đổi được ảnh của mình. Không mở
+     /api/upload cho người dùng ẩn danh — đó là cửa để spam file lên server. */
+  async avatar(ctx) {
+    const payload = auth.readToken(ctx);
+    if (!payload || payload.kind !== 'member') return ctx.unauthorized('Phiên đăng nhập không hợp lệ.');
+
+    const files = ctx.request.files || {};
+    const file = files.file || files.files;
+    const upload = Array.isArray(file) ? file[0] : file;
+    if (!upload) return ctx.badRequest('Chưa chọn ảnh.');
+    if (!/^image\//.test(upload.mimetype || upload.type || '')) return ctx.badRequest('Tệp tải lên phải là ảnh.');
+    if ((upload.size || 0) > MAX_AVATAR_BYTES) return ctx.badRequest('Ảnh không được vượt quá 3 MB.');
+
+    const uploaded = await strapi.plugin('upload').service('upload').upload({ data: {}, files: upload });
+    await strapi.documents(UID).update({
+      documentId: payload.documentId,
+      data: { avatar: uploaded[0].id },
+    });
+    const doc = await strapi.documents(UID).findOne({
+      documentId: payload.documentId,
+      populate: ['disciplines', 'freeMatches', 'avatar'],
+    });
+    ctx.body = { member: auth.selfView(doc) };
+  },
+
   async me(ctx) {
     const payload = auth.readToken(ctx);
     if (!payload || payload.kind !== 'member') return ctx.unauthorized('Phiên đăng nhập không hợp lệ.');
     const doc = await strapi.documents(UID).findOne({
       documentId: payload.documentId,
-      populate: ['disciplines', 'freeMatches'],
+      populate: ['disciplines', 'freeMatches', 'avatar'],
     });
     if (!doc) return ctx.unauthorized('Hội viên không còn tồn tại.');
     ctx.body = { member: auth.selfView(doc) };

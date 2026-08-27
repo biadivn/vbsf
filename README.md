@@ -50,5 +50,34 @@ danh** (CCCD, số điện thoại, email, ngày sinh, địa chỉ, mã số th
 ẩn danh; request đã đăng nhập (CMS) vẫn nhận đủ — xem
 `strapi-backend/src/api/member/controllers/member.js`.
 
-> Cần bổ sung trước khi lên production: giới hạn tần suất (rate limit) cho các
-> endpoint đăng ký/đăng nhập, và luồng quên mật khẩu.
+### Giới hạn tần suất
+
+Đếm theo IP, cửa sổ trượt (`strapi-backend/src/utils/rate-limit.js`):
+
+| Nhóm endpoint | Hạn mức |
+|---|---|
+| `register` · `login` · `me` · `cccd-status` · `avatar` | **10 request/giây** |
+| `forgot-password` · `reset-password` | **5 request/phút** |
+
+Quá hạn trả `429` kèm header `Retry-After`. Bộ đếm nằm trong bộ nhớ tiến trình —
+chạy nhiều instance sau load balancer thì mỗi instance có bộ đếm riêng; muốn
+chính xác tuyệt đối cần chuyển sang Redis.
+
+### Quên mật khẩu
+
+`POST .../forgot-password {phone}` luôn trả cùng một thông báo dù số có tài khoản
+hay không. Nếu có, hệ thống sinh token 32 byte ngẫu nhiên, lưu **bản băm SHA-256**
++ hạn 30 phút vào hồ sơ, rồi gửi link `PUBLIC_SITE_URL/?reset=<token>#hoi-vien`
+qua email (`email` của hội viên, `repEmail` của tổ chức). `POST .../reset-password
+{token, password}` đổi mật khẩu và xoá token — mỗi mã dùng được đúng một lần.
+
+> Chưa cấu hình email provider thì link được ghi vào log server để dev thử được;
+> **production bắt buộc phải cấu hình provider thật** cho plugin email của Strapi.
+
+### Ảnh đại diện
+
+Content-type `member` có field `avatar` (media, ảnh). Hội viên tự đổi ảnh qua
+`POST /api/member-auth/avatar` (multipart, cần Bearer token, tối đa 3 MB, chỉ nhận
+`image/*`) — `/api/upload` **không** mở cho người dùng ẩn danh. Ảnh hiển thị ở hồ
+sơ hội viên, danh sách hội viên, bục xếp hạng và ô Top players; chưa có ảnh thì
+giữ nguyên ô placeholder.

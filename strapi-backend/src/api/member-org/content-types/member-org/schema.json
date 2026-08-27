@@ -122,6 +122,14 @@
     "password": {
       "type": "password"
     },
+    "resetTokenHash": {
+      "type": "string",
+      "private": true
+    },
+    "resetTokenExpiry": {
+      "type": "datetime",
+      "private": true
+    },
     "package": {
       "type": "enumeration",
       "enum": [

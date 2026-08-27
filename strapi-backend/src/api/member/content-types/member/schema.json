@@ -40,6 +40,19 @@
     "address": {
       "type": "string"
     },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "resetTokenHash": {
+      "type": "string",
+      "private": true
+    },
+    "resetTokenExpiry": {
+      "type": "datetime",
+      "private": true
+    },
     "category": {
       "type": "enumeration",
       "enum": [

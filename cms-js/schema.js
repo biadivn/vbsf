@@ -93,6 +93,7 @@ const COLLECTIONS = {
       {key:'code', label:'Mã hội viên', type:'text', placeholder:'VBSF-2026-XXXXX', span2:true, disabled:true, section:'Thông tin cơ bản'},
       {key:'name', label:'Họ và tên', type:'text', required:true, section:'Thông tin cơ bản'},
       {key:'cccd', label:'Số CCCD', type:'text', required:true, placeholder:'079095001234', span2:true, section:'Thông tin cơ bản'},
+      {key:'avatar', label:'Ảnh đại diện', type:'image', span2:true, section:'Thông tin cơ bản'},
       {key:'dob', label:'Ngày sinh', type:'date', section:'Thông tin cơ bản'},
       {key:'email', label:'Email', type:'text', placeholder:'email@example.com', section:'Thông tin cơ bản'},
       {key:'address', label:'Địa chỉ nơi ở', type:'text', span2:true, section:'Thông tin cơ bản'},

@@ -1,6 +1,7 @@
 'use strict';
 /* Đăng ký / đăng nhập hội viên tổ chức từ site public. */
 const auth = require('../../../utils/public-auth');
+const passwordReset = require('../../../utils/password-reset');
 
 const UID = 'api::member-org.member-org';
 
@@ -80,6 +81,28 @@ module.exports = {
       token: auth.signToken({ kind: 'org', documentId: row.documentId }),
       org: auth.selfView(doc),
     };
+  },
+
+  /* Xem ghi chú ở src/api/member/controllers/member-auth.js — email đặt lại
+     mật khẩu của tổ chức gửi tới email người đại diện. */
+  async forgotPassword(ctx) {
+    const phone = (ctx.request.body || {}).phone;
+    await passwordReset.requestReset(strapi, { uid: UID, phone: phone, emailField: 'repEmail' });
+    ctx.body = {
+      ok: true,
+      message: 'Nếu số điện thoại này có tài khoản, chúng tôi đã gửi hướng dẫn đặt lại mật khẩu tới email người đại diện.',
+    };
+  },
+
+  async resetPassword(ctx) {
+    const body = ctx.request.body || {};
+    const res = await passwordReset.performReset(strapi, {
+      uid: UID,
+      token: body.token,
+      password: body.password,
+    });
+    if (res.error) return ctx.badRequest(res.error);
+    ctx.body = { ok: true, message: 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới.' };
   },
 
   async me(ctx) {

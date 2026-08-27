@@ -664,6 +664,8 @@ export interface ApiMemberOrgMemberOrg extends Struct.CollectionTypeSchema {
     repName: Schema.Attribute.String;
     repPhone: Schema.Attribute.String;
     repTitle: Schema.Attribute.String;
+    resetTokenExpiry: Schema.Attribute.DateTime & Schema.Attribute.Private;
+    resetTokenHash: Schema.Attribute.String & Schema.Attribute.Private;
     status: Schema.Attribute.Enumeration<['active', 'pending', 'expired']> &
       Schema.Attribute.DefaultTo<'active'>;
     taxCode: Schema.Attribute.String;
@@ -686,6 +688,7 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
   };
   attributes: {
     address: Schema.Attribute.String;
+    avatar: Schema.Attribute.Media<'images'>;
     category: Schema.Attribute.Enumeration<
       [
         'Pool 8 bi',
@@ -790,6 +793,8 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
       ]
     >;
     publishedAt: Schema.Attribute.DateTime;
+    resetTokenExpiry: Schema.Attribute.DateTime & Schema.Attribute.Private;
+    resetTokenHash: Schema.Attribute.String & Schema.Attribute.Private;
     status: Schema.Attribute.Enumeration<['active', 'pending', 'expired']> &
       Schema.Attribute.DefaultTo<'active'>;
     updatedAt: Schema.Attribute.DateTime;

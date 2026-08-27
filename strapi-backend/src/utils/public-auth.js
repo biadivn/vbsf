@@ -4,12 +4,16 @@
    (users-permissions) để hai hệ không lẫn quyền vào nhau. */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const TOKEN_TTL = '7d';
+/* Link đặt lại mật khẩu chỉ sống 30 phút — đủ để người dùng mở email, đủ ngắn
+   để một link rò rỉ không dùng được lâu. */
+const RESET_TTL_MS = 30 * 60 * 1000;
 
 /* Field không được trả ra ngoài: mật khẩu (kể cả bản hash) và dữ liệu định danh
    cá nhân. `me` được trả đầy đủ hơn vì đó là hồ sơ của chính người đăng nhập. */
-const SECRET_FIELDS = ['password'];
+const SECRET_FIELDS = ['password', 'resetTokenHash', 'resetTokenExpiry'];
 const PRIVATE_MEMBER_FIELDS = ['cccd', 'phone', 'email', 'dob', 'address'];
 const PRIVATE_ORG_FIELDS = ['taxCode', 'phone', 'repPhone', 'repEmail'];
 
@@ -56,6 +60,22 @@ async function comparePassword(plain, hash) {
   return bcrypt.compare(String(plain), String(hash));
 }
 
+/* Token đặt lại mật khẩu: gửi cho người dùng bản gốc, CSDL chỉ giữ bản băm —
+   rò rỉ CSDL không đổi được mật khẩu của ai. Không cần bcrypt vì token đã là 32
+   byte ngẫu nhiên (không brute-force được như mật khẩu người đặt). */
+function createResetToken() {
+  const token = crypto.randomBytes(32).toString('hex');
+  return {
+    token,
+    hash: hashResetToken(token),
+    expiry: new Date(Date.now() + RESET_TTL_MS).toISOString(),
+  };
+}
+
+function hashResetToken(token) {
+  return crypto.createHash('sha256').update(String(token)).digest('hex');
+}
+
 /** Chuẩn hoá SĐT về dạng chỉ chữ số để so khớp không phụ thuộc khoảng trắng. */
 function normalizePhone(phone) {
   return String(phone == null ? '' : phone).replace(/[^\d]/g, '');
@@ -75,6 +95,9 @@ async function nextCode(strapi, uid, prefix, pad) {
 
 module.exports = {
   TOKEN_TTL,
+  RESET_TTL_MS,
+  createResetToken,
+  hashResetToken,
   PRIVATE_MEMBER_FIELDS,
   PRIVATE_ORG_FIELDS,
   signToken,
