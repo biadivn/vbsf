@@ -524,7 +524,11 @@ const tournaments = [
     participants: 128,
     location: 'Nhà thi đấu Phú Thọ, TP.HCM',
     liveRound: 'Vòng tứ kết',
-    note: 'Vòng tứ kết · Kết quả các trận đấu loại. Bracket lưu ở đây là vòng chung kết 16 cơ thủ.',
+    note: '',
+    // `note` = "Trạng thái đăng ký" trong CMS — giải đang diễn ra thì prototype
+    // không hiển thị trạng thái đăng ký nào, để trống.
+    // participants = 128 theo trang chi tiết; bracket bên dưới là vòng chung
+    // kết 16 cơ thủ, đúng bảng tỷ số trang "Kết quả trực tiếp".
     entryFee: '300.000đ / cơ thủ',
     players: live.players,
     bracket: live.bracket,
@@ -572,7 +576,9 @@ const tournaments = [
     mode: 'op',
     date: d('18/04/2026'),
     champion: 'Trần Quốc Bảo',
-    note: 'Á quân: Nguyễn Phúc Long · Hạng 3: Lê Minh Khôi',
+    note: '',
+    // Prototype còn có Á quân: Nguyễn Phúc Long · Hạng 3: Lê Minh Khôi — schema
+    // hiện chỉ có field `champion` nên chưa lưu được 2 hạng này.
     entryFee: '200.000đ / cơ thủ',
   },
   {
@@ -583,7 +589,9 @@ const tournaments = [
     mode: 'op',
     date: d('30/03/2026'),
     champion: 'Nguyễn Phúc Long',
-    note: 'Á quân: Trần Quốc Bảo · Hạng 3: Phạm Anh Tú',
+    note: '',
+    // Prototype còn có Á quân: Trần Quốc Bảo · Hạng 3: Phạm Anh Tú — schema
+    // hiện chỉ có field `champion` nên chưa lưu được 2 hạng này.
     entryFee: '200.000đ / cơ thủ',
   },
   {
@@ -594,7 +602,9 @@ const tournaments = [
     mode: 'op',
     date: d('12/12/2025'),
     champion: 'Lê Minh Khôi',
-    note: 'Á quân: Đỗ Thành Nam · Hạng 3: Vũ Hoàng Sơn',
+    note: '',
+    // Prototype còn có Á quân: Đỗ Thành Nam · Hạng 3: Vũ Hoàng Sơn — schema
+    // hiện chỉ có field `champion` nên chưa lưu được 2 hạng này.
     entryFee: '200.000đ / cơ thủ',
   },
 ].map((t) => ({
