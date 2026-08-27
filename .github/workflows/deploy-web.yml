@@ -6,6 +6,7 @@ on:
     paths:
       - "index.html"
       - "pages/**"
+      - "site-js/**"
       - ".github/workflows/deploy-web.yml"
   workflow_dispatch: {}
 
@@ -14,7 +15,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  verify:
+    name: Unit test + security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: strapi-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: strapi-backend
+        run: npm ci
+
+      # Gate trước khi build: coverage >= 80% và không có lỗ hổng high/critical.
+      - name: Verify
+        working-directory: strapi-backend
+        run: npm run verify
+
   deploy:
+    needs: verify
     runs-on: ubuntu-latest
     environment: production
     steps:

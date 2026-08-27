@@ -109,6 +109,64 @@ Components dùng chung: `shared.prize`, `tournament.player` (có quan hệ tuỳ
   member và 1 tournament mẫu để kiểm tra nhanh components/JSON fields hoạt động
   đúng, không để lại dữ liệu thừa.
 
+## Kiểm thử & security gate (chặn trước khi build)
+
+`npm run build` gọi `prebuild` → `npm run verify` = **unit test + security scan**.
+Không có cờ bỏ qua: cả hai phải xanh thì `strapi build` mới chạy. CI cũng có job
+`verify` riêng chạy trước job build image (xem `.github/workflows/deploy-strapi.yml`
+và `deploy-web.yml`).
+
+```bash
+npm test            # unit test + ngưỡng coverage 80%
+npm run security:scan
+npm run verify      # cả hai
+```
+
+### Unit test — ngưỡng coverage 80%
+
+Dùng test runner có sẵn của Node (`node:test`), **không thêm phụ thuộc nào**.
+`scripts/run-tests.js` ép ngưỡng 80% cho cả line, branch và function; thêm
+`--test-coverage-include-all` nên xoá bớt test sẽ làm coverage tụt xuống 0 chứ
+không "đạt ngưỡng" bằng cách lặng lẽ bỏ test đi.
+
+Phạm vi đo coverage được liệt kê tường minh trong `scripts/run-tests.js` — các
+module logic thuần chạy được ngoài trình duyệt:
+
+| Module | Vì sao đo |
+|---|---|
+| `src/utils/public-auth.js` | ký/đọc JWT, lọc field riêng tư, băm token |
+| `src/utils/rate-limit.js` | cửa sổ trượt, hạn mức 10 RPS / 5 RPM |
+| `src/utils/password-reset.js` | token dùng một lần, hết hạn, không lộ tài khoản |
+| `src/api/*/controllers/*-auth.js` | kiểm tra đầu vào, trùng hồ sơ, upload ảnh |
+| `src/api/*/controllers/{member,member-org}.js` | hàng rào lọc CCCD/SĐT với người đọc ẩn danh |
+| `src/api/*/routes/*-auth.js` | bất biến: route công khai phải có rate limit |
+| `scripts/website-content.js` | sơ đồ nhánh đấu + ràng buộc enum của schema |
+| `../site-js/member-auth.js` | luồng đăng nhập/đăng ký phía site |
+
+**Không** nằm trong phạm vi: mã cần DOM thật (`site-js/strapi-content.js`,
+`cms-js/`, JS nội tuyến trong `index.html`) và phần khung do Strapi sinh — những
+phần đó kiểm bằng chạy thật trên trình duyệt, không phải unit test. Muốn đưa vào
+thì phải viết test DOM trước, không hạ ngưỡng.
+
+> `site-js/` nằm ngoài build context của Docker; khi thiếu thì test tự bỏ qua và
+> file bị loại khỏi phạm vi coverage (CI vẫn chạy đủ vì checkout cả repo).
+
+### Security scan
+
+`scripts/security-scan.js` fail build khi:
+
+1. **Phụ thuộc** có lỗ hổng `high`/`critical` (npm audit) chưa được rà soát.
+2. **Allowlist quá hạn** — mỗi ngoại lệ trong `scripts/security-allowlist.json`
+   bắt buộc có `reason` + `reviewBy`; quá hạn là fail, không im lặng bỏ qua mãi.
+3. **Secret bị commit** — khoá riêng tư PEM, AWS/GitHub/Slack/Google token, chuỗi
+   kết nối có mật khẩu, hoặc file `.env` thật lọt vào git / vào image.
+4. **Route công khai thiếu rate limit** — `auth: false` mà không có middleware.
+
+Ngoại lệ đang mở: `GHSA-fx2h-pf6j-xcff` (vite, high) — `@strapi/strapi@5.52.1`
+ghim vite@5.4.21, bản vá chỉ có ở vite >6.4.2. Lỗ hổng nằm ở dev server của vite
+và chỉ khai thác được trên Windows; production là container Linux phục vụ admin
+panel đã build sẵn. Hạn rà soát lại: **2026-11-30**.
+
 ## Đã kiểm tra
 
 - Toàn bộ 7 collection types + 2 single types load không lỗi/không cảnh báo.

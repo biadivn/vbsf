@@ -1,0 +1,19 @@
+{
+  "$comment": [
+    "Ngoại lệ ĐÃ RÀ SOÁT cho security scan. Mỗi mục bắt buộc có lý do và hạn rà",
+    "soát lại — quá hạn thì scan FAIL, không có chuyện im lặng bỏ qua mãi mãi.",
+    "Chỉ thêm vào đây khi lỗ hổng thực sự không vá được và đã đánh giá là không",
+    "ảnh hưởng tới runtime production."
+  ],
+  "advisories": [
+    {
+      "id": "GHSA-fx2h-pf6j-xcff",
+      "package": "vite",
+      "severity": "high",
+      "reason": "vite@5.4.21 bị @strapi/strapi@5.52.1 ghim cứng; bản vá chỉ có ở vite >6.4.2 nên không nâng được nếu không hạ cấp Strapi (npm audit fix đề xuất @strapi/strapi@4.26.2 — lùi cả một major). Lỗ hổng nằm ở dev server của vite (server.fs.deny bypass) và chỉ khai thác được trên Windows; production chạy container Linux, phục vụ admin panel đã build sẵn, không bật vite dev server.",
+      "reviewBy": "2026-11-30",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-08-28"
+    }
+  ]
+}

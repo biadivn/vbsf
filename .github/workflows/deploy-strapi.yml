@@ -16,7 +16,29 @@ env:
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/vbsf-strapi
 
 jobs:
+  verify:
+    name: Unit test + security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: strapi-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: strapi-backend
+        run: npm ci
+
+      # Gate trước khi build: coverage >= 80% và không có lỗ hổng high/critical.
+      - name: Verify
+        working-directory: strapi-backend
+        run: npm run verify
+
   build-and-push:
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       contents: read

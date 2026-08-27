@@ -185,4 +185,8 @@
   };
 
   window.VBSF_AUTH = api;
+
+  /* Trình duyệt chỉ cần window.VBSF_AUTH ở trên. Nhánh này để unit test nạp
+     được module bằng require() (nhờ vậy báo cáo coverage mới tính đúng file). */
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })();

@@ -32,6 +32,14 @@ Nạp nội dung mẫu (trích từ prototype tĩnh `VBSF Web.html`) vào Strapi
 cd strapi-backend && npm run migrate:website
 ```
 
+## Kiểm thử & security gate
+
+`cd strapi-backend && npm run verify` — unit test (ngưỡng coverage 80%) + security
+scan (chặn nếu có lỗ hổng high/critical, secret bị commit, hoặc route công khai
+thiếu rate limit). Gate này chạy tự động trước `npm run build` và trong CI trước
+khi build image / deploy web. Chi tiết ở
+[strapi-backend/README.md](strapi-backend/README.md).
+
 ## Tài khoản hội viên trên site public
 
 Hội viên cá nhân và hội viên tổ chức đăng nhập/đăng ký bằng **tài khoản thật**:
