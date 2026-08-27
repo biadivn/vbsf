@@ -78,9 +78,12 @@ export interface TournamentPlayer extends Struct.ComponentSchema {
     club: Schema.Attribute.String;
     feeStatus: Schema.Attribute.Enumeration<['unpaid', 'paid']> &
       Schema.Attribute.DefaultTo<'unpaid'>;
-    member: Schema.Attribute.Relation<'oneToOne', 'api::member.member'>;
+    localId: Schema.Attribute.String & Schema.Attribute.Required;
+    memberId: Schema.Attribute.String;
     name: Schema.Attribute.String & Schema.Attribute.Required;
+    rating: Schema.Attribute.Integer;
     registeredAt: Schema.Attribute.DateTime;
+    seed: Schema.Attribute.Integer;
   };
 }
 

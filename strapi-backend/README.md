@@ -84,6 +84,24 @@ Components dùng chung: `shared.prize`, `tournament.player` (có quan hệ tuỳ
   `scripts/cms-seed-source/` (idempotent — bỏ qua collection nào đã có dữ liệu).
   Chạy được cả ngoài host lẫn trong container vì không phụ thuộc thư mục `cms-js/`
   bên ngoài build context.
+- `node scripts/migrate-website-content.js` (hoặc `npm run migrate:website`) — nạp
+  **toàn bộ nội dung của website prototype tĩnh `VBSF Web.html`** vào Strapi:
+  thông tin tổ chức, liên hệ, 10 tin tức, 6 văn bản/luật, 4 mục media, 15 đối tác,
+  5 hội viên tổ chức, 23 hội viên cá nhân (kèm điểm/hạng theo từng bộ môn) và 7
+  giải đấu (kèm bảng giải thưởng, thể lệ, và bracket 16 cơ thủ đang đá dở của giải
+  đang diễn ra). Upsert theo khoá tự nhiên (`code` / `title` / `name`) nên chạy lại
+  không tạo bản trùng.
+  - `--dry-run` — chỉ in kế hoạch, không ghi.
+  - `--update` — ghi đè cả bản ghi đã tồn tại theo prototype (mặc định chỉ tạo bản còn thiếu).
+  - `--only=news,tournaments` — chạy một phần; nhóm hợp lệ: `settings`, `contact`,
+    `news`, `library-docs`, `media-items`, `partners`, `member-orgs`, `members`,
+    `tournaments`.
+
+  Dữ liệu nguồn nằm ở `scripts/website-content.js` (module thuần dữ liệu). Chỗ nào
+  prototype chỉ có placeholder — mã hội viên/SĐT/CCCD của cơ thủ chỉ xuất hiện
+  trong bảng xếp hạng, tên nhà tài trợ chỉ là ô logo trống, ngày đăng của 2 tin
+  trong block "Tin xem nhiều" — được sinh deterministic và đánh dấu `GENERATED`
+  trong file đó.
 - `node scripts/sync-cms-seed-source.js` — đồng bộ lại `scripts/cms-seed-source/`
   từ `../cms-js/seed-data.js` + `../cms-js/database-queries.js` gốc. Chạy lệnh này
   rồi build lại image mỗi khi seed data phía CMS thay đổi.
