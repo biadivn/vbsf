@@ -32,6 +32,23 @@ Nạp nội dung mẫu (trích từ prototype tĩnh `VBSF Web.html`) vào Strapi
 cd strapi-backend && npm run migrate:website
 ```
 
-> Đăng nhập hội viên/tổ chức trên site public hiện vẫn là **demo**: Strapi không
-> trả field `password` qua API công khai nên site tĩnh không xác thực thật được.
-> Cần một endpoint đăng nhập riêng ở backend trước khi lên production.
+## Tài khoản hội viên trên site public
+
+Hội viên cá nhân và hội viên tổ chức đăng nhập/đăng ký bằng **tài khoản thật**:
+
+- Mật khẩu được Strapi hash bằng bcrypt (field kiểu `password`), so khớp ở phía
+  máy chủ — site không bao giờ nhận được mật khẩu hay bản hash.
+- Endpoint riêng, không dùng chung với tài khoản CMS:
+  `POST /api/member-auth/{register,login}` · `GET /api/member-auth/me`
+  và `POST /api/org-auth/{register,login}` · `GET /api/org-auth/me`
+  (xem `strapi-backend/src/api/*/routes/*-auth.js`).
+- Phiên là JWT riêng ký bằng `PUBLIC_AUTH_JWT_SECRET`, lưu ở localStorage.
+- Hồ sơ đăng ký mới vào trạng thái `pending` — chờ VBSF xác nhận hội phí / xét duyệt.
+
+API công khai `GET /api/members` và `/api/member-orgs` **đã lược bỏ dữ liệu định
+danh** (CCCD, số điện thoại, email, ngày sinh, địa chỉ, mã số thuế) cho request
+ẩn danh; request đã đăng nhập (CMS) vẫn nhận đủ — xem
+`strapi-backend/src/api/member/controllers/member.js`.
+
+> Cần bổ sung trước khi lên production: giới hạn tần suất (rate limit) cho các
+> endpoint đăng ký/đăng nhập, và luồng quên mật khẩu.

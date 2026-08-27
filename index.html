@@ -3,7 +3,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <style>
-:root{--vd:#21428E;--vd2:#15305F;--vg:#21428E;--gold:#FFFFFF;--vbrown:#AD702F;--vgreen:#00814D;--vcyan:#0190BF;--ink:#1B2A24;--muted:#5C6B63;--hint:#8A968F;--line:#E3E8E4;--surface:#F5F7F5;--ph:#E7ECF0;--phc:#8A9FAE}
+:root{--vd:#21428E;--vd2:#15305F;--vg:#21428E;--gold:#AD702F;--gold-ink:#8A5A1E;--vbrown:#AD702F;--vgreen:#00814D;--vcyan:#0190BF;--ink:#1B2A24;--muted:#5C6B63;--hint:#8A968F;--line:#E3E8E4;--surface:#F5F7F5;--ph:#E7ECF0;--phc:#8A9FAE}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Be Vietnam Pro',sans-serif;color:var(--ink);background:#EAEEEB;line-height:1.6;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1000px;margin:0 auto;padding:0 20px}
@@ -55,7 +55,7 @@ footer.docftr{text-align:center;color:var(--muted);font-size:12px;padding:30px 0
 .vb-sec{padding:22px 26px}
 .vb-st{font-size:17px;font-weight:600;color:#21428E;margin:0}
 .vb-h{font-size:16px;font-weight:600;color:#21428E;margin:0}
-.vb-stag{font-size:11px;font-weight:600;color:#FFFFFF;text-transform:uppercase;letter-spacing:.06em}
+.vb-stag{font-size:11px;font-weight:600;color:var(--gold-ink);text-transform:uppercase;letter-spacing:.06em}
 .vb-link{font-size:12px;color:#21428E;text-decoration:none;cursor:pointer}
 .vb-tag{font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:4px;background:#E8EEF9;color:#21428E;white-space:nowrap;display:inline-block}
 .vb-ph{background:#E7ECF0;display:flex;align-items:center;justify-content:center;color:#8A9FAE}
@@ -106,7 +106,7 @@ footer.docftr{text-align:center;color:var(--muted);font-size:12px;padding:30px 0
 .art-h{font-size:16px;font-weight:600;color:#21428E;margin-top:22px}
 .art-li{font-size:14px;color:#34423B;line-height:1.7;padding-left:20px;position:relative;margin-top:8px}
 .art-li:before{content:'';position:absolute;left:4px;top:9px;width:6px;height:6px;border-radius:50%;background:#21428E}
-.art-quote{border-left:3px solid #FFFFFF;background:#F5F7F5;padding:14px 18px;margin:20px 0;font-size:15px;font-style:italic;color:#21428E;line-height:1.6}
+.art-quote{border-left:3px solid var(--gold);background:#F5F7F5;padding:14px 18px;margin:20px 0;font-size:15px;font-style:italic;color:#21428E;line-height:1.6}
 .shr{width:32px;height:32px;border-radius:50%;border:0.5px solid #E3E8E4;display:flex;align-items:center;justify-content:center;color:#5C6B63}
 .doc-row{display:flex;align-items:center;gap:13px;padding:11px 14px;border:0.5px solid #E3E8E4;border-radius:8px;background:#fff}
 .ficon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -161,6 +161,7 @@ body{background:#E4E8E5}
 <button class="navtgl" aria-label="Mở menu"><i class="ti ti-menu-2" style="font-size:20px"></i></button><nav class="mainnav" id="mainnav"><a class="vb-nav" data-go="trang-chu" data-nav="trang-chu" href="#trang-chu">Trang chủ</a><a class="vb-nav" data-go="gioi-thieu" data-nav="gioi-thieu" href="#gioi-thieu">Giới thiệu</a><a class="vb-nav" data-go="tin-tuc" data-nav="tin-tuc" href="#tin-tuc">Tin tức</a><a class="vb-nav" data-go="giai-dau" data-nav="giai-dau" href="#giai-dau">Giải đấu</a><a class="vb-nav" data-go="ranking" data-nav="ranking" href="#ranking">Ranking</a><a class="vb-nav" data-go="thu-vien" data-nav="thu-vien" href="#thu-vien">Thư viện</a><a class="vb-nav" data-go="hoi-vien" data-nav="hoi-vien" href="#hoi-vien">Hội viên</a><a class="vb-nav" data-go="lien-he" data-nav="lien-he" href="#lien-he">Liên hệ</a></nav></div></header><main><div id="pages-root"></div></main><div style="background:#21428E;padding:24px 26px;display:flex;gap:24px;flex-wrap:wrap"><div style="flex:1.4;min-width:200px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:30px;height:30px;border-radius:50%;border:1.5px solid #FFFFFF;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:10px;font-weight:500">VBSF</div><span style="color:#fff;font-size:13px;font-weight:500">VBSF</span></div><div style="color:#C9D9F2;font-size:11.5px;line-height:1.6">Liên đoàn Billiards &amp; Snooker Việt Nam — cơ quan quản lý và phát triển phong trào bi-a toàn quốc.</div></div>
 <div class="vb-fcol" style="flex:1;min-width:120px"><div style="color:#fff;font-size:12px;font-weight:500;margin-bottom:6px">Liên kết nhanh</div><a data-go="gioi-thieu">Giới thiệu</a><a data-go="giai-dau">Giải đấu</a><a data-go="ranking">Bảng xếp hạng</a><a data-go="hoi-vien">Hội viên</a></div>
 <div class="vb-fcol" style="flex:1;min-width:150px"><div style="color:#fff;font-size:12px;font-weight:500;margin-bottom:6px">Liên hệ</div><a data-go="lien-he"><i class="ti ti-map-pin"></i> Hà Nội, Việt Nam</a><a data-go="lien-he"><i class="ti ti-mail"></i> info@billiards.org.vn</a><a data-go="lien-he"><i class="ti ti-phone"></i> 024 xxxx xxxx</a></div></div><div class="vb-cprt">© 2026 Liên đoàn Billiards &amp; Snooker Việt Nam (VBSF). Phát triển và bảo lưu mọi quyền bởi <a href="https://biadi.vn">Biadi.vn</a></div></div>
+<script src="site-js/member-auth.js"></script>
 <script src="site-js/strapi-content.js"></script>
 <script>
 (async function(){
@@ -170,42 +171,17 @@ body{background:#E4E8E5}
   var norm=function(s){return s.trim().toLowerCase();};
   var escapeHtmlSite=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});};
 
-  var MEMBER_SESSION_KEY='vbsf_member_session';
-  /* CẢNH BÁO — đăng nhập hội viên/tổ chức dưới đây chỉ là DEMO của prototype.
-     Strapi (đúng như mong đợi) không trả field `password` qua API công khai, nên
-     site tĩnh không thể xác thực thật phía client. Trước khi lên production phải
-     thay bằng một endpoint đăng nhập riêng ở backend. */
-  var DEMO_MEMBER_PASSWORD='123456';
+  /* Hội viên đăng nhập bằng TÀI KHOẢN THẬT trên Strapi (bcrypt + JWT riêng,
+     xem site-js/member-auth.js và strapi-backend/src/api/member/routes/member-auth.js).
+     Không còn mảng hồ sơ cứng trong trang nào cả — CURRENT_* là hồ sơ của phiên
+     đang đăng nhập, do API trả về. */
+  var CURRENT_MEMBER=null;
+  var CURRENT_ORG=null;
+  var MEMBER_STATUS_LABEL={active:['Đang hiệu lực','#E7F4EC','#00814D'],pending:['Chờ thanh toán','#F4F1E8','#9A7B2E'],expired:['Hết hạn','#F1F1EE','#8A8A82']};
   /* Mức hội phí mặc định — được ghi đè bằng Thông tin tổ chức trong CMS khi
      Strapi truy cập được (xem đoạn nạp dữ liệu ở cuối phần khởi tạo). */
   var FEES={firstTime:200000, annualFull:500000, annualHalf:250000, renewal:500000};
-  var MEMBER_DB=[
-    {code:'VBSF-2026-00098',name:'Nguyễn Phúc Long',phone:'0901234567',password:'123456',cccd:'079095001234',club:'CLB Sài Gòn',province:'TP.HCM',category:'Pool 9 bi',status:'active',expiry:'31/12/2026',rank:1,points:2485,matches:45,trend:'up',trendValue:1},
-    {code:'VBSF-2026-00071',name:'Trần Quốc Bảo',phone:'0912345678',password:'123456',cccd:'001094005678',club:'CLB Thủ Đô',province:'Hà Nội',category:'Pool 9 bi',status:'active',expiry:'30/11/2026',rank:2,points:2410,matches:44,trend:'down',trendValue:1},
-    {code:'VBSF-2026-00112',name:'Lê Minh Khôi',phone:'0923456789',password:'123456',cccd:'048096009012',club:'CLB Sông Hàn',province:'Đà Nẵng',category:'Pool 9 bi',status:'active',expiry:'15/10/2026',rank:3,points:2388,matches:43,trend:'eq',trendValue:0},
-    {code:'VBSF-2026-00123',name:'Phạm Anh Tú',phone:'0934567890',password:'123456',cccd:'074097003456',club:'Meow Billiards',province:'Bình Dương',category:'Pool 9 bi',status:'pending',expiry:'',rank:4,points:2301,matches:42,trend:'up',trendValue:2},
-    {code:'VBSF-2025-00410',name:'Đỗ Thành Nam',phone:'0945678901',password:'123456',cccd:'031093007890',club:'CLB Cảng',province:'Hải Phòng',category:'Pool 9 bi',status:'expired',expiry:'31/12/2025',rank:5,points:2256,matches:38,trend:'down',trendValue:1}
-  ];
-  var MEMBER_STATUS_LABEL={active:['Đang hiệu lực','#E7F4EC','#00814D'],pending:['Chờ thanh toán','#F4F1E8','#9A7B2E'],expired:['Hết hạn','#F1F1EE','#8A8A82']};
-  function getLoggedInMember(){
-    var code=localStorage.getItem(MEMBER_SESSION_KEY);
-    if(!code) return null;
-    return MEMBER_DB.find(function(m){return m.code===code;})||null;
-  }
 
-  var ORG_SESSION_KEY='vbsf_org_session';
-  var ORG_DB=[
-    {code:'VBSF-TC-2019-001',name:'CLB Sài Gòn',orgType:'Câu lạc bộ',province:'TP.HCM',address:'Quận 1, TP.HCM',repName:'Nguyễn Văn Hòa',repTitle:'Chủ nhiệm CLB',repPhone:'0901112233',repEmail:'clbsaigon@vbsf.org.vn',phone:'0901112233',password:'123456',package:'Gói Tiêu chuẩn',joinYear:'2019',status:'active',expiry:'31/12/2026'},
-    {code:'VBSF-TC-2020-002',name:'CLB Thủ Đô',orgType:'Câu lạc bộ',province:'Hà Nội',address:'Cầu Giấy, Hà Nội',repName:'Trần Thị Mai',repTitle:'Chủ nhiệm CLB',repPhone:'0912223344',repEmail:'clbthudo@vbsf.org.vn',phone:'0912223344',password:'123456',package:'Gói Tiêu chuẩn',joinYear:'2020',status:'active',expiry:'30/11/2026'},
-    {code:'VBSF-TC-2021-003',name:'CLB Sông Hàn',orgType:'Câu lạc bộ',province:'Đà Nẵng',address:'Hải Châu, Đà Nẵng',repName:'Lê Văn Đức',repTitle:'Chủ nhiệm CLB',repPhone:'0923334455',repEmail:'clbsonghan@vbsf.org.vn',phone:'0923334455',password:'123456',package:'Gói Cơ bản',joinYear:'2021',status:'active',expiry:'15/10/2026'},
-    {code:'VBSF-TC-2022-004',name:'Meow Billiards',orgType:'Doanh nghiệp',province:'Bình Dương',address:'Thủ Dầu Một, Bình Dương',repName:'Phạm Anh Tuấn',repTitle:'Giám đốc',repPhone:'0934445566',repEmail:'meowbilliards@vbsf.org.vn',phone:'0934445566',password:'123456',package:'Gói Nâng cao',joinYear:'2022',status:'pending',expiry:''},
-    {code:'VBSF-TC-2023-005',name:'CLB Cảng',orgType:'Câu lạc bộ',province:'Hải Phòng',address:'Hồng Bàng, Hải Phòng',repName:'Đỗ Thành Long',repTitle:'Chủ nhiệm CLB',repPhone:'0945556677',repEmail:'clbcang@vbsf.org.vn',phone:'0945556677',password:'123456',package:'Gói Cơ bản',joinYear:'2023',status:'expired',expiry:'31/12/2025'}
-  ];
-  function getLoggedInOrg(){
-    var code=localStorage.getItem(ORG_SESSION_KEY);
-    if(!code) return null;
-    return ORG_DB.find(function(o){return o.code===code;})||null;
-  }
   function renderOrgProfileHtml(o){
     var st=MEMBER_STATUS_LABEL[o.status]||['—','#F1F1EE','#8A8A82'];
     return '<div style="display:flex;gap:20px;flex-wrap:wrap">'
@@ -409,12 +385,13 @@ body{background:#E4E8E5}
       location.hash=dest;
     }
   });
-  /* Thay dữ liệu demo tĩnh phía trên bằng hồ sơ thật từ Strapi (nếu gọi được),
-     chạy trước show() để trang đầu tiên đã có dữ liệu đúng. */
+  /* Khôi phục phiên đăng nhập (nếu token còn hiệu lực) và lấy mức hội phí thật
+     từ Thông tin tổ chức — chạy trước show() để trang đầu tiên đã đúng trạng thái. */
+  if(window.VBSF_AUTH){
+    CURRENT_MEMBER=await window.VBSF_AUTH.restoreMember();
+    CURRENT_ORG=await window.VBSF_AUTH.restoreOrg();
+  }
   if(window.VBSF_CONTENT){
-    var remote=await window.VBSF_CONTENT.loginTables();
-    if(remote && remote.members.length){ MEMBER_DB.length=0; remote.members.forEach(function(m){MEMBER_DB.push(m);}); }
-    if(remote && remote.orgs.length){ ORG_DB.length=0; remote.orgs.forEach(function(o){ORG_DB.push(o);}); }
     var remoteFees=await window.VBSF_CONTENT.fees();
     if(remoteFees && remoteFees.annualFull) FEES=remoteFees;
   }
@@ -423,6 +400,9 @@ body{background:#E4E8E5}
   await show(location.hash.replace('#','')||'trang-chu');
 
   function initNews(newsPage){
+    // Khi lớp dữ liệu đã bật lọc/phân trang phía máy chủ thì bỏ qua bộ lọc client
+    // ở đây — nếu không, hai bên cùng ẩn/hiện thẻ và đá nhau.
+    if(newsPage.getAttribute('data-server-driven')==='1') return;
     var pills=newsPage.querySelectorAll('.vb-pill');
     var newsCards=newsPage.querySelectorAll('[data-items] .vb-card');
     var searchInput=newsPage.querySelector('[data-news-search]');
@@ -606,7 +586,7 @@ body{background:#E4E8E5}
     var feeTotal=joinPage.querySelector('[data-reg-fee-total]');
     var feeBreakdown=joinPage.querySelector('[data-reg-fee-breakdown]');
     function fmtVnd(n){ return n.toLocaleString('vi-VN')+'đ'; }
-    function computeRegFee(){
+    async function computeRegFee(){
       if(!cccdInput) return;
       var cccd=(cccdInput.value||'').trim();
       if(!cccd){
@@ -619,16 +599,22 @@ body{background:#E4E8E5}
       var now=new Date();
       var julyFirst=new Date(now.getFullYear(),6,1);
       var beforeJuly=now<julyFirst;
-      var existing=MEMBER_DB.find(function(m){return m.cccd===cccd;});
+      /* Chỉ hỏi máy chủ "CCCD này đã có hồ sơ chưa" — endpoint cố tình không trả
+         tên/mã hội viên để không dò được danh tính từ một số CCCD bất kỳ. */
+      var existing=null;
+      if(window.VBSF_AUTH && /^\d{9,12}$/.test(cccd)){
+        var res=await window.VBSF_AUTH.cccdStatus(cccd);
+        if(res.found) existing={status:res.status};
+      }
       var total,label,breakdown,note;
       if(existing && existing.status!=='expired'){
         total=FEES.renewal;
         label='Phí thường niên (hội viên cũ gia hạn)';
         breakdown=fmtVnd(FEES.renewal)+' phí thường niên';
-        note='<i class="ti ti-circle-check"></i> Đã tìm thấy hội viên '+escapeHtmlSite(existing.name)+' ('+escapeHtmlSite(existing.code)+') — áp dụng mức phí gia hạn.';
+        note='<i class="ti ti-circle-check"></i> Đã có hồ sơ hội viên ứng với CCCD này — áp dụng mức phí gia hạn.';
       } else {
         note = existing
-          ? '<i class="ti ti-info-circle"></i> CCCD trùng hội viên '+escapeHtmlSite(existing.name)+' đã quá hạn — đăng ký lại từ đầu như hội viên mới.'
+          ? '<i class="ti ti-info-circle"></i> Hồ sơ ứng với CCCD này đã quá hạn — đăng ký lại từ đầu như hội viên mới.'
           : '<i class="ti ti-info-circle"></i> Chưa có trong hệ thống — đăng ký hội viên mới.';
         if(beforeJuly){
           total=FEES.firstTime+FEES.annualFull;
@@ -658,7 +644,7 @@ body{background:#E4E8E5}
     var regTabLabel=joinPage.querySelector('[data-reg-tab-label]');
 
     function renderAuthState(){
-      var m=getLoggedInMember();
+      var m=CURRENT_MEMBER;
       if(regTabLabel) regTabLabel.textContent=m?'Thông tin hội viên':'Đăng ký hội viên';
       if(m){
         loginBox.style.display='none';
@@ -667,7 +653,8 @@ body{background:#E4E8E5}
         profileBox.innerHTML=renderMemberProfileHtml(m);
         var logoutBtn=profileBox.querySelector('[data-member-logout]');
         if(logoutBtn) logoutBtn.addEventListener('click',function(){
-          localStorage.removeItem(MEMBER_SESSION_KEY);
+          if(window.VBSF_AUTH) window.VBSF_AUTH.logoutMember();
+          CURRENT_MEMBER=null;
           renderAuthState();
         });
       }else{
@@ -677,28 +664,73 @@ body{background:#E4E8E5}
         profileBox.innerHTML='';
       }
     }
-    if(loginBtn) loginBtn.addEventListener('click',function(){
+    function showFormMsg(el,text){
+      if(!el) return;
+      el.textContent=text||'';
+      el.style.display=text?'':'none';
+    }
+    if(loginBtn) loginBtn.addEventListener('click',async function(){
       var phone=(loginPhone.value||'').trim();
       var password=(loginPassword.value||'').trim();
-      if(!phone||!password){
-        if(loginErr){ loginErr.textContent='Vui lòng nhập số điện thoại và mật khẩu.'; loginErr.style.display=''; }
-        return;
-      }
-      var m=MEMBER_DB.find(function(r){return r.phone===phone;});
-      if(!m||password!==DEMO_MEMBER_PASSWORD){
-        if(loginErr){ loginErr.textContent='Số điện thoại hoặc mật khẩu không đúng.'; loginErr.style.display=''; }
-        return;
-      }
-      if(loginErr) loginErr.style.display='none';
-      localStorage.setItem(MEMBER_SESSION_KEY,m.code);
-      loginPhone.value=''; loginPassword.value='';
-      renderAuthState();
+      if(!phone||!password){ showFormMsg(loginErr,'Vui lòng nhập số điện thoại và mật khẩu.'); return; }
+      if(!window.VBSF_AUTH){ showFormMsg(loginErr,'Không kết nối được máy chủ.'); return; }
+      loginBtn.disabled=true;
+      try{
+        CURRENT_MEMBER=await window.VBSF_AUTH.loginMember(phone,password);
+        showFormMsg(loginErr,'');
+        loginPhone.value=''; loginPassword.value='';
+        renderAuthState();
+      }catch(err){
+        showFormMsg(loginErr,err.message);
+      }finally{ loginBtn.disabled=false; }
     });
     [loginPhone,loginPassword].forEach(function(input){
       if(input) input.addEventListener('keydown',function(e){
         if(e.key==='Enter'){ e.preventDefault(); if(loginBtn) loginBtn.click(); }
       });
     });
+
+    /* Đăng ký hội viên: tạo tài khoản thật (status "pending" — chờ VBSF xác nhận
+       hội phí), rồi đăng nhập luôn để người dùng thấy ngay hồ sơ của mình. */
+    var regSubmit=joinPage.querySelector('[data-reg-submit]');
+    var regErr=joinPage.querySelector('[data-reg-error]');
+    var regOk=joinPage.querySelector('[data-reg-success]');
+    function regValue(sel){
+      var el=joinPage.querySelector(sel);
+      return el?(el.value||'').trim():'';
+    }
+    /* Xoá trắng form sau khi gửi thành công — nếu để nguyên, lần bấm sau sẽ gửi
+       lại đúng SĐT vừa đăng ký và nhận lỗi trùng khó hiểu. */
+    function clearForm(scope){
+      joinPage.querySelectorAll(scope+' input, '+scope+' select').forEach(function(el){
+        if(el.tagName==='SELECT') el.selectedIndex=0; else el.value='';
+      });
+    }
+    if(regSubmit) regSubmit.addEventListener('click',async function(){
+      showFormMsg(regErr,''); showFormMsg(regOk,'');
+      if(!window.VBSF_AUTH){ showFormMsg(regErr,'Không kết nối được máy chủ.'); return; }
+      var payload={
+        name:regValue('[data-reg-name]'),
+        cccd:regValue('[data-reg-cccd]'),
+        phone:regValue('[data-reg-phone]'),
+        password:regValue('[data-reg-password]'),
+        dob:regValue('[data-reg-dob]')||undefined,
+        email:regValue('[data-reg-email]')||undefined,
+        province:regValue('[data-reg-province]')||undefined,
+        address:regValue('[data-reg-address]')||undefined,
+        club:regValue('[data-reg-club]')||undefined
+      };
+      regSubmit.disabled=true;
+      try{
+        CURRENT_MEMBER=await window.VBSF_AUTH.registerMember(payload);
+        showFormMsg(regOk,'Đăng ký thành công! Mã hội viên của bạn: '+CURRENT_MEMBER.code+'. Hồ sơ đang chờ xác nhận hội phí.');
+        clearForm('[data-section="form-dang-ky"]');
+        renderAuthState();
+      }catch(err){
+        showFormMsg(regErr,err.message);
+      }finally{ regSubmit.disabled=false; }
+    });
+
     renderAuthState();
 
     var hvTabs=joinPage.querySelectorAll('[data-hv-tab]');
@@ -719,7 +751,7 @@ body{background:#E4E8E5}
     var orgLoginErr=joinPage.querySelector('[data-org-login-error]');
 
     function renderOrgAuthState(){
-      var o=getLoggedInOrg();
+      var o=CURRENT_ORG;
       if(o){
         orgLoginBox.style.display='none';
         orgFormSections.forEach(function(s){s.style.display='none';});
@@ -727,7 +759,8 @@ body{background:#E4E8E5}
         orgProfileBox.innerHTML=renderOrgProfileHtml(o);
         var logoutBtn=orgProfileBox.querySelector('[data-org-logout]');
         if(logoutBtn) logoutBtn.addEventListener('click',function(){
-          localStorage.removeItem(ORG_SESSION_KEY);
+          if(window.VBSF_AUTH) window.VBSF_AUTH.logoutOrg();
+          CURRENT_ORG=null;
           renderOrgAuthState();
         });
       }else{
@@ -737,28 +770,57 @@ body{background:#E4E8E5}
         orgProfileBox.innerHTML='';
       }
     }
-    if(orgLoginBtn) orgLoginBtn.addEventListener('click',function(){
+    if(orgLoginBtn) orgLoginBtn.addEventListener('click',async function(){
       var phone=(orgLoginPhone.value||'').trim();
       var password=(orgLoginPassword.value||'').trim();
-      if(!phone||!password){
-        if(orgLoginErr){ orgLoginErr.textContent='Vui lòng nhập số điện thoại và mật khẩu.'; orgLoginErr.style.display=''; }
-        return;
-      }
-      var o=ORG_DB.find(function(r){return r.phone===phone;});
-      if(!o||o.password!==password){
-        if(orgLoginErr){ orgLoginErr.textContent='Số điện thoại hoặc mật khẩu không đúng.'; orgLoginErr.style.display=''; }
-        return;
-      }
-      if(orgLoginErr) orgLoginErr.style.display='none';
-      localStorage.setItem(ORG_SESSION_KEY,o.code);
-      orgLoginPhone.value=''; orgLoginPassword.value='';
-      renderOrgAuthState();
+      if(!phone||!password){ showFormMsg(orgLoginErr,'Vui lòng nhập số điện thoại và mật khẩu.'); return; }
+      if(!window.VBSF_AUTH){ showFormMsg(orgLoginErr,'Không kết nối được máy chủ.'); return; }
+      orgLoginBtn.disabled=true;
+      try{
+        CURRENT_ORG=await window.VBSF_AUTH.loginOrg(phone,password);
+        showFormMsg(orgLoginErr,'');
+        orgLoginPhone.value=''; orgLoginPassword.value='';
+        renderOrgAuthState();
+      }catch(err){
+        showFormMsg(orgLoginErr,err.message);
+      }finally{ orgLoginBtn.disabled=false; }
     });
     [orgLoginPhone,orgLoginPassword].forEach(function(input){
       if(input) input.addEventListener('keydown',function(e){
         if(e.key==='Enter'){ e.preventDefault(); if(orgLoginBtn) orgLoginBtn.click(); }
       });
     });
+
+    /* Đăng ký hội viên tổ chức — hồ sơ vào trạng thái chờ Ban Tổ chức xét duyệt. */
+    var orgRegSubmit=joinPage.querySelector('[data-org-reg-submit]');
+    var orgRegErr=joinPage.querySelector('[data-org-reg-error]');
+    var orgRegOk=joinPage.querySelector('[data-org-reg-success]');
+    if(orgRegSubmit) orgRegSubmit.addEventListener('click',async function(){
+      showFormMsg(orgRegErr,''); showFormMsg(orgRegOk,'');
+      if(!window.VBSF_AUTH){ showFormMsg(orgRegErr,'Không kết nối được máy chủ.'); return; }
+      var payload={
+        name:regValue('[data-org-reg-name]'),
+        orgType:regValue('[data-org-reg-type]')||undefined,
+        taxCode:regValue('[data-org-reg-taxcode]')||undefined,
+        repName:regValue('[data-org-reg-repname]'),
+        repTitle:regValue('[data-org-reg-reptitle]')||undefined,
+        phone:regValue('[data-org-reg-phone]'),
+        repEmail:regValue('[data-org-reg-email]')||undefined,
+        province:regValue('[data-org-reg-province]')||undefined,
+        address:regValue('[data-org-reg-address]'),
+        password:regValue('[data-org-reg-password]')
+      };
+      orgRegSubmit.disabled=true;
+      try{
+        CURRENT_ORG=await window.VBSF_AUTH.registerOrg(payload);
+        showFormMsg(orgRegOk,'Đã gửi hồ sơ! Mã tổ chức: '+CURRENT_ORG.code+'. Ban Tổ chức sẽ liên hệ trong 3–5 ngày làm việc.');
+        clearForm('[data-section="org-form-dang-ky"]');
+        renderOrgAuthState();
+      }catch(err){
+        showFormMsg(orgRegErr,err.message);
+      }finally{ orgRegSubmit.disabled=false; }
+    });
+
     renderOrgAuthState();
   }
 
@@ -771,6 +833,10 @@ body{background:#E4E8E5}
         mlPanels.forEach(function(p){p.style.display=(p.getAttribute('data-tabpanel')===tab.getAttribute('data-tab'))?'':'none';});
       });
     });
+
+    // Tìm kiếm + phân trang do lớp dữ liệu đảm nhiệm khi nối được Strapi;
+    // phần chuyển tab phía trên vẫn giữ nguyên trong mọi trường hợp.
+    if(memberPage.getAttribute('data-server-driven')==='1') return;
 
     var caNhanPanel=memberPage.querySelector('[data-tabpanel="ca-nhan"]');
     var memberSearch=memberPage.querySelector('[data-member-search]');

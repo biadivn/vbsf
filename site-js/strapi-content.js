@@ -90,11 +90,52 @@
 
   /* ---------------- tải dữ liệu ---------------- */
 
-  async function api(path) {
+  async function apiRaw(path) {
     var res = await fetch(STRAPI_URL + '/api/' + path);
     if (!res.ok) throw new Error('Strapi ' + res.status + ' cho /' + path);
-    var out = await res.json();
-    return out.data;
+    return res.json();
+  }
+
+  async function api(path) {
+    return (await apiRaw(path)).data;
+  }
+
+  /** Một trang dữ liệu + meta.pagination của Strapi. */
+  async function apiPage(path, params) {
+    var qs = Object.keys(params)
+      .filter(function (k) { return params[k] !== undefined && params[k] !== null && params[k] !== ''; })
+      .map(function (k) { return k + '=' + encodeURIComponent(params[k]); })
+      .join('&');
+    var out = await apiRaw(path + (qs ? '?' + qs : ''));
+    return { data: out.data || [], pagination: (out.meta && out.meta.pagination) || { page: 1, pageCount: 1, total: (out.data || []).length } };
+  }
+
+  /* Bộ nút phân trang dùng chung — dựng lại markup .vb-pg của prototype và gọi
+     onGo(page) khi bấm. Hiển thị tối đa 5 số quanh trang hiện tại. */
+  function renderPager(container, pagination, onGo) {
+    if (!container) return;
+    var page = pagination.page || 1;
+    var last = pagination.pageCount || 1;
+    if (last <= 1) { container.innerHTML = ''; return; }
+
+    var from = Math.max(1, Math.min(page - 2, last - 4));
+    var to = Math.min(last, from + 4);
+    var html = '<span class="vb-pg' + (page === 1 ? ' dis' : '') + '" data-pg="' + (page - 1) +
+      '"><i class="ti ti-chevron-left"></i></span>';
+    for (var i = from; i <= to; i++) {
+      html += '<span class="vb-pg' + (i === page ? ' on' : '') + '" data-pg="' + i + '">' + i + '</span>';
+    }
+    html += '<span class="vb-pg' + (page === last ? ' dis' : '') + '" data-pg="' + (page + 1) +
+      '"><i class="ti ti-chevron-right"></i></span>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('[data-pg]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (btn.classList.contains('dis') || btn.classList.contains('on')) return;
+        var target = parseInt(btn.getAttribute('data-pg'), 10);
+        if (target >= 1 && target <= last) onGo(target);
+      });
+    });
   }
 
   function list(path, query) {
@@ -326,7 +367,7 @@
       '<div class="vb-row"><div style="flex:1">' +
       '<div style="font-size:13.5px;font-weight:500;color:#1B2A24;cursor:pointer" data-go="giai-dau-chi-tiet" ' +
       dsAttrs(ds) + '>' + esc(t.name) + '</div>' +
-      '<div style="font-size:11.5px;color:#8A968F;margin-top:3px"><i class="ti ti-trophy" style="color:#FFFFFF"></i> Vô địch: ' +
+      '<div style="font-size:11.5px;color:#8A968F;margin-top:3px"><i class="ti ti-trophy" style="color:var(--gold-ink)"></i> Vô địch: ' +
       esc(t.champion || '—') + ' · ' + fmtDate(t.date) + '</div></div>' +
       '<span class="vb-tag">' + esc(t.category || '') + '</span>' +
       '<span class="vb-link" style="cursor:pointer" data-go="giai-dau-ket-qua" ' + dsAttrs(ds) + '>Xem kết quả →</span></div>'
@@ -433,6 +474,10 @@
     }
   };
 
+  /* Trang Tin tức phân trang THẬT: lọc chuyên mục + tìm kiếm + đổi trang đều
+     gửi query lên Strapi, chỉ tải đúng số bài của trang đang xem. */
+  var NEWS_PAGE_SIZE = 6;
+
   RENDER['tin-tuc'] = function (page, data) {
     if (!data.news.length) return;
     var featured = data.news.filter(function (n) { return n.featured; })[0] || data.news[0];
@@ -459,15 +504,6 @@
       }
     }
 
-    // Lưới bài viết
-    var grid = items(section(page, 'danh-sach-tin'));
-    if (grid) {
-      grid.innerHTML = data.news
-        .filter(function (n) { return n.documentId !== featured.documentId; })
-        .map(newsCardList)
-        .join('');
-    }
-
     // Sidebar "Tin xem nhiều"
     var side = section(page, 'sidebar-tin-tuc');
     if (side) {
@@ -481,6 +517,58 @@
         );
       }).join('');
     }
+
+    var listSec = section(page, 'danh-sach-tin');
+    var grid = items(listSec);
+    if (!grid) return;
+    var pagerBox = listSec.querySelector('[style*="justify-content:center"]');
+    var searchInput = page.querySelector('[data-news-search]');
+    var pills = page.querySelectorAll('.vb-pill');
+
+    // initNews() của index.html lọc phía client trên các thẻ đã render — đánh dấu
+    // để nó nhường quyền cho phân trang/lọc phía máy chủ ở đây.
+    page.setAttribute('data-server-driven', '1');
+
+    var state = { page: 1, category: '', q: '' };
+    var timer = null;
+
+    async function show() {
+      grid.innerHTML = '<div style="font-size:12.5px;color:#8A968F">Đang tải…</div>';
+      var res = await apiPage('news-articles', {
+        'sort': 'date:desc',
+        'populate': 'image',
+        'pagination[page]': state.page,
+        'pagination[pageSize]': NEWS_PAGE_SIZE,
+        'filters[documentId][$ne]': featured.documentId,
+        'filters[category][$eq]': state.category || undefined,
+        'filters[title][$containsi]': state.q || undefined,
+      });
+      grid.innerHTML = res.data.length
+        ? res.data.map(newsCardList).join('')
+        : '<div style="font-size:12.5px;color:#8A968F">Không tìm thấy bài viết phù hợp.</div>';
+      renderPager(pagerBox, res.pagination, function (p) { state.page = p; show(); });
+    }
+
+    pills.forEach(function (pill) {
+      pill.addEventListener('click', function () {
+        pills.forEach(function (x) { x.classList.toggle('on', x === pill); });
+        var label = pill.textContent.trim();
+        state.category = label === 'Tất cả' ? '' : label;
+        state.page = 1;
+        show();
+      });
+    });
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          state.q = searchInput.value.trim();
+          state.page = 1;
+          show();
+        }, 300);
+      });
+    }
+    show();
   };
 
   RENDER['giai-dau'] = function (page, data) {
@@ -548,7 +636,7 @@
           if (!r) return '';
           if (place === 1) {
             return (
-              '<div class="pod" style="border-top:3px solid #FFFFFF;box-shadow:0 6px 20px rgba(12,58,42,.10);padding-top:22px;padding-bottom:22px">' +
+              '<div class="pod" style="border-top:3px solid var(--gold);box-shadow:0 6px 20px rgba(12,58,42,.10);padding-top:22px;padding-bottom:22px">' +
               '<div style="font-size:11px;font-weight:700;color:#21428E"><i class="ti ti-crown"></i> HẠNG 1</div>' +
               '<div class="vb-ph" style="width:66px;height:66px;border-radius:50%;margin:10px auto;border:2px solid #21428E"><i class="ti ti-user" style="font-size:28px"></i></div>' +
               '<div style="font-size:14px;font-weight:600;color:#1B2A24">' + esc(r.name) + '</div>' +
@@ -783,6 +871,27 @@
     });
   };
 
+  /* Danh sách tỉnh/thành khớp enum `province` trong schema Strapi — gửi giá trị
+     ngoài danh sách này thì API đăng ký sẽ từ chối. */
+  var PROVINCES = [
+    'Hà Nội', 'TP.HCM', 'Đà Nẵng', 'Hải Phòng',
+    'Cần Thơ', 'An Giang', 'Bà Rịa - Vũng Tàu', 'Bạc Liêu',
+    'Bắc Giang', 'Bắc Kạn', 'Bắc Ninh', 'Bến Tre',
+    'Bình Định', 'Bình Dương', 'Bình Phước', 'Bình Thuận',
+    'Cà Mau', 'Cao Bằng', 'Đắk Lắk', 'Đắk Nông',
+    'Điện Biên', 'Đồng Nai', 'Đồng Tháp', 'Gia Lai',
+    'Hà Giang', 'Hà Nam', 'Hà Tĩnh', 'Hải Dương',
+    'Hậu Giang', 'Hòa Bình', 'Hưng Yên', 'Khánh Hòa',
+    'Kiên Giang', 'Kon Tum', 'Lai Châu', 'Lâm Đồng',
+    'Lạng Sơn', 'Lào Cai', 'Long An', 'Nam Định',
+    'Nghệ An', 'Ninh Bình', 'Ninh Thuận', 'Phú Thọ',
+    'Phú Yên', 'Quảng Bình', 'Quảng Nam', 'Quảng Ngãi',
+    'Quảng Ninh', 'Quảng Trị', 'Sóc Trăng', 'Sơn La',
+    'Tây Ninh', 'Thái Bình', 'Thái Nguyên', 'Thanh Hóa',
+    'Thừa Thiên Huế', 'Tiền Giang', 'Trà Vinh', 'Tuyên Quang',
+    'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái',
+  ];
+
   RENDER['hoi-vien'] = function (page, data) {
     var s = data.settings;
     // Khối VietQR: ngân hàng / số TK / chủ TK
@@ -790,6 +899,13 @@
       var k = el.getAttribute('data-bank');
       var v = k === 'name' ? s.bankName : k === 'account' ? s.bankAccount : s.bankHolder;
       if (v) el.textContent = v;
+    });
+
+    // Ô chọn tỉnh/thành trong 2 form đăng ký
+    page.querySelectorAll('[data-province-select]').forEach(function (sel) {
+      if (sel.options.length) return;
+      sel.innerHTML = '<option value="">— Chọn tỉnh / thành —</option>' +
+        PROVINCES.map(function (name) { return '<option value="' + esc(name) + '">' + esc(name) + '</option>'; }).join('');
     });
   };
 
@@ -800,51 +916,91 @@
     if (fee && data.settings.feeRenewal) fee.textContent = data.settings.feeRenewal;
   };
 
-  RENDER['hoi-vien-danh-sach'] = function (page, data) {
-    var STATUS = {
-      active: ['Đang hiệu lực', 'background:#E7F4EC;color:#00814D'],
-      pending: ['Chờ thanh toán', 'background:#F4F1E8;color:#9A7B2E'],
-      expired: ['Hết hạn', 'background:#F1F1EE;color:#8A8A82'],
+  /* Danh sách hội viên phân trang THẬT: tìm kiếm + đổi trang gọi thẳng Strapi.
+     API công khai đã lược bỏ CCCD/SĐT (xem src/api/member/controllers/member.js). */
+  var MEMBER_PAGE_SIZE = 10;
+
+  var MEMBER_STATUS = {
+    active: ['Đang hiệu lực', 'background:#E7F4EC;color:#00814D'],
+    pending: ['Chờ thanh toán', 'background:#F4F1E8;color:#9A7B2E'],
+    expired: ['Hết hạn', 'background:#F1F1EE;color:#8A8A82'],
+  };
+
+  function memberRow(m) {
+    var st = MEMBER_STATUS[m.status] || MEMBER_STATUS.active;
+    var ds = {
+      name: m.name, code: m.code || '', club: m.club || '', province: m.province || '',
+      status: m.status, statuslabel: st[0], expiry: m.expiry ? fmtDate(m.expiry) : '—',
     };
-    var tbodies = page.querySelectorAll('table.mtbl tbody');
+    return (
+      '<tr style="cursor:pointer" data-go="hoi-vien-chi-tiet" ' + dsAttrs(ds) + '>' +
+      '<td><span class="av"><i class="ti ti-user" style="font-size:15px"></i></span>' + esc(m.name) + '</td>' +
+      '<td style="color:#5C6B63">' + esc(m.code || '') + '</td>' +
+      '<td><span class="vb-badge" style="' + st[1] + '">' + st[0] + '</span></td></tr>'
+    );
+  }
 
-    if (tbodies[0] && data.members.length) {
-      tbodies[0].innerHTML = data.members.map(function (m) {
-        var st = STATUS[m.status] || STATUS.active;
-        var ds = {
-          name: m.name, code: m.code || '', club: m.club || '', province: m.province || '',
-          status: m.status, statuslabel: st[0], expiry: m.expiry ? fmtDate(m.expiry) : '—',
-        };
-        return (
-          '<tr style="cursor:pointer" data-go="hoi-vien-chi-tiet" ' + dsAttrs(ds) + '>' +
-          '<td><span class="av"><i class="ti ti-user" style="font-size:15px"></i></span>' + esc(m.name) + '</td>' +
-          '<td style="color:#5C6B63">' + esc(m.code || '') + '</td>' +
-          '<td><span class="vb-badge" style="' + st[1] + '">' + st[0] + '</span></td></tr>'
-        );
-      }).join('');
-      var cnt = page.querySelector('[data-tabpanel="ca-nhan"] [style*="font-size:11px"]');
-      if (cnt) cnt.textContent = 'Tổng ' + data.members.length + ' hội viên cá nhân · hiển thị 1–' + data.members.length;
+  function orgRow(o) {
+    var st = MEMBER_STATUS[o.status] || MEMBER_STATUS.active;
+    var ds = {
+      name: o.name, code: o.code || '', club: o.orgType || '', province: o.address || o.province || '',
+      status: o.status, statuslabel: st[0], expiry: o.expiry ? fmtDate(o.expiry) : '—',
+    };
+    return (
+      '<tr style="cursor:pointer" data-go="hoi-vien-chi-tiet" ' + dsAttrs(ds) + '>' +
+      '<td><span class="av"><i class="ti ti-building" style="font-size:15px"></i></span>' + esc(o.name) + '</td>' +
+      '<td style="color:#5C6B63">' + esc(o.joinDate ? String(o.joinDate).slice(0, 4) : '') + '</td>' +
+      '<td style="color:#5C6B63">' + esc(o.address || o.province || '') + '</td>' +
+      '<td><span class="vb-badge" style="' + st[1] + '">' + st[0] + '</span></td></tr>'
+    );
+  }
+
+  RENDER['hoi-vien-danh-sach'] = function (page) {
+    page.setAttribute('data-server-driven', '1');
+
+    function wirePanel(opts) {
+      var panel = page.querySelector('[data-tabpanel="' + opts.tab + '"]');
+      if (!panel) return;
+      var tbody = panel.querySelector('tbody');
+      var footer = panel.querySelector('[style*="justify-content:space-between"]');
+      var countEl = footer && footer.firstElementChild;
+      var pagerBox = footer && footer.lastElementChild;
+      var searchInput = panel.querySelector(opts.searchSelector);
+      var state = { page: 1, q: '' };
+      var timer = null;
+
+      async function show() {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:#8A968F">Đang tải…</td></tr>';
+        var res = await apiPage(opts.path, {
+          'sort': 'name:asc',
+          'pagination[page]': state.page,
+          'pagination[pageSize]': MEMBER_PAGE_SIZE,
+          'filters[name][$containsi]': state.q || undefined,
+        });
+        tbody.innerHTML = res.data.length
+          ? res.data.map(opts.row).join('')
+          : '<tr><td colspan="4" style="color:#8A968F">Không tìm thấy ' + opts.noun + ' phù hợp.</td></tr>';
+        if (countEl) {
+          var p = res.pagination;
+          var from = (p.page - 1) * MEMBER_PAGE_SIZE + 1;
+          countEl.textContent = p.total
+            ? 'Tổng ' + p.total + ' ' + opts.noun + ' · hiển thị ' + from + '–' + Math.min(from + res.data.length - 1, p.total)
+            : 'Chưa có ' + opts.noun + ' nào';
+        }
+        renderPager(pagerBox, res.pagination, function (n) { state.page = n; show(); });
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', function () {
+          clearTimeout(timer);
+          timer = setTimeout(function () { state.q = searchInput.value.trim(); state.page = 1; show(); }, 300);
+        });
+      }
+      show();
     }
 
-    if (tbodies[1] && data.memberOrgs.length) {
-      tbodies[1].innerHTML = data.memberOrgs.map(function (o) {
-        var st = STATUS[o.status] || STATUS.active;
-        var ds = {
-          name: o.name, code: o.code || '', club: o.orgType || '', province: o.address || o.province || '',
-          status: o.status, statuslabel: st[0], expiry: o.expiry ? fmtDate(o.expiry) : '—',
-        };
-        var joinYear = o.joinDate ? String(o.joinDate).slice(0, 4) : '';
-        return (
-          '<tr style="cursor:pointer" data-go="hoi-vien-chi-tiet" ' + dsAttrs(ds) + '>' +
-          '<td><span class="av"><i class="ti ti-building" style="font-size:15px"></i></span>' + esc(o.name) + '</td>' +
-          '<td style="color:#5C6B63">' + esc(joinYear) + '</td>' +
-          '<td style="color:#5C6B63">' + esc(o.address || o.province || '') + '</td>' +
-          '<td><span class="vb-badge" style="' + st[1] + '">' + st[0] + '</span></td></tr>'
-        );
-      }).join('');
-      var cntOrg = page.querySelector('[data-tabpanel="to-chuc"] [style*="font-size:11px"]');
-      if (cntOrg) cntOrg.textContent = 'Tổng ' + data.memberOrgs.length + ' hội viên tổ chức · hiển thị 1–' + data.memberOrgs.length;
-    }
+    wirePanel({ tab: 'ca-nhan', path: 'members', row: memberRow, searchSelector: '[data-member-search]', noun: 'hội viên cá nhân' });
+    wirePanel({ tab: 'to-chuc', path: 'member-orgs', row: orgRow, searchSelector: '[data-org-search]', noun: 'hội viên tổ chức' });
   };
 
   /* ---------------- các trang chi tiết (điền sau khi điều hướng) ---------------- */
@@ -991,7 +1147,7 @@
       var score = m.s1 != null && m.s2 != null
         ? '<span style="font-size:15px;font-weight:700;color:#21428E">' + m.s1 + ' – ' + m.s2 + '</span>'
         : '<span style="font-size:15px;font-weight:700;color:#8A968F">–</span>';
-      var rowStyle = livePlaying ? ' style="border-color:#21428E;background:#FFFFFF"' : (done ? '' : ' style="opacity:.6"');
+      var rowStyle = livePlaying ? ' style="border-color:#21428E;background:#FDF6EC"' : (done ? '' : ' style="opacity:.6"');
       return (
         '<div class="vb-row"' + rowStyle + '>' + badge +
         '<div style="flex:1;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">' +
@@ -1057,32 +1213,6 @@
     }
   }
 
-  /** Hồ sơ hội viên / tổ chức cho luồng đăng nhập demo trong index.html. */
-  async function loginTables() {
-    var data = await load();
-    if (!data) return null;
-    return {
-      members: data.members.map(function (m) {
-        var d = (m.disciplines || []).slice().sort(function (a, b) { return (b.points || 0) - (a.points || 0); })[0] || {};
-        return {
-          code: m.code, name: m.name, phone: m.phone, cccd: m.cccd,
-          club: m.club || '', province: m.province || '', category: m.category || d.category || '',
-          status: m.status, expiry: m.expiry ? fmtDate(m.expiry) : '',
-          rank: d.rank, points: d.points, matches: d.matches, trend: d.trend, trendValue: d.trendValue,
-        };
-      }),
-      orgs: data.memberOrgs.map(function (o) {
-        return {
-          code: o.code, name: o.name, orgType: o.orgType, province: o.province || '', address: o.address || '',
-          repName: o.repName || '', repTitle: o.repTitle || '', repPhone: o.repPhone || '', repEmail: o.repEmail || '',
-          phone: o.phone, package: o.package || '',
-          joinYear: o.joinDate ? String(o.joinDate).slice(0, 4) : '',
-          status: o.status, expiry: o.expiry ? fmtDate(o.expiry) : '',
-        };
-      }),
-    };
-  }
-
   /** Mức hội phí trong Thông tin tổ chức (đơn vị: đồng). */
   async function fees() {
     var data = await load();
@@ -1100,7 +1230,6 @@
     load: load,
     hydrate: hydrate,
     afterNav: afterNav,
-    loginTables: loginTables,
     fees: fees,
     fmtDate: fmtDate,
     strapiUrl: STRAPI_URL,

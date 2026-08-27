@@ -31,6 +31,15 @@
     "password": {
       "type": "password"
     },
+    "email": {
+      "type": "email"
+    },
+    "dob": {
+      "type": "date"
+    },
+    "address": {
+      "type": "string"
+    },
     "category": {
       "type": "enumeration",
       "enum": [

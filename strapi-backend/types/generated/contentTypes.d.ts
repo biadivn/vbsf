@@ -685,6 +685,7 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    address: Schema.Attribute.String;
     category: Schema.Attribute.Enumeration<
       [
         'Pool 8 bi',
@@ -703,6 +704,8 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     disciplines: Schema.Attribute.Component<'member.discipline', true>;
+    dob: Schema.Attribute.Date;
+    email: Schema.Attribute.Email;
     expiry: Schema.Attribute.Date;
     freeMatches: Schema.Attribute.Component<'member.free-match', true>;
     group: Schema.Attribute.Enumeration<
