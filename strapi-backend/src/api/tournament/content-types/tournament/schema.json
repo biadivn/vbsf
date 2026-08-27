@@ -40,6 +40,8 @@
     "regDeadline": { "type": "date" },
     "liveRound": { "type": "string" },
     "champion": { "type": "string" },
+    "runnerUp": { "type": "string" },
+    "third": { "type": "string" },
     "entryFee": { "type": "string" },
     "rules": { "type": "text" },
     "metaTitle": { "type": "string" },

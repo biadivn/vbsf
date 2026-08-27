@@ -977,9 +977,11 @@ export interface ApiTournamentTournament extends Struct.CollectionTypeSchema {
     regDeadline: Schema.Attribute.Date;
     rr: Schema.Attribute.JSON;
     rules: Schema.Attribute.Text;
+    runnerUp: Schema.Attribute.String;
     status: Schema.Attribute.Enumeration<['upcoming', 'ongoing', 'completed']> &
       Schema.Attribute.DefaultTo<'upcoming'>;
     sw: Schema.Attribute.JSON;
+    third: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

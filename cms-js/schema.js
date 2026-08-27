@@ -41,6 +41,8 @@ const COLLECTIONS = {
       {key:'regDeadline', label:'Hạn đăng ký', type:'date'},
       {key:'liveRound', label:'Vòng đấu hiện tại (khi đang diễn ra)', type:'text', placeholder:'VD: Vòng tứ kết'},
       {key:'champion', label:'Nhà vô địch (nếu đã kết thúc)', type:'text'},
+      {key:'runnerUp', label:'Á quân (nếu đã kết thúc)', type:'text'},
+      {key:'third', label:'Hạng 3 (nếu đã kết thúc)', type:'text'},
       {key:'entryFee', label:'Lệ phí tham gia', type:'text', placeholder:'VD: 200.000đ / cơ thủ'},
       {key:'rules', label:'Thể lệ & luật thi đấu', type:'textarea', span2:true, rows:6, placeholder:'Mỗi dòng là một điều luật...'},
       {key:'metaTitle', label:'SEO — Meta title', type:'text', span2:true, placeholder:'Để trống sẽ dùng Tên giải đấu'},

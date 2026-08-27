@@ -576,9 +576,9 @@ const tournaments = [
     mode: 'op',
     date: d('18/04/2026'),
     champion: 'Trần Quốc Bảo',
+    runnerUp: 'Nguyễn Phúc Long',
+    third: 'Lê Minh Khôi',
     note: '',
-    // Prototype còn có Á quân: Nguyễn Phúc Long · Hạng 3: Lê Minh Khôi — schema
-    // hiện chỉ có field `champion` nên chưa lưu được 2 hạng này.
     entryFee: '200.000đ / cơ thủ',
   },
   {
@@ -589,9 +589,9 @@ const tournaments = [
     mode: 'op',
     date: d('30/03/2026'),
     champion: 'Nguyễn Phúc Long',
+    runnerUp: 'Trần Quốc Bảo',
+    third: 'Phạm Anh Tú',
     note: '',
-    // Prototype còn có Á quân: Trần Quốc Bảo · Hạng 3: Phạm Anh Tú — schema
-    // hiện chỉ có field `champion` nên chưa lưu được 2 hạng này.
     entryFee: '200.000đ / cơ thủ',
   },
   {
@@ -602,9 +602,9 @@ const tournaments = [
     mode: 'op',
     date: d('12/12/2025'),
     champion: 'Lê Minh Khôi',
+    runnerUp: 'Đỗ Thành Nam',
+    third: 'Vũ Hoàng Sơn',
     note: '',
-    // Prototype còn có Á quân: Đỗ Thành Nam · Hạng 3: Vũ Hoàng Sơn — schema
-    // hiện chỉ có field `champion` nên chưa lưu được 2 hạng này.
     entryFee: '200.000đ / cơ thủ',
   },
 ].map((t) => ({
