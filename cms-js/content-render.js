@@ -140,7 +140,17 @@ function filterRows(rows, schema, term, filterField, filterVal){
 function attachListEvents(key){
   const search = document.getElementById('searchInput');
   if(search){
-    search.addEventListener('input', e=>{ searchTerm = e.target.value; renderContent(); document.getElementById('searchInput').focus(); document.getElementById('searchInput').setSelectionRange(searchTerm.length,searchTerm.length); });
+    search.addEventListener('input', e=>{
+      /* Trình duyệt tự điền (autofill) cũng phát sự kiện `input`, và nó từng điền
+         email tài khoản vào ô này ngay sau khi đăng nhập -> danh sách bị lọc còn
+         0 dòng, trông như mất sạch dữ liệu. Người thật không gõ được vào ô chưa
+         focus, nên chỉ nhận sự kiện khi ô đang được focus. */
+      if(document.activeElement !== search){ search.value = searchTerm; return; }
+      searchTerm = e.target.value;
+      renderContent();
+      document.getElementById('searchInput').focus();
+      document.getElementById('searchInput').setSelectionRange(searchTerm.length,searchTerm.length);
+    });
   }
   const filterSelect = document.getElementById('filterSelect');
   if(filterSelect){

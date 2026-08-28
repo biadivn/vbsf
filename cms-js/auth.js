@@ -142,9 +142,23 @@ function closeAvatarMenu(){
   document.getElementById('avatarMenu').classList.remove('on');
 }
 
+/* Trình duyệt tự điền tài khoản đã lưu vào ô <input> đầu tiên nó cho là
+   "username" — sau khi đăng nhập, ô đó chính là ô TÌM KIẾM của danh sách, khiến
+   bộ lọc loại sạch bản ghi và người dùng thấy "Chưa có dữ liệu". Vô hiệu hoá 2 ô
+   đăng nhập khi đã vào app để trình quản lý mật khẩu không còn chỗ bám. */
+function setLoginFieldsActive(active){
+  ['loginUsername', 'loginPassword'].forEach((id)=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.disabled = !active;
+    if(!active) el.value = '';
+  });
+}
+
 async function showCmsApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = '';
+  setLoginFieldsActive(false);
   renderAvatarMenu();
   await refreshAccountsFromApi();
   const remoteKeys = Object.keys(COLLECTIONS).filter(k=>COLLECTIONS[k].remote && !COLLECTIONS[k].strapiUsers);
@@ -161,6 +175,7 @@ async function showCmsApp(){
 function showCmsLogin(message){
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
+  setLoginFieldsActive(true);
   const err = document.getElementById('loginError');
   err.textContent = message || '';
   err.style.display = message ? 'block' : 'none';
