@@ -125,9 +125,15 @@ npm run verify      # cả hai
 ### Unit test — ngưỡng coverage 80%
 
 Dùng test runner có sẵn của Node (`node:test`), **không thêm phụ thuộc nào**.
-`scripts/run-tests.js` ép ngưỡng 80% cho cả line, branch và function; thêm
-`--test-coverage-include-all` nên xoá bớt test sẽ làm coverage tụt xuống 0 chứ
-không "đạt ngưỡng" bằng cách lặng lẽ bỏ test đi.
+`scripts/run-tests.js` ép ngưỡng 80% cho line, branch và function **theo từng
+file** (không phải trung bình toàn bộ) — một module tệ không nấp được sau các
+module tốt. Số liệu đọc từ báo cáo lcov của chính test runner; file nào trong
+phạm vi mà biến mất khỏi báo cáo cũng bị coi là fail, nên không thể "đạt ngưỡng"
+bằng cách lặng lẽ xoá test đi.
+
+> Cách này thay cho cờ `--test-coverage-include-all` (chỉ có từ Node 26, trong
+> khi CI và image Docker chạy Node 24) và chặt hơn vì kiểm theo từng file.
+> Yêu cầu tối thiểu: Node 22.9.
 
 Phạm vi đo coverage được liệt kê tường minh trong `scripts/run-tests.js` — các
 module logic thuần chạy được ngoài trình duyệt:
