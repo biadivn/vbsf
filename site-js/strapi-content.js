@@ -821,11 +821,6 @@
         provSel.innerHTML = '<option value="">Toàn quốc</option>' +
           provinces.map(function (p) { return '<option value="' + esc(p) + '">' + esc(p) + '</option>'; }).join('');
       }
-      /* Kỳ xếp hạng không có dữ liệu lịch sử để lọc — hiển thị đúng kỳ hiện tại
-         từ Thông tin tổ chức thay vì giả vờ là bộ lọc. */
-      var periodEl = page.querySelector('[data-rk-period]');
-      if (periodEl) periodEl.textContent = data.settings.rankingPeriod || 'Kỳ hiện tại';
-
       var renderCurrent = function () { renderTable(currentKey); };
       if (provSel) provSel.addEventListener('change', renderCurrent);
 

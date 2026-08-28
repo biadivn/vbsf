@@ -1060,7 +1060,6 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
     orgShort: Schema.Attribute.String;
     provinceCount: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
-    rankingPeriod: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

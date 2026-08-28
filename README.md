@@ -58,11 +58,22 @@ khoản CMS mới xem được.
 | Nhãn/tiêu đề/banner từng trang | single type `page-content` — module "Trang website" |
 | Ban lãnh đạo (trang Giới thiệu) | collection `leaders` |
 | Footer (địa chỉ, email, điện thoại) | single type `contact-info` |
-| Kỳ xếp hạng hiển thị ở trang Xếp hạng | `setting.rankingPeriod` |
 
 Bộ lọc trên site lọc thật từ dữ liệu: Giải đấu lọc theo nội dung + năm, Xếp hạng
-lọc theo tỉnh/thành. Riêng "lượt xem" của bài viết vẫn là số cố định trong HTML —
-chưa có cơ chế đếm.
+lọc theo tỉnh/thành. Bảng xếp hạng là **danh sách luôn cập nhật**, không chia theo
+kỳ. Riêng "lượt xem" của bài viết vẫn là số cố định trong HTML — chưa có cơ chế đếm.
+
+### Cache của site public
+
+nginx đặt `Cache-Control: max-age=14400` cho `*.js`, nên `index.html` gắn
+`?v=<commit ngắn>` vào 3 thẻ script và `deploy-web.yml` thay giá trị này khi
+rsync. Mỗi bản deploy là một URL mới nên cả Cloudflare lẫn trình duyệt đều nạp
+lại ngay. `index.html` và `pages/*.html` không bị cache edge (`cf-cache-status:
+DYNAMIC`) nên không cần xử lý gì thêm.
+
+> Purge cache Cloudflare **không thay thế được** cơ chế này: purge chỉ xoá bản
+> lưu ở edge, còn trình duyệt của người đã truy cập vẫn dùng bản cũ cho tới hết
+> 4 giờ. Đổi URL thì cả hai cùng nạp lại.
 
 ## Kiểm thử & security gate
 
