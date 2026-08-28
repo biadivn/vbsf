@@ -104,6 +104,19 @@ async function saveNewsEditor(){
     metaTitle: document.getElementById('ne_metaTitle').value,
     metaDescription: document.getElementById('ne_metaDescription').value
   };
+  /* Tin tức là collection remote (schema.js: remote:true, apiPath:'news-articles')
+     — phải ghi lên Strapi như mọi module khác. Trước đây chỉ push vào DB rồi
+     saveDB() (localStorage), nên bài viết soạn trong CMS không bao giờ tới
+     Strapi và biến mất ngay lần đồng bộ kế tiếp. */
+  if(COLLECTIONS.news.remote){
+    const ok = await saveRemoteCollectionRecord('news', isNew?null:id, data);
+    if(!ok) return;
+    renderSidebar();
+    showToast(isNew ? 'Đã đăng bài viết' : 'Đã lưu thay đổi');
+    setView('news');
+    return;
+  }
+
   if(isNew){
     data.id = uid();
     DB.news.push(data);
@@ -116,11 +129,20 @@ async function saveNewsEditor(){
   showToast(isNew ? 'Đã đăng bài viết' : 'Đã lưu thay đổi');
   setView('news');
 }
-function deleteNewsEditor(){
+async function deleteNewsEditor(){
   const id = currentView.slice('news-edit:'.length);
   const record = DB.news.find(r=>r.id===id);
   const label = record ? record.title : 'bài viết này';
   if(confirm(`Xóa "${label}" khỏi Tin tức? Hành động này không thể hoàn tác.`)){
+    // Xoá cũng phải đi qua Strapi, nếu không bài viết sẽ hiện lại sau khi đồng bộ.
+    if(COLLECTIONS.news.remote){
+      const ok = await deleteRemoteCollectionRecord('news', id);
+      if(!ok) return;
+      renderSidebar();
+      showToast('Đã xóa');
+      setView('news');
+      return;
+    }
     DB.news = DB.news.filter(r=>r.id!==id);
     saveDB();
     renderSidebar();
