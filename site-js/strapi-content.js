@@ -160,35 +160,55 @@
 
   var bundlePromise = null;
 
+  /* Mỗi nguồn dữ liệu tải độc lập: một endpoint hỏng thì chỉ mất đúng phần đó,
+     các phần còn lại vẫn render. Trước đây dùng Promise.all nên chỉ cần
+     "Thông tin tổ chức" chưa có dữ liệu (Strapi trả 404 cho single type rỗng)
+     là cả trang mất sạch dữ liệu và rơi về bản tĩnh. */
   function load() {
     if (bundlePromise) return bundlePromise;
-    bundlePromise = (async function () {
-      var r = await Promise.all([
-        api('setting'),
-        api('contact-info'),
-        list('news-articles', 'sort=date:desc&populate=image'),
-        list('tournaments', 'populate=prizes&populate=players'),
-        list('members', 'populate=disciplines&populate=avatar'),
-        list('member-orgs'),
-        list('partners', 'populate=image'),
-        list('library-docs', 'populate=file'),
-        list('media-items', 'populate=assets'),
-      ]);
-      return {
-        settings: r[0] || {},
-        contact: r[1] || {},
-        news: r[2] || [],
-        tournaments: r[3] || [],
-        members: r[4] || [],
-        memberOrgs: r[5] || [],
-        partners: r[6] || [],
-        libraryDocs: r[7] || [],
-        mediaItems: r[8] || [],
-      };
-    })().catch(function (err) {
-      console.warn('[VBSF] Không nạp được dữ liệu từ Strapi — giữ nội dung tĩnh.', err);
-      return null;
+
+    var SOURCES = [
+      { key: 'settings', fallback: {}, load: function () { return api('setting'); } },
+      { key: 'contact', fallback: {}, load: function () { return api('contact-info'); } },
+      { key: 'news', fallback: [], load: function () { return list('news-articles', 'sort=date:desc&populate=image'); } },
+      { key: 'tournaments', fallback: [], load: function () { return list('tournaments', 'populate=prizes&populate=players'); } },
+      { key: 'members', fallback: [], load: function () { return list('members', 'populate=disciplines&populate=avatar'); } },
+      { key: 'memberOrgs', fallback: [], load: function () { return list('member-orgs'); } },
+      { key: 'partners', fallback: [], load: function () { return list('partners', 'populate=image'); } },
+      { key: 'libraryDocs', fallback: [], load: function () { return list('library-docs', 'populate=file'); } },
+      { key: 'mediaItems', fallback: [], load: function () { return list('media-items', 'populate=assets'); } },
+    ];
+
+    bundlePromise = Promise.all(
+      SOURCES.map(function (source) {
+        return source.load().catch(function (err) {
+          return { __failed: source.key, error: err };
+        });
+      })
+    ).then(function (results) {
+      var bundle = {};
+      var failed = [];
+      results.forEach(function (value, i) {
+        var source = SOURCES[i];
+        if (value && value.__failed) {
+          failed.push(source.key);
+          bundle[source.key] = source.fallback;
+        } else {
+          bundle[source.key] = value || source.fallback;
+        }
+      });
+
+      // Hỏng sạch thì coi như không có Strapi — giữ nguyên nội dung tĩnh.
+      if (failed.length === SOURCES.length) {
+        console.warn('[VBSF] Không nạp được dữ liệu từ Strapi — giữ nội dung tĩnh.');
+        return null;
+      }
+      if (failed.length) {
+        console.warn('[VBSF] Thiếu dữ liệu cho: ' + failed.join(', ') + ' — các phần còn lại vẫn hiển thị.');
+      }
+      return bundle;
     });
+
     return bundlePromise;
   }
 
