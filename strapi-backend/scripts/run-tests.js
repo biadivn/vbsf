@@ -48,6 +48,7 @@ const COVERAGE_SCOPE = [
   'src/api/member/routes/member-auth.js',
   'src/api/member-org/routes/member-org-auth.js',
   'scripts/website-content.js',
+  '../site-js/config.js',
   '../site-js/member-auth.js',
 ];
 

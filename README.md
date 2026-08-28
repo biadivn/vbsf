@@ -23,6 +23,11 @@ Cả site public lẫn CMS đều đọc nội dung từ Strapi (xem
   qua API công khai, render đè lên các khối đã đánh dấu sẵn trong HTML
   (`[data-section]`, `[data-items]`, `[data-fill]`).
 
+Trên production site public và Strapi nằm ở **hai domain khác nhau**
+(`vbsf.biadi.vn` ↔ `vbsf-cms.biadi.vn`), nên địa chỉ Strapi được khai báo tập
+trung ở [site-js/config.js](site-js/config.js). Thêm domain mới thì sửa đúng một
+chỗ đó; đặt `window.VBSF_STRAPI_URL` trước khi nạp file này để ghi đè tạm.
+
 Site public hoạt động theo kiểu *progressive enhancement*: nếu không gọi được
 Strapi thì giữ nguyên nội dung tĩnh có sẵn trong HTML, không báo lỗi ra giao diện.
 

@@ -68,7 +68,10 @@ jobs:
             cd '$REPO_PATH'
             git fetch origin main
             git reset --hard origin/main
-            mkdir -p '$WEB_ROOT/pages'
+            mkdir -p '$WEB_ROOT/pages' '$WEB_ROOT/site-js'
             rsync -a '$REPO_PATH/index.html' '$WEB_ROOT/index.html'
             rsync -a --delete '$REPO_PATH/pages/' '$WEB_ROOT/pages/'
+            # index.html nạp site-js/ (lớp đọc dữ liệu Strapi + đăng nhập hội
+            # viên) — thiếu thư mục này thì site chạy như bản tĩnh cũ.
+            rsync -a --delete '$REPO_PATH/site-js/' '$WEB_ROOT/site-js/'
           "

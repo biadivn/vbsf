@@ -18,10 +18,13 @@
 (function () {
   'use strict';
 
-  // Local dev (file:// hoặc localhost): Strapi chạy riêng ở cổng 1337.
-  // Trên live: nginx reverse-proxy Strapi dưới cùng domain -> path tương đối.
+  /* Địa chỉ Strapi do site-js/config.js quyết định (site public và Strapi ở hai
+     domain khác nhau trên production). Nhánh dự phòng phía dưới để module vẫn
+     chạy độc lập được trong unit test. */
   var STRAPI_URL =
-    location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    typeof window !== 'undefined' && typeof window.VBSF_STRAPI_URL === 'string'
+      ? window.VBSF_STRAPI_URL
+      : location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1'
       ? 'http://localhost:1337'
       : '';
 
