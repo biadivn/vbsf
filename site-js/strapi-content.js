@@ -177,6 +177,8 @@
       { key: 'partners', fallback: [], load: function () { return list('partners', 'populate=image'); } },
       { key: 'libraryDocs', fallback: [], load: function () { return list('library-docs', 'populate=file'); } },
       { key: 'mediaItems', fallback: [], load: function () { return list('media-items', 'populate=assets'); } },
+      { key: 'leaders', fallback: [], load: function () { return list('leaders', 'sort=order:asc&populate=photo'); } },
+      { key: 'pageContent', fallback: {}, load: function () { return api('page-content'); } },
     ];
 
     bundlePromise = Promise.all(
@@ -210,6 +212,23 @@
     });
 
     return bundlePromise;
+  }
+
+  /** POST tới endpoint form công khai; ném Error kèm thông báo của backend. */
+  async function submitForm(path, payload) {
+    var res;
+    try {
+      res = await fetch(STRAPI_URL + '/api/' + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      throw new Error('Không kết nối được máy chủ. Vui lòng thử lại.');
+    }
+    var out = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error((out.error && out.error.message) || 'Không gửi được. Vui lòng thử lại.');
+    return out.message || 'Đã gửi.';
   }
 
   /* ---------------- suy dẫn dữ liệu ---------------- */
@@ -637,24 +656,55 @@
     }
 
     var upcomingBox = items(section(page, 'sap-dien-ra'));
-    if (upcomingBox) {
-      var upcoming = data.tournaments
-        .filter(function (t) { return t.status === 'upcoming'; })
-        .sort(byDateAsc);
-      upcomingBox.innerHTML = upcoming.length
-        ? upcoming.map(tournamentRowUpcoming).join('')
-        : '<div style="font-size:12.5px;color:#8A968F">Chưa có giải đấu nào sắp diễn ra.</div>';
-    }
 
     var doneBox = items(section(page, 'ket-qua-gan-day'));
-    if (doneBox) {
-      var done = data.tournaments
-        .filter(function (t) { return t.status === 'completed'; })
-        .sort(byDateDesc);
-      doneBox.innerHTML = done.length
-        ? done.map(function (t) { return tournamentRowFinished(t, finalStandings(data, t)); }).join('')
-        : '<div style="font-size:12.5px;color:#8A968F">Chưa có kết quả giải đấu nào.</div>';
+
+    /* Hai ô chọn "nội dung" và "năm" trước đây chỉ là nhãn tĩnh. Nay dựng lựa
+       chọn từ chính dữ liệu đang có và lọc thật cả 3 khối. */
+    var catSel = page.querySelector('[data-td-category]');
+    var yearSel = page.querySelector('[data-td-year]');
+    var yearOf = function (t) { return t.date ? String(t.date).slice(0, 4) : ''; };
+
+    function fillOptions(sel, values, allLabel) {
+      if (!sel || sel.options.length > 1) return;
+      sel.innerHTML = '<option value="">' + allLabel + '</option>' +
+        values.map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('');
     }
+    fillOptions(catSel, [...new Set(data.tournaments.map(function (t) { return t.category; }).filter(Boolean))]
+      .sort(function (a, b) { return DISCIPLINE_ORDER.indexOf(a) - DISCIPLINE_ORDER.indexOf(b); }), 'Tất cả nội dung');
+    fillOptions(yearSel, [...new Set(data.tournaments.map(yearOf).filter(Boolean))].sort().reverse(), 'Tất cả năm');
+
+    function matches(t) {
+      if (catSel && catSel.value && t.category !== catSel.value) return false;
+      if (yearSel && yearSel.value && yearOf(t) !== yearSel.value) return false;
+      return true;
+    }
+
+    function renderUpcoming() {
+      if (!upcomingBox) return;
+      var list = data.tournaments.filter(function (t) { return t.status === 'upcoming' && matches(t); }).sort(byDateAsc);
+      upcomingBox.innerHTML = list.length
+        ? list.map(tournamentRowUpcoming).join('')
+        : '<div style="font-size:12.5px;color:#8A968F">Không có giải đấu nào phù hợp bộ lọc.</div>';
+    }
+    function renderDone() {
+      if (!doneBox) return;
+      var list = data.tournaments.filter(function (t) { return t.status === 'completed' && matches(t); }).sort(byDateDesc);
+      doneBox.innerHTML = list.length
+        ? list.map(function (t) { return tournamentRowFinished(t, finalStandings(data, t)); }).join('')
+        : '<div style="font-size:12.5px;color:#8A968F">Không có kết quả nào phù hợp bộ lọc.</div>';
+    }
+    function renderLive() {
+      if (!liveSec) return;
+      var visible = live.filter(matches);
+      liveSec.style.display = visible.length ? '' : 'none';
+    }
+
+    [catSel, yearSel].forEach(function (sel) {
+      if (sel) sel.addEventListener('change', function () { renderUpcoming(); renderDone(); renderLive(); });
+    });
+    renderUpcoming();
+    renderDone();
   };
 
   RENDER['ranking'] = function (page, data) {
@@ -727,9 +777,13 @@
     var tbody = items(section(page, 'bang-xep-hang'));
     if (tbody) {
       var searchInput = page.querySelector('[data-rank-search]');
+      var currentKey = keys[0].key;
       var renderTable = function (key) {
+        currentKey = key;
         var parts = key.split('|');
+        var province = (page.querySelector('[data-rk-province]') || {}).value || '';
         var rows = rankingRows(data.members, parts[0], parts[1]).filter(function (r) {
+          if (province && r.province !== province) return false;
           return !r.rank || r.rank >= 4;
         });
         tbody.innerHTML = rows.length
@@ -758,6 +812,23 @@
           });
         }
       };
+      /* Ô "Toàn quốc" trước đây là nhãn tĩnh — nay lọc thật theo tỉnh/thành của
+         chính các cơ thủ đang có trong bảng. */
+      var provSel = page.querySelector('[data-rk-province]');
+      if (provSel && provSel.options.length <= 1) {
+        var provinces = [...new Set(data.members.map(function (m) { return m.province; }).filter(Boolean))]
+          .sort(function (a, b) { return a.localeCompare(b, 'vi'); });
+        provSel.innerHTML = '<option value="">Toàn quốc</option>' +
+          provinces.map(function (p) { return '<option value="' + esc(p) + '">' + esc(p) + '</option>'; }).join('');
+      }
+      /* Kỳ xếp hạng không có dữ liệu lịch sử để lọc — hiển thị đúng kỳ hiện tại
+         từ Thông tin tổ chức thay vì giả vờ là bộ lọc. */
+      var periodEl = page.querySelector('[data-rk-period]');
+      if (periodEl) periodEl.textContent = data.settings.rankingPeriod || 'Kỳ hiện tại';
+
+      var renderCurrent = function () { renderTable(currentKey); };
+      if (provSel) provSel.addEventListener('change', renderCurrent);
+
       renderTable(keys[0].key);
       // Đổi bảng khi bấm pill hoặc khi carousel tự chuyển slide.
       page.addEventListener('click', function (e) {
@@ -874,17 +945,50 @@
   RENDER['gioi-thieu'] = function (page, data) {
     var s = data.settings;
     var sec = section(page, 'thong-tin-chung');
-    if (!sec) return;
-    var about = sec.querySelector('.vb-p');
-    if (about && s.about) about.textContent = s.about;
-    var stats = [s.foundedYear, s.memberCount, s.clubCount, s.provinceCount];
-    sec.querySelectorAll('[style*="text-align:center"]').forEach(function (cell, i) {
-      var v = cell.firstElementChild;
-      if (v && stats[i]) v.textContent = stats[i];
-    });
+    if (sec) {
+      var about = sec.querySelector('.vb-p');
+      if (about && s.about) about.textContent = s.about;
+      var stats = [s.foundedYear, s.memberCount, s.clubCount, s.provinceCount];
+      sec.querySelectorAll('[style*="text-align:center"]').forEach(function (cell, i) {
+        var v = cell.firstElementChild;
+        if (v && stats[i]) v.textContent = stats[i];
+      });
+    }
+
+    // Tầm nhìn / Sứ mệnh — lấy từ "Nội dung trang website" nếu đã nhập.
+    var gt = (data.pageContent && data.pageContent.data && data.pageContent.data.pageSections
+      && data.pageContent.data.pageSections['gioi-thieu']) || [];
+    var chung = gt.filter(function (x) { return x && x.key === 'thong-tin-chung'; })[0];
+    if (chung && chung.values) {
+      if (chung.values.visionText) setText(page, '[data-vision]', chung.values.visionText);
+      if (chung.values.missionText) setText(page, '[data-mission]', chung.values.missionText);
+      if (chung.values.paragraph && sec) {
+        var p = sec.querySelector('.vb-p');
+        if (p) p.textContent = chung.values.paragraph;
+      }
+    }
+
+    // Ban lãnh đạo — collection riêng trong CMS.
+    var box = page.querySelector('[data-leaders]');
+    if (box && data.leaders.length) {
+      box.innerHTML = data.leaders.map(function (l) {
+        return (
+          '<div style="background:#fff;border:0.5px solid #E3E8E4;border-radius:8px;padding:16px;text-align:center">' +
+          avatarCircle(l.photo, '56px', '', '24px', '0 auto 10px') +
+          '<div style="font-size:13px;font-weight:500;color:#1B2A24">' + esc(l.name) + '</div>' +
+          '<div style="font-size:11.5px;color:var(--gold-ink);margin-top:2px">' + esc(l.role || '') + '</div></div>'
+        );
+      }).join('');
+    }
   };
 
+  function setText(scope, selector, value) {
+    var el = scope.querySelector(selector);
+    if (el && value) el.textContent = value;
+  }
+
   RENDER['lien-he'] = function (page, data) {
+    wireContactForm(page);
     var c = data.contact;
     var values = [c.address, c.email, c.phone, c.hours];
     page.querySelectorAll('.ci .ci-v').forEach(function (el, i) {
@@ -928,6 +1032,70 @@
     'Thừa Thiên Huế', 'Tiền Giang', 'Trà Vinh', 'Tuyên Quang',
     'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái',
   ];
+
+  /* Form Liên hệ gửi thật lên /api/contact-messages/submit (trước đây chỉ hiện
+     dòng "Đã gửi!" mà không gửi đi đâu). */
+  function wireContactForm(page) {
+    var btn = page.querySelector('[data-contact-btn]');
+    if (!btn || btn.__wired) return;
+    btn.__wired = true;
+    var ok = page.querySelector('[data-contact-msg]');
+    var err = page.querySelector('[data-contact-err]');
+    var val = function (sel) { var e = page.querySelector(sel); return e ? e.value.trim() : ''; };
+    var show = function (el, text) { if (el) { el.innerHTML = text || ''; el.style.display = text ? '' : 'none'; } };
+
+    btn.addEventListener('click', async function () {
+      show(ok, ''); show(err, '');
+      btn.disabled = true;
+      try {
+        var msg = await submitForm('contact-messages/submit', {
+          name: val('[data-contact-name]'),
+          email: val('[data-contact-email]'),
+          phone: val('[data-contact-phone]'),
+          subject: val('[data-contact-subject]'),
+          message: val('[data-contact-message]'),
+        });
+        show(ok, '<i class="ti ti-circle-check-filled"></i> ' + esc(msg));
+        ['[data-contact-name]', '[data-contact-email]', '[data-contact-phone]', '[data-contact-message]']
+          .forEach(function (sel) { var e = page.querySelector(sel); if (e) e.value = ''; });
+      } catch (e) {
+        show(err, esc(e.message));
+      } finally { btn.disabled = false; }
+    });
+  }
+
+  /* Form Đăng ký thi đấu — tên giải lấy từ ô [data-fill="name"] mà router đã điền
+     khi bấm "Đăng ký" ở danh sách giải. */
+  RENDER['giai-dau-dang-ky'] = function (page) {
+    var btn = page.querySelector('[data-reg-tourney-submit]');
+    if (!btn || btn.__wired) return;
+    btn.__wired = true;
+    var ok = page.querySelector('[data-reg-tourney-ok]');
+    var err = page.querySelector('[data-reg-tourney-err]');
+    var val = function (sel) { var e = page.querySelector(sel); return e ? e.value.trim() : ''; };
+    var show = function (el, text) { if (el) { el.innerHTML = text || ''; el.style.display = text ? '' : 'none'; } };
+
+    btn.addEventListener('click', async function () {
+      show(ok, ''); show(err, '');
+      var nameEl = page.querySelector('[data-fill="name"]');
+      btn.disabled = true;
+      try {
+        var msg = await submitForm('tournament-registrations/submit', {
+          tournamentName: nameEl ? nameEl.textContent.trim() : '',
+          playerName: val('[data-reg-player]'),
+          memberCode: val('[data-reg-code]'),
+          phone: val('[data-reg-phone2]'),
+          club: val('[data-reg-club2]'),
+          note: val('[data-reg-note]'),
+        });
+        show(ok, '<i class="ti ti-circle-check-filled"></i> ' + esc(msg));
+        ['[data-reg-player]', '[data-reg-code]', '[data-reg-phone2]', '[data-reg-club2]', '[data-reg-note]']
+          .forEach(function (sel) { var e = page.querySelector(sel); if (e) e.value = ''; });
+      } catch (e) {
+        show(err, esc(e.message));
+      } finally { btn.disabled = false; }
+    });
+  };
 
   RENDER['hoi-vien'] = function (page, data) {
     var s = data.settings;
@@ -1230,9 +1398,54 @@
 
   /* ---------------- API công khai ---------------- */
 
+  /* Footer nằm ngoài các trang (luôn hiển thị) nên điền một lần, không theo trang. */
+  function hydrateFooter(data) {
+    var c = data.contact || {};
+    var map = { address: c.address, email: c.email, phone: c.phone };
+    document.querySelectorAll('[data-footer]').forEach(function (el) {
+      var value = map[el.getAttribute('data-footer')];
+      if (!value) return;
+      var icon = el.querySelector('i');
+      el.textContent = ' ' + value;
+      if (icon) el.insertBefore(icon, el.firstChild);
+    });
+  }
+
+  /* Nhãn/tiêu đề do module "Trang website" trong CMS quản lý. Chỉ áp những khối
+     có chỗ để áp; phần nào chưa nhập thì giữ nguyên chữ tĩnh trong HTML. */
+  function applyPageContent(pageId, page, data) {
+    var all = data.pageContent && data.pageContent.data && data.pageContent.data.pageSections;
+    var sections = (all && all[pageId]) || [];
+    sections.forEach(function (entry) {
+      if (!entry || !entry.key || !entry.values) return;
+      var el = section(page, entry.key);
+      if (!el) return;
+      var v = entry.values;
+
+      // Tiêu đề khối (khối nào cũng có thể có [data-title])
+      if (v.title) setText(el, '[data-title]', v.title);
+
+      if (entry.key === 'hero') {
+        if (v.bannerTag) setText(el, '[style*="font-size:10.5px"]', v.bannerTag);
+        if (v.bannerTitle) setText(el, '[style*="font-size:18px"]', v.bannerTitle);
+        if (v.bannerSubtitle) setText(el, '[style*="font-size:12px"]', v.bannerSubtitle);
+        if (v.sideLabel && el.children[1]) setText(el.children[1], 'div', v.sideLabel);
+      }
+
+      if (entry.key === 'event-banner') {
+        ['tag', 'title', 'subtitle', 'buttonText'].forEach(function (k) {
+          if (v[k]) setText(el, '[data-fill-eb="' + k + '"]', v[k]);
+        });
+        if (v.enabled === false) el.setAttribute('data-eb-enabled', 'false');
+      }
+    });
+  }
+
   async function hydrate(pageId, page) {
     var data = await load();
     if (!data) return;
+    try { hydrateFooter(data); applyPageContent(pageId, page, data); }
+    catch (err) { console.warn('[VBSF] Lỗi áp nội dung trang.', err); }
     var fn = RENDER[pageId];
     if (!fn) return;
     try {
@@ -1270,6 +1483,7 @@
 
   window.VBSF_CONTENT = {
     load: load,
+    submitPaymentClaim: function (payload) { return submitForm('payment-claims/submit', payload); },
     hydrate: hydrate,
     afterNav: afterNav,
     fees: fees,

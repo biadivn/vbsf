@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "payment_claims",
+  "info": {
+    "singularName": "payment-claim",
+    "pluralName": "payment-claims",
+    "displayName": "Báo đã chuyển khoản",
+    "description": "Người dùng bấm \"Tôi đã chuyển khoản\" — chờ đối soát"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "kind": {
+      "type": "enumeration",
+      "enum": ["dang-ky", "gia-han"],
+      "default": "dang-ky"
+    },
+    "memberCode": { "type": "string" },
+    "payerName": { "type": "string" },
+    "phone": { "type": "string" },
+    "amount": { "type": "string" },
+    "transferNote": { "type": "string" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "matched", "rejected"],
+      "default": "pending"
+    }
+  }
+}

@@ -61,4 +61,12 @@ const PASSWORD_RESET_LIMIT = {
   message: 'Bạn đã yêu cầu đặt lại mật khẩu quá nhiều lần. Vui lòng thử lại sau một phút.',
 };
 
-module.exports = { rateLimit, AUTH_LIMIT, PASSWORD_RESET_LIMIT };
+/* Form công khai (liên hệ, đăng ký thi đấu, báo chuyển khoản): 5 lần/phút/IP —
+   đủ cho người dùng thật gửi lại khi gõ sai, đủ chặt để không thành hộp thư rác. */
+const FORM_LIMIT = {
+  max: 5,
+  windowMs: 60 * 1000,
+  message: 'Bạn gửi quá nhiều lần. Vui lòng thử lại sau một phút.',
+};
+
+module.exports = { rateLimit, AUTH_LIMIT, PASSWORD_RESET_LIMIT, FORM_LIMIT };

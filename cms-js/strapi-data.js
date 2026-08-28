@@ -19,6 +19,37 @@
    ========================================================= */
 const SINGLETON_API_PATH = { settings:'setting', contact:'contact-info' };
 
+/* Module "Trang website" trước đây chỉ lưu localStorage nên nội dung không tới
+   được site và mất khi đổi máy. Nay toàn bộ trạng thái của nó (pageSections,
+   customPages, customSections, pageMeta, pageSectionKeysEverAdded) được cất
+   trong single type `page-content` dưới dạng JSON — CMS vẫn là nơi chỉnh sửa,
+   Strapi là nơi lưu trữ và site đọc từ đó. */
+const PAGE_CONTENT_KEYS = ['pageSections','customPages','customSections','pageMeta','pageSectionKeysEverAdded'];
+
+async function refreshPageContentFromApi(){
+  try{
+    const res = await apiFetch('/api/page-content');
+    if(!res.ok) return;                       // 404 = chưa có bản ghi nào
+    const out = await res.json();
+    const data = out && out.data && out.data.data;
+    if(!data) return;
+    PAGE_CONTENT_KEYS.forEach(k=>{ if(data[k]) DB[k] = data[k]; });
+  }catch(e){ /* offline: giữ nguyên dữ liệu đang có */ }
+}
+
+async function savePageContentToApi(){
+  const payload = {};
+  PAGE_CONTENT_KEYS.forEach(k=>{ payload[k] = DB[k] || {}; });
+  try{
+    const res = await apiFetch('/api/page-content', { method:'PUT', body: JSON.stringify({ data: { data: payload } }) });
+    if(!res.ok){ showToast('Không lưu được nội dung trang lên máy chủ', true); return false; }
+    return true;
+  }catch(e){
+    showToast('Không kết nối được máy chủ Strapi', true);
+    return false;
+  }
+}
+
 async function uploadDataUri(dataUri, filenameHint){
   const blobRes = await fetch(dataUri);
   const blob = await blobRes.blob();

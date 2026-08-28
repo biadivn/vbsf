@@ -15,10 +15,16 @@ const NAV_GROUPS = [
     {key:'pages', label:'Trang website', icon:'ti-layout-2'},
     {key:'news', label:COLLECTIONS.news.label, icon:'ti-news'},
     {key:'settings', label:'Thông tin tổ chức', icon:'ti-settings'},
+    {key:'leaders', label:COLLECTIONS.leaders.label, icon:'ti-user-star'},
     {key:'contact', label:'Liên hệ', icon:'ti-address-book'},
   ]},
   {label:'Quản lý giải đấu', items:[
     {key:'tournaments', label:COLLECTIONS.tournaments.label, icon:'ti-trophy'},
+  ]},
+  {label:'Đăng ký & Liên hệ', items:[
+    {key:'tournament_registrations', label:COLLECTIONS.tournament_registrations.label, icon:'ti-clipboard-check'},
+    {key:'payment_claims', label:COLLECTIONS.payment_claims.label, icon:'ti-cash'},
+    {key:'contact_messages', label:COLLECTIONS.contact_messages.label, icon:'ti-mail'},
   ]},
   {label:'Quản lý Hội viên', items:[
     {key:'members', label:COLLECTIONS.members.label, icon:'ti-users'},

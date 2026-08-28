@@ -37,6 +37,33 @@ Nạp nội dung mẫu (trích từ prototype tĩnh `VBSF Web.html`) vào Strapi
 cd strapi-backend && npm run migrate:website
 ```
 
+## Form trên site gửi về đâu
+
+| Form | Endpoint | Xem trong CMS |
+|---|---|---|
+| Liên hệ | `POST /api/contact-messages/submit` | Đăng ký & Liên hệ → Liên hệ đến |
+| Đăng ký thi đấu | `POST /api/tournament-registrations/submit` | Đăng ký & Liên hệ → Đăng ký thi đấu |
+| "Tôi đã chuyển khoản" | `POST /api/payment-claims/submit` | Đăng ký & Liên hệ → Báo chuyển khoản |
+
+Ba endpoint này công khai nhưng **không** mở quyền `create` của core controller —
+mỗi form đi qua handler riêng chỉ nhận đúng field cho phép và tự đặt trạng thái
+(`pending` / `handled: false`), nên client không thể tự đánh dấu "đã xử lý".
+Giới hạn 5 lần/phút/IP. Dữ liệu người gửi **không** đọc được công khai, chỉ tài
+khoản CMS mới xem được.
+
+## Nội dung do CMS điều khiển
+
+| Thứ | Nguồn |
+|---|---|
+| Nhãn/tiêu đề/banner từng trang | single type `page-content` — module "Trang website" |
+| Ban lãnh đạo (trang Giới thiệu) | collection `leaders` |
+| Footer (địa chỉ, email, điện thoại) | single type `contact-info` |
+| Kỳ xếp hạng hiển thị ở trang Xếp hạng | `setting.rankingPeriod` |
+
+Bộ lọc trên site lọc thật từ dữ liệu: Giải đấu lọc theo nội dung + năm, Xếp hạng
+lọc theo tỉnh/thành. Riêng "lượt xem" của bài viết vẫn là số cố định trong HTML —
+chưa có cơ chế đếm.
+
 ## Kiểm thử & security gate
 
 `cd strapi-backend && npm run verify` — unit test (ngưỡng coverage 80%) + security

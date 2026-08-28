@@ -1,0 +1,17 @@
+{
+  "kind": "collectionType",
+  "collectionName": "leaders",
+  "info": {
+    "singularName": "leader",
+    "pluralName": "leaders",
+    "displayName": "Ban lãnh đạo",
+    "description": "Thành viên ban lãnh đạo hiển thị ở trang Giới thiệu"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "role": { "type": "string" },
+    "order": { "type": "integer", "default": 0 },
+    "photo": { "type": "media", "multiple": false, "allowedTypes": ["images"] }
+  }
+}

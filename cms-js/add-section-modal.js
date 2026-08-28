@@ -63,7 +63,7 @@ function saveAddSectionModal(){
 
   activeSectionKey = key;
   sectionEditBuffer = null;
-  saveDB();
+  saveDB().then(savePageContentToApi);
   closeAddSectionModal();
   renderContent();
   showToast('Đã thêm section mới');

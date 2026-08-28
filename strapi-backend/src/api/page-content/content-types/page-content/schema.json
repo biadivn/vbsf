@@ -1,0 +1,17 @@
+{
+  "kind": "singleType",
+  "collectionName": "page_contents",
+  "info": {
+    "singularName": "page-content",
+    "pluralName": "page-contents",
+    "displayName": "Nội dung trang website",
+    "description": "Nhãn/tiêu đề/banner của từng trang trên site — do module \"Trang website\" trong CMS quản lý"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "data": {
+      "type": "json",
+      "description": "pageSections / customPages / customSections / pageMeta / pageSectionKeysEverAdded"
+    }
+  }
+}

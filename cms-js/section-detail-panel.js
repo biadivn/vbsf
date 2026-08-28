@@ -228,7 +228,7 @@ function attachSectionDetailEvents(pageKey, key){
     if(!trimmed || trimmed===current) return;
     const entry = DB.pageSections[pageKey].find(s=>s.key===key);
     entry.labelOverride = trimmed;
-    saveDB();
+    saveDB().then(savePageContentToApi);
     renderContent();
     showToast('Đã đổi tên section');
   });
@@ -354,7 +354,7 @@ async function saveSectionDetail(pageKey, key){
   }
   entry.backgroundImage = buf.backgroundImage;
 
-  await saveDB();
+  await saveDB(); await savePageContentToApi();
   sectionEditBuffer = null;
   renderContent();
   showToast('Đã lưu section (giả lập)');

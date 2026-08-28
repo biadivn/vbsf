@@ -165,8 +165,10 @@ async function showCmsApp(){
   await Promise.all([
     ...remoteKeys.map(k=>refreshRemoteCollection(k)),
     refreshSingletonFromApi('settings'),
-    refreshSingletonFromApi('contact')
+    refreshSingletonFromApi('contact'),
+    refreshPageContentFromApi()
   ]);
+  normalizePageSections();
   renderSidebar();
   renderTopbar();
   renderContent();

@@ -2,14 +2,14 @@
 <div style="padding:22px 26px;display:flex;gap:22px;flex-wrap:wrap">
 <div style="flex:1.4;min-width:260px">
 <div style="border:0.5px solid #E3E8E4;border-radius:10px;padding:14px 18px;margin-bottom:20px;background:#F5F7F5;display:flex;align-items:center;gap:8px;font-size:12.5px;color:#5C6B63"><i class="ti ti-map-pin"></i> <span data-fill="loc">Địa điểm</span></div>
-<div class="fld"><span class="lbl">Họ và tên cơ thủ <span class="req">*</span></span><div class="inp">Nguyễn Văn A</div></div>
-<div class="fld"><span class="lbl">Mã hội viên VBSF <span class="req">*</span></span><div class="inp">VBSF-2026-00xxx</div></div>
+<div class="fld"><span class="lbl">Họ và tên cơ thủ <span class="req">*</span></span><input type="text" data-reg-player class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Nguyễn Văn A"></div>
+<div class="fld"><span class="lbl">Mã hội viên VBSF</span><input type="text" data-reg-code class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="VBSF-2026-00xxx"></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
-<div class="fld"><span class="lbl">Số điện thoại <span class="req">*</span></span><div class="inp">09xx xxx xxx</div></div>
-<div class="fld"><span class="lbl">CLB / Đơn vị</span><div class="inp">Tên CLB</div></div>
+<div class="fld"><span class="lbl">Số điện thoại <span class="req">*</span></span><input type="tel" data-reg-phone2 class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="09xx xxx xxx"></div>
+<div class="fld"><span class="lbl">CLB / Đơn vị</span><input type="text" data-reg-club2 class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Tên CLB"></div>
 </div>
-<div class="fld"><span class="lbl">Ghi chú</span><div class="inp" style="min-height:70px">Yêu cầu thêm (nếu có)...</div></div>
-<button class="btn-gold">Gửi đăng ký</button>
+<div class="fld"><span class="lbl">Ghi chú</span><textarea data-reg-note rows="3" class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Yêu cầu thêm (nếu có)..."></textarea></div>
+<button class="btn-gold" data-reg-tourney-submit type="button" style="border:none;cursor:pointer">Gửi đăng ký</button><div data-reg-tourney-ok style="display:none;margin-top:10px;font-size:12.5px;color:#00814D"></div><div data-reg-tourney-err style="display:none;margin-top:10px;font-size:12.5px;color:#9E2A2B"></div>
 <div style="font-size:11px;color:#8A968F;margin-top:10px"><span class="req">*</span> Bắt buộc · Ban tổ chức sẽ liên hệ xác nhận qua điện thoại</div>
 </div>
 <div style="flex:1;min-width:230px"><div style="border:0.5px solid #E3E8E4;border-radius:10px;overflow:hidden"><div style="background:#F5F7F5;padding:12px 16px;border-bottom:0.5px solid #E3E8E4"><div style="font-size:13px;font-weight:600;color:#21428E">Lệ phí thi đấu</div></div><div style="padding:16px"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#5C6B63">Phí tham dự</span><span style="font-weight:600;color:#21428E">200.000đ</span></div><div style="font-size:11px;color:#8A968F;margin-top:10px;line-height:1.6">Thanh toán được hướng dẫn qua email sau khi đăng ký được xác nhận.</div></div></div></div>

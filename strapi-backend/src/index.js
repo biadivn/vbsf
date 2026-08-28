@@ -5,6 +5,7 @@
    bật quyền tay mỗi lần reset DB. Không dùng cấu hình này cho production. */
 const PUBLIC_READ_UIDS = [
   'api::news-article.news-article',
+  'api::leader.leader',
   'api::tournament.tournament',
   'api::member.member',
   'api::member-org.member-org',
@@ -12,7 +13,15 @@ const PUBLIC_READ_UIDS = [
   'api::library-doc.library-doc',
   'api::media-item.media-item',
 ];
-const PUBLIC_READ_SINGLE_TYPE_UIDS = ['api::setting.setting', 'api::contact-info.contact-info'];
+const PUBLIC_READ_SINGLE_TYPE_UIDS = [
+  'api::setting.setting',
+  'api::contact-info.contact-info',
+  'api::page-content.page-content',
+];
+
+/* CỐ Ý KHÔNG cho đọc công khai: contact-message, tournament-registration,
+   payment-claim — đó là dữ liệu người dùng gửi lên (tên, email, số điện thoại).
+   Ghi vào thì qua endpoint /submit riêng, đọc thì chỉ tài khoản CMS. */
 
 // CMS đăng nhập bằng tài khoản plugin::users-permissions.user (Authenticated role) —
 // role này cần các quyền CRUD trên chính content-type user để module "Tài khoản CMS"
@@ -35,6 +44,10 @@ const AUTHENTICATED_USER_ACTIONS = [
 // tài khoản CMS (role Authenticated) cần đủ quyền CRUD trên các content-type này.
 const CONTENT_MANAGE_UIDS = [
   'api::news-article.news-article',
+  'api::leader.leader',
+  'api::contact-message.contact-message',
+  'api::tournament-registration.tournament-registration',
+  'api::payment-claim.payment-claim',
   'api::partner.partner',
   'api::library-doc.library-doc',
   'api::media-item.media-item',
@@ -42,7 +55,11 @@ const CONTENT_MANAGE_UIDS = [
   'api::member-org.member-org',
   'api::tournament.tournament',
 ];
-const CONTENT_MANAGE_SINGLE_TYPE_UIDS = ['api::setting.setting', 'api::contact-info.contact-info'];
+const CONTENT_MANAGE_SINGLE_TYPE_UIDS = [
+  'api::setting.setting',
+  'api::contact-info.contact-info',
+  'api::page-content.page-content',
+];
 
 // Cho phép tài khoản CMS upload ảnh (news.image, partner.image) qua /api/upload.
 const UPLOAD_ACTIONS = ['plugin::upload.content-api.upload'];

@@ -478,6 +478,73 @@ export interface ApiContactInfoContactInfo extends Struct.SingleTypeSchema {
   };
 }
 
+export interface ApiContactMessageContactMessage
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'contact_messages';
+  info: {
+    description: 'Tin nh\u1EAFn g\u1EEDi t\u1EEB form Li\u00EAn h\u1EC7 tr\u00EAn site';
+    displayName: 'Li\u00EAn h\u1EC7 \u0111\u1EBFn';
+    pluralName: 'contact-messages';
+    singularName: 'contact-message';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    handled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::contact-message.contact-message'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.Text & Schema.Attribute.Required;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    phone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    subject: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiLeaderLeader extends Struct.CollectionTypeSchema {
+  collectionName: 'leaders';
+  info: {
+    description: 'Th\u00E0nh vi\u00EAn ban l\u00E3nh \u0111\u1EA1o hi\u1EC3n th\u1ECB \u1EDF trang Gi\u1EDBi thi\u1EC7u';
+    displayName: 'Ban l\u00E3nh \u0111\u1EA1o';
+    pluralName: 'leaders';
+    singularName: 'leader';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::leader.leader'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    photo: Schema.Attribute.Media<'images'>;
+    publishedAt: Schema.Attribute.DateTime;
+    role: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiLibraryDocLibraryDoc extends Struct.CollectionTypeSchema {
   collectionName: 'library_docs';
   info: {
@@ -849,6 +916,35 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiPageContentPageContent extends Struct.SingleTypeSchema {
+  collectionName: 'page_contents';
+  info: {
+    description: 'Nh\u00E3n/ti\u00EAu \u0111\u1EC1/banner c\u1EE7a t\u1EEBng trang tr\u00EAn site \u2014 do module "Trang website" trong CMS qu\u1EA3n l\u00FD';
+    displayName: 'N\u1ED9i dung trang website';
+    pluralName: 'page-contents';
+    singularName: 'page-content';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    data: Schema.Attribute.JSON;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::page-content.page-content'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
   collectionName: 'partners';
   info: {
@@ -882,6 +978,44 @@ export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
         '\u0110\u1ED1i t\u00E1c \u0111\u1ED3ng h\u00E0nh',
       ]
     >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPaymentClaimPaymentClaim
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'payment_claims';
+  info: {
+    description: 'Ng\u01B0\u1EDDi d\u00F9ng b\u1EA5m "T\u00F4i \u0111\u00E3 chuy\u1EC3n kho\u1EA3n" \u2014 ch\u1EDD \u0111\u1ED1i so\u00E1t';
+    displayName: 'B\u00E1o \u0111\u00E3 chuy\u1EC3n kho\u1EA3n';
+    pluralName: 'payment-claims';
+    singularName: 'payment-claim';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    amount: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    kind: Schema.Attribute.Enumeration<['dang-ky', 'gia-han']> &
+      Schema.Attribute.DefaultTo<'dang-ky'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::payment-claim.payment-claim'
+    > &
+      Schema.Attribute.Private;
+    memberCode: Schema.Attribute.String;
+    payerName: Schema.Attribute.String;
+    phone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<['pending', 'matched', 'rejected']> &
+      Schema.Attribute.DefaultTo<'pending'>;
+    transferNote: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -926,6 +1060,44 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
     orgShort: Schema.Attribute.String;
     provinceCount: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    rankingPeriod: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiTournamentRegistrationTournamentRegistration
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'tournament_registrations';
+  info: {
+    description: 'C\u01A1 th\u1EE7 \u0111\u0103ng k\u00FD tham gia gi\u1EA3i qua form tr\u00EAn site';
+    displayName: '\u0110\u0103ng k\u00FD thi \u0111\u1EA5u';
+    pluralName: 'tournament-registrations';
+    singularName: 'tournament-registration';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    club: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::tournament-registration.tournament-registration'
+    > &
+      Schema.Attribute.Private;
+    memberCode: Schema.Attribute.String;
+    note: Schema.Attribute.Text;
+    phone: Schema.Attribute.String & Schema.Attribute.Required;
+    playerName: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<['pending', 'confirmed', 'rejected']> &
+      Schema.Attribute.DefaultTo<'pending'>;
+    tournamentName: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1509,13 +1681,18 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::contact-info.contact-info': ApiContactInfoContactInfo;
+      'api::contact-message.contact-message': ApiContactMessageContactMessage;
+      'api::leader.leader': ApiLeaderLeader;
       'api::library-doc.library-doc': ApiLibraryDocLibraryDoc;
       'api::media-item.media-item': ApiMediaItemMediaItem;
       'api::member-org.member-org': ApiMemberOrgMemberOrg;
       'api::member.member': ApiMemberMember;
       'api::news-article.news-article': ApiNewsArticleNewsArticle;
+      'api::page-content.page-content': ApiPageContentPageContent;
       'api::partner.partner': ApiPartnerPartner;
+      'api::payment-claim.payment-claim': ApiPaymentClaimPaymentClaim;
       'api::setting.setting': ApiSettingSetting;
+      'api::tournament-registration.tournament-registration': ApiTournamentRegistrationTournamentRegistration;
       'api::tournament.tournament': ApiTournamentTournament;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

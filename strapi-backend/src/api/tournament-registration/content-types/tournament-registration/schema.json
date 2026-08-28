@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tournament_registrations",
+  "info": {
+    "singularName": "tournament-registration",
+    "pluralName": "tournament-registrations",
+    "displayName": "Đăng ký thi đấu",
+    "description": "Cơ thủ đăng ký tham gia giải qua form trên site"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "tournamentName": { "type": "string", "required": true },
+    "playerName": { "type": "string", "required": true },
+    "memberCode": { "type": "string" },
+    "phone": { "type": "string", "required": true },
+    "club": { "type": "string" },
+    "note": { "type": "text" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "confirmed", "rejected"],
+      "default": "pending"
+    }
+  }
+}

@@ -201,6 +201,7 @@ const SETTINGS_FIELDS = [
   {key:'about', label:'Giới thiệu chung', type:'textarea', span2:true, rows:5},
   {key:'heroTitle', label:'Giải đấu nổi bật (trang chủ)', type:'text', span2:true},
   {key:'heroSubtitle', label:'Mô tả giải đấu nổi bật', type:'text', span2:true},
+  {key:'rankingPeriod', label:'Kỳ xếp hạng hiện tại (trang Xếp hạng)', type:'text', placeholder:'VD: Kỳ T6/2026', span2:true},
   {key:'feeFirstTime', label:'Lệ phí tham gia lần đầu (VNĐ)', type:'text', placeholder:'200.000đ'},
   {key:'feeAnnualFull', label:'Phí thường niên cả năm — đăng ký trước 01/7 (VNĐ)', type:'text', placeholder:'500.000đ'},
   {key:'feeAnnualHalf', label:'Phí thường niên nửa năm — đăng ký từ 01/7 (VNĐ)', type:'text', placeholder:'250.000đ'},

@@ -159,6 +159,80 @@ const COLLECTIONS = {
       {key:'username', label:'Tên đăng nhập', muted:true}
     ]
   },
+  leaders: {
+    label:'Ban lãnh đạo', icon:'ti-user-star', single:'thành viên', remote:true, apiPath:'leaders',
+    fields:[
+      {key:'photo', label:'Ảnh chân dung', type:'image', span2:true},
+      {key:'name', label:'Họ và tên', type:'text', required:true, span2:true},
+      {key:'role', label:'Chức vụ', type:'text'},
+      {key:'order', label:'Thứ tự hiển thị', type:'number', placeholder:'Số nhỏ hiện trước'}
+    ],
+    columns:[
+      {key:'name', label:'Họ và tên'},
+      {key:'role', label:'Chức vụ', muted:true},
+      {key:'order', label:'Thứ tự', muted:true}
+    ]
+  },
+  contact_messages: {
+    label:'Liên hệ đến', icon:'ti-mail', single:'tin nhắn', remote:true, apiPath:'contact-messages',
+    fields:[
+      {key:'name', label:'Người gửi', type:'text', disabled:true},
+      {key:'email', label:'Email', type:'text', disabled:true},
+      {key:'phone', label:'Điện thoại', type:'text', disabled:true},
+      {key:'subject', label:'Chủ đề', type:'text', disabled:true},
+      {key:'message', label:'Nội dung', type:'textarea', rows:6, span2:true, disabled:true},
+      {key:'handled', label:'Đã xử lý', type:'checkbox'}
+    ],
+    columns:[
+      {key:'name', label:'Người gửi'},
+      {key:'subject', label:'Chủ đề', muted:true},
+      {key:'email', label:'Email', muted:true},
+      {key:'handled', label:'Đã xử lý', muted:true}
+    ]
+  },
+  tournament_registrations: {
+    label:'Đăng ký thi đấu', icon:'ti-clipboard-check', single:'đăng ký', remote:true, apiPath:'tournament-registrations',
+    filterField:'status',
+    fields:[
+      {key:'tournamentName', label:'Giải đấu', type:'text', disabled:true, span2:true},
+      {key:'playerName', label:'Cơ thủ', type:'text', disabled:true},
+      {key:'memberCode', label:'Mã hội viên', type:'text', disabled:true},
+      {key:'phone', label:'Điện thoại', type:'text', disabled:true},
+      {key:'club', label:'CLB / Đơn vị', type:'text', disabled:true},
+      {key:'note', label:'Ghi chú', type:'textarea', rows:3, span2:true, disabled:true},
+      {key:'status', label:'Trạng thái', type:'select', options:['pending','confirmed','rejected'],
+        optionLabels:{pending:'Chờ xác nhận',confirmed:'Đã xác nhận',rejected:'Từ chối'}}
+    ],
+    columns:[
+      {key:'playerName', label:'Cơ thủ'},
+      {key:'tournamentName', label:'Giải đấu', muted:true},
+      {key:'phone', label:'Điện thoại', muted:true},
+      {key:'status', label:'Trạng thái', status:true,
+        statusMap:{pending:{t:'Chờ xác nhận',c:'blue'},confirmed:{t:'Đã xác nhận',c:'green'},rejected:{t:'Từ chối',c:'gray'}}}
+    ]
+  },
+  payment_claims: {
+    label:'Báo chuyển khoản', icon:'ti-cash', single:'báo chuyển khoản', remote:true, apiPath:'payment-claims',
+    filterField:'status',
+    fields:[
+      {key:'kind', label:'Loại', type:'select', options:['dang-ky','gia-han'],
+        optionLabels:{'dang-ky':'Đăng ký mới','gia-han':'Gia hạn'}, disabled:true},
+      {key:'memberCode', label:'Mã hội viên', type:'text', disabled:true},
+      {key:'payerName', label:'Người chuyển', type:'text', disabled:true},
+      {key:'phone', label:'Điện thoại', type:'text', disabled:true},
+      {key:'amount', label:'Số tiền', type:'text', disabled:true},
+      {key:'transferNote', label:'Nội dung chuyển khoản', type:'text', span2:true, disabled:true},
+      {key:'status', label:'Đối soát', type:'select', options:['pending','matched','rejected'],
+        optionLabels:{pending:'Chờ đối soát',matched:'Khớp',rejected:'Không khớp'}}
+    ],
+    columns:[
+      {key:'transferNote', label:'Nội dung CK'},
+      {key:'memberCode', label:'Mã HV', muted:true},
+      {key:'amount', label:'Số tiền', muted:true},
+      {key:'status', label:'Đối soát', status:true,
+        statusMap:{pending:{t:'Chờ đối soát',c:'blue'},matched:{t:'Khớp',c:'green'},rejected:{t:'Không khớp',c:'gray'}}}
+    ]
+  },
   partners: {
     label:'Đối tác & Tài trợ', icon:'ti-building', single:'đối tác', remote:true, apiPath:'partners',
     fields:[

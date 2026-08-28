@@ -46,7 +46,7 @@ async function savePageModal(){
   DB.pageSections[pageKey] = [];
   DB.pageSectionKeysEverAdded[pageKey] = [];
   DB.pageMeta[pageKey] = {slug, title, metaTitle:'', metaDescription:''};
-  await saveDB();
+  await saveDB(); await savePageContentToApi();
   closePageModal();
   setView('page:'+pageKey);
   showToast('Đã tạo trang mới');

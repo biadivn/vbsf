@@ -96,7 +96,7 @@ function attachPageMetaCardEvents(pageKey){
     DB.pageMeta[pageKey] = values;
     if(DB.customPages[pageKey]) DB.customPages[pageKey].label = values.title;
     pageMetaEditBuffer = null;
-    await saveDB();
+    await saveDB(); await savePageContentToApi();
     renderSidebar();
     renderContent();
     showToast('Đã lưu thông tin trang');
@@ -110,7 +110,7 @@ function attachPageMetaCardEvents(pageKey){
     delete DB.pageMeta[pageKey];
     delete DB.pageSectionKeysEverAdded[pageKey];
     pageMetaEditBuffer = null;
-    saveDB().then(()=>{ setView('pages'); showToast('Đã xóa trang'); });
+    saveDB().then(savePageContentToApi).then(()=>{ setView('pages'); showToast('Đã xóa trang'); });
   });
 }
 
@@ -129,7 +129,7 @@ function attachPageSectionsEvents(){
     el.addEventListener('click', async ()=>{
       const s = DB.pageSections[pageKey].find(r=>r.key===el.getAttribute('data-enable-input'));
       s.enabled = !s.enabled;
-      await saveDB();
+      await saveDB(); await savePageContentToApi();
       renderContent();
       showToast('Đã lưu cấu hình (giả lập)');
     });
@@ -145,7 +145,7 @@ function attachPageSectionsEvents(){
         DB.customSections[pageKey] = (DB.customSections[pageKey]||[]).filter(s=>s.key!==key);
       }
       if(activeSectionKey===key){ activeSectionKey = null; sectionEditBuffer = null; }
-      saveDB();
+      saveDB().then(savePageContentToApi);
       renderContent();
       showToast('Đã xóa section khỏi trang');
     });
@@ -161,7 +161,7 @@ function attachPageSectionsEvents(){
       if(!trimmed || trimmed===current) return;
       const entry = DB.pageSections[pageKey].find(s=>s.key===key);
       entry.labelOverride = trimmed;
-      saveDB();
+      saveDB().then(savePageContentToApi);
       renderContent();
       showToast('Đã đổi tên section');
     });
@@ -185,7 +185,7 @@ async function moveSectionRow(idx, dir){
   const j = idx + dir;
   if(j<0 || j>=list.length) return;
   [list[idx], list[j]] = [list[j], list[idx]];
-  await saveDB();
+  await saveDB(); await savePageContentToApi();
   renderContent();
 }
 
