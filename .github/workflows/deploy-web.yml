@@ -69,7 +69,13 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             mkdir -p '$WEB_ROOT/pages' '$WEB_ROOT/site-js'
-            rsync -a '$REPO_PATH/index.html' '$WEB_ROOT/index.html'
+            # Gắn ?v=<commit ngắn> vào script src trong index.html để Cloudflare
+            # coi mỗi bản deploy là URL mới. Không có bước này thì site-js/ mới
+            # deploy vẫn bị phục vụ từ cache tới 4 giờ (Cache-Control max-age
+            # =14400 do nginx đặt cho .js) — người dùng chạy mã cũ mà không biết.
+            BUILD_ID=\$(git rev-parse --short HEAD)
+            sed \"s/__WEB_BUILD__/\$BUILD_ID/g\" '$REPO_PATH/index.html' > /tmp/index.deploy.html
+            rsync -a /tmp/index.deploy.html '$WEB_ROOT/index.html'
             rsync -a --delete '$REPO_PATH/pages/' '$WEB_ROOT/pages/'
             # index.html nạp site-js/ (lớp đọc dữ liệu Strapi + đăng nhập hội
             # viên) — thiếu thư mục này thì site chạy như bản tĩnh cũ.
