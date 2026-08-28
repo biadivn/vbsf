@@ -50,24 +50,36 @@ async function deliver(strapi, { email, name, token }) {
   return 'log';
 }
 
-/** Bước 1 — nhận yêu cầu. Luôn trả về cùng một kết quả dù có tài khoản hay không. */
+/* Bước 1 — nhận yêu cầu. Luôn trả về cùng một kết quả dù có tài khoản hay không.
+
+   KHÔNG chờ gửi email xong mới trả lời. Provider mặc định của Strapi (sendmail)
+   chặn ~9 giây khi máy chủ không có MTA, mà chỉ chặn với hồ sơ CÓ email — nghĩa
+   là thời gian phản hồi tự tố cáo số nào có tài khoản, phá đúng mục đích của
+   thông báo trung tính. Gửi email chạy nền, HTTP trả lời ngay.
+
+   `delivery` là promise cho test khẳng định kênh gửi; phía HTTP bỏ qua nó. */
 async function requestReset(strapi, { uid, phone, emailField }) {
   const normalized = auth.normalizePhone(phone);
-  if (!normalized) return { ok: true };
+  if (!normalized) return { ok: true, delivery: Promise.resolve(null) };
 
   const row = await strapi.db.query(uid).findOne({
     where: { phone: normalized },
     select: ['documentId', 'name', emailField],
   });
-  if (!row) return { ok: true };
+  if (!row) return { ok: true, delivery: Promise.resolve(null) };
 
   const reset = auth.createResetToken();
   await strapi.documents(uid).update({
     documentId: row.documentId,
     data: { resetTokenHash: reset.hash, resetTokenExpiry: reset.expiry },
   });
-  const via = await deliver(strapi, { email: row[emailField], name: row.name, token: reset.token });
-  return { ok: true, via };
+
+  const delivery = deliver(strapi, { email: row[emailField], name: row.name, token: reset.token })
+    .catch((err) => {
+      strapi.log.warn('[public-auth] Gửi email đặt lại mật khẩu thất bại: ' + err.message);
+      return 'failed';
+    });
+  return { ok: true, delivery };
 }
 
 /** Bước 2 — đổi mật khẩu bằng token. */

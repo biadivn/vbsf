@@ -38,7 +38,7 @@ describe('password-reset: bước 1 — yêu cầu', () => {
   test('số có tài khoản: lưu bản băm + hạn dùng, gửi email', async () => {
     const res = await reset.requestReset(strapi, { uid: UID, phone: '0901234567', emailField: 'email' });
     assert.strictEqual(res.ok, true);
-    assert.strictEqual(res.via, 'email');
+    assert.strictEqual(await res.delivery, 'email');
 
     const row = strapi._tables[UID][0];
     assert.match(row.resetTokenHash, /^[a-f0-9]{64}$/);
@@ -56,32 +56,47 @@ describe('password-reset: bước 1 — yêu cầu', () => {
 
   test('số KHÔNG có tài khoản: vẫn ok, không gửi gì, không ghi gì', async () => {
     const res = await reset.requestReset(strapi, { uid: UID, phone: '0900000000', emailField: 'email' });
-    assert.deepStrictEqual(res, { ok: true });
+    assert.strictEqual(res.ok, true);
+    assert.strictEqual(await res.delivery, null);
     assert.strictEqual(strapi._emails.length, 0);
     assert.ok(!strapi._tables[UID][0].resetTokenHash);
   });
 
   test('số điện thoại rỗng thì thoát sớm', async () => {
-    assert.deepStrictEqual(await reset.requestReset(strapi, { uid: UID, phone: '', emailField: 'email' }), { ok: true });
+    const res = await reset.requestReset(strapi, { uid: UID, phone: '', emailField: 'email' });
+    assert.strictEqual(res.ok, true);
+    assert.strictEqual(await res.delivery, null);
     assert.strictEqual(strapi._emails.length, 0);
   });
 
   test('số nhập kèm khoảng trắng vẫn khớp hồ sơ', async () => {
     const res = await reset.requestReset(strapi, { uid: UID, phone: '090 123 4567', emailField: 'email' });
-    assert.strictEqual(res.via, 'email');
+    assert.strictEqual(await res.delivery, 'email');
   });
 
   test('hồ sơ chưa có email: vẫn tạo token, chuyển sang ghi log', async () => {
     const res = await reset.requestReset(strapi, { uid: UID, phone: '0909999999', emailField: 'email' });
-    assert.strictEqual(res.via, 'log');
+    assert.strictEqual(await res.delivery, 'log');
     assert.ok(strapi._tables[UID][1].resetTokenHash);
     assert.strictEqual(strapi._emails.length, 0);
+  });
+
+  test('trả lời NGAY, không chờ gửi email xong (tránh rò rỉ qua thời gian)', async () => {
+    let released;
+    strapi.plugin = () => ({ service: () => ({ send: () => new Promise((r) => { released = r; }) }) });
+    const started = Date.now();
+    const res = await reset.requestReset(strapi, { uid: UID, phone: '0901234567', emailField: 'email' });
+    assert.strictEqual(res.ok, true);
+    assert.ok(Date.now() - started < 200, 'requestReset không được chờ email');
+    assert.ok(strapi._tables[UID][0].resetTokenHash, 'token phải được lưu trước khi trả lời');
+    released();
+    assert.strictEqual(await res.delivery, 'email');
   });
 
   test('email provider lỗi thì không ném ra ngoài, chỉ chuyển sang log', async () => {
     strapi.plugin = () => ({ service: () => ({ send() { throw new Error('SMTP sập'); } }) });
     const res = await reset.requestReset(strapi, { uid: UID, phone: '0901234567', emailField: 'email' });
-    assert.strictEqual(res.via, 'log');
+    assert.strictEqual(await res.delivery, 'log');
     assert.ok(strapi._tables[UID][0].resetTokenHash, 'token vẫn phải được lưu');
   });
 });
