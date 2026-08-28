@@ -114,7 +114,11 @@ function teBuildTournamentPayload(record){
     date: teNz(record.date),
     participants: (record.participants!=null && record.participants!=='') ? Number(record.participants) : null,
     location: teNz(record.location), note: teNz(record.note), regDeadline: teNz(record.regDeadline),
-    liveRound: teNz(record.liveRound), champion: teNz(record.champion), entryFee: teNz(record.entryFee),
+    liveRound: teNz(record.liveRound), entryFee: teNz(record.entryFee),
+    // Bục trao giải: champion do engine tự điền khi giải kết thúc, runnerUp/third
+    // ban tổ chức nhập tay ở tab Thông tin. Thiếu hai field sau trong payload thì
+    // Strapi giữ nguyên giá trị cũ — người nhập thấy báo "đã lưu" mà dữ liệu không đi đâu cả.
+    champion: teNz(record.champion), runnerUp: teNz(record.runnerUp), third: teNz(record.third),
     rules: teNz(record.rules), metaTitle: teNz(record.metaTitle), metaDescription: teNz(record.metaDescription),
     players: tePlayersToStrapiPayload(record.players), prizes: tePrizesToStrapiPayload(record.prizes),
     bracket: record.bracket||null, rr: record.rr||null, sw: record.sw||null

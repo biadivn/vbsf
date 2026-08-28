@@ -157,3 +157,14 @@ function tbkSimScore(aId,bId,ratingOf){
   const ls=Math.min(4, Math.floor(Math.random()*5*(0.45+0.5*close)));
   return {win,lose,ws:5,ls};
 }
+
+/* Trình duyệt nạp file này bằng thẻ <script> nên các hàm trên là biến toàn cục.
+   Trong Node (unit test / tournament-seeding.js) thì xuất qua CommonJS. */
+if (typeof module === 'object' && module.exports) {
+  module.exports = {
+    tbkNextPow2, tbkBracketSeeds, tbkPlace, tbkDecide, tbkResolveByes,
+    tbkGenSE, tbkGenDE, tbkGenRR, tbkRoundName, tbkElimChampion, tbkShuffle,
+    tbkRrStandings, tbkSwDerive, tbkSwSos, tbkSwRoundMatches, tbkSwissDrawn,
+    tbkSwRoundComplete, tbkSwissDraw, tbkSwissNext, tbkWinProb, tbkSimScore,
+  };
+}

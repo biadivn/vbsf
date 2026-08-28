@@ -63,6 +63,36 @@ Bộ lọc trên site lọc thật từ dữ liệu: Giải đấu lọc theo n�
 lọc theo tỉnh/thành. Bảng xếp hạng là **danh sách luôn cập nhật**, không chia theo
 kỳ. Riêng "lượt xem" của bài viết vẫn là số cố định trong HTML — chưa có cơ chế đếm.
 
+### Quản lý giải đấu (CMS)
+
+Engine ở [cms-js/tournament-engine.js](cms-js/tournament-engine.js) lo 4 thể thức
+(loại trực tiếp, loại kép, vòng tròn, Swiss tính mạng); [tournament-editor.js](cms-js/tournament-editor.js)
+là phần giao diện. Toàn bộ trạng thái sơ đồ được đẩy lên Strapi ở mọi điểm thay
+đổi qua `teSyncTournamentToStrapi`.
+
+**Thứ tự `record.players` chính là thứ tự hạt giống.** Người thứ i là hạt giống
+#i+1, cặp vòng 1 suy ra theo bảng hạt giống chuẩn. Muốn sắp cặp khác thì đổi chỗ
+hai người trong danh sách — card "Bắt cặp vòng 1" cho chọn thẳng ở từng ô, kèm
+nút bốc thăm ngẫu nhiên. Suất miễn đấu (BYE) luôn rơi vào các hạt giống cuối
+(thông lệ: hạt giống trên được miễn đấu), và vẫn chọn được ai hưởng bằng cách
+đưa người đó vào hạt giống ghép với ô BYE. Phần logic thuần nằm ở
+[cms-js/tournament-seeding.js](cms-js/tournament-seeding.js) và có unit test.
+
+Nhập kết quả có hai đường, dùng chung `teSubmitElimResult`:
+
+| Đường | Dùng khi |
+|---|---|
+| Bấm trận trên sơ đồ | Cần đặt điểm xếp hạng riêng, hoặc **sửa** trận đã có kết quả |
+| Bảng "Trận cần nhập kết quả" | Nhập nhanh, sơ đồ 32/64 người khỏi phải dò trên cây |
+
+Bảng chỉ liệt kê trận đã đủ hai người chơi thật và chưa có tỷ số, áp điểm xếp
+hạng mặc định (thắng +25, thua +5).
+
+> `champion` do engine tự điền khi giải kết thúc; `runnerUp`/`third` ban tổ chức
+> nhập tay ở tab Thông tin. Cả ba **phải** nằm trong `teBuildTournamentPayload` —
+> Strapi giữ nguyên field không được gửi, nên thiếu là người nhập thấy báo "đã
+> lưu" mà dữ liệu không đi đâu cả. Bấm "Tạo lại sơ đồ" xoá cả ba.
+
 ### Cache của site public
 
 nginx đặt `Cache-Control: max-age=14400` cho `*.js`, nên `index.html` gắn

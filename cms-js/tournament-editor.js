@@ -302,7 +302,7 @@ function renderTeMatchesTab(record){
       <div class="tbk-view" id="tbkView"><div class="tbk-stage" id="tbkStage"></div></div>
       <div class="tbk-label" id="tbkLabel"></div>
       <div class="tbk-zoom"><button data-tbz="out" title="Thu nhỏ"><i class="ti ti-zoom-out"></i></button><button data-tbz="fit" title="Vừa khung"><i class="ti ti-focus-2"></i></button><button data-tbz="in" title="Phóng to"><i class="ti ti-zoom-in"></i></button></div>
-    </div></div>`;
+    </div></div>` + teRenderPendingMatches(record);
   } else if(record.format==='RR'){
     body = teRenderRR(record);
   } else {
@@ -349,22 +349,75 @@ function teRenderPlayerSeedList(record){
 function teRenderSeedPairPreview(record){
   const n = record.players.length;
   if(n<2) return '';
-  const size = tbkNextPow2(n);
-  const seeds = tbkBracketSeeds(size);
-  const pid = s=>(s<=n?record.players[s-1]:null);
-  const rows = [];
-  for(let i=0;i<size/2;i++){
-    const a = pid(seeds[2*i]), b = pid(seeds[2*i+1]);
-    rows.push({a,b});
-  }
+  const rows = teSeedRows(record.players);
+  const size = rows.length*2;
+  /* Mỗi ô hạt giống là một <select> chứa toàn bộ người chơi: chọn người khác
+     tức là đổi chỗ hai người trong danh sách hạt giống. Ô miễn đấu (BYE) không
+     có ai để đổi nên để nguyên dạng chữ. */
+  const slot = (seedNo, player, right)=>{
+    if(!player) return `<span class="pn ${right?'r':''}"><span class="cell-muted">(miễn đấu — BYE)</span></span>`;
+    const opts = record.players.map(p=>`<option value="${escapeAttr(p.id)}"${p.id===player.id?' selected':''}>#${record.players.indexOf(p)+1} ${escapeHtml(p.name)}${p.club?` · ${escapeHtml(p.club)}`:''}</option>`).join('');
+    return `<span class="pn ${right?'r':''}"><select class="tbk-seedsel" data-tbseed="${seedNo}" aria-label="Hạt giống #${seedNo}">${opts}</select></span>`;
+  };
   const fixtures = rows.map(r=>`<div class="tbk-fix">
-    <span class="pn">${r.a?`<span style="color:var(--hint);font-weight:700">#${record.players.indexOf(r.a)+1}</span> ${escapeHtml(r.a.name)}`:''}</span>
-    <span class="vs">vs</span>
-    <span class="pn r">${r.b?`${escapeHtml(r.b.name)} <span style="color:var(--hint);font-weight:700">#${record.players.indexOf(r.b)+1}</span>`:'<span class="cell-muted">(miễn đấu — BYE)</span>'}</span>
+    ${slot(r.seedA, r.a, false)}<span class="vs">vs</span>${slot(r.seedB, r.b, true)}
   </div>`).join('');
-  return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Xem trước bắt cặp vòng 1</h2><div class="desc">Ghép theo hạt giống${size>n?` · ${size-n} người được miễn đấu (BYE) vòng đầu`:''} — sẽ được chốt khi tạo sơ đồ</div></div></div>
+  return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Bắt cặp vòng 1</h2><div class="desc">Đổi người ở ô bất kỳ để sắp lại cặp đấu${size>n?` · ${size-n} người được miễn đấu (BYE) vòng đầu`:''} — sẽ được chốt khi tạo sơ đồ</div></div>
+      <button type="button" class="btn btn-ghost" id="tbShuffleBtn"><i class="ti ti-arrows-shuffle"></i> Bốc thăm ngẫu nhiên</button></div>
     <div class="card-body padded">${fixtures}</div>
   </div>`;
+}
+/* Đổi chỗ hai người chơi để playerId về đúng ô hạt giống seedNo. */
+function teAssignSeedSlot(record, seedNo, playerId){
+  const next = teReorderForSlot(record.players, seedNo, playerId);
+  if(next === record.players) return;          // không có gì đổi
+  record.players = next;
+  record.players.forEach((p,i)=>{ p.seed = i+1; });
+  saveDB();
+  teSyncTournamentToStrapi(record);
+  renderContent();
+}
+function teShuffleSeeds(record){
+  record.players = tbkShuffle(record.players);
+  record.players.forEach((p,i)=>{ p.seed = i+1; });
+  saveDB();
+  teSyncTournamentToStrapi(record);
+  showToast('Đã bốc thăm lại thứ tự hạt giống');
+  renderContent();
+}
+/* Bảng nhập nhanh: sơ đồ 32/64 người phải kéo/thu phóng mới tìm được trận cần
+   nhập, nên liệt kê phẳng những trận đã đủ hai người mà chưa có tỷ số. */
+function teRenderPendingMatches(record){
+  const eng = record.bracket;
+  if(!eng) return '';
+  const pending = tePendingMatches(eng);
+  if(!pending.length){
+    const champ = tbkElimChampion(eng);
+    return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Trận cần nhập kết quả</h2></div></div>
+      <div class="card-body padded"><div class="empty" style="padding:20px"><i class="ti ti-checkbox"></i><b>${champ?'Giải đã có nhà vô địch':'Không còn trận nào chờ kết quả'}</b>${champ?'Toàn bộ sơ đồ đã hoàn tất.':'Trận tiếp theo sẽ hiện ở đây ngay khi đủ hai người chơi.'}</div></div></div>`;
+  }
+  const rows = pending.map(m=>`<div class="tbk-fix">
+    <span class="rd">${escapeHtml(teMatchRoundLabel(eng, m))}</span>
+    <span class="pn">${escapeHtml(teName(record,m.p1))}</span>
+    <input type="number" min="0" id="tb_pa_${m.id}" aria-label="Tỷ số ${escapeAttr(teName(record,m.p1))}">
+    <span class="vs">–</span>
+    <input type="number" min="0" id="tb_pb_${m.id}" aria-label="Tỷ số ${escapeAttr(teName(record,m.p2))}">
+    <span class="pn r">${escapeHtml(teName(record,m.p2))}</span>
+    <button class="btn-icon" data-tbpsave="${m.id}" title="Lưu kết quả"><i class="ti ti-device-floppy"></i></button>
+  </div>`).join('');
+  return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Trận cần nhập kết quả</h2><div class="desc">${pending.length} trận đã đủ hai người chơi và chưa có tỷ số</div></div></div>
+    <div class="card-body padded">${rows}
+    <div class="cell-muted" style="margin-top:12px;font-size:12.5px">Điểm xếp hạng áp mặc định: thắng +${TE_WIN_POINTS}, thua +${TE_LOSS_POINTS}. Cần điểm khác, hoặc muốn sửa trận đã có kết quả, thì bấm vào trận trên sơ đồ.</div></div></div>`;
+}
+function teSavePendingResult(mid){
+  const record = teRecordFromView();
+  if(!record || !record.bracket) return;
+  const m = record.bracket.matches[mid];
+  if(!m) return;
+  const s1 = Number(document.getElementById('tb_pa_'+mid).value);
+  const s2 = Number(document.getElementById('tb_pb_'+mid).value);
+  if(!Number.isFinite(s1) || !Number.isFinite(s2) || s1===s2){ showToast('Vui lòng nhập tỷ số hợp lệ, phải có người thắng.', true); return; }
+  teSubmitElimResult(record, mid, s1, s2, TE_WIN_POINTS, TE_LOSS_POINTS);
 }
 function teStartBracket(record){
   record.players.forEach((p,i)=>{ p.seed=i+1; });
@@ -385,11 +438,11 @@ function teStartBracket(record){
   if(fmt==='SE'||fmt==='DE') setTimeout(()=>teFitBracket(record), 30);
 }
 function teResetBracket(record){
-  if(!confirm('Tạo lại sơ đồ sẽ xóa toàn bộ kết quả đã nhập và hoàn tác điểm xếp hạng đã cộng (nếu có). Danh sách người chơi được giữ nguyên. Tiếp tục?')) return;
+  if(!confirm('Tạo lại sơ đồ sẽ xóa toàn bộ kết quả đã nhập, xóa vô địch/á quân/hạng 3 và hoàn tác điểm xếp hạng đã cộng (nếu có). Danh sách người chơi được giữ nguyên. Tiếp tục?')) return;
   teReverseAllPoints(record);
   record.bracket = null; record.rr = null; record.sw = null;
   if(record.status==='completed') record.status = 'ongoing';
-  record.champion = '';
+  record.champion = ''; record.runnerUp = ''; record.third = '';
   recomputeMemberRanking();
   syncAllMemberDisciplines();
   saveDB();
@@ -778,6 +831,12 @@ function attachTeMatchesTab(record){
   }));
   const startBtn = document.getElementById('tbStartBtn');
   if(startBtn) startBtn.addEventListener('click', ()=>teStartBracket(record));
+  document.querySelectorAll('[data-tbseed]').forEach(sel=>sel.addEventListener('change', ()=>
+    teAssignSeedSlot(record, sel.getAttribute('data-tbseed'), sel.value)));
+  const shuffleBtn = document.getElementById('tbShuffleBtn');
+  if(shuffleBtn) shuffleBtn.addEventListener('click', ()=>teShuffleSeeds(record));
+  document.querySelectorAll('[data-tbpsave]').forEach(b=>b.addEventListener('click', ()=>
+    teSavePendingResult(b.getAttribute('data-tbpsave'))));
   const resetBtn = document.getElementById('tbResetBtn');
   if(resetBtn) resetBtn.addEventListener('click', ()=>teResetBracket(record));
   const simNext = document.getElementById('tbSimNext');
