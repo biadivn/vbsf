@@ -696,6 +696,13 @@ body{background:#E4E8E5}
       var q=function(sel){ return joinPage.querySelector('[data-'+kind+'-'+sel+']'); };
       var link=q('forgot-link'), panel=q('forgot-panel');
       if(!link||!panel) return null;
+      /* Chưa có máy chủ email thì ẩn hẳn lối vào thay vì để người dùng bấm rồi
+         chờ một email không bao giờ tới (xem site-js/config.js). */
+      if(!(window.VBSF_FEATURES && window.VBSF_FEATURES.passwordReset)){
+        link.style.display='none';
+        panel.style.display='none';
+        return null;
+      }
       var stepRequest=joinPage.querySelector('[data-'+kind+'-forgot-step="request"]');
       var stepReset=joinPage.querySelector('[data-'+kind+'-forgot-step="reset"]');
       var err=q('forgot-error'), ok=q('forgot-success');

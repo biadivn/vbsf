@@ -57,6 +57,7 @@ Hội viên cá nhân và hội viên tổ chức đăng nhập/đăng ký bằn
   (xem `strapi-backend/src/api/*/routes/*-auth.js`).
 - Phiên là JWT riêng ký bằng `PUBLIC_AUTH_JWT_SECRET`, lưu ở localStorage.
 - Hồ sơ đăng ký mới vào trạng thái `pending` — chờ VBSF xác nhận hội phí / xét duyệt.
+- **Quên mật khẩu đang TẮT** (chưa có máy chủ email) — xem mục bên dưới.
 
 API công khai `GET /api/members` và `/api/member-orgs` **đã lược bỏ dữ liệu định
 danh** (CCCD, số điện thoại, email, ngày sinh, địa chỉ, mã số thuế) cho request
@@ -76,7 +77,21 @@ Quá hạn trả `429` kèm header `Retry-After`. Bộ đếm nằm trong bộ n
 chạy nhiều instance sau load balancer thì mỗi instance có bộ đếm riêng; muốn
 chính xác tuyệt đối cần chuyển sang Redis.
 
-### Quên mật khẩu
+### Quên mật khẩu — ĐANG TẮT
+
+> Tính năng này **đang tắt** vì hệ thống chưa có máy chủ email: route
+> `forgot-password` / `reset-password` không được đăng ký (gọi vào trả 405) và
+> link "Quên mật khẩu?" trên site bị ẩn — thay vì hứa gửi mã rồi không gửi được.
+> Mặc định là tắt (fail-closed): thiếu biến môi trường cũng coi như tắt.
+>
+> **Bật lại khi đã có email server** — đủ 3 bước, thiếu bước nào cũng hỏng:
+> 1. Cấu hình provider email cho Strapi (`config/plugins.js`) và gửi thử thật.
+> 2. `PASSWORD_RESET_ENABLED=true` trong `.env` của server.
+> 3. `passwordReset: true` trong [site-js/config.js](site-js/config.js).
+>
+> Có unit test canh hai giá trị mặc định ở bước 2 và 3 không lệch nhau.
+
+Mô tả luồng (để tham chiếu khi bật lại):
 
 `POST .../forgot-password {phone}` luôn trả cùng một thông báo dù số có tài khoản
 hay không. Nếu có, hệ thống sinh token 32 byte ngẫu nhiên, lưu **bản băm SHA-256**

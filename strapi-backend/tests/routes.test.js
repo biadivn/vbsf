@@ -5,12 +5,29 @@
 const { test, describe } = require('node:test');
 const assert = require('node:assert');
 
-const memberRoutes = require('../src/api/member/routes/member-auth');
-const orgRoutes = require('../src/api/member-org/routes/member-org-auth');
 const { AUTH_LIMIT, PASSWORD_RESET_LIMIT } = require('../src/utils/rate-limit');
+const { DEFAULTS } = require('../src/utils/features');
 const { createMockCtx } = require('./helpers/mock-strapi');
 
-const allRoutes = memberRoutes.routes.concat(orgRoutes.routes);
+/* Route đặt lại mật khẩu chỉ được đăng ký khi PASSWORD_RESET_ENABLED=true, nên
+   nạp lại module với cờ đặt sẵn để test được cả hai trạng thái. */
+function loadRoutes(passwordResetEnabled) {
+  const saved = process.env.PASSWORD_RESET_ENABLED;
+  if (passwordResetEnabled === undefined) delete process.env.PASSWORD_RESET_ENABLED;
+  else process.env.PASSWORD_RESET_ENABLED = String(passwordResetEnabled);
+  ['../src/utils/features', '../src/api/member/routes/member-auth', '../src/api/member-org/routes/member-org-auth']
+    .forEach((m) => { delete require.cache[require.resolve(m)]; });
+  const member = require('../src/api/member/routes/member-auth');
+  const org = require('../src/api/member-org/routes/member-org-auth');
+  if (saved === undefined) delete process.env.PASSWORD_RESET_ENABLED;
+  else process.env.PASSWORD_RESET_ENABLED = saved;
+  return { member, org, all: member.routes.concat(org.routes) };
+}
+
+const enabled = loadRoutes(true);
+const memberRoutes = enabled.member;
+const orgRoutes = enabled.org;
+const allRoutes = enabled.all;
 
 /** Gọi middleware của route n lần, đếm số lần được cho qua. */
 async function passesBefore429(route, times) {
@@ -22,6 +39,47 @@ async function passesBefore429(route, times) {
   }
   return passed;
 }
+
+describe('cờ tắt tính năng đặt lại mật khẩu', () => {
+  test('mặc định (không set biến môi trường) là TẮT — fail-closed', () => {
+    assert.strictEqual(DEFAULTS.passwordReset, false);
+    const off = loadRoutes(undefined);
+    assert.strictEqual(off.all.filter((r) => /password$/.test(r.path)).length, 0);
+  });
+
+  test('tắt thì KHÔNG đăng ký route forgot/reset, các route khác giữ nguyên', () => {
+    const off = loadRoutes(false);
+    assert.deepStrictEqual(off.member.routes.map((r) => r.path), [
+      '/member-auth/register', '/member-auth/login', '/member-auth/me',
+      '/member-auth/cccd-status', '/member-auth/avatar',
+    ]);
+    assert.deepStrictEqual(off.org.routes.map((r) => r.path), [
+      '/org-auth/register', '/org-auth/login', '/org-auth/me',
+    ]);
+  });
+
+  test('giá trị ngoài "true" đều coi là tắt', () => {
+    ['', 'false', '1', 'yes', 'TRUE '].forEach((v) => {
+      assert.strictEqual(loadRoutes(v).all.filter((r) => /password$/.test(r.path)).length, 0, 'giá trị: ' + JSON.stringify(v));
+    });
+  });
+
+  test('bật thì có đủ 4 route đặt lại mật khẩu', () => {
+    assert.strictEqual(loadRoutes(true).all.filter((r) => /password$/.test(r.path)).length, 4);
+  });
+
+  test('cờ mặc định phía site khớp với backend', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const configFile = path.join(__dirname, '..', '..', 'site-js', 'config.js');
+    if (!fs.existsSync(configFile)) return; // ngoài build context của Docker
+    const src = fs.readFileSync(configFile, 'utf8');
+    const match = src.match(/passwordReset:\s*(true|false)/);
+    assert.ok(match, 'site-js/config.js phải khai báo cờ passwordReset');
+    assert.strictEqual(match[1] === 'true', DEFAULTS.passwordReset,
+      'cờ passwordReset ở site-js/config.js lệch với mặc định của backend');
+  });
+});
 
 describe('route công khai: bất biến bảo mật', () => {
   test('mọi route auth:false đều có middleware giới hạn tần suất', () => {

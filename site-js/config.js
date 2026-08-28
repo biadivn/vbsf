@@ -45,9 +45,17 @@
 
   window.VBSF_STRAPI_URL = resolve();
 
+  /* Cờ tính năng phía giao diện — phải KHỚP với backend
+     (strapi-backend/src/utils/features.js + biến PASSWORD_RESET_ENABLED).
+
+     passwordReset ĐANG TẮT vì chưa có máy chủ email. Bật lại: đổi thành true ở
+     đây VÀ đặt PASSWORD_RESET_ENABLED=true trong .env của Strapi. Chỉ đổi một
+     bên thì hoặc link vẫn ẩn, hoặc bấm vào nhận 404. */
+  window.VBSF_FEATURES = Object.assign({ passwordReset: false }, window.VBSF_FEATURES || {});
+
   /* Trình duyệt chỉ cần window.VBSF_STRAPI_URL ở trên. Nhánh này để unit test
      gọi lại resolve() với từng hostname giả (xem tests/site-config.test.js). */
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { resolve: resolve, STRAPI_BY_HOST: STRAPI_BY_HOST };
+    module.exports = { resolve: resolve, STRAPI_BY_HOST: STRAPI_BY_HOST, FEATURES: window.VBSF_FEATURES };
   }
 })();

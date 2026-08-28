@@ -180,6 +180,9 @@ function scanSecrets(files) {
         const m = line.match(/^\s*([A-Z0-9_]*(?:SECRET|PASSWORD|TOKEN|KEY|SALT)[A-Z0-9_]*)\s*=\s*(.+?)\s*$/);
         if (!m) return;
         const value = m[2].replace(/^['"]|['"]$/g, '');
+        /* Cờ bật/tắt và số không thể là bí mật (vd. PASSWORD_RESET_ENABLED=false)
+           — tên biến khớp "PASSWORD" nhưng giá trị thì vô hại. */
+        if (/^(true|false|yes|no|on|off|\d+)$/i.test(value)) return;
         // APP_KEYS là danh sách ngăn bởi dấu phẩy — placeholder khi MỌI phần đều là placeholder.
         const parts = value.split(',').map((v) => v.trim()).filter(Boolean);
         if (!parts.length || parts.every((v) => PLACEHOLDER.test(v))) return;
