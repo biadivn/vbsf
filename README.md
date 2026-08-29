@@ -63,6 +63,42 @@ Bộ lọc trên site lọc thật từ dữ liệu: Giải đấu lọc theo n�
 lọc theo tỉnh/thành. Bảng xếp hạng là **danh sách luôn cập nhật**, không chia theo
 kỳ. Riêng "lượt xem" của bài viết vẫn là số cố định trong HTML — chưa có cơ chế đếm.
 
+### Cấu hình khối (section) của site
+
+Module "Trang website" trong CMS bật/tắt, đổi tiêu đề, đổi nội dung và chọn dữ
+liệu cho từng khối. Toàn bộ lưu trong single type `page-content`; site đọc lại
+qua [site-js/page-config.js](site-js/page-config.js).
+
+Ba mảnh phải khớp nhau, lệch một mảnh là admin sửa mà trang không đổi:
+
+| Mảnh | Ở đâu |
+|---|---|
+| Khai báo khối + các ô nhập | [cms-js/page-sections-registry.js](cms-js/page-sections-registry.js) |
+| Chỗ nhận nội dung trên trang | `pages/*.html` — `data-section`, `data-title`, `data-fill`, `data-fill-html`, `data-items`, `data-bg` |
+| Đọc cấu hình khi dựng trang | [site-js/page-config.js](site-js/page-config.js) + `RENDER` trong `site-js/strapi-content.js` |
+
+- `data-fill="<key>"` nhận chữ thuần; `data-fill-html="<key>"` dành cho ô soạn
+  thảo (`type:'textarea'`), CMS lưu HTML cho những ô đó.
+- `data-title` nhận "Tiêu đề hiển thị"; `data-items` là nơi đổ danh sách; `data-bg`
+  là ô nhận ảnh nền (mặc định đặt lên chính khối).
+- Bộ chọn (`newsPicker` / `partnerPicker` / `tournamentSelect`) lưu id vào
+  `newsIds` / `partnerIds` / `tournamentIds`; `pickerMode` `'manual'` dùng đúng
+  danh sách đã chọn, `'auto'` lấy `autoCount` bản ghi mới nhất.
+
+> Panel chỉnh sửa chỉ dựng được **một** loại nội dung cho mỗi khối: picker HOẶC
+> fields HOẶC itemFields. Cần cả hai thì tách thành hai khối — đó là lý do banner
+> trang chủ và cột "Tin nổi bật" cạnh nó là hai khối riêng (`hero-banner`,
+> `hero-tin-noi-bat`).
+
+Banner trang chủ trỏ vào **một giải đấu thật**: tên, ngày và địa điểm lấy từ bản
+ghi giải, bấm vào mở đúng giải đó. Chưa chọn thì tự lấy giải đang diễn ra, không
+có nữa thì giải sắp tới gần nhất.
+
+Nguồn dùng chung không đặt trong section: phí và số tài khoản ở "Thông tin tổ
+chức" (`setting`), địa chỉ/email/điện thoại ở "Thông tin liên hệ" (`contact-info`).
+Đặt thêm bản sao trong section thì hai nơi lệch nhau mà không ai biết bên nào
+đang hiển thị.
+
 ### Quản lý giải đấu (CMS)
 
 Engine ở [cms-js/tournament-engine.js](cms-js/tournament-engine.js) lo 4 thể thức

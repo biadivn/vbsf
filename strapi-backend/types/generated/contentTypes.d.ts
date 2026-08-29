@@ -1047,8 +1047,6 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
     feeFirstTime: Schema.Attribute.String;
     feeRenewal: Schema.Attribute.String;
     foundedYear: Schema.Attribute.String;
-    heroSubtitle: Schema.Attribute.String;
-    heroTitle: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',

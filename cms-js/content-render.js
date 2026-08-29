@@ -20,15 +20,23 @@ function renderContent(){
 }
 
 function renderDashboard(){
-  const heroTitle = DB.settings.heroTitle || 'Chưa thiết lập giải đấu nổi bật';
-  const heroSub = DB.settings.heroSubtitle || '';
+  /* Banner trang chủ nay trỏ vào một giải đấu thật (khối "Banner giải đấu nổi bật"),
+     không còn là hai ô chữ trong Thông tin tổ chức. Bảng điều khiển soi đúng thứ
+     site đang hiển thị: giải đã chọn, không chọn thì giải đang diễn ra. */
+  const heroEntry = ((DB.pageSections && DB.pageSections['trang-chu']) || []).find(e=>e.key==='hero-banner');
+  const heroPickId = ((heroEntry && heroEntry.tournamentIds) || [])[0];
+  const heroTour = (heroPickId && DB.tournaments.find(t=>t.id===heroPickId))
+    || DB.tournaments.find(t=>t.status==='ongoing')
+    || [...DB.tournaments].filter(t=>t.status!=='completed').sort((a,b)=>(a.date||'').localeCompare(b.date||''))[0];
+  const heroTitle = heroTour ? heroTour.name : 'Chưa thiết lập giải đấu nổi bật';
+  const heroSub = heroTour ? [heroTour.date ? 'Khởi tranh '+fmtDate(heroTour.date) : '', heroTour.location].filter(Boolean).join(' · ') : '';
   let html = `<div class="dash-hero">
     <div>
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#C9A24B;font-weight:600">Giải đấu nổi bật · Trang chủ</div>
       <h2 style="margin-top:6px">${escapeHtml(heroTitle)}</h2>
       <p>${escapeHtml(heroSub)}</p>
     </div>
-    <button class="btn btn-gold" id="goSettings"><i class="ti ti-edit"></i> Chỉnh sửa</button>
+    <button class="btn btn-gold" id="goHeroSection"><i class="ti ti-edit"></i> Chỉnh sửa</button>
   </div>`;
 
   html += `<div class="dash-grid">`;
@@ -65,8 +73,13 @@ function attachDashboardEvents(){
     if(el.closest('.sidebar')) return;
     el.addEventListener('click', ()=>setView(el.getAttribute('data-nav')));
   });
-  const gs = document.getElementById('goSettings');
-  if(gs) gs.addEventListener('click', ()=>setView('settings'));
+  // Nút "Chỉnh sửa" của banner mở thẳng khối cấu hình banner ở trang chủ.
+  const gh = document.getElementById('goHeroSection');
+  if(gh) gh.addEventListener('click', ()=>{
+    activeSectionKey = 'hero-banner';
+    sectionEditBuffer = null;
+    setView('page:trang-chu');
+  });
 }
 
 function renderListView(key){

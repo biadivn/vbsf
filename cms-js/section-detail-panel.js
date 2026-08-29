@@ -121,11 +121,11 @@ function renderPickerModeSection(kind, def, buf){
       const latest = kind==='tournament' ? latestTournaments(count) : latestNews(count);
       const previewRows = latest.map(x=>`<div style="padding:8px 10px;border-bottom:1px solid var(--line);font-size:13.5px">${escapeHtml(kind==='tournament'?x.name:x.title)}</div>`).join('') || `<div class="empty" style="padding:16px"><b>Chưa có dữ liệu</b></div>`;
       html += `<div class="fld" style="max-width:160px;margin-bottom:14px"><label>Số lượng hiển thị</label><input type="number" min="1" id="secAutoCountInput" value="${count}"></div>
-        <div class="hint" style="margin-bottom:8px">Hệ thống sẽ tự động lấy ${count} ${noun} mới nhất theo ngày, không cần chọn thủ công (mô phỏng, chưa áp dụng trực tiếp). Xem trước:</div>
+        <div class="hint" style="margin-bottom:8px">Hệ thống sẽ tự động lấy ${count} ${noun} mới nhất theo ngày, không cần chọn thủ công. Xem trước:</div>
         <div style="border:1px solid var(--line-strong);border-radius:8px;overflow:hidden">${previewRows}</div>`;
     } else {
       const latest = latestTournaments(1)[0];
-      html += `<div class="hint" style="margin-bottom:8px">Hệ thống sẽ tự động lấy giải đấu mới nhất theo ngày, không cần chọn thủ công (mô phỏng, chưa áp dụng trực tiếp).</div>
+      html += `<div class="hint" style="margin-bottom:8px">Hệ thống sẽ tự động lấy giải đấu mới nhất theo ngày, không cần chọn thủ công.</div>
         <div style="border:1px solid var(--line-strong);border-radius:8px;padding:10px 12px;font-size:13.5px">${latest ? escapeHtml(latest.name) : '<span class="hint">Chưa có giải đấu nào</span>'}</div>`;
     }
     return html;
@@ -148,13 +148,13 @@ function renderTournamentPickerInline(def, buf){
         <input type="radio" name="secTournamentPick" data-sec-tournament-pick="${t.id}" ${ids.includes(t.id)?'checked':''} style="width:16px;height:16px;flex-shrink:0">
         ${renderMeta(t)}
       </label>`).join('');
-    const hint = def.apiIntegrated ? 'Dữ liệu sẽ được lấy tự động qua API theo giải đấu đã chọn (mô phỏng, chưa gọi API thật).' : 'Nội dung sẽ lấy tự động từ giải đấu đã chọn trong danh mục "Giải đấu".';
+    const hint = def.apiIntegrated ? 'Dữ liệu lấy tự động theo giải đấu đã chọn.' : 'Nội dung sẽ lấy tự động từ giải đấu đã chọn trong danh mục "Giải đấu".';
     return `<div style="max-height:320px;overflow-y:auto;border:1px solid var(--line-strong);border-radius:8px">${rows || '<div class="empty" style="padding:20px"><b>Chưa có giải đấu nào</b></div>'}</div>
       <div class="hint" style="margin-top:10px">${hint}</div>`;
   }
 
   const hint = def.apiIntegrated
-    ? 'Bảng xếp hạng sẽ được lấy tự động qua API theo các giải đấu đã chọn, đúng theo thứ tự bên trên (mô phỏng, chưa gọi API thật).'
+    ? 'Nội dung lấy tự động theo các giải đấu đã chọn, đúng thứ tự bên trên.'
     : 'Nội dung hiển thị sẽ lấy tự động từ các giải đấu đã chọn, đúng theo thứ tự bên trên.';
   return renderPickerInline(buf.tournamentIds || [], DB.tournaments, renderMeta) + `<div class="hint" style="margin-top:10px">${hint}</div>`;
 }
@@ -213,6 +213,28 @@ function syncSectionItemsFromInputs(){
   });
 }
 
+/* Panel được vẽ lại từ sectionEditBuffer sau mỗi thao tác (đổi chế độ chọn, thêm
+   /bớt/sắp xếp mục, đổi ảnh nền). Không cất giá trị các ô đang gõ vào buffer
+   trước khi vẽ lại thì admin gõ tiêu đề rồi bấm một nút bất kỳ là mất chữ vừa
+   gõ, mà không có dấu hiệu gì. Mọi handler gọi renderContent() đều đi qua đây. */
+function readSectionInputs(def, buf){
+  if(!def || !buf) return;
+  const titleInput = document.getElementById('secTitleInput');
+  if(titleInput) buf.title = titleInput.value;
+  const countInput = document.getElementById('secCountInput');
+  if(countInput) buf.itemCount = Math.max(1, parseInt(countInput.value,10)||1);
+  const autoCountInput = document.getElementById('secAutoCountInput');
+  if(autoCountInput) buf.autoCount = Math.max(1, parseInt(autoCountInput.value,10)||1);
+  if(def.fields){
+    buf.content = buf.content || {};
+    def.fields.forEach(f=>{
+      const el = document.getElementById((f.type==='textarea' ? 'rte_' : 'f_')+f.key);
+      if(el) buf.content[f.key] = f.type==='textarea' ? el.innerHTML : el.value;
+    });
+  }
+  if(def.itemFields) syncSectionItemsFromInputs();
+}
+
 function attachSectionDetailEvents(pageKey, key){
   if(!key) return;
   const def = getSectionDef(pageKey, key);
@@ -229,14 +251,14 @@ function attachSectionDetailEvents(pageKey, key){
     const entry = DB.pageSections[pageKey].find(s=>s.key===key);
     entry.labelOverride = trimmed;
     saveDB().then(savePageContentToApi);
-    renderContent();
+    readSectionInputs(def, buf); renderContent();
     showToast('Đã đổi tên section');
   });
 
   document.querySelectorAll('[data-picker-mode-btn]').forEach(el=>{
     el.addEventListener('click', ()=>{
       buf.pickerMode = el.getAttribute('data-picker-mode-btn');
-      renderContent();
+      readSectionInputs(def, buf); renderContent();
     });
   });
 
@@ -249,14 +271,14 @@ function attachSectionDetailEvents(pageKey, key){
     document.querySelectorAll('[data-picker-add-row]').forEach(el=>{
       el.addEventListener('click', ()=>{
         buf[pickerField].push(el.getAttribute('data-picker-add-row'));
-        renderContent();
+        readSectionInputs(def, buf); renderContent();
       });
     });
     document.querySelectorAll('[data-picker-remove]').forEach(el=>{
       el.addEventListener('click', ()=>{
         const id = el.getAttribute('data-picker-remove');
         buf[pickerField] = buf[pickerField].filter(x=>x!==id);
-        renderContent();
+        readSectionInputs(def, buf); renderContent();
       });
     });
     document.querySelectorAll('[data-picker-up]').forEach(el=>{
@@ -265,7 +287,7 @@ function attachSectionDetailEvents(pageKey, key){
         if(idx<=0) return;
         const arr = buf[pickerField];
         [arr[idx-1], arr[idx]] = [arr[idx], arr[idx-1]];
-        renderContent();
+        readSectionInputs(def, buf); renderContent();
       });
     });
     document.querySelectorAll('[data-picker-down]').forEach(el=>{
@@ -274,7 +296,7 @@ function attachSectionDetailEvents(pageKey, key){
         const arr = buf[pickerField];
         if(idx>=arr.length-1) return;
         [arr[idx+1], arr[idx]] = [arr[idx], arr[idx+1]];
-        renderContent();
+        readSectionInputs(def, buf); renderContent();
       });
     });
   }
@@ -284,13 +306,13 @@ function attachSectionDetailEvents(pageKey, key){
     syncSectionItemsFromInputs();
     const blank = {}; def.itemFields.forEach(f=>blank[f.key]='');
     buf.items.push(blank);
-    renderContent();
+    readSectionInputs(def, buf); renderContent();
   });
   document.querySelectorAll('[data-sec-ci-remove]').forEach(el=>{
     el.addEventListener('click', ()=>{
       syncSectionItemsFromInputs();
       buf.items.splice(parseInt(el.getAttribute('data-sec-ci-remove'),10), 1);
-      renderContent();
+      readSectionInputs(def, buf); renderContent();
     });
   });
   document.querySelectorAll('[data-sec-ci-image]').forEach(el=>{
@@ -300,7 +322,7 @@ function attachSectionDetailEvents(pageKey, key){
       syncSectionItemsFromInputs();
       const [idx, fkey] = el.getAttribute('data-sec-ci-image').split(':');
       const reader = new FileReader();
-      reader.onload = (ev)=>{ buf.items[parseInt(idx,10)][fkey] = ev.target.result; renderContent(); };
+      reader.onload = (ev)=>{ buf.items[parseInt(idx,10)][fkey] = ev.target.result; readSectionInputs(def, buf); renderContent(); };
       reader.readAsDataURL(file);
     });
   });
@@ -310,11 +332,11 @@ function attachSectionDetailEvents(pageKey, key){
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
-    reader.onload = (ev)=>{ buf.backgroundImage = ev.target.result; renderContent(); };
+    reader.onload = (ev)=>{ buf.backgroundImage = ev.target.result; readSectionInputs(def, buf); renderContent(); };
     reader.readAsDataURL(file);
   });
   const bgRemoveBtn = document.getElementById('secBgRemoveBtn');
-  if(bgRemoveBtn) bgRemoveBtn.addEventListener('click', ()=>{ buf.backgroundImage = null; renderContent(); });
+  if(bgRemoveBtn) bgRemoveBtn.addEventListener('click', ()=>{ buf.backgroundImage = null; readSectionInputs(def, buf); renderContent(); });
 
   const saveBtn = document.getElementById('secSaveBtn');
   if(saveBtn) saveBtn.addEventListener('click', ()=> saveSectionDetail(pageKey, key));
@@ -326,19 +348,7 @@ async function saveSectionDetail(pageKey, key){
   const def = getSectionDef(pageKey, key);
   const buf = sectionEditBuffer;
 
-  const titleInput = document.getElementById('secTitleInput');
-  if(titleInput) buf.title = titleInput.value;
-  const countInput = document.getElementById('secCountInput');
-  if(countInput) buf.itemCount = Math.max(1, parseInt(countInput.value,10)||1);
-  const autoCountInput = document.getElementById('secAutoCountInput');
-  if(autoCountInput) buf.autoCount = Math.max(1, parseInt(autoCountInput.value,10)||1);
-  if(def.fields){
-    buf.content = buf.content || {};
-    def.fields.forEach(f=>{
-      buf.content[f.key] = f.type==='textarea' ? document.getElementById('rte_'+f.key).innerHTML : document.getElementById('f_'+f.key).value;
-    });
-  }
-  if(def.itemFields) syncSectionItemsFromInputs();
+  readSectionInputs(def, buf);
 
   const entry = DB.pageSections[pageKey].find(r=>r.key===key);
   if(def.title!==undefined) entry.title = buf.title;
@@ -357,7 +367,7 @@ async function saveSectionDetail(pageKey, key){
   await saveDB(); await savePageContentToApi();
   sectionEditBuffer = null;
   renderContent();
-  showToast('Đã lưu section (giả lập)');
+  showToast('Đã lưu section');
 }
 
 const RTE_TOOLBAR = [

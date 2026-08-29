@@ -1,14 +1,24 @@
 /* =========================================================
-   PAGE SECTIONS (mô phỏng — chưa kết nối thật với index.html)
+   PAGE SECTIONS — cấu hình từng khối của site public.
+
+   Lưu trong single type `page-content` (Strapi), site đọc lại qua
+   site-js/page-config.js. Hình dạng một entry do makeDefaultSectionEntry()
+   quyết định: { key, enabled, title, content, backgroundImage, newsIds |
+   partnerIds | tournamentIds, pickerMode, autoCount }.
+
+   Thêm ô `fields` mới thì PHẢI có chỗ nhận tương ứng trong pages/*.html
+   (data-fill="<key>", hoặc data-fill-html cho ô soạn thảo) — không thì admin
+   nhập vào mà trang không đổi, đúng lỗi cũ của module này.
+
+   Panel chỉnh sửa (section-detail-panel.js) chỉ dựng ĐƯỢC MỘT loại nội dung cho
+   mỗi section: picker HOẶC fields HOẶC itemFields. Cần cả hai thì tách section.
    ========================================================= */
 const PAGE_SECTIONS_REGISTRY = {
   'trang-chu': {label:'Trang chủ', icon:'ti-home', path:'/', sections:[
-    {key:'hero', label:'Banner giải đấu nổi bật + Tin nổi bật', fields:[
-      {key:'bannerTag', label:'Nhãn banner', type:'text', default:'GIẢI ĐẤU NỔI BẬT'},
-      {key:'bannerTitle', label:'Tiêu đề banner', type:'text', span2:true, default:'Giải Vô địch Billiards & Snooker Quốc gia 2026'},
-      {key:'bannerSubtitle', label:'Mô tả banner', type:'text', span2:true, default:'Khởi tranh 12/06 · Nhà thi đấu Phú Thọ, TP.HCM'},
-      {key:'sideLabel', label:'Nhãn khối "Tin nổi bật"', type:'text', default:'Tin nổi bật'}
-    ]},
+    /* Banner và cột tin bên phải là hai khối riêng: mỗi section chỉ dựng được
+       một loại nội dung, mà banner cần chọn giải còn cột phải cần chọn tin. */
+    {key:'hero-banner', label:'Banner giải đấu nổi bật', title:'GIẢI ĐẤU NỔI BẬT', tournamentSelect:true, singleSelect:true},
+    {key:'hero-tin-noi-bat', label:'Tin nổi bật (cạnh banner)', title:'Tin nổi bật', newsPicker:true},
     {key:'tin-tuc-home', label:'Tin tức mới nhất', title:'Tin tức mới nhất', newsPicker:true},
     {key:'event-banner', label:'Banner sự kiện tùy chỉnh', fields:[
       {key:'tag', label:'Nhãn', type:'text', default:'SỰ KIỆN'},
@@ -16,7 +26,7 @@ const PAGE_SECTIONS_REGISTRY = {
       {key:'subtitle', label:'Mô tả', type:'text', span2:true, default:'Trực tiếp 12–20/06 tại Nhà thi đấu Phú Thọ, TP.HCM — cập nhật tỷ số theo thời gian thực.'},
       {key:'buttonText', label:'Nút bấm', type:'text', default:'Xem chi tiết'}
     ]},
-    {key:'lich-giai-dau', label:'Lịch giải đấu sắp diễn ra', title:'Lịch giải đấu sắp diễn ra', apiIntegrated:true},
+    {key:'lich-giai-dau', label:'Lịch giải đấu sắp diễn ra', title:'Lịch giải đấu sắp diễn ra', apiIntegrated:true, tournamentSelect:true},
     {key:'top-players', label:'Top players theo nội dung', title:'Top players', apiIntegrated:true},
     {key:'cta-hoi-vien', label:'CTA — Trở thành hội viên', fields:[
       {key:'title', label:'Tiêu đề', type:'text', span2:true, default:'Trở thành hội viên chính thức của VBSF'},
@@ -37,13 +47,11 @@ const PAGE_SECTIONS_REGISTRY = {
       itemFields:[{key:'name', label:'Tên bộ môn', type:'text'},{key:'desc', label:'Mô tả', type:'text'},{key:'tags', label:'Nội dung (phân cách bởi ,)', type:'text'}]}
   ]},
   'tin-tuc': {label:'Tin tức', icon:'ti-news', path:'/tin-tuc', sections:[
-    {key:'tin-noi-bat', label:'Bài viết nổi bật', fields:[
-      {key:'tag', label:'Chuyên mục', type:'text', default:'HOẠT ĐỘNG VBSF'},
-      {key:'title', label:'Tiêu đề', type:'text', span2:true, default:'VBSF công bố hệ thống thi đấu quốc gia năm 2026'},
-      {key:'excerpt', label:'Tóm tắt', type:'textarea', span2:true, default:'Hệ thống giải đấu năm 2026 gồm các giải vô địch quốc gia, cúp khu vực và hệ thống tích điểm xếp hạng áp dụng cho tất cả nội dung pool, carom và snooker.'},
-      {key:'date', label:'Ngày đăng', type:'text', default:'02/06/2026'}
-    ]},
-    {key:'danh-sach-tin', label:'Danh sách tin tức', newsPicker:true},
+    /* Nhãn/tiêu đề/tóm tắt/ngày lấy thẳng từ bản ghi tin tức — gõ tay 4 ô đó chỉ
+       tạo ra bản sao lệch với bài thật, nên đổi thành chọn bài. */
+    {key:'tin-noi-bat', label:'Bài viết nổi bật', newsPicker:true},
+    /* Danh sách tin phân trang + tìm kiếm phía máy chủ nên không chọn tay được. */
+    {key:'danh-sach-tin', label:'Danh sách tin tức', apiIntegrated:true},
     {key:'sidebar-tin-tuc', label:'Sidebar (tìm kiếm, chuyên mục, tin xem nhiều)'}
   ]},
   'giai-dau': {label:'Giải đấu', icon:'ti-trophy', path:'/giai-dau', sections:[
@@ -52,7 +60,7 @@ const PAGE_SECTIONS_REGISTRY = {
     {key:'ket-qua-gan-day', label:'Kết quả gần đây', title:'Kết quả gần đây', apiIntegrated:true}
   ]},
   'ranking': {label:'Xếp hạng', icon:'ti-medal', path:'/xep-hang', sections:[
-    {key:'top3', label:'Top 3 (podium)', title:'Top 3 · Pool 9 bi', apiIntegrated:true},
+    {key:'rk-carousel', label:'Top 3 (podium quay vòng)', apiIntegrated:true},
     {key:'bang-xep-hang', label:'Bảng xếp hạng chi tiết', apiIntegrated:true}
   ]},
   'thu-vien': {label:'Thư viện', icon:'ti-books', path:'/thu-vien', sections:[
@@ -62,13 +70,11 @@ const PAGE_SECTIONS_REGISTRY = {
       itemFields:[{key:'title', label:'Tên album', type:'text'},{key:'mediaType', label:'Loại (photo/video)', type:'text'},{key:'count', label:'Số lượng', type:'text'}]}
   ]},
   'hoi-vien': {label:'Hội viên', icon:'ti-users', path:'/hoi-vien', sections:[
-    {key:'form-dang-ky', label:'Form đăng ký hội viên', fields:[
-      {key:'feeLabel', label:'Nhãn hội phí', type:'text', default:'Hội phí năm 2026'},
-      {key:'feeAmount', label:'Số tiền', type:'text', default:'300.000đ'},
-      {key:'bankName', label:'Ngân hàng', type:'text', default:'Vietcombank'},
-      {key:'bankAccount', label:'Số tài khoản', type:'text', default:'00xx xxx xxx'}
-    ]},
-    {key:'danh-sach-hoi-vien', label:'Danh sách người chơi (hội viên)', title:'Danh sách hội viên', apiIntegrated:true}
+    /* Phí và số tài khoản dùng ở nhiều chỗ (trang hội viên, gia hạn, footer) nên
+       chỉ có một nguồn: "Thông tin tổ chức". Để thêm bản sao ở đây thì hai nơi
+       lệch nhau mà không ai biết bên nào đang hiển thị. */
+    {key:'form-dang-ky', label:'Form đăng ký hội viên', apiIntegrated:true},
+    {key:'org-form-dang-ky', label:'Form đăng ký hội viên tổ chức', apiIntegrated:true}
   ]},
   'doi-tac': {label:'Đối tác', icon:'ti-building', path:'/doi-tac', sections:[
     {key:'gioi-thieu-doi-tac', label:'Đoạn giới thiệu', fields:[
@@ -85,12 +91,9 @@ const PAGE_SECTIONS_REGISTRY = {
     ]}
   ]},
   'lien-he': {label:'Liên hệ', icon:'ti-phone', path:'/lien-he', sections:[
-    {key:'thong-tin-lien-he', label:'Thông tin liên hệ', title:'Thông tin liên hệ', fields:[
-      {key:'address', label:'Địa chỉ', type:'text', span2:true, default:'Số ..., Quận ..., Hà Nội, Việt Nam'},
-      {key:'email', label:'Email', type:'text', default:'info@billiards.org.vn'},
-      {key:'phone', label:'Điện thoại', type:'text', default:'024 xxxx xxxx'},
-      {key:'hours', label:'Giờ làm việc', type:'text', span2:true, default:'Thứ 2 – Thứ 6 · 08:00 – 17:00'}
-    ]},
+    /* Địa chỉ/email/điện thoại/giờ làm việc lấy từ "Thông tin liên hệ" — cùng
+       nguồn với footer của mọi trang. */
+    {key:'thong-tin-lien-he', label:'Thông tin liên hệ', title:'Thông tin liên hệ', apiIntegrated:true},
     {key:'form-lien-he', label:'Form gửi liên hệ'},
     {key:'ban-do', label:'Bản đồ'}
   ]}
@@ -199,8 +202,6 @@ const SETTINGS_FIELDS = [
   {key:'clubCount', label:'Số câu lạc bộ (hiển thị)', type:'text'},
   {key:'provinceCount', label:'Số tỉnh/thành (hiển thị)', type:'text'},
   {key:'about', label:'Giới thiệu chung', type:'textarea', span2:true, rows:5},
-  {key:'heroTitle', label:'Giải đấu nổi bật (trang chủ)', type:'text', span2:true},
-  {key:'heroSubtitle', label:'Mô tả giải đấu nổi bật', type:'text', span2:true},
   {key:'feeFirstTime', label:'Lệ phí tham gia lần đầu (VNĐ)', type:'text', placeholder:'200.000đ'},
   {key:'feeAnnualFull', label:'Phí thường niên cả năm — đăng ký trước 01/7 (VNĐ)', type:'text', placeholder:'500.000đ'},
   {key:'feeAnnualHalf', label:'Phí thường niên nửa năm — đăng ký từ 01/7 (VNĐ)', type:'text', placeholder:'250.000đ'},

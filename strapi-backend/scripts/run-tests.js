@@ -50,6 +50,7 @@ const COVERAGE_SCOPE = [
   'scripts/website-content.js',
   '../site-js/config.js',
   '../site-js/member-auth.js',
+  '../site-js/page-config.js',
   '../cms-js/tournament-seeding.js',
 ];
 

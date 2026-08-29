@@ -131,7 +131,7 @@ function attachPageSectionsEvents(){
       s.enabled = !s.enabled;
       await saveDB(); await savePageContentToApi();
       renderContent();
-      showToast('Đã lưu cấu hình (giả lập)');
+      showToast('Đã lưu cấu hình');
     });
   });
   document.querySelectorAll('[data-remove-section]').forEach(el=>{

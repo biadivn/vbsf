@@ -443,34 +443,41 @@
   var RENDER = {};
 
   RENDER['trang-chu'] = function (page, data) {
-    var s = data.settings;
+    var cfg = function (key) { return sectionEntry(data.pageContent, 'trang-chu', key); };
 
-    // Hero — tiêu đề/phụ đề lấy từ Thông tin tổ chức, ảnh từ giải nổi bật.
-    var hero = section(page, 'hero');
-    if (hero && (s.heroTitle || s.heroSubtitle)) {
-      var titleEl = hero.querySelector('[style*="font-size:18px"]');
-      var subEl = titleEl && titleEl.nextElementSibling;
-      if (titleEl && s.heroTitle) titleEl.textContent = s.heroTitle;
-      if (subEl && s.heroSubtitle) subEl.textContent = s.heroSubtitle;
+    /* Banner: giải do CMS chọn; chưa chọn thì lấy giải đang diễn ra, không có thì
+       giải sắp tới gần nhất — banner trống trên trang chủ là tệ nhất. */
+    var banner = section(page, 'hero-banner');
+    if (banner && data.tournaments.length) {
+      var live = data.tournaments.filter(function (t) { return t.status === 'ongoing'; })[0];
+      var next = data.tournaments.filter(function (t) { return t.status !== 'completed'; }).sort(byDateAsc)[0];
+      var feat = pickOne(cfg('hero-banner'), data.tournaments, 'tournamentIds') || live || next;
+      if (feat) {
+        setText(banner, '[data-hero-name]', feat.name);
+        var meta = [feat.date ? 'Khởi tranh ' + fmtDate(feat.date) : '', feat.location]
+          .filter(Boolean).join(' · ');
+        setText(banner, '[data-hero-meta]', meta);
+        // Bấm banner mở đúng giải đó thay vì danh sách giải chung.
+        banner.setAttribute('data-go', 'giai-dau-chi-tiet');
+        var ds = tournamentDataset(feat);
+        Object.keys(ds).forEach(function (k) {
+          if (ds[k] !== '' && ds[k] != null) banner.setAttribute('data-' + k, ds[k]);
+        });
+      }
     }
 
-    // Tin nổi bật (cột phải hero)
-    if (hero && data.news.length) {
-      var sideWrap = hero.children[1];
-      if (sideWrap) {
-        var head = sideWrap.firstElementChild;
-        var sideNews = data.news.slice(3, 6);
-        if (!sideNews.length) sideNews = data.news.slice(0, 3);
-        sideWrap.innerHTML = head.outerHTML + sideNews.map(function (n) {
-          return newsRowSmall(n, 'width:64px;height:48px;border-radius:6px;flex-shrink:0');
-        }).join('');
-      }
+    // Tin nổi bật (cột phải banner) — bài do CMS chọn, mặc định 3 bài mới nhất.
+    var sideBox = items(section(page, 'hero-tin-noi-bat'));
+    if (sideBox && data.news.length) {
+      sideBox.innerHTML = pickItems(cfg('hero-tin-noi-bat'), data.news, 'newsIds', 3)
+        .map(function (n) { return newsRowSmall(n, 'width:64px;height:48px;border-radius:6px;flex-shrink:0'); })
+        .join('');
     }
 
     // Tin tức mới nhất
     var newsBox = items(section(page, 'tin-tuc-home'));
     if (newsBox && data.news.length) {
-      newsBox.innerHTML = data.news.slice(0, 3).map(newsCardHome).join('');
+      newsBox.innerHTML = pickItems(cfg('tin-tuc-home'), data.news, 'newsIds', 3).map(newsCardHome).join('');
     }
 
     // Lịch giải đấu sắp diễn ra — giải đang diễn ra trước, rồi tới ngày gần nhất
@@ -483,8 +490,9 @@
           if (b.status === 'ongoing' && a.status !== 'ongoing') return 1;
           return byDateAsc(a, b);
         })
-        .slice(0, 3);
-      if (upcoming.length) schedule.innerHTML = upcoming.map(tournamentRowHome).join('');
+        ;
+      var picked = pickItems(cfg('lich-giai-dau'), upcoming, 'tournamentIds', 3);
+      if (picked.length) schedule.innerHTML = picked.map(tournamentRowHome).join('');
     }
 
     // Top players — mỗi ô là 1 cặp (nhóm | bộ môn), tự động chạy slide
@@ -524,7 +532,7 @@
     // Dải logo đối tác
     var partnerBox = items(section(page, 'doi-tac-home'));
     if (partnerBox && data.partners.length) {
-      partnerBox.innerHTML = data.partners.slice(0, 5).map(function (p) {
+      partnerBox.innerHTML = pickItems(cfg('doi-tac-home'), data.partners, 'partnerIds', 5).map(function (p) {
         return imageBox(p.image, 'width:96px;height:40px;border-radius:6px').replace('ti-photo', 'ti-building');
       }).join('');
     }
@@ -536,7 +544,8 @@
 
   RENDER['tin-tuc'] = function (page, data) {
     if (!data.news.length) return;
-    var featured = data.news.filter(function (n) { return n.featured; })[0] || data.news[0];
+    var featured = pickItems(sectionEntry(data.pageContent, 'tin-tuc', 'tin-noi-bat'), data.news, 'newsIds', 1)[0]
+      || data.news.filter(function (n) { return n.featured; })[0] || data.news[0];
 
     // Bài nổi bật
     var feat = section(page, 'tin-noi-bat');
@@ -907,7 +916,12 @@
     boxes.forEach(function (box) {
       var tierName = box.getAttribute('data-tier');
       var tier = TIERS.filter(function (t) { return t.name === tierName; })[0];
-      var list = data.partners.filter(function (p) { return p.tier === tierName; });
+      var sec = box.closest('[data-section]');
+      var entry = sec ? sectionEntry(data.pageContent, 'doi-tac', sec.getAttribute('data-section')) : null;
+      // Chọn tay trong CMS thì theo đúng danh sách đó; không thì lọc theo hạng.
+      var list = (entry && entry.pickerMode === 'manual' && (entry.partnerIds || []).length)
+        ? pickItems(entry, data.partners, 'partnerIds', 0)
+        : data.partners.filter(function (p) { return p.tier === tierName; });
       if (!list.length) {
         box.innerHTML = '<div style="font-size:12.5px;color:#8A968F">Chưa có đơn vị nào ở hạng này.</div>';
         return;
@@ -1408,31 +1422,49 @@
 
   /* Nhãn/tiêu đề do module "Trang website" trong CMS quản lý. Chỉ áp những khối
      có chỗ để áp; phần nào chưa nhập thì giữ nguyên chữ tĩnh trong HTML. */
+  /* Áp cấu hình CMS lên một trang: bật/tắt khối, tiêu đề khối, các ô [data-fill]
+     và ảnh nền. Phần dữ liệu (tin/giải/đối tác) do RENDER lo — có dùng bộ chọn
+     của CMS qua pickItems/pickOne. */
+  /* Đặt ảnh nền cho một ô. Ô đang là khung xám chờ ảnh (.vb-ph + icon) thì gỡ
+     luôn khung và icon, không thì ảnh nằm dưới lớp xám và coi như không thấy. */
+  function setBackground(el, url) {
+    if (!el || !url) return;
+    if (el.classList.contains('vb-ph')) {
+      el.classList.remove('vb-ph');
+      var icon = el.querySelector(':scope > i');
+      if (icon) icon.remove();
+    }
+    el.style.backgroundImage = "url('" + url + "')";
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+  }
+
   function applyPageContent(pageId, page, data) {
     var all = data.pageContent && data.pageContent.data && data.pageContent.data.pageSections;
-    var sections = (all && all[pageId]) || [];
-    sections.forEach(function (entry) {
-      if (!entry || !entry.key || !entry.values) return;
+    var list = (all && all[pageId]) || [];
+    list.forEach(function (entry) {
+      if (!entry || !entry.key) return;
       var el = section(page, entry.key);
       if (!el) return;
-      var v = entry.values;
 
-      // Tiêu đề khối (khối nào cũng có thể có [data-title])
-      if (v.title) setText(el, '[data-title]', v.title);
+      if (sectionHidden(entry)) { el.style.display = 'none'; return; }
 
-      if (entry.key === 'hero') {
-        if (v.bannerTag) setText(el, '[style*="font-size:10.5px"]', v.bannerTag);
-        if (v.bannerTitle) setText(el, '[style*="font-size:18px"]', v.bannerTitle);
-        if (v.bannerSubtitle) setText(el, '[style*="font-size:12px"]', v.bannerSubtitle);
-        if (v.sideLabel && el.children[1]) setText(el.children[1], 'div', v.sideLabel);
-      }
+      if (entry.title) setText(el, '[data-title]', entry.title);
 
-      if (entry.key === 'event-banner') {
-        ['tag', 'title', 'subtitle', 'buttonText'].forEach(function (k) {
-          if (v[k]) setText(el, '[data-fill-eb="' + k + '"]', v[k]);
-        });
-        if (v.enabled === false) el.setAttribute('data-eb-enabled', 'false');
-      }
+      var content = entry.content || {};
+      /* [data-fill] nhận chữ thuần; [data-fill-html] dành cho ô soạn thảo
+         (type:'textarea' trong registry) — CMS lưu HTML cho những ô đó. Tách
+         hai loại thay vì đoán theo nội dung để không tự dựng HTML từ ô chữ. */
+      el.querySelectorAll('[data-fill]').forEach(function (slot) {
+        var v = content[slot.getAttribute('data-fill')];
+        if (v != null && String(v).trim() !== '') slot.textContent = v;
+      });
+      el.querySelectorAll('[data-fill-html]').forEach(function (slot) {
+        var v = content[slot.getAttribute('data-fill-html')];
+        if (v != null && String(v).trim() !== '') slot.innerHTML = v;
+      });
+
+      if (entry.backgroundImage) setBackground(el.querySelector('[data-bg]') || el, entry.backgroundImage);
     });
   }
 

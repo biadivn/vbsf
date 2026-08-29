@@ -49,7 +49,7 @@ function renderTopbar(){
   } else if(currentView.startsWith('page:')){
     const pageKey = currentView.slice(5);
     title.textContent = getPageLabel(pageKey);
-    sub.textContent = 'Bật/tắt, sắp xếp và cấu hình nội dung từng section trên trang này — mô phỏng, chưa áp dụng trực tiếp lên website';
+    sub.textContent = 'Bật/tắt, sắp xếp và cấu hình nội dung từng section — thay đổi áp thẳng lên website';
     actions.innerHTML = `<a class="btn btn-ghost" href="index.html" target="_blank" rel="noopener"><i class="ti ti-external-link"></i> Xem trang (thật)</a>`;
   } else if(currentView==='settings'){
     title.textContent = 'Thông tin tổ chức';
