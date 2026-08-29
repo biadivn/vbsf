@@ -24,7 +24,7 @@ const SINGLETON_API_PATH = { settings:'setting', contact:'contact-info' };
    customPages, customSections, pageMeta, pageSectionKeysEverAdded) được cất
    trong single type `page-content` dưới dạng JSON — CMS vẫn là nơi chỉnh sửa,
    Strapi là nơi lưu trữ và site đọc từ đó. */
-const PAGE_CONTENT_KEYS = ['pageSections','customPages','customSections','pageMeta','pageSectionKeysEverAdded'];
+const PAGE_CONTENT_KEYS = ['pageSections','customPages','customSections','pageMeta','pageSectionKeysEverAdded','pageSectionsOrderVersion'];
 
 async function refreshPageContentFromApi(){
   try{
@@ -33,13 +33,18 @@ async function refreshPageContentFromApi(){
     const out = await res.json();
     const data = out && out.data && out.data.data;
     if(!data) return;
-    PAGE_CONTENT_KEYS.forEach(k=>{ if(data[k]) DB[k] = data[k]; });
+    // Danh sách này có cả khoá số (pageSectionsOrderVersion) nên không lọc theo truthy.
+  PAGE_CONTENT_KEYS.forEach(k=>{ if(data[k]!==undefined && data[k]!==null) DB[k] = data[k]; });
+  /* Cờ "đã sắp lại thứ tự khối" phải theo dữ liệu TRÊN MÁY CHỦ: máy chủ chưa có
+     cờ nghĩa là dữ liệu vừa nạp về chưa được sắp, kể cả khi localStorage của máy
+     này đã sắp rồi (storage.js gọi normalizePageSections trước lúc đăng nhập). */
+  DB.pageSectionsOrderVersion = data.pageSectionsOrderVersion;
   }catch(e){ /* offline: giữ nguyên dữ liệu đang có */ }
 }
 
 async function savePageContentToApi(){
   const payload = {};
-  PAGE_CONTENT_KEYS.forEach(k=>{ payload[k] = DB[k] || {}; });
+  PAGE_CONTENT_KEYS.forEach(k=>{ payload[k] = DB[k]!==undefined ? DB[k] : {}; });
   try{
     const res = await apiFetch('/api/page-content', { method:'PUT', body: JSON.stringify({ data: { data: payload } }) });
     if(!res.ok){ showToast('Không lưu được nội dung trang lên máy chủ', true); return false; }

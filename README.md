@@ -90,6 +90,13 @@ Ba mảnh phải khớp nhau, lệch một mảnh là admin sửa mà trang khô
 > trang chủ và cột "Tin nổi bật" cạnh nó là hai khối riêng (`hero-banner`,
 > `hero-tin-noi-bat`).
 
+Bật/tắt và thứ tự khối cũng áp lên site: `enabled: false` ẩn khối, còn thứ tự
+trong danh sách CMS sắp lại DOM — nhưng chỉ **hoán vị các khối cùng một cha**,
+vì khối nằm trong một hàng flex riêng (banner + cột tin) không thể đổi chỗ với
+khối ngoài hàng đó mà không vỡ bố cục. `PAGE_SECTION_ORDER_VERSION` trong
+registry sắp lại thứ tự đang lưu một lần cho khớp danh mục; tăng số đó nếu cần
+sắp lại lần nữa.
+
 Banner trang chủ trỏ vào **một giải đấu thật**: tên, ngày và địa điểm lấy từ bản
 ghi giải, bấm vào mở đúng giải đó. Chưa chọn thì tự lấy giải đang diễn ra, không
 có nữa thì giải sắp tới gần nhất.

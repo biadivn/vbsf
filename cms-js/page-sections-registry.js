@@ -131,6 +131,9 @@ function getSectionLabel(pageKey, key){
   const def = getSectionDef(pageKey, key);
   return (entry && entry.labelOverride) || (def && def.label) || key;
 }
+/* Tăng số này nếu cần sắp lại thứ tự khối một lần nữa cho toàn bộ cài đặt. */
+const PAGE_SECTION_ORDER_VERSION = 1;
+
 function makeDefaultSectionEntry(s){
   const entry = {key:s.key, enabled:true, title: s.title!==undefined ? s.title : undefined, itemCount: s.items ? s.itemCount : undefined, backgroundImage:null};
   if(s.fields){ entry.content = {}; s.fields.forEach(f=>{ entry.content[f.key] = f.default||''; }); }
@@ -165,7 +168,16 @@ function normalizePageSections(){
     const everAdded = DB.pageSectionKeysEverAdded[pageKey];
     catalog.forEach(s=>{
       if(!DB.pageSections[pageKey].find(e=>e.key===s.key) && !everAdded.includes(s.key)){
-        DB.pageSections[pageKey].push(makeDefaultSectionEntry(s));
+        /* Chèn đúng vị trí theo danh mục thay vì đẩy xuống cuối: danh sách trong
+           CMS phải đọc theo đúng thứ tự khối trên trang thật, không thì khối mới
+           lúc nào cũng nằm cuối dù nó ở đầu trang. */
+        const catIdx = catalog.findIndex(c=>c.key===s.key);
+        const before = catalog.slice(0, catIdx).map(c=>c.key);
+        let at = DB.pageSections[pageKey].length;
+        for(let i=0;i<DB.pageSections[pageKey].length;i++){
+          if(!before.includes(DB.pageSections[pageKey][i].key)){ at = i; break; }
+        }
+        DB.pageSections[pageKey].splice(at, 0, makeDefaultSectionEntry(s));
         everAdded.push(s.key);
       }
     });
@@ -192,6 +204,20 @@ function normalizePageSections(){
       if(!s.fields){ delete e.content; }
     });
   });
+
+  /* Thứ tự khối trước đây không ảnh hưởng gì tới site, nên chưa ai sắp xếp có
+     chủ đích — trong khi vòng lặp trên luôn chèn khối mới theo danh mục và dữ
+     liệu cũ thì nối vào cuối. Nay thứ tự đã có tác dụng thật (site sắp lại DOM
+     theo danh sách này) nên chỉnh một lần cho khớp danh mục; từ lần sau admin
+     kéo thả thế nào giữ nguyên thế đó. */
+  if(DB.pageSectionsOrderVersion === PAGE_SECTION_ORDER_VERSION) return false;
+  getAllPageKeys().forEach(pageKey=>{
+    const catalog = getSectionCatalog(pageKey);
+    const at = key=>{ const i = catalog.findIndex(c=>c.key===key); return i<0 ? catalog.length : i; };
+    DB.pageSections[pageKey].sort((a,b)=>at(a.key)-at(b.key));
+  });
+  DB.pageSectionsOrderVersion = PAGE_SECTION_ORDER_VERSION;
+  return true;   // bên gọi lưu lên máy chủ để site thấy thứ tự đã sắp
 }
 
 const SETTINGS_FIELDS = [

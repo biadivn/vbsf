@@ -168,7 +168,7 @@ async function showCmsApp(){
     refreshSingletonFromApi('contact'),
     refreshPageContentFromApi()
   ]);
-  normalizePageSections();
+  if(normalizePageSections()) await savePageContentToApi();
   renderSidebar();
   renderTopbar();
   renderContent();

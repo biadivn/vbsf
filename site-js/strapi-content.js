@@ -1466,6 +1466,37 @@
 
       if (entry.backgroundImage) setBackground(el.querySelector('[data-bg]') || el, entry.backgroundImage);
     });
+
+    reorderSections(page, list);
+  }
+
+  /* CMS cho kéo thả sắp xếp khối, nên trang phải đổi thứ tự theo. Chỉ sắp lại
+     những khối CÙNG một cha — vd. banner trang chủ và cột tin bên cạnh nằm trong
+     một hàng flex riêng, đổi chỗ chúng với khối ngoài hàng đó thì vỡ bố cục. */
+  function reorderSections(page, list) {
+    var groups = new Map();
+    list.forEach(function (entry) {
+      if (!entry || !entry.key) return;
+      var el = section(page, entry.key);
+      if (!el || !el.parentNode) return;
+      if (!groups.has(el.parentNode)) groups.set(el.parentNode, []);
+      groups.get(el.parentNode).push(el);
+    });
+    groups.forEach(function (els, parent) {
+      if (els.length < 2) return;
+      /* Chỉ HOÁN VỊ các khối trong đúng những vị trí chúng đang chiếm: đánh dấu
+         từng vị trí bằng một comment rồi đặt lại theo thứ tự CMS. Làm kiểu chèn
+         tương đối sẽ kéo cả các phần tử không phải section nằm xen giữa. */
+      var slots = Array.prototype.filter.call(parent.children, function (c) {
+        return els.indexOf(c) > -1;
+      }).map(function (node) {
+        var mark = document.createComment('vbsf-section-slot');
+        parent.insertBefore(mark, node);
+        return mark;
+      });
+      els.forEach(function (el, i) { if (slots[i]) parent.insertBefore(el, slots[i]); });
+      slots.forEach(function (mark) { parent.removeChild(mark); });
+    });
   }
 
   async function hydrate(pageId, page) {
