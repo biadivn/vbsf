@@ -109,8 +109,10 @@ chức" (`setting`), địa chỉ/email/điện thoại ở "Thông tin liên h�
 ### Tệp tài liệu (Văn bản & Luật)
 
 Admin đính tệp ngay trong CMS (ô "Tệp đính kèm", tự điền Định dạng + Dung lượng
-theo tệp vừa chọn). Tệp lên Strapi qua `POST /api/upload` bằng token của phiên
-đăng nhập — endpoint đó **không** mở cho khách ẩn danh.
+theo tệp vừa chọn), thay tệp bằng cách chọn tệp khác, gỡ tệp bằng nút "Gỡ tệp".
+Lưu mà không đụng vào ô đó thì tệp đang có giữ nguyên. Tệp lên Strapi qua
+`POST /api/upload` bằng token của phiên đăng nhập — endpoint đó **không** mở cho
+khách ẩn danh.
 
 Tài liệu là nội dung công khai, ai vào site cũng phải tải được; cái cần chặn là
 bot quét sạch kho tệp và công cụ tìm kiếm lập chỉ mục thẳng file PDF. Ba lớp:

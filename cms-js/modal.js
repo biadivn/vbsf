@@ -179,6 +179,18 @@ function toggleRowVisibility(key, id){
 /* Tệp tài liệu: giữ nguyên TÊN và ĐUÔI thật của tệp (khác ảnh đại diện, vốn
    suy đuôi từ kiểu MIME) — tên tệp là thứ người tải về nhìn thấy. */
 function attachModalFileEvents(){
+  document.querySelectorAll('[data-file-clear]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.getAttribute('data-file-clear');
+      // null (khác undefined) = gỡ hẳn; undefined = không đụng tới tệp đang có.
+      modalFileValues[key] = null;
+      const box = document.getElementById('filePreview_'+key);
+      if(box) box.innerHTML = '<div class="cell-muted" style="font-size:13px">Sẽ gỡ tệp khi lưu</div>';
+      btn.style.display = 'none';
+      const input = document.querySelector('[data-file-field="'+key+'"]');
+      if(input) input.value = '';
+    });
+  });
   document.querySelectorAll('[data-file-field]').forEach(input=>{
     input.addEventListener('change', (e)=>{
       const key = input.getAttribute('data-file-field');
@@ -190,6 +202,8 @@ function attachModalFileEvents(){
         modalFileValues[key] = {data: ev.target.result, name: file.name, size: file.size, sizeLabel};
         const box = document.getElementById('filePreview_'+key);
         if(box) box.innerHTML = `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)"><i class="ti ti-file-text" style="font-size:18px;color:var(--vd)"></i><b>${escapeHtml(file.name)}</b> <span class="cell-muted">· ${escapeHtml(sizeLabel)}</span></div>`;
+        const clearBtn = document.querySelector('[data-file-clear="'+key+'"]');
+        if(clearBtn) clearBtn.style.display = '';
         autoFillFromFile(key, file);
       };
       reader.readAsDataURL(file);
@@ -293,7 +307,10 @@ function renderField(f, value){
       : `<div class="cell-muted" style="font-size:13px">Chưa có tệp đính kèm</div>`;
     return `<div>
       <div id="filePreview_${f.key}" style="margin-bottom:8px">${cur}</div>
-      <input type="file" accept="${escapeAttr(f.accept||'')}" data-file-field="${f.key}">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input type="file" accept="${escapeAttr(f.accept||'')}" data-file-field="${f.key}">
+        <button type="button" class="btn btn-ghost" data-file-clear="${f.key}" style="${value && value.name ? '' : 'display:none'}"><i class="ti ti-trash"></i> Gỡ tệp</button>
+      </div>
       <div class="fld-hint">Tệp tải lên chỉ tải được qua trang Thư viện, không lộ đường dẫn lưu trữ.</div>
     </div>`;
   }
