@@ -62,8 +62,12 @@ const COLLECTIONS = {
       {key:'title', label:'Tên tài liệu', type:'text', required:true, span2:true},
       {key:'fileType', label:'Định dạng', type:'select', options:['PDF','DOCX','XLSX']},
       {key:'tag', label:'Phân loại', type:'select', options:['Quy chế','Luật','Biểu mẫu','Thông báo']},
-      {key:'size', label:'Dung lượng', type:'text', placeholder:'VD: 1,2 MB'},
-      {key:'date', label:'Ngày ban hành', type:'date'}
+      {key:'size', label:'Dung lượng', type:'text', placeholder:'Tự điền khi tải tệp lên'},
+      {key:'date', label:'Ngày ban hành', type:'date'},
+      /* autoFill: chọn tệp xong thì tự điền Định dạng + Dung lượng, khỏi gõ tay
+         rồi lệch với tệp thật. */
+      {key:'file', label:'Tệp đính kèm', type:'file', span2:true,
+        accept:'.pdf,.doc,.docx,.xls,.xlsx', autoFill:{fileType:'ext', size:'size'}}
     ],
     columns:[
       {key:'title', label:'Tên tài liệu'},

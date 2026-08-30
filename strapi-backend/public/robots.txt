@@ -1,3 +1,14 @@
-# To prevent search engines from seeing the site altogether, uncomment the next two lines:
-# User-Agent: *
-# Disallow: /
+# Tệp tài liệu (Văn bản & Luật) chỉ tải qua /api/library-docs/:id/download.
+# Thư mục lưu trữ không được công bố ở API công khai và không nên bị lập chỉ mục.
+#
+# LƯU Ý: /robots.txt của vbsf-cms.biadi.vn hiện do Cloudflare quản lý (Managed
+# robots.txt) và ĐANG GHI ĐÈ file này — kiểm chứng bằng:
+#     curl -s https://vbsf-cms.biadi.vn/robots.txt
+# Muốn nội dung dưới đây có hiệu lực thì phải tắt tính năng đó trong Cloudflare.
+# Lớp chặn KHÔNG phụ thuộc robots.txt nằm ở phía ứng dụng: API công khai không
+# trả đường dẫn /uploads, và middleware uploads-noindex gắn X-Robots-Tag cho mọi
+# phản hồi dưới /uploads.
+User-agent: *
+Disallow: /uploads/
+Disallow: /admin
+Disallow: /api/

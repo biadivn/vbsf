@@ -106,6 +106,36 @@ chức" (`setting`), địa chỉ/email/điện thoại ở "Thông tin liên h�
 Đặt thêm bản sao trong section thì hai nơi lệch nhau mà không ai biết bên nào
 đang hiển thị.
 
+### Tệp tài liệu (Văn bản & Luật)
+
+Admin đính tệp ngay trong CMS (ô "Tệp đính kèm", tự điền Định dạng + Dung lượng
+theo tệp vừa chọn). Tệp lên Strapi qua `POST /api/upload` bằng token của phiên
+đăng nhập — endpoint đó **không** mở cho khách ẩn danh.
+
+Tài liệu là nội dung công khai, ai vào site cũng phải tải được; cái cần chặn là
+bot quét sạch kho tệp và công cụ tìm kiếm lập chỉ mục thẳng file PDF. Ba lớp:
+
+| Lớp | Ở đâu |
+|---|---|
+| API công khai **không trả** đường dẫn `/uploads` — chỉ có `downloadUrl` trỏ vào endpoint riêng | [library-doc.js](strapi-backend/src/api/library-doc/controllers/library-doc.js) + [library-doc-file.js](strapi-backend/src/utils/library-doc-file.js) |
+| Endpoint tải đặt `X-Robots-Tag: noindex, nofollow, noarchive`, ép `Content-Disposition: attachment`, chốt đường dẫn trong `public/uploads`, chỉ phục vụ đuôi tệp trong danh sách cho phép | [library-doc-download.js](strapi-backend/src/api/library-doc/controllers/library-doc-download.js) |
+| 30 lượt tải/phút/IP | `DOWNLOAD_LIMIT` trong [rate-limit.js](strapi-backend/src/utils/rate-limit.js) |
+
+Thêm một lớp phòng khi đường dẫn `/uploads` lọt ra ngoài bằng cách khác (ảnh
+trong bài viết vẫn dùng thẳng `/uploads`): middleware
+[uploads-noindex](strapi-backend/src/middlewares/uploads-noindex.js) gắn
+`X-Robots-Tag` cho mọi phản hồi dưới `/uploads`.
+
+> **robots.txt không dùng được ở đây.** `/robots.txt` của cả `vbsf.biadi.vn` và
+> `vbsf-cms.biadi.vn` đang do Cloudflare quản lý (Managed robots.txt) và ghi đè
+> file trong repo — kiểm chứng bằng `curl -s https://vbsf-cms.biadi.vn/robots.txt`.
+> `strapi-backend/public/robots.txt` đã có `Disallow: /uploads/` để dùng ngay khi
+> tắt tính năng đó trong Cloudflare, nhưng ba lớp trên không phụ thuộc vào nó.
+
+`hasFile`/`downloadUrl` suy ra từ quan hệ media nên controller **tự ép populate**
+thay vì trông chờ người gọi truyền `?populate=file` — quên một lần là cả trang
+Thư viện mất nút tải mà không có lỗi nào báo ra.
+
 ### Quản lý giải đấu (CMS)
 
 Engine ở [cms-js/tournament-engine.js](cms-js/tournament-engine.js) lo 4 thể thức

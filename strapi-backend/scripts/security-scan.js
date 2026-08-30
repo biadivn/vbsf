@@ -205,14 +205,28 @@ function checkEnvNotTracked(files, fromGit) {
 /* ---------------- 3. Bất biến của route công khai ---------------- */
 
 function checkPublicRoutes() {
-  const routeFiles = [
-    'src/api/member/routes/member-auth.js',
-    'src/api/member-org/routes/member-org-auth.js',
-  ];
+  /* Quét MỌI file route tự viết trong src/api thay vì một danh sách chép tay:
+     thêm endpoint công khai mới mà quên cập nhật danh sách thì bất biến này im
+     lặng bỏ qua đúng cái route cần canh nhất. */
+  const routeFiles = [];
+  const apiDir = path.join(ROOT, 'src', 'api');
+  if (fs.existsSync(apiDir)) {
+    fs.readdirSync(apiDir).forEach((api) => {
+      const dir = path.join(apiDir, api, 'routes');
+      if (!fs.existsSync(dir)) return;
+      fs.readdirSync(dir)
+        .filter((f) => f.endsWith('.js'))
+        .forEach((f) => routeFiles.push(path.join('src', 'api', api, 'routes', f)));
+    });
+  }
+  if (!routeFiles.length) return fail('routes', 'không tìm thấy file route nào để kiểm tra');
   let checked = 0;
   routeFiles.forEach((rel) => {
     const abs = path.join(ROOT, rel);
     if (!fs.existsSync(abs)) return fail('routes', rel + ': không tìm thấy file route');
+    /* Bỏ qua core router: quyền của nó do Users & Permissions quyết định chứ
+       không khai trong file, và đọc .routes ngoài runtime Strapi sẽ ném lỗi. */
+    if (fs.readFileSync(abs, 'utf8').includes('createCoreRouter')) return;
     delete require.cache[require.resolve(abs)];
     const mod = require(abs);
     (mod.routes || []).forEach((r) => {

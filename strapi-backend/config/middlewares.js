@@ -9,4 +9,6 @@ module.exports = [
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
+  // Sau strapi::public để chạy cho cả tệp tĩnh trong /uploads.
+  'global::uploads-noindex',
 ];

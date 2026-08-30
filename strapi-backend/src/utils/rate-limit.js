@@ -69,4 +69,13 @@ const FORM_LIMIT = {
   message: 'Bạn gửi quá nhiều lần. Vui lòng thử lại sau một phút.',
 };
 
-module.exports = { rateLimit, AUTH_LIMIT, PASSWORD_RESET_LIMIT, FORM_LIMIT };
+/* Tải tài liệu (Văn bản & Luật): 30 lần/phút/IP. Người thật mở trang rồi tải vài
+   file là cùng; con số này đủ rộng cho một lớp học cùng dùng một đường mạng,
+   nhưng chặn việc quét sạch kho tài liệu bằng vòng lặp. */
+const DOWNLOAD_LIMIT = {
+  max: 30,
+  windowMs: 60 * 1000,
+  message: 'Bạn tải quá nhiều tệp trong thời gian ngắn. Vui lòng thử lại sau một phút.',
+};
+
+module.exports = { rateLimit, AUTH_LIMIT, PASSWORD_RESET_LIMIT, FORM_LIMIT, DOWNLOAD_LIMIT };

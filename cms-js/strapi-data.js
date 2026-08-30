@@ -55,6 +55,22 @@ async function savePageContentToApi(){
   }
 }
 
+/* Tệp tài liệu: giữ nguyên tên và đuôi gốc. uploadDataUri() suy đuôi từ kiểu
+   MIME, đúng cho ảnh nhưng sai cho .docx/.xlsx (đều là zip). */
+async function uploadNamedFile(value, fallbackName){
+  const blobRes = await fetch(value.data);
+  const blob = await blobRes.blob();
+  const form = new FormData();
+  form.append('files', blob, value.name || fallbackName);
+  const { jwt } = getStoredTokens();
+  const headers = {};
+  if(jwt) headers['Authorization'] = 'Bearer '+jwt;
+  const res = await fetch(STRAPI_URL+'/api/upload', { method:'POST', headers, body: form });
+  if(!res.ok) throw new Error('upload failed');
+  const out = await res.json();
+  return out[0].id;
+}
+
 async function uploadDataUri(dataUri, filenameHint){
   const blobRes = await fetch(dataUri);
   const blob = await blobRes.blob();
@@ -70,6 +86,13 @@ async function uploadDataUri(dataUri, filenameHint){
   return out[0].id;
 }
 
+/* Strapi lưu size của media theo KB (số thực), khác File.size của trình duyệt
+   vốn theo byte — hai đơn vị này lẫn nhau thì "1,2 MB" thành "1,2 KB". */
+function strapiSizeLabel(kb){
+  if(kb == null) return '';
+  return kb < 1024 ? Math.round(kb) + ' KB' : (kb/1024).toFixed(1).replace('.', ',') + ' MB';
+}
+
 function mediaUrl(media){
   if(!media || !media.url) return '';
   return media.url.startsWith('http') ? media.url : STRAPI_URL + media.url;
@@ -78,7 +101,14 @@ function mediaUrl(media){
 function mapStrapiEntryToRecord(c, item){
   const rec = { id: item.documentId };
   c.fields.forEach(f=>{
-    rec[f.key] = f.type==='image' ? mediaUrl(item[f.key]) : item[f.key];
+    if(f.type==='image'){ rec[f.key] = mediaUrl(item[f.key]); return; }
+    if(f.type==='file'){
+      // Không giữ url: CMS chỉ cần tên + dung lượng để hiện "đang đính kèm gì".
+      const m = item[f.key];
+      rec[f.key] = m ? {name: m.name, size: m.size, sizeLabel: strapiSizeLabel(m.size)} : null;
+      return;
+    }
+    rec[f.key] = item[f.key];
   });
   // Field không nằm trong form chỉnh sửa (c.fields) nhưng CMS vẫn cần đọc để
   // hiển thị/vận hành — vd. disciplines/freeMatches (hội viên), bracket/rr/sw/mode
@@ -205,6 +235,14 @@ async function saveRemoteCollectionRecord(key, id, data){
         const val = data[f.key];
         if(val && val.startsWith('data:')) payload[f.key] = await uploadDataUri(val, f.key);
         else if(val === '') payload[f.key] = null;
+        continue;
+      }
+      if(f.type==='file'){
+        const val = data[f.key];
+        // Chọn tệp mới -> tải lên. Không chọn gì -> bỏ field khỏi payload để
+        // Strapi giữ nguyên tệp đang có, không phải gỡ đính kèm.
+        if(val && val.data) payload[f.key] = await uploadNamedFile(val, f.key);
+        else if(val === null) payload[f.key] = null;
         continue;
       }
       const val = data[f.key];

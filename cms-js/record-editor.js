@@ -26,7 +26,12 @@ function renderRecordEditor(key, id){
 function renderRecordInfoTab(key, record, isNew){
   const c = COLLECTIONS[key];
   modalImageValues = {};
-  c.fields.forEach(f=>{ if(f.type==='image') modalImageValues[f.key] = record[f.key] || null; });
+  modalFileValues = {};
+  editingRecordFiles = {};
+  c.fields.forEach(f=>{
+    if(f.type==='image') modalImageValues[f.key] = record[f.key] || null;
+    if(f.type==='file') editingRecordFiles[f.key] = record[f.key] || null;
+  });
   const sections = [];
   c.fields.forEach(f=>{
     const title = f.section || null;
@@ -291,6 +296,7 @@ async function saveRecordEditor(key){
     let val;
     if(f.type==='checkbox'){ val = document.getElementById('f_'+f.key).classList.contains('on'); }
     else if(f.type==='image'){ val = modalImageValues[f.key] || ''; }
+    else if(f.type==='file'){ val = modalFileValues[f.key] !== undefined ? modalFileValues[f.key] : (editingRecordFiles[f.key] || null); }
     else if(f.type==='richtext'){ val = document.getElementById('rte_'+f.key).innerHTML; }
     else if(f.type==='multiselect'){
       val = Array.from(document.querySelectorAll(`[data-multiselect="${f.key}"].on`)).map(el=>el.getAttribute('data-value'));

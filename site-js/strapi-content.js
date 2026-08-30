@@ -39,6 +39,12 @@
   }
 
   /** '2026-06-12' -> '12/06/2026' */
+  /* Strapi trả dung lượng media theo KB. Chỉ dùng khi admin bỏ trống ô "Dung lượng". */
+  function docSize(kb) {
+    if (kb == null) return '';
+    return kb < 1024 ? Math.round(kb) + ' KB' : (kb / 1024).toFixed(1).replace('.', ',') + ' MB';
+  }
+
   function fmtDate(iso) {
     if (!iso) return '';
     var p = String(iso).slice(0, 10).split('-');
@@ -175,7 +181,8 @@
       { key: 'members', fallback: [], load: function () { return list('members', 'populate=disciplines&populate=avatar'); } },
       { key: 'memberOrgs', fallback: [], load: function () { return list('member-orgs'); } },
       { key: 'partners', fallback: [], load: function () { return list('partners', 'populate=image'); } },
-      { key: 'libraryDocs', fallback: [], load: function () { return list('library-docs', 'populate=file'); } },
+      // Không cần populate=file: controller tự nạp quan hệ và chỉ trả downloadUrl.
+      { key: 'libraryDocs', fallback: [], load: function () { return list('library-docs'); } },
       { key: 'mediaItems', fallback: [], load: function () { return list('media-items', 'populate=assets'); } },
       { key: 'leaders', fallback: [], load: function () { return list('leaders', 'sort=order:asc&populate=photo'); } },
       { key: 'pageContent', fallback: {}, load: function () { return api('page-content'); } },
@@ -865,11 +872,14 @@
         var icon = isPdf
           ? '<div class="ficon" style="background:#FDECEC;color:#9E2A2B"><i class="ti ti-file-type-pdf" style="font-size:20px"></i></div>'
           : '<div class="ficon" style="background:#EAF1FB;color:#0190BF"><i class="ti ti-file-text" style="font-size:20px"></i></div>';
-        var meta = [d.fileType, d.size, fmtDate(d.date)].filter(Boolean).join(' · ');
-        var url = mediaUrl(d.file);
-        var dl = url
-          ? '<a href="' + esc(url) + '" target="_blank" rel="noopener"><i class="ti ti-download" style="color:#21428E;font-size:18px"></i></a>'
-          : '<i class="ti ti-download" style="color:#21428E;font-size:18px"></i>';
+        var size = d.size || (d.fileSizeKb != null ? docSize(d.fileSizeKb) : '');
+        var meta = [d.fileType, size, fmtDate(d.date)].filter(Boolean).join(' · ');
+        /* downloadUrl do API trả về, trỏ vào endpoint tải của Strapi — đường dẫn
+           /uploads thật không xuất hiện ở đâu trên trang để bot lần theo. */
+        var dl = d.downloadUrl
+          ? '<a href="' + esc(STRAPI_URL + d.downloadUrl) + '" rel="nofollow noopener" ' +
+            'title="Tải ' + esc(d.title) + '"><i class="ti ti-download" style="color:#21428E;font-size:18px"></i></a>'
+          : '<i class="ti ti-download" style="color:#C9CFC9;font-size:18px" title="Chưa có tệp đính kèm"></i>';
         return (
           '<div class="doc-row" data-cat="' + catOf(d) + '">' + icon +
           '<div style="flex:1"><div style="font-size:13.5px;font-weight:500;color:#1B2A24">' + esc(d.title) + '</div>' +

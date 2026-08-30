@@ -2,13 +2,22 @@
    MODAL (add / edit for collections)
    ========================================================= */
 let modalImageValues = {};
+/* Tệp vừa chọn trong phiên chỉnh sửa (dataUri + tên gốc); editingRecordFiles giữ
+   tệp đang đính kèm sẵn để "không chọn gì" nghĩa là giữ nguyên, không phải xoá. */
+let modalFileValues = {};
+let editingRecordFiles = {};
 function openModal(key, id){
   pageModal = null; addSectionModal = null;
   editingCollection = key; editingId = id;
   const c = COLLECTIONS[key];
   const record = id ? DB[key].find(r=>r.id===id) : {};
   modalImageValues = {};
-  c.fields.forEach(f=>{ if(f.type==='image') modalImageValues[f.key] = record[f.key] || null; });
+  modalFileValues = {};
+  editingRecordFiles = {};
+  c.fields.forEach(f=>{
+    if(f.type==='image') modalImageValues[f.key] = record[f.key] || null;
+    if(f.type==='file') editingRecordFiles[f.key] = record[f.key] || null;
+  });
   document.getElementById('modalTitle').textContent = id ? `Sửa ${c.single}` : `Thêm ${c.single}`;
   const body = document.getElementById('modalBody');
   body.innerHTML = `<div class="form-grid">` + c.fields.map(f=>{
@@ -47,6 +56,7 @@ function openViewModal(key, id){
       else if(f.type==='checkbox'){ val = val ? 'Có' : 'Không'; }
       else if(f.type==='password'){ val = val ? '••••••••' : ''; }
       else if(f.type==='image'){ return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label>${val?`<img src="${val}" style="width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block">`:`<div class="view-value"><span class="cell-muted">—</span></div>`}</div>`; }
+      else if(f.type==='file'){ return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label><div class="view-value">${val&&val.name?escapeHtml(val.name):'<span class="cell-muted">—</span>'}</div></div>`; }
       else if(f.type==='richtext'){ return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label><div class="view-value">${val||'<span class="cell-muted">—</span>'}</div></div>`; }
       return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label><div class="view-value">${val!==undefined&&val!==null&&val!=='' ? escapeHtml(String(val)) : '<span class="cell-muted">—</span>'}</div></div>`;
     }).join('') + `</div>`;
@@ -166,7 +176,55 @@ function toggleRowVisibility(key, id){
   renderContent();
   showToast(row[c.toggleVisibility] ? `Đã ẩn ${c.single} khỏi website` : `Đã hiện lại ${c.single} trên website`);
 }
+/* Tệp tài liệu: giữ nguyên TÊN và ĐUÔI thật của tệp (khác ảnh đại diện, vốn
+   suy đuôi từ kiểu MIME) — tên tệp là thứ người tải về nhìn thấy. */
+function attachModalFileEvents(){
+  document.querySelectorAll('[data-file-field]').forEach(input=>{
+    input.addEventListener('change', (e)=>{
+      const key = input.getAttribute('data-file-field');
+      const file = e.target.files[0];
+      if(!file) return;
+      const sizeLabel = fileSizeLabel(file.size);
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        modalFileValues[key] = {data: ev.target.result, name: file.name, size: file.size, sizeLabel};
+        const box = document.getElementById('filePreview_'+key);
+        if(box) box.innerHTML = `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)"><i class="ti ti-file-text" style="font-size:18px;color:var(--vd)"></i><b>${escapeHtml(file.name)}</b> <span class="cell-muted">· ${escapeHtml(sizeLabel)}</span></div>`;
+        autoFillFromFile(key, file);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+}
+
+/** "1,2 MB" — dùng dấu phẩy thập phân cho khớp cách viết trên site. */
+function fileSizeLabel(bytes){
+  if(!bytes && bytes!==0) return '';
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1).replace('.', ',') + ' MB';
+}
+
+/** Điền hộ các ô khai trong autoFill của field (định dạng, dung lượng). */
+function autoFillFromFile(fieldKey, file){
+  const c = COLLECTIONS[editingCollection] || COLLECTIONS[(currentView.split('-edit:')[0])];
+  const def = c && c.fields.find(f=>f.key===fieldKey);
+  if(!def || !def.autoFill) return;
+  const ext = (file.name.split('.').pop() || '').toUpperCase();
+  Object.keys(def.autoFill).forEach(target=>{
+    const el = document.getElementById('f_'+target);
+    if(!el) return;
+    const kind = def.autoFill[target];
+    const value = kind==='ext' ? ext : kind==='size' ? fileSizeLabel(file.size) : '';
+    if(!value) return;
+    // Ô select chỉ nhận đúng giá trị có trong danh sách.
+    if(el.tagName==='SELECT' && !Array.from(el.options).some(o=>o.value===value)) return;
+    el.value = value;
+  });
+}
+
 function attachModalImageEvents(){
+  attachModalFileEvents();
   document.querySelectorAll('[data-image-field]').forEach(input=>{
     input.addEventListener('change', (e)=>{
       const key = input.getAttribute('data-image-field');
@@ -226,18 +284,35 @@ function renderField(f, value){
       <input type="file" accept="image/*" data-image-field="${f.key}">
     </div>`;
   }
+  if(f.type==='file'){
+    /* value là object {name, size, url} do mapStrapiEntryToRecord dựng lại từ
+       media của Strapi, hoặc null khi chưa đính tệp. Không hiện url thật: tài
+       liệu chỉ tải qua endpoint riêng (xem src/utils/library-doc-file.js). */
+    const cur = value && value.name
+      ? `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)"><i class="ti ti-file-text" style="font-size:18px;color:var(--vd)"></i><b>${escapeHtml(value.name)}</b>${value.sizeLabel?`<span class="cell-muted">· ${escapeHtml(value.sizeLabel)}</span>`:''}</div>`
+      : `<div class="cell-muted" style="font-size:13px">Chưa có tệp đính kèm</div>`;
+    return `<div>
+      <div id="filePreview_${f.key}" style="margin-bottom:8px">${cur}</div>
+      <input type="file" accept="${escapeAttr(f.accept||'')}" data-file-field="${f.key}">
+      <div class="fld-hint">Tệp tải lên chỉ tải được qua trang Thư viện, không lộ đường dẫn lưu trữ.</div>
+    </div>`;
+  }
   return `<input type="text" id="f_${f.key}" value="${escapeAttr(value)}" placeholder="${escapeAttr(f.placeholder||'')}" ${disabledAttr}>${disabledHint}`;
 }
 
 async function saveModal(){
   const key = editingCollection;
   const c = COLLECTIONS[key];
+  // closeModal() xoá editingId, nên chốt lại trước — không thì sửa bản ghi cũ
+  // vẫn báo "Đã thêm mới".
+  const wasEditing = !!editingId;
   const data = {};
   let missingRequired = false;
   c.fields.forEach(f=>{
     let val;
     if(f.type==='checkbox'){ val = document.getElementById('f_'+f.key).classList.contains('on'); }
     else if(f.type==='image'){ val = modalImageValues[f.key] || ''; }
+    else if(f.type==='file'){ val = modalFileValues[f.key] !== undefined ? modalFileValues[f.key] : (editingRecordFiles[f.key] || null); }
     else if(f.type==='richtext'){ val = document.getElementById('rte_'+f.key).innerHTML; }
     else if(f.type==='multiselect'){
       val = Array.from(document.querySelectorAll(`[data-multiselect="${f.key}"].on`)).map(el=>el.getAttribute('data-value'));
@@ -258,7 +333,7 @@ async function saveModal(){
     closeModal();
     renderSidebar();
     renderContent();
-    showToast(editingId ? 'Đã cập nhật' : 'Đã thêm mới');
+    showToast(wasEditing ? 'Đã cập nhật' : 'Đã thêm mới');
     return;
   }
 
@@ -273,7 +348,7 @@ async function saveModal(){
   closeModal();
   renderSidebar();
   renderContent();
-  showToast(editingId ? 'Đã cập nhật' : 'Đã thêm mới');
+  showToast(wasEditing ? 'Đã cập nhật' : 'Đã thêm mới');
 }
 
 async function deleteModal(){
