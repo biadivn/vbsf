@@ -13,12 +13,8 @@
   "pluginOptions": {},
   "attributes": {
     "orgName": { "type": "string" },
-    "orgShort": { "type": "string" },
-    "foundedYear": { "type": "string" },
-    "memberCount": { "type": "string" },
-    "clubCount": { "type": "string" },
-    "provinceCount": { "type": "string" },
     "about": { "type": "text" },
+    "orgShort": { "type": "string" },
     "feeFirstTime": { "type": "string" },
     "feeAnnualFull": { "type": "string" },
     "feeAnnualHalf": { "type": "string" },

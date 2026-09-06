@@ -39,7 +39,18 @@ const PAGE_SECTIONS_REGISTRY = {
     {key:'thong-tin-chung', label:'Thông tin chung & số liệu', title:'Về Liên đoàn', fields:[
       {key:'paragraph', label:'Đoạn giới thiệu', type:'textarea', span2:true, rows:4, default:'Liên đoàn Billiards & Snooker Việt Nam (VBSF) là tổ chức xã hội – nghề nghiệp đại diện cho phong trào billiards & snooker trên cả nước.'},
       {key:'visionText', label:'Tầm nhìn', type:'textarea', default:'Đưa billiards & snooker Việt Nam phát triển chuyên nghiệp, minh bạch và hội nhập quốc tế.'},
-      {key:'missionText', label:'Sứ mệnh', type:'textarea', default:'Chuẩn hóa hệ thống thi đấu, xếp hạng công bằng và mở rộng phong trào tới mọi cấp độ người chơi.'}
+      {key:'missionText', label:'Sứ mệnh', type:'textarea', default:'Chuẩn hóa hệ thống thi đấu, xếp hạng công bằng và mở rộng phong trào tới mọi cấp độ người chơi.'},
+      /* Dải 4 ô số liệu. Trước đây nằm ở "Thông tin tổ chức" nên admin mở đúng
+         khối này lại không thấy — mà 4 giá trị đó không dùng ở đâu khác ngoài
+         dải này. Nhãn cũng cho sửa: "Câu lạc bộ" có nơi gọi là "CLB thành viên". */
+      {key:'stat1Value', label:'Số liệu 1 — giá trị', type:'text', default:'200x'},
+      {key:'stat1Label', label:'Số liệu 1 — nhãn', type:'text', default:'Năm thành lập'},
+      {key:'stat2Value', label:'Số liệu 2 — giá trị', type:'text', default:'1.500+'},
+      {key:'stat2Label', label:'Số liệu 2 — nhãn', type:'text', default:'Hội viên'},
+      {key:'stat3Value', label:'Số liệu 3 — giá trị', type:'text', default:'120+'},
+      {key:'stat3Label', label:'Số liệu 3 — nhãn', type:'text', default:'Câu lạc bộ'},
+      {key:'stat4Value', label:'Số liệu 4 — giá trị', type:'text', default:'30+'},
+      {key:'stat4Label', label:'Số liệu 4 — nhãn', type:'text', default:'Tỉnh / thành'}
     ]},
     {key:'ban-lanh-dao', label:'Ban lãnh đạo & sơ đồ tổ chức', title:'Ban lãnh đạo', items:true, itemCount:4, maxItems:20,
       itemFields:[{key:'name', label:'Họ và tên', type:'text'},{key:'role', label:'Chức vụ', type:'text'}]},
@@ -134,6 +145,12 @@ function getSectionLabel(pageKey, key){
 /* Tăng số này nếu cần sắp lại thứ tự khối một lần nữa cho toàn bộ cài đặt. */
 const PAGE_SECTION_ORDER_VERSION = 1;
 
+/* Tăng số này khi cần chuyển thêm dữ liệu từ Thông tin tổ chức sang cấu hình
+   section. v1: đoạn giới thiệu + 4 ô số liệu của khối "Thông tin chung" — chúng
+   chỉ phục vụ đúng khối đó, để ở Thông tin tổ chức thì admin mở khối ra không
+   thấy đâu mà sửa. */
+const SETTINGS_TO_SECTION_VERSION = 1;
+
 function makeDefaultSectionEntry(s){
   const entry = {key:s.key, enabled:true, title: s.title!==undefined ? s.title : undefined, itemCount: s.items ? s.itemCount : undefined, backgroundImage:null};
   if(s.fields){ entry.content = {}; s.fields.forEach(f=>{ entry.content[f.key] = f.default||''; }); }
@@ -153,6 +170,34 @@ function ensurePageMeta(pageKey){
     DB.pageMeta[pageKey] = {slug: (reg && reg.path) || ('/'+pageKey), title: (reg && reg.label) || pageKey, metaTitle:'', metaDescription:''};
   }
 }
+/* Chuyển một lần các giá trị vốn nằm ở Thông tin tổ chức về đúng khối dùng chúng.
+   Chỉ ghi khi ô đích còn trống hoặc vẫn đang là giá trị mặc định, để không đè
+   nội dung admin đã tự sửa. */
+function migrateSettingsIntoSections(){
+  if(DB.settingsToSectionVersion === SETTINGS_TO_SECTION_VERSION) return;
+  const entry = (DB.pageSections['gioi-thieu']||[]).find(e=>e.key==='thong-tin-chung');
+  const st = DB.settings || {};
+  if(entry){
+    entry.content = entry.content || {};
+    const def = getSectionDef('gioi-thieu','thong-tin-chung');
+    const defaultOf = k => ((def && def.fields)||[]).find(f=>f.key===k);
+    const move = (from, to) => {
+      const val = st[from];
+      if(!val) return;
+      const cur = entry.content[to];
+      const d = defaultOf(to);
+      if(!cur || (d && cur === d.default)) entry.content[to] = val;
+    };
+    move('about','paragraph');
+    move('foundedYear','stat1Value');
+    move('memberCount','stat2Value');
+    move('clubCount','stat3Value');
+    move('provinceCount','stat4Value');
+  }
+  ['about','foundedYear','memberCount','clubCount','provinceCount'].forEach(k=>{ delete DB.settings[k]; });
+  DB.settingsToSectionVersion = SETTINGS_TO_SECTION_VERSION;
+}
+
 /** Đảm bảo DB.pageSections khớp với danh mục section hiện tại (thêm section mới lần đầu, không tự thêm lại section admin đã xóa, bù field còn thiếu). */
 function normalizePageSections(){
   if(!DB.customPages) DB.customPages = {};
@@ -202,6 +247,14 @@ function normalizePageSections(){
       }
       if(!s.items){ delete e.items; delete e.itemCount; }
       if(!s.fields){ delete e.content; }
+      else {
+        /* Bù giá trị mặc định cho ô MỚI thêm vào registry. Không có bước này thì
+           entry.content của cài đặt cũ thiếu khoá, panel hiển thị mặc định nhưng
+           dữ liệu lưu lại rỗng — site rơi về chữ tĩnh trong HTML và admin tưởng
+           đã cấu hình rồi. */
+        e.content = e.content || {};
+        s.fields.forEach(f=>{ if(e.content[f.key] === undefined) e.content[f.key] = f.default || ''; });
+      }
     });
   });
 
@@ -210,6 +263,8 @@ function normalizePageSections(){
      liệu cũ thì nối vào cuối. Nay thứ tự đã có tác dụng thật (site sắp lại DOM
      theo danh sách này) nên chỉnh một lần cho khớp danh mục; từ lần sau admin
      kéo thả thế nào giữ nguyên thế đó. */
+  migrateSettingsIntoSections();
+
   if(DB.pageSectionsOrderVersion === PAGE_SECTION_ORDER_VERSION) return false;
   getAllPageKeys().forEach(pageKey=>{
     const catalog = getSectionCatalog(pageKey);
@@ -223,11 +278,6 @@ function normalizePageSections(){
 const SETTINGS_FIELDS = [
   {key:'orgName', label:'Tên đầy đủ tổ chức', type:'text', span2:true},
   {key:'orgShort', label:'Tên viết tắt', type:'text'},
-  {key:'foundedYear', label:'Năm thành lập', type:'text'},
-  {key:'memberCount', label:'Số hội viên (hiển thị)', type:'text'},
-  {key:'clubCount', label:'Số câu lạc bộ (hiển thị)', type:'text'},
-  {key:'provinceCount', label:'Số tỉnh/thành (hiển thị)', type:'text'},
-  {key:'about', label:'Giới thiệu chung', type:'textarea', span2:true, rows:5},
   {key:'feeFirstTime', label:'Lệ phí tham gia lần đầu (VNĐ)', type:'text', placeholder:'200.000đ'},
   {key:'feeAnnualFull', label:'Phí thường niên cả năm — đăng ký trước 01/7 (VNĐ)', type:'text', placeholder:'500.000đ'},
   {key:'feeAnnualHalf', label:'Phí thường niên nửa năm — đăng ký từ 01/7 (VNĐ)', type:'text', placeholder:'250.000đ'},

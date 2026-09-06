@@ -962,30 +962,16 @@
   };
 
   RENDER['gioi-thieu'] = function (page, data) {
-    var s = data.settings;
-    var sec = section(page, 'thong-tin-chung');
-    if (sec) {
-      var about = sec.querySelector('.vb-p');
-      if (about && s.about) about.textContent = s.about;
-      var stats = [s.foundedYear, s.memberCount, s.clubCount, s.provinceCount];
-      sec.querySelectorAll('[style*="text-align:center"]').forEach(function (cell, i) {
-        var v = cell.firstElementChild;
-        if (v && stats[i]) v.textContent = stats[i];
-      });
-    }
+    /* Đoạn giới thiệu, tầm nhìn, sứ mệnh và dải 4 ô số liệu đều là cấu hình của
+       khối "Thông tin chung", và applyPageContent() đã điền qua data-fill /
+       data-fill-html. Ở đây chỉ còn phần dữ liệu thật: ban lãnh đạo.
 
-    // Tầm nhìn / Sứ mệnh — lấy từ "Nội dung trang website" nếu đã nhập.
-    var gt = (data.pageContent && data.pageContent.data && data.pageContent.data.pageSections
-      && data.pageContent.data.pageSections['gioi-thieu']) || [];
-    var chung = gt.filter(function (x) { return x && x.key === 'thong-tin-chung'; })[0];
-    if (chung && chung.values) {
-      if (chung.values.visionText) setText(page, '[data-vision]', chung.values.visionText);
-      if (chung.values.missionText) setText(page, '[data-mission]', chung.values.missionText);
-      if (chung.values.paragraph && sec) {
-        var p = sec.querySelector('.vb-p');
-        if (p) p.textContent = chung.values.paragraph;
-      }
-    }
+       Bản cũ đọc lại chúng từ Thông tin tổ chức rồi GHI ĐÈ lên những gì
+       applyPageContent vừa điền — nên sửa ô "Đoạn giới thiệu" trong CMS không có
+       tác dụng. Nó còn dò dải số liệu bằng
+       sec.querySelectorAll('[style*="text-align:center"]'): đổi chút CSS trong
+       HTML là hỏng mà không ai biết. Khối đọc chung.values thì đã chết sẵn, vì
+       CMS ghi vào entry.content chứ không phải entry.values. */
 
     // Ban lãnh đạo — collection riêng trong CMS.
     var box = page.querySelector('[data-leaders]');

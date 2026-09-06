@@ -24,7 +24,7 @@ const SINGLETON_API_PATH = { settings:'setting', contact:'contact-info' };
    customPages, customSections, pageMeta, pageSectionKeysEverAdded) được cất
    trong single type `page-content` dưới dạng JSON — CMS vẫn là nơi chỉnh sửa,
    Strapi là nơi lưu trữ và site đọc từ đó. */
-const PAGE_CONTENT_KEYS = ['pageSections','customPages','customSections','pageMeta','pageSectionKeysEverAdded','pageSectionsOrderVersion'];
+const PAGE_CONTENT_KEYS = ['pageSections','customPages','customSections','pageMeta','pageSectionKeysEverAdded','pageSectionsOrderVersion','settingsToSectionVersion'];
 
 async function refreshPageContentFromApi(){
   try{
@@ -39,6 +39,7 @@ async function refreshPageContentFromApi(){
      cờ nghĩa là dữ liệu vừa nạp về chưa được sắp, kể cả khi localStorage của máy
      này đã sắp rồi (storage.js gọi normalizePageSections trước lúc đăng nhập). */
   DB.pageSectionsOrderVersion = data.pageSectionsOrderVersion;
+  DB.settingsToSectionVersion = data.settingsToSectionVersion;
   }catch(e){ /* offline: giữ nguyên dữ liệu đang có */ }
 }
 

@@ -5,8 +5,6 @@ function seedData(){
   return {
     settings:{
       orgName:'Liên đoàn Billiards & Snooker Việt Nam', orgShort:'VBSF',
-      foundedYear:'200x', memberCount:'1.500+', clubCount:'120+', provinceCount:'30+',
-      about:'Liên đoàn Billiards & Snooker Việt Nam (VBSF) là tổ chức xã hội – nghề nghiệp đại diện cho phong trào billiards & snooker trên cả nước. Liên đoàn giữ vai trò quản lý chuyên môn, tổ chức hệ thống thi đấu quốc gia, phát triển vận động viên và kết nối với các tổ chức billiards quốc tế.',
       feeFirstTime:'200.000đ', feeAnnualFull:'500.000đ', feeAnnualHalf:'250.000đ', feeRenewal:'500.000đ',
       bankName:'Vietcombank', bankAccount:'00xx xxx xxx', bankHolder:'LĐ Billiards & Snooker VN'
     },

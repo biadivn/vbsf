@@ -1038,7 +1038,6 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
     bankAccount: Schema.Attribute.String;
     bankHolder: Schema.Attribute.String;
     bankName: Schema.Attribute.String;
-    clubCount: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1046,17 +1045,14 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
     feeAnnualHalf: Schema.Attribute.String;
     feeFirstTime: Schema.Attribute.String;
     feeRenewal: Schema.Attribute.String;
-    foundedYear: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::setting.setting'
     > &
       Schema.Attribute.Private;
-    memberCount: Schema.Attribute.String;
     orgName: Schema.Attribute.String;
     orgShort: Schema.Attribute.String;
-    provinceCount: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

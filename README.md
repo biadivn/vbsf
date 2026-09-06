@@ -106,6 +106,23 @@ chức" (`setting`), địa chỉ/email/điện thoại ở "Thông tin liên h�
 Đặt thêm bản sao trong section thì hai nơi lệch nhau mà không ai biết bên nào
 đang hiển thị.
 
+Ngược lại, thứ chỉ phục vụ **một khối** thì đặt ngay trong cấu hình khối đó —
+đoạn giới thiệu và dải 4 ô số liệu của "Thông tin chung" từng nằm ở Thông tin tổ
+chức, nên admin mở đúng khối ra lại không thấy đâu mà sửa. Nay cả giá trị lẫn
+nhãn đều nằm trong khối (`stat1Value`/`stat1Label`… ).
+
+**Khi chuyển dữ liệu giữa hai nơi, đừng bỏ field nguồn cùng lúc.** `migrateSettingsIntoSections()`
+trong registry đọc `DB.settings` để mang giá trị cũ sang; nếu xoá field khỏi
+schema Strapi trong cùng bản phát hành thì API ngừng trả nó và migration không
+còn gì để đọc. Vì vậy `setting.about` vẫn còn trong schema dù đã bỏ khỏi form
+CMS — xoá được sau khi mọi cài đặt đã chạy migration (`settingsToSectionVersion = 1`).
+Bốn ô số liệu thì bỏ luôn được vì giá trị cũ chỉ là chữ mẫu, mặc định trong
+registry tái tạo y hệt.
+
+`normalizePageSections()` cũng bù giá trị mặc định cho ô mới thêm vào registry —
+thiếu bước này thì cài đặt cũ có `entry.content` khuyết khoá, panel hiển thị mặc
+định nhưng dữ liệu lưu lại rỗng, và admin tưởng mình đã cấu hình rồi.
+
 ### Đăng ký giải khi đã đăng nhập
 
 Hội viên đang đăng nhập không phải nhập lại tên/mã/điện thoại/CLB — màn đăng ký
