@@ -202,6 +202,84 @@ describe('site-js/member-auth', { skip: available ? false : 'không có site-js/
     });
   });
 
+  /* currentMember() là nguồn duy nhất để site biết ai đang đăng nhập — màn đăng
+     ký giải dựa vào nó để bỏ qua bước nhập thông tin. Sai ở đây thì hoặc khách
+     lạ được điền sẵn hồ sơ người khác, hoặc hội viên bị bắt gõ lại từ đầu. */
+  describe('phiên đang đăng nhập (currentMember)', () => {
+    test('chưa đăng nhập thì là null', () => {
+      const ctx = loadModule(() => reply(200, {}));
+      assert.strictEqual(ctx.auth.currentMember(), null);
+    });
+
+    test('đăng nhập xong thì trả đúng hồ sơ vừa nhận', async () => {
+      const ctx = loadModule(() => reply(200, { token: 'tok', member: MEMBER }));
+      const returned = await ctx.auth.loginMember('0901234567', '123456');
+      const current = ctx.auth.currentMember();
+      assert.strictEqual(current.code, MEMBER.code);
+      assert.deepStrictEqual(current, returned, 'phải là chính hồ sơ mà loginMember trả về');
+    });
+
+    test('đăng ký cũng đặt phiên', async () => {
+      const ctx = loadModule(() => reply(200, { token: 'tok', member: MEMBER }));
+      await ctx.auth.registerMember({ name: 'X' });
+      assert.strictEqual(ctx.auth.currentMember().code, MEMBER.code);
+    });
+
+    test('khôi phục phiên từ token còn hiệu lực', async () => {
+      const ctx = loadModule(() => reply(200, { member: MEMBER }));
+      ctx.store.set('vbsf_member_token', 'tok');
+      await ctx.auth.restoreMember();
+      assert.strictEqual(ctx.auth.currentMember().code, MEMBER.code);
+    });
+
+    test('KHÔNG có token thì xoá phiên trong bộ nhớ', async () => {
+      const ctx = loadModule(() => reply(200, { token: 'tok', member: MEMBER }));
+      await ctx.auth.loginMember('0901234567', '123456');
+      ctx.store.delete('vbsf_member_token');
+      await ctx.auth.restoreMember();
+      assert.strictEqual(ctx.auth.currentMember(), null);
+    });
+
+    test('token hỏng/hết hạn thì xoá phiên trong bộ nhớ', async () => {
+      let ok = true;
+      const ctx = loadModule(() => (ok ? reply(200, { token: 'tok', member: MEMBER }) : reply(401, {})));
+      await ctx.auth.loginMember('0901234567', '123456');
+      assert.ok(ctx.auth.currentMember(), 'điều kiện tiền đề');
+      ok = false;
+      await ctx.auth.restoreMember();
+      assert.strictEqual(ctx.auth.currentMember(), null, 'token hỏng mà vẫn giữ hồ sơ là rò phiên');
+    });
+
+    test('đăng xuất xoá phiên, không chỉ xoá token', async () => {
+      const ctx = loadModule(() => reply(200, { token: 'tok', member: MEMBER }));
+      await ctx.auth.loginMember('0901234567', '123456');
+      ctx.auth.logoutMember();
+      assert.strictEqual(ctx.auth.currentMember(), null);
+    });
+
+    test('đổi ảnh đại diện cập nhật hồ sơ đang giữ', async () => {
+      const updated = Object.assign({}, MEMBER, { name: 'Tên Mới' });
+      let first = true;
+      const ctx = loadModule(() => {
+        const body = first ? { token: 'tok', member: MEMBER } : { member: updated };
+        first = false;
+        return reply(200, body);
+      });
+      await ctx.auth.loginMember('0901234567', '123456');
+      await ctx.auth.uploadAvatar({ name: 'a.png' });
+      assert.strictEqual(ctx.auth.currentMember().name, 'Tên Mới');
+    });
+
+    test('đăng nhập tổ chức KHÔNG đụng tới phiên hội viên', async () => {
+      const ctx = loadModule((url) => (url.indexOf('org-auth') > -1
+        ? reply(200, { token: 'o', org: ORG })
+        : reply(200, { token: 'm', member: MEMBER })));
+      await ctx.auth.loginMember('0901234567', '123456');
+      await ctx.auth.loginOrg('0909999999', '123456');
+      assert.strictEqual(ctx.auth.currentMember().code, MEMBER.code);
+    });
+  });
+
   describe('quên & đặt lại mật khẩu', () => {
     test('chọn đúng endpoint theo loại tài khoản', async () => {
       const ctx = loadModule(() => reply(200, { ok: true, message: 'Đã gửi.' }));

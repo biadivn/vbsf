@@ -338,6 +338,11 @@ body{background:#E4E8E5}
     var pid=parent(id);
     navs.forEach(function(n){n.classList.toggle('active', n.getAttribute('data-nav')===pid);});
     window.scrollTo(0,0);
+    /* ensurePage() chỉ hydrate lần đầu; sau đó trang nằm sẵn trong DOM nên
+       RENDER không chạy lại. Những gì phụ thuộc trạng thái đăng nhập (vd. thẻ
+       hội viên ở màn đăng ký giải) phải áp lại mỗi lần vào trang, kể cả khi vào
+       bằng hash — chỗ này là đường đi chung của mọi kiểu điều hướng. */
+    if(window.VBSF_CONTENT) await window.VBSF_CONTENT.afterNav(id, page, null);
   }
 
   document.addEventListener('click',async function(e){

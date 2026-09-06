@@ -106,6 +106,25 @@ chức" (`setting`), địa chỉ/email/điện thoại ở "Thông tin liên h�
 Đặt thêm bản sao trong section thì hai nơi lệch nhau mà không ai biết bên nào
 đang hiển thị.
 
+### Đăng ký giải khi đã đăng nhập
+
+Hội viên đang đăng nhập không phải nhập lại tên/mã/điện thoại/CLB — màn đăng ký
+giải đọc thẳng hồ sơ qua `VBSF_AUTH.currentMember()`. Vẫn còn lối "nhập thông tin
+thủ công" cho trường hợp đăng ký hộ người khác.
+
+Hai điểm dễ sai nếu sửa tiếp:
+
+- **`hydrate()` chỉ chạy MỘT LẦN**, lúc trang được nạp vào DOM lần đầu
+  (`ensurePage` trong index.html); sau đó trang nằm sẵn nên `RENDER` không chạy
+  lại. Mọi thứ phụ thuộc trạng thái đăng nhập phải áp lại trong `afterNav`, và
+  `show()` gọi `afterNav` để cả điều hướng bằng hash cũng được làm mới.
+- **Lúc gửi, đọc theo trạng thái đang HIỂN THỊ** (thẻ hội viên có đang hiện
+  không), không gọi lại `applyMemberIdentity()`. Gọi lại sẽ đổi giao diện ngay
+  lúc bấm gửi và có thể bỏ qua những gì người dùng vừa gõ tay.
+
+Trang cũng chặn gửi khi chưa chọn giải: vào thẳng bằng link/hash thì ô tên vẫn là
+chữ mẫu "Tên giải đấu", gửi đi sẽ tạo một đăng ký vô nghĩa cho ban tổ chức.
+
 ### Tệp tài liệu (Văn bản & Luật)
 
 Admin đính tệp ngay trong CMS (ô "Tệp đính kèm", tự điền Định dạng + Dung lượng

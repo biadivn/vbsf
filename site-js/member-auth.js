@@ -93,17 +93,23 @@
     };
   }
 
+  /* Hồ sơ của phiên đang đăng nhập. index.html giữ CURRENT_MEMBER trong IIFE của
+     nó nên site-js không với tới được; để chính module đăng nhập giữ luôn thì cả
+     hai bên cùng đọc một nguồn, không phải đồng bộ hai biến. */
+  var currentMember = null;
+  function setMember(m) { currentMember = m; return m; }
+
   var api = {
     async loginMember(phone, password) {
       var out = await post('member-auth/login', { phone: phone, password: password });
       writeToken(MEMBER_TOKEN_KEY, out.token);
-      return flattenMember(out.member);
+      return setMember(flattenMember(out.member));
     },
 
     async registerMember(payload) {
       var out = await post('member-auth/register', payload);
       writeToken(MEMBER_TOKEN_KEY, out.token);
-      return flattenMember(out.member);
+      return setMember(flattenMember(out.member));
     },
 
     async loginOrg(phone, password) {
@@ -121,12 +127,12 @@
     /** Khôi phục phiên sau khi tải lại trang; token hỏng/hết hạn thì xoá. */
     async restoreMember() {
       var token = readToken(MEMBER_TOKEN_KEY);
-      if (!token) return null;
+      if (!token) return setMember(null);
       try {
-        return flattenMember((await get('member-auth/me', token)).member);
+        return setMember(flattenMember((await get('member-auth/me', token)).member));
       } catch (err) {
         writeToken(MEMBER_TOKEN_KEY, null);
-        return null;
+        return setMember(null);
       }
     },
 
@@ -141,7 +147,7 @@
       }
     },
 
-    logoutMember() { writeToken(MEMBER_TOKEN_KEY, null); },
+    logoutMember() { writeToken(MEMBER_TOKEN_KEY, null); setMember(null); },
     logoutOrg() { writeToken(ORG_TOKEN_KEY, null); },
 
     /* Quên mật khẩu — backend luôn trả cùng một thông báo dù số có tài khoản
@@ -176,8 +182,13 @@
       }
       var out = await res.json().catch(function () { return {}; });
       if (!res.ok) throw new Error((out.error && out.error.message) || 'Không tải được ảnh lên.');
-      return flattenMember(out.member);
+      return setMember(flattenMember(out.member));
     },
+
+    /** Hội viên của phiên hiện tại, hoặc null khi chưa đăng nhập. Chỉ có giá trị
+        sau loginMember/registerMember/restoreMember trong cùng lần tải trang —
+        bên gọi nào cần chắc chắn thì await restoreMember() trước. */
+    currentMember() { return currentMember; },
 
     /** {found, status} — dùng để tính mức hội phí, không trả danh tính. */
     async cccdStatus(cccd) {

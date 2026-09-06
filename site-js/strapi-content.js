@@ -1085,7 +1085,77 @@
 
   /* Form Đăng ký thi đấu — tên giải lấy từ ô [data-fill="name"] mà router đã điền
      khi bấm "Đăng ký" ở danh sách giải. */
+  /* Hội viên đã đăng nhập thì không bắt nhập lại tên/mã/điện thoại/CLB — hồ sơ
+     đã có sẵn những thứ đó. Vẫn để lối "nhập thủ công" cho trường hợp đăng ký hộ
+     người khác. Trạng thái này áp lại MỖI lần vào trang, vì người dùng có thể
+     đăng nhập rồi quay lại mà trang không tải lại. */
+  async function applyMemberIdentity(page) {
+    var card = page.querySelector('[data-reg-asmember]');
+    var manualBox = page.querySelector('[data-reg-identity]');
+    if (!card || !manualBox) return null;
+
+    var auth = window.VBSF_AUTH;
+    var me = auth ? auth.currentMember() : null;
+    /* RENDER có thể chạy trước khi index.html khôi phục xong phiên; hỏi lại một
+       lần thay vì kết luận là khách. */
+    if (!me && auth && typeof auth.restoreMember === 'function') {
+      try { me = await auth.restoreMember(); } catch (e) { me = null; }
+    }
+    /* Chú thích "* Bắt buộc" chỉ đúng khi còn ô bắt buộc trên màn hình. */
+    var reqNote = page.querySelector('[data-reg-required-note]');
+    var setManual = function (on) {
+      card.style.display = on ? 'none' : '';
+      manualBox.style.display = on ? '' : 'none';
+      if (reqNote) reqNote.style.display = on ? '' : 'none';
+    };
+
+    if (!me || page.__regManual) { setManual(true); return null; }
+
+    setText(card, '[data-reg-me-name]', me.name || '—');
+    setText(card, '[data-reg-me-code]', me.code || 'Chưa có mã');
+    setText(card, '[data-reg-me-phone]', me.phone || '—');
+    var clubEl = card.querySelector('[data-reg-me-club]');
+    if (clubEl) clubEl.textContent = me.club ? ' (' + me.club + ')' : '';
+
+    var avatar = card.querySelector('[data-reg-me-avatar]');
+    if (avatar && me.avatar) {
+      avatar.classList.remove('vb-ph');
+      avatar.innerHTML = '';
+      avatar.style.backgroundImage = "url('" + me.avatar + "')";
+      avatar.style.backgroundSize = 'cover';
+      avatar.style.backgroundPosition = 'center';
+    }
+
+    /* Trạng thái hội phí hiện ra để người đăng ký biết trước — ban tổ chức vẫn là
+       bên xác nhận, nên không chặn nút gửi ở đây. */
+    var STATUS = {
+      active: ['Đang hiệu lực', 'background:#E7F4EC;color:#00814D'],
+      pending: ['Chờ thanh toán hội phí', 'background:#F4F1E8;color:#9A7B2E'],
+      expired: ['Hội phí đã hết hạn', 'background:#F1F1EE;color:#8A8A82'],
+    };
+    var st = card.querySelector('[data-reg-me-status]');
+    if (st) {
+      var info = STATUS[me.status];
+      if (info) { st.textContent = info[0]; st.setAttribute('style', info[1]); }
+      else { st.style.display = 'none'; }
+    }
+
+    setManual(false);
+    return me;
+  }
+
   RENDER['giai-dau-dang-ky'] = function (page) {
+    applyMemberIdentity(page);
+
+    var manualLink = page.querySelector('[data-reg-manual]');
+    if (manualLink && !manualLink.__wired) {
+      manualLink.__wired = true;
+      manualLink.addEventListener('click', function () {
+        page.__regManual = true;
+        applyMemberIdentity(page);
+      });
+    }
+
     var btn = page.querySelector('[data-reg-tourney-submit]');
     if (!btn || btn.__wired) return;
     btn.__wired = true;
@@ -1096,15 +1166,28 @@
 
     btn.addEventListener('click', async function () {
       show(ok, ''); show(err, '');
+      /* Vào thẳng trang bằng link/hash mà chưa chọn giải thì ô tên vẫn là chữ
+         mẫu "Tên giải đấu" — gửi đi sẽ tạo một đăng ký vô nghĩa cho ban tổ chức. */
       var nameEl = page.querySelector('[data-fill="name"]');
+      var tourName = nameEl ? nameEl.textContent.trim() : '';
+      if (!tourName || tourName === 'Tên giải đấu') {
+        show(err, 'Chưa chọn giải đấu. Vào mục Giải đấu rồi bấm "Đăng ký" ở giải bạn muốn tham dự.');
+        return;
+      }
       btn.disabled = true;
       try {
+        /* Gửi đúng thứ người dùng đang NHÌN THẤY: chỉ dùng hồ sơ khi thẻ hội viên
+           đang hiện. Gọi applyMemberIdentity() ở đây sẽ đổi giao diện ngay lúc
+           bấm gửi và có thể bỏ qua những gì họ vừa gõ tay. */
+        var card = page.querySelector('[data-reg-asmember]');
+        var usingMember = !!card && card.style.display !== 'none';
+        var me = usingMember && window.VBSF_AUTH ? window.VBSF_AUTH.currentMember() : null;
         var msg = await submitForm('tournament-registrations/submit', {
-          tournamentName: nameEl ? nameEl.textContent.trim() : '',
-          playerName: val('[data-reg-player]'),
-          memberCode: val('[data-reg-code]'),
-          phone: val('[data-reg-phone2]'),
-          club: val('[data-reg-club2]'),
+          tournamentName: tourName,
+          playerName: me ? me.name : val('[data-reg-player]'),
+          memberCode: me ? me.code : val('[data-reg-code]'),
+          phone: me ? me.phone : val('[data-reg-phone2]'),
+          club: me ? me.club : val('[data-reg-club2]'),
           note: val('[data-reg-note]'),
         });
         show(ok, '<i class="ti ti-circle-check-filled"></i> ' + esc(msg));
@@ -1524,6 +1607,16 @@
   }
 
   async function afterNav(dest, page, dataset) {
+    /* hydrate() chỉ chạy một lần, lúc trang được nạp vào DOM lần đầu; sau đó
+       trang nằm sẵn nên RENDER không chạy lại. Trạng thái đăng nhập thì đổi
+       giữa chừng được (xem trang đăng ký trước, đăng nhập sau, rồi quay lại),
+       nên phải áp lại ở đây — nơi chạy mỗi lần điều hướng.
+       Đặt TRƯỚC guard dataset bên dưới vì điều hướng bằng hash không có dataset. */
+    if (dest === 'giai-dau-dang-ky' && page) {
+      page.__regManual = false;   // chọn "nhập thủ công" chỉ có hiệu lực trong lần đăng ký đó
+      applyMemberIdentity(page);
+    }
+
     var data = await load();
     if (!data || !dataset) return;
     try {
