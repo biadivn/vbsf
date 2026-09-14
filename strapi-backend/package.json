@@ -41,5 +41,9 @@
   "strapi": {
     "uuid": "235ed82d-5b49-4907-9159-a1a3edd2945a",
     "installId": "5a7dfb9bfcbaaa7ace3c0bdcf8d8731c18c8175e598a66c2fed3b309b0e44590"
+  },
+  "overrides": {
+    "sharp": "0.35.4",
+    "nodemailer": "^9.0.2"
   }
 }

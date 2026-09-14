@@ -17,14 +17,19 @@ const PAGE_SECTIONS_REGISTRY = {
   'trang-chu': {label:'Trang chủ', icon:'ti-home', path:'/', sections:[
     /* Banner và cột tin bên phải là hai khối riêng: mỗi section chỉ dựng được
        một loại nội dung, mà banner cần chọn giải còn cột phải cần chọn tin. */
-    {key:'hero-banner', label:'Banner giải đấu nổi bật', title:'GIẢI ĐẤU NỔI BẬT', tournamentSelect:true, singleSelect:true},
+    /* Banner lớn trang chủ nay là MỘT bài viết nổi bật (trước đây là một giải
+       đấu): ảnh banner, tiêu đề và ngày lấy từ bài được chọn, bấm vào mở bài đó. */
+    {key:'hero-banner', label:'Banner bài viết nổi bật', title:'TIN NỔI BẬT', newsPicker:true, singleSelect:true},
     {key:'hero-tin-noi-bat', label:'Tin nổi bật (cạnh banner)', title:'Tin nổi bật', newsPicker:true},
     {key:'tin-tuc-home', label:'Tin tức mới nhất', title:'Tin tức mới nhất', newsPicker:true},
     {key:'event-banner', label:'Banner sự kiện tùy chỉnh', fields:[
       {key:'tag', label:'Nhãn', type:'text', default:'SỰ KIỆN'},
       {key:'title', label:'Tiêu đề', type:'text', span2:true, default:'Vòng chung kết giải Vô địch Quốc gia 2026'},
       {key:'subtitle', label:'Mô tả', type:'text', span2:true, default:'Trực tiếp 12–20/06 tại Nhà thi đấu Phú Thọ, TP.HCM — cập nhật tỷ số theo thời gian thực.'},
-      {key:'buttonText', label:'Nút bấm', type:'text', default:'Xem chi tiết'}
+      {key:'buttonText', label:'Nút bấm', type:'text', default:'Xem chi tiết'},
+      /* Ảnh banner dùng ô "Ảnh nền" ở cuối bảng; ô này chỉ nhận đích đến khi bấm.
+         Để trống thì vẫn mở trang Trực tiếp như trước. */
+      {key:'link', label:'Liên kết khi bấm (để trống = trang Trực tiếp)', type:'text', span2:true, default:''}
     ]},
     {key:'lich-giai-dau', label:'Lịch giải đấu sắp diễn ra', title:'Lịch giải đấu sắp diễn ra', apiIntegrated:true, tournamentSelect:true},
     {key:'top-players', label:'Top players theo nội dung', title:'Top players', apiIntegrated:true},
@@ -284,7 +289,12 @@ const SETTINGS_FIELDS = [
   {key:'feeRenewal', label:'Phí gia hạn hội viên cũ (VNĐ)', type:'text', placeholder:'500.000đ'},
   {key:'bankName', label:'Ngân hàng', type:'text'},
   {key:'bankAccount', label:'Số tài khoản', type:'text'},
-  {key:'bankHolder', label:'Chủ tài khoản', type:'text'}
+  {key:'bankHolder', label:'Chủ tài khoản', type:'text'},
+  /* Hai mã QR chuyển khoản: site hiện đúng mã của luồng đang thanh toán —
+     QR hội viên ở trang Đăng ký/Gia hạn hội viên, QR giải đấu ở trang Đăng ký
+     thi đấu. Để trống thì site chỉ hiện số tài khoản như trước. */
+  {key:'qrMember', label:'QR chuyển khoản — Đăng ký hội viên', type:'image'},
+  {key:'qrTournament', label:'QR chuyển khoản — Đăng ký giải đấu', type:'image'}
 ];
 
 const CONTACT_FIELDS = [

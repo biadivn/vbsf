@@ -21,6 +21,8 @@
     "feeRenewal": { "type": "string" },
     "bankName": { "type": "string" },
     "bankAccount": { "type": "string" },
-    "bankHolder": { "type": "string" }
+    "bankHolder": { "type": "string" },
+    "qrMember": { "type": "text" },
+    "qrTournament": { "type": "text" }
   }
 }

@@ -19,6 +19,7 @@ const available = fs.existsSync(path.join(__dirname, '..', '..', 'cms-js', 'tour
 const skip = available ? false : 'không có thư mục cms-js trong context này';
 const {
   teSeedRows, teReorderForSlot, tePendingMatches, teMatchRoundLabel,
+  teAllMatches, teMatchPlayable,
 } = available ? require('../../cms-js/tournament-seeding') : {};
 const { tbkGenSE, tbkGenDE, tbkDecide } = available ? require('../../cms-js/tournament-engine') : {};
 
@@ -227,5 +228,59 @@ describe('teMatchRoundLabel: tên vòng', { skip }, () => {
   test('thiếu dữ liệu thì trả chuỗi rỗng, không ném lỗi', () => {
     assert.strictEqual(teMatchRoundLabel(null, {}), '');
     assert.strictEqual(teMatchRoundLabel({ type: 'SE' }, null), '');
+  });
+});
+
+describe('teAllMatches: danh sách đầy đủ cho bảng nhập kết quả', { skip }, () => {
+  test('sơ đồ rỗng / thiếu dữ liệu thì trả mảng rỗng', () => {
+    assert.deepStrictEqual(teAllMatches(null), []);
+    assert.deepStrictEqual(teAllMatches({}), []);
+    assert.deepStrictEqual(teAllMatches({ matches: {} }), []);
+  });
+
+  test('liệt kê CẢ trận chưa đủ người lẫn trận đã có kết quả', () => {
+    const eng = tbkGenSE(players(8).map((p) => p.id));
+    // 8 người: 4 tứ kết + 2 bán kết + 1 chung kết = 7 trận, dù mới chỉ 4 trận đấu được.
+    assert.strictEqual(teAllMatches(eng).length, 7);
+    assert.strictEqual(tePendingMatches(eng).length, 4);
+
+    const [m1] = tePendingMatches(eng);
+    tbkDecide(eng.matches, m1.id, m1.p1, 5, 2);
+    const all = teAllMatches(eng);
+    assert.strictEqual(all.length, 7, 'trận đã có kết quả vẫn phải nằm trong danh sách');
+    assert.ok(all.some((m) => m.id === m1.id && m.win != null));
+  });
+
+  test('bỏ trận gặp BYE vì không ai nhập tỷ số được', () => {
+    const eng = tbkGenSE(players(5).map((p) => p.id));
+    teAllMatches(eng).forEach((m) => {
+      assert.notStrictEqual(m.p1, 'BYE');
+      assert.notStrictEqual(m.p2, 'BYE');
+    });
+  });
+
+  test('giữ nguyên thứ tự nhánh → vòng → vị trí như bảng nhập nhanh', () => {
+    const all = teAllMatches(tbkGenDE(players(8).map((p) => p.id)));
+    const order = { W: 0, L: 1, GF: 2, GF2: 3 };
+    for (let i = 1; i < all.length; i++) {
+      const a = all[i - 1], b = all[i];
+      const ka = order[a.br] || 0, kb = order[b.br] || 0;
+      assert.ok(ka < kb || (ka === kb && (a.round < b.round || (a.round === b.round && a.idx <= b.idx))),
+        `sai thứ tự tại ${i}`);
+    }
+  });
+});
+
+describe('teMatchPlayable: trận nhập được tỷ số', { skip }, () => {
+  test('đủ hai người chơi thật thì nhập được', () => {
+    assert.strictEqual(teMatchPlayable({ p1: 'p1', p2: 'p2' }), true);
+  });
+
+  test('thiếu người hoặc gặp BYE thì không', () => {
+    assert.strictEqual(teMatchPlayable(null), false);
+    assert.strictEqual(teMatchPlayable({ p1: 'p1', p2: null }), false);
+    assert.strictEqual(teMatchPlayable({ p1: null, p2: 'p2' }), false);
+    assert.strictEqual(teMatchPlayable({ p1: 'p1', p2: 'BYE' }), false);
+    assert.strictEqual(teMatchPlayable({ p1: 'BYE', p2: 'p2' }), false);
   });
 });

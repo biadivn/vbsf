@@ -452,24 +452,47 @@
   RENDER['trang-chu'] = function (page, data) {
     var cfg = function (key) { return sectionEntry(data.pageContent, 'trang-chu', key); };
 
-    /* Banner: giải do CMS chọn; chưa chọn thì lấy giải đang diễn ra, không có thì
-       giải sắp tới gần nhất — banner trống trên trang chủ là tệ nhất. */
+    /* Banner lớn: MỘT bài viết nổi bật do CMS chọn; chưa chọn thì lấy bài mới
+       nhất — banner trống trên trang chủ là tệ nhất. Ảnh banner của bài đè lên
+       "Ảnh nền" của khối, vì ảnh đi kèm bài mới là thứ người đọc đang xem. */
     var banner = section(page, 'hero-banner');
-    if (banner && data.tournaments.length) {
-      var live = data.tournaments.filter(function (t) { return t.status === 'ongoing'; })[0];
-      var next = data.tournaments.filter(function (t) { return t.status !== 'completed'; }).sort(byDateAsc)[0];
-      var feat = pickOne(cfg('hero-banner'), data.tournaments, 'tournamentIds') || live || next;
+    if (banner && data.news.length) {
+      var feat = pickOne(cfg('hero-banner'), data.news, 'newsIds') || data.news[0];
       if (feat) {
-        setText(banner, '[data-hero-name]', feat.name);
-        var meta = [feat.date ? 'Khởi tranh ' + fmtDate(feat.date) : '', feat.location]
-          .filter(Boolean).join(' · ');
-        setText(banner, '[data-hero-meta]', meta);
-        // Bấm banner mở đúng giải đó thay vì danh sách giải chung.
-        banner.setAttribute('data-go', 'giai-dau-chi-tiet');
-        var ds = tournamentDataset(feat);
-        Object.keys(ds).forEach(function (k) {
-          if (ds[k] !== '' && ds[k] != null) banner.setAttribute('data-' + k, ds[k]);
-        });
+        setText(banner, '[data-hero-name]', feat.title);
+        setText(banner, '[data-hero-meta]', [feat.category, fmtDate(feat.date)].filter(Boolean).join(' · '));
+        if (feat.image) setBackground(banner.querySelector('[data-hero-image]'), feat.image);
+        // Bấm banner mở đúng bài đó thay vì danh sách tin chung.
+        banner.setAttribute('data-go', 'tin-tuc-chi-tiet');
+        if (feat.documentId) banner.setAttribute('data-doc', feat.documentId);
+      }
+    }
+
+    /* Banner sự kiện: đích đến do CMS đặt ở ô "Liên kết khi bấm". Link ngoài
+       (http…) mở tab mới; còn lại coi như trang trong site. Bỏ trống thì giữ
+       nguyên data-go có sẵn trong HTML (trang Trực tiếp). */
+    var eventBanner = section(page, 'event-banner');
+    if (eventBanner) {
+      var ebCfg = cfg('event-banner');
+      /* Chữ của khối này màu trắng. Tải ảnh banner lên mà để nguyên thì gặp ảnh
+         sáng là không đọc được, nên phủ thêm một lớp tối lên trên ảnh. */
+      if (ebCfg && ebCfg.backgroundImage) {
+        eventBanner.style.backgroundImage =
+          "linear-gradient(rgba(20,38,84,0.72),rgba(20,38,84,0.72)), url('" + ebCfg.backgroundImage + "')";
+        eventBanner.style.backgroundSize = 'cover';
+        eventBanner.style.backgroundPosition = 'center';
+      }
+      var ebLink = contentValue(ebCfg, 'link').trim();
+      if (ebLink && /^https?:\/\//i.test(ebLink)) {
+        eventBanner.removeAttribute('data-go');
+        if (!eventBanner.__ebWired) {
+          eventBanner.__ebWired = true;
+          eventBanner.addEventListener('click', function () {
+            window.open(ebLink, '_blank', 'noopener');
+          });
+        }
+      } else if (ebLink) {
+        eventBanner.setAttribute('data-go', ebLink.replace(/^#/, ''));
       }
     }
 
@@ -1130,8 +1153,9 @@
     return me;
   }
 
-  RENDER['giai-dau-dang-ky'] = function (page) {
+  RENDER['giai-dau-dang-ky'] = function (page, data) {
     applyMemberIdentity(page);
+    applyBankBox(page, data && data.settings);
 
     var manualLink = page.querySelector('[data-reg-manual]');
     if (manualLink && !manualLink.__wired) {
@@ -1185,14 +1209,37 @@
     });
   };
 
-  RENDER['hoi-vien'] = function (page, data) {
-    var s = data.settings;
-    // Khối VietQR: ngân hàng / số TK / chủ TK
+  /* Khối chuyển khoản dùng chung cho 3 trang: Đăng ký hội viên, Gia hạn hội viên
+     và Đăng ký thi đấu. Ngân hàng/số TK/chủ TK lấy ở "Thông tin tổ chức"; ảnh QR
+     cũng vậy, nhưng tách 2 mã — `member` cho hội phí, `tournament` cho lệ phí giải.
+     Chưa tải mã nào lên thì giữ nguyên ô giữ chỗ (và ở trang đăng ký giải thì
+     khối QR vẫn ẩn), nên trang cũ không đổi giao diện. */
+  function applyBankBox(page, s) {
+    if (!s) return;
     page.querySelectorAll('[data-bank]').forEach(function (el) {
       var k = el.getAttribute('data-bank');
       var v = k === 'name' ? s.bankName : k === 'account' ? s.bankAccount : s.bankHolder;
       if (v) el.textContent = v;
     });
+    page.querySelectorAll('[data-qr]').forEach(function (el) {
+      var src = el.getAttribute('data-qr') === 'tournament' ? s.qrTournament : s.qrMember;
+      if (!src) return;
+      el.classList.remove('vb-ph');
+      el.innerHTML = '<img src="' + esc(src) + '" alt="Mã QR chuyển khoản" ' +
+        'style="width:100%;height:100%;object-fit:contain;display:block">';
+      // Trang đăng ký giải giấu sẵn khối QR + số tài khoản cho tới khi có mã.
+      var box = el.closest('[data-qr-box]');
+      if (box) {
+        box.style.display = '';
+        var bank = box.parentNode && box.parentNode.querySelector('[data-qr-bank]');
+        if (bank) bank.style.display = '';
+      }
+    });
+  }
+
+  RENDER['hoi-vien'] = function (page, data) {
+    var s = data.settings;
+    applyBankBox(page, s);
 
     // Ô chọn tỉnh/thành trong 2 form đăng ký
     page.querySelectorAll('[data-province-select]').forEach(function (sel) {

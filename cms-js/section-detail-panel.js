@@ -106,7 +106,7 @@ function renderPickerInline(ids, allItems, renderMeta){
 }
 
 function renderPickerModeSection(kind, def, buf){
-  const multi = kind==='tournament' ? !def.singleSelect : true;
+  const multi = !def.singleSelect;
   const mode = buf.pickerMode || 'manual';
   const noun = kind==='tournament' ? 'giải đấu' : 'tin tức';
 
@@ -124,14 +124,15 @@ function renderPickerModeSection(kind, def, buf){
         <div class="hint" style="margin-bottom:8px">Hệ thống sẽ tự động lấy ${count} ${noun} mới nhất theo ngày, không cần chọn thủ công. Xem trước:</div>
         <div style="border:1px solid var(--line-strong);border-radius:8px;overflow:hidden">${previewRows}</div>`;
     } else {
-      const latest = latestTournaments(1)[0];
-      html += `<div class="hint" style="margin-bottom:8px">Hệ thống sẽ tự động lấy giải đấu mới nhất theo ngày, không cần chọn thủ công.</div>
-        <div style="border:1px solid var(--line-strong);border-radius:8px;padding:10px 12px;font-size:13.5px">${latest ? escapeHtml(latest.name) : '<span class="hint">Chưa có giải đấu nào</span>'}</div>`;
+      const latest = kind==='tournament' ? latestTournaments(1)[0] : latestNews(1)[0];
+      const label = latest ? (kind==='tournament' ? latest.name : latest.title) : '';
+      html += `<div class="hint" style="margin-bottom:8px">Hệ thống sẽ tự động lấy ${noun} mới nhất theo ngày, không cần chọn thủ công.</div>
+        <div style="border:1px solid var(--line-strong);border-radius:8px;padding:10px 12px;font-size:13.5px">${latest ? escapeHtml(label) : `<span class="hint">Chưa có ${noun} nào</span>`}</div>`;
     }
     return html;
   }
 
-  html += kind==='tournament' ? renderTournamentPickerInline(def, buf) : renderNewsPickerInline(buf);
+  html += kind==='tournament' ? renderTournamentPickerInline(def, buf) : renderNewsPickerInline(def, buf);
   return html;
 }
 
@@ -159,8 +160,21 @@ function renderTournamentPickerInline(def, buf){
   return renderPickerInline(buf.tournamentIds || [], DB.tournaments, renderMeta) + `<div class="hint" style="margin-top:10px">${hint}</div>`;
 }
 
-function renderNewsPickerInline(buf){
+function renderNewsPickerInline(def, buf){
   const renderMeta = n=>`<span style="flex:1;font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(n.title||'(chưa có tiêu đề)')}</span><span class="badge">${escapeHtml(n.category||'')}</span><span class="cell-muted" style="font-size:11px;width:76px;text-align:right;flex-shrink:0">${fmtDate(n.date)}</span>`;
+
+  /* Banner trang chủ chỉ hiện MỘT bài, nên dùng radio thay vì danh sách nhiều
+     mục — vẫn lưu vào newsIds (mảng một phần tử) để site đọc chung một chỗ. */
+  if(def.singleSelect){
+    const ids = buf.newsIds || [];
+    const rows = DB.news.map(n=>`<label style="display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);cursor:pointer">
+        <input type="radio" name="secNewsPick" data-sec-news-pick="${n.id}" ${ids.includes(n.id)?'checked':''} style="width:16px;height:16px;flex-shrink:0">
+        ${renderMeta(n)}
+      </label>`).join('');
+    return `<div style="max-height:320px;overflow-y:auto;border:1px solid var(--line-strong);border-radius:8px">${rows || '<div class="empty" style="padding:20px"><b>Chưa có bài viết nào</b></div>'}</div>
+      <div class="hint" style="margin-top:10px">Ảnh banner, tiêu đề và ngày đăng của bài được chọn sẽ hiển thị ở banner lớn trang chủ.</div>`;
+  }
+
   return renderPickerInline(buf.newsIds || [], DB.news, renderMeta) + `<div class="hint" style="margin-top:10px">Thứ tự hiển thị theo danh sách "Đã chọn" bên trên.</div>`;
 }
 
@@ -265,8 +279,12 @@ function attachSectionDetailEvents(pageKey, key){
   document.querySelectorAll('[data-sec-tournament-pick]').forEach(cb=>{
     cb.addEventListener('change', ()=>{ buf.tournamentIds = cb.checked ? [cb.getAttribute('data-sec-tournament-pick')] : []; });
   });
+  document.querySelectorAll('[data-sec-news-pick]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{ buf.newsIds = cb.checked ? [cb.getAttribute('data-sec-news-pick')] : []; });
+  });
 
-  const pickerField = (def.tournamentSelect && !def.singleSelect) ? 'tournamentIds' : (def.newsPicker ? 'newsIds' : (def.partnerPicker ? 'partnerIds' : null));
+  // Bộ chọn một mục dùng radio riêng ở trên, không có hàng thêm/bớt/đổi thứ tự.
+  const pickerField = def.singleSelect ? null : (def.tournamentSelect ? 'tournamentIds' : (def.newsPicker ? 'newsIds' : (def.partnerPicker ? 'partnerIds' : null)));
   if(pickerField){
     document.querySelectorAll('[data-picker-add-row]').forEach(el=>{
       el.addEventListener('click', ()=>{
