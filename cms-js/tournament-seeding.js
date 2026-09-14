@@ -81,6 +81,30 @@ function tePendingMatches(bracket) {
   });
 }
 
+/**
+ * TOÀN BỘ trận của sơ đồ theo đúng thứ tự nhánh/vòng — kể cả trận đã có kết quả
+ * và trận còn chờ người. Dùng cho bảng "Danh sách trận đấu": ban tổ chức cần
+ * thấy cả giải chứ không chỉ những trận nhập được ngay.
+ * Bỏ trận gặp BYE (engine tự quyết) và nhánh bị huỷ (`void`, vd. chung kết tái
+ * đấu không diễn ra) vì hai loại đó không ai nhập tỷ số được.
+ */
+function teAllMatches(bracket) {
+  if (!bracket || !bracket.matches) return [];
+  var all = Object.keys(bracket.matches).map(function (k) { return bracket.matches[k]; });
+  return all.filter(function (m) {
+    return m.status !== 'void' && m.p1 !== 'BYE' && m.p2 !== 'BYE';
+  }).sort(function (a, b) {
+    return ((TS_BRANCH_ORDER[a.br] || 0) - (TS_BRANCH_ORDER[b.br] || 0))
+      || (a.round - b.round)
+      || (a.idx - b.idx);
+  });
+}
+
+/** Trận nhập được tỷ số: đã đủ hai người chơi thật. */
+function teMatchPlayable(m) {
+  return !!m && m.p1 != null && m.p2 != null && m.p1 !== 'BYE' && m.p2 !== 'BYE';
+}
+
 /** Tên vòng của một trận, dùng chung cách gọi với nhãn trên sơ đồ. */
 function teMatchRoundLabel(bracket, m) {
   if (!bracket || !m) return '';
@@ -92,5 +116,8 @@ function teMatchRoundLabel(bracket, m) {
 }
 
 if (typeof module === 'object' && module.exports) {
-  module.exports = { teSeedRows, teReorderForSlot, tePendingMatches, teMatchRoundLabel };
+  module.exports = {
+    teSeedRows, teReorderForSlot, tePendingMatches, teMatchRoundLabel,
+    teAllMatches, teMatchPlayable,
+  };
 }

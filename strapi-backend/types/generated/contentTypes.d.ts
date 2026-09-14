@@ -1054,6 +1054,8 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
     orgName: Schema.Attribute.String;
     orgShort: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    qrMember: Schema.Attribute.Text;
+    qrTournament: Schema.Attribute.Text;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

@@ -385,29 +385,68 @@ function teShuffleSeeds(record){
   showToast('Đã bốc thăm lại thứ tự hạt giống');
   renderContent();
 }
-/* Bảng nhập nhanh: sơ đồ 32/64 người phải kéo/thu phóng mới tìm được trận cần
-   nhập, nên liệt kê phẳng những trận đã đủ hai người mà chưa có tỷ số. */
+/* Bảng danh sách trận: sơ đồ 32/64 người phải kéo/thu phóng mới tìm được một
+   trận, nên liệt kê phẳng TOÀN BỘ trận của giải — chưa đấu, đang chờ người và
+   đã có kết quả — để nhập mới hoặc sửa lại tỷ số ngay tại chỗ. */
+let teMatchFilter = 'all';   // all | pending | done
+
 function teRenderPendingMatches(record){
   const eng = record.bracket;
   if(!eng) return '';
-  const pending = tePendingMatches(eng);
-  if(!pending.length){
-    const champ = tbkElimChampion(eng);
-    return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Trận cần nhập kết quả</h2></div></div>
-      <div class="card-body padded"><div class="empty" style="padding:20px"><i class="ti ti-checkbox"></i><b>${champ?'Giải đã có nhà vô địch':'Không còn trận nào chờ kết quả'}</b>${champ?'Toàn bộ sơ đồ đã hoàn tất.':'Trận tiếp theo sẽ hiện ở đây ngay khi đủ hai người chơi.'}</div></div></div>`;
-  }
-  const rows = pending.map(m=>`<div class="tbk-fix">
-    <span class="rd">${escapeHtml(teMatchRoundLabel(eng, m))}</span>
-    <span class="pn">${escapeHtml(teName(record,m.p1))}</span>
-    <input type="number" min="0" id="tb_pa_${m.id}" aria-label="Tỷ số ${escapeAttr(teName(record,m.p1))}">
-    <span class="vs">–</span>
-    <input type="number" min="0" id="tb_pb_${m.id}" aria-label="Tỷ số ${escapeAttr(teName(record,m.p2))}">
-    <span class="pn r">${escapeHtml(teName(record,m.p2))}</span>
-    <button class="btn-icon" data-tbpsave="${m.id}" title="Lưu kết quả"><i class="ti ti-device-floppy"></i></button>
-  </div>`).join('');
-  return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Trận cần nhập kết quả</h2><div class="desc">${pending.length} trận đã đủ hai người chơi và chưa có tỷ số</div></div></div>
-    <div class="card-body padded">${rows}
-    <div class="cell-muted" style="margin-top:12px;font-size:12.5px">Điểm xếp hạng áp mặc định: thắng +${TE_WIN_POINTS}, thua +${TE_LOSS_POINTS}. Cần điểm khác, hoặc muốn sửa trận đã có kết quả, thì bấm vào trận trên sơ đồ.</div></div></div>`;
+  const all = teAllMatches(eng);
+  if(!all.length) return '';
+
+  const isDone = m => m.win != null;
+  const pendingCount = all.filter(m=>!isDone(m) && teMatchPlayable(m)).length;
+  const doneCount = all.filter(isDone).length;
+  const champ = tbkElimChampion(eng);
+
+  const shown = all.filter(m=>{
+    if(teMatchFilter==='pending') return !isDone(m);
+    if(teMatchFilter==='done') return isDone(m);
+    return true;
+  });
+
+  const tab = (key,label,n)=>`<button type="button" class="btn ${teMatchFilter===key?'btn-primary':'btn-ghost'}" data-tbmfilter="${key}">${label} (${n})</button>`;
+
+  const rows = shown.map(m=>{
+    const done = isDone(m);
+    const playable = teMatchPlayable(m);
+    /* Trận sau đã có kết quả thì engine không cho sửa trận này (teSubmitElimResult),
+       nên khoá luôn ô nhập để không mời người dùng gõ rồi báo lỗi. */
+    const nextDone = m.winTo && eng.matches[m.winTo[0]] && eng.matches[m.winTo[0]].win != null;
+    const locked = done && nextDone;
+    const dis = (!playable || locked) ? ' disabled' : '';
+    const s1 = done && m.s1 != null ? m.s1 : '';
+    const s2 = done && m.s2 != null ? m.s2 : '';
+    const winner = done ? (m.win===m.p1 ? 1 : 2) : 0;
+    const nameStyle = side => winner===side ? 'font-weight:600;color:var(--vg)' : '';
+    const state = locked ? '<span class="cell-muted" title="Trận sau đã có kết quả — sửa từ trận muộn nhất trước"><i class="ti ti-lock"></i></span>'
+      : !playable ? '<span class="cell-muted" title="Chờ đủ hai người chơi"><i class="ti ti-clock"></i></span>'
+      : `<button class="btn-icon" data-tbpsave="${m.id}" title="${done?'Cập nhật tỷ số':'Lưu kết quả'}"><i class="ti ti-device-floppy"></i></button>`;
+    return `<div class="tbk-fix">
+      <span class="rd">${escapeHtml(teMatchRoundLabel(eng, m))}</span>
+      <span class="pn" style="${nameStyle(1)}">${escapeHtml(teName(record,m.p1))}</span>
+      <input type="number" min="0" id="tb_pa_${m.id}" value="${s1}"${dis} aria-label="Tỷ số ${escapeAttr(teName(record,m.p1))}">
+      <span class="vs">–</span>
+      <input type="number" min="0" id="tb_pb_${m.id}" value="${s2}"${dis} aria-label="Tỷ số ${escapeAttr(teName(record,m.p2))}">
+      <span class="pn r" style="${nameStyle(2)}">${escapeHtml(teName(record,m.p2))}</span>
+      ${state}
+    </div>`;
+  }).join('') || `<div class="empty" style="padding:20px"><i class="ti ti-checkbox"></i><b>Không có trận nào trong mục này</b></div>`;
+
+  const desc = champ ? 'Giải đã có nhà vô địch — toàn bộ sơ đồ đã hoàn tất.'
+    : pendingCount ? `${pendingCount} trận đã đủ hai người chơi và chưa có tỷ số`
+    : 'Chưa có trận nào nhập được — trận tiếp theo hiện ở đây ngay khi đủ hai người chơi.';
+
+  return `<div class="card" style="margin-top:16px"><div class="card-head"><div><h2>Danh sách trận đấu</h2><div class="desc">${desc}</div></div></div>
+    <div class="card-body padded">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        ${tab('all','Tất cả',all.length)}${tab('pending','Chưa có kết quả',all.length-doneCount)}${tab('done','Đã có kết quả',doneCount)}
+      </div>
+      ${rows}
+      <div class="cell-muted" style="margin-top:12px;font-size:12.5px">Điểm xếp hạng áp mặc định: thắng +${TE_WIN_POINTS}, thua +${TE_LOSS_POINTS}. Sửa tỷ số ở đây sẽ tự hoàn tác điểm cũ trước khi áp điểm mới. Cần đặt điểm khác mặc định thì bấm vào trận trên sơ đồ.</div>
+    </div></div>`;
 }
 function teSavePendingResult(mid){
   const record = teRecordFromView();
@@ -837,6 +876,10 @@ function attachTeMatchesTab(record){
   if(shuffleBtn) shuffleBtn.addEventListener('click', ()=>teShuffleSeeds(record));
   document.querySelectorAll('[data-tbpsave]').forEach(b=>b.addEventListener('click', ()=>
     teSavePendingResult(b.getAttribute('data-tbpsave'))));
+  document.querySelectorAll('[data-tbmfilter]').forEach(b=>b.addEventListener('click', ()=>{
+    teMatchFilter = b.getAttribute('data-tbmfilter');
+    renderContent();
+  }));
   const resetBtn = document.getElementById('tbResetBtn');
   if(resetBtn) resetBtn.addEventListener('click', ()=>teResetBracket(record));
   const simNext = document.getElementById('tbSimNext');
