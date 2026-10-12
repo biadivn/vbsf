@@ -1,0 +1,12 @@
+{
+  "collectionName": "components_tournament_docs",
+  "info": {
+    "displayName": "Tệp của giải",
+    "description": "Điều lệ, lịch thi đấu, kết quả... — tải tệp nào thì site hiện tệp đó"
+  },
+  "options": {},
+  "attributes": {
+    "label": { "type": "string", "required": true },
+    "file": { "type": "media", "multiple": false, "allowedTypes": ["files", "images"] }
+  }
+}

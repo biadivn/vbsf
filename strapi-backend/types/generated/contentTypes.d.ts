@@ -626,6 +626,7 @@ export interface ApiMemberOrgMemberOrg extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    activityField: Schema.Attribute.String;
     address: Schema.Attribute.String;
     code: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
@@ -642,6 +643,7 @@ export interface ApiMemberOrgMemberOrg extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String & Schema.Attribute.Required;
     orgType: Schema.Attribute.Enumeration<
       [
+        '\u0110\u1ED9i t\u1EC9nh/th\u00E0nh',
         'C\u00E2u l\u1EA1c b\u1ED9',
         'Doanh nghi\u1EC7p',
         'Tr\u01B0\u1EDDng h\u1ECDc',
@@ -727,6 +729,10 @@ export interface ApiMemberOrgMemberOrg extends Struct.CollectionTypeSchema {
       ]
     >;
     publishedAt: Schema.Attribute.DateTime;
+    recognizedDate: Schema.Attribute.Date;
+    regAuthority: Schema.Attribute.String;
+    regDate: Schema.Attribute.Date;
+    regNo: Schema.Attribute.String;
     repEmail: Schema.Attribute.Email;
     repName: Schema.Attribute.String;
     repPhone: Schema.Attribute.String;
@@ -739,6 +745,7 @@ export interface ApiMemberOrgMemberOrg extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    website: Schema.Attribute.String;
   };
 }
 
@@ -1062,6 +1069,96 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
   };
 }
 
+export interface ApiTeamRegistrationTeamRegistration
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'team_registrations';
+  info: {
+    description: '\u0110\u01A1n \u0111\u0103ng k\u00FD m\u1ED9t gi\u1EA3i th\u00E0nh t\u00EDch cao do \u0111\u1ED9i t\u1EC9nh/th\u00E0nh g\u1EEDi \u2014 ph\u1EA7n \u0111\u1EA7u \u0111\u01A1n (tr\u01B0\u1EDFng \u0111o\u00E0n, v\u0103n b\u1EA3n c\u1EED \u0111o\u00E0n). Danh s\u00E1ch V\u0110V n\u1EB1m \u1EDF B\u1EA3n ghi V\u0110V d\u1EF1 gi\u1EA3i.';
+    displayName: '\u0110\u0103ng k\u00FD theo \u0111o\u00E0n';
+    pluralName: 'team-registrations';
+    singularName: 'team-registration';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    file: Schema.Attribute.Media<'files' | 'images'>;
+    leaderName: Schema.Attribute.String;
+    leaderPhone: Schema.Attribute.String;
+    leaderTitle: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::team-registration.team-registration'
+    > &
+      Schema.Attribute.Private;
+    note: Schema.Attribute.Text;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<['pending', 'confirmed', 'rejected']> &
+      Schema.Attribute.DefaultTo<'pending'>;
+    teamDocId: Schema.Attribute.String & Schema.Attribute.Required;
+    teamName: Schema.Attribute.String;
+    tournamentDocId: Schema.Attribute.String & Schema.Attribute.Required;
+    tournamentName: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiTournamentEntryTournamentEntry
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'tournament_entries';
+  info: {
+    description: 'M\u1ED9t V\u0110V \u0111\u0103ng k\u00FD m\u1ED9t gi\u1EA3i. \u0110\u1ED9i nh\u1EADp (gi\u1EA3i th\u00E0nh t\u00EDch cao) ho\u1EB7c V\u0110V t\u1EF1 \u0111\u0103ng k\u00FD (gi\u1EA3i phong tr\u00E0o). V\u1EADn h\u00E0nh duy\u1EC7t t\u1EEBng ng\u01B0\u1EDDi v\u00E0o danh s\u00E1ch thi \u0111\u1EA5u ch\u00EDnh th\u1EE9c.';
+    displayName: 'V\u0110V d\u1EF1 gi\u1EA3i';
+    pluralName: 'tournament-entries';
+    singularName: 'tournament-entry';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    address: Schema.Attribute.String;
+    cccd: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dob: Schema.Attribute.Date;
+    events: Schema.Attribute.JSON;
+    feeTotal: Schema.Attribute.String;
+    fullName: Schema.Attribute.String & Schema.Attribute.Required;
+    gender: Schema.Attribute.Enumeration<['Nam', 'N\u1EEF']>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::tournament-entry.tournament-entry'
+    > &
+      Schema.Attribute.Private;
+    memberCode: Schema.Attribute.String;
+    memberValid: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    note: Schema.Attribute.Text;
+    paid: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    phone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    source: Schema.Attribute.Enumeration<['team', 'self']> &
+      Schema.Attribute.DefaultTo<'team'>;
+    status: Schema.Attribute.Enumeration<['pending', 'official', 'rejected']> &
+      Schema.Attribute.DefaultTo<'pending'>;
+    teamDocId: Schema.Attribute.String;
+    teamName: Schema.Attribute.String;
+    tournamentDocId: Schema.Attribute.String & Schema.Attribute.Required;
+    tournamentName: Schema.Attribute.String;
+    transferImage: Schema.Attribute.Text;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiTournamentRegistrationTournamentRegistration
   extends Struct.CollectionTypeSchema {
   collectionName: 'tournament_registrations';
@@ -1127,7 +1224,10 @@ export interface ApiTournamentTournament extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     date: Schema.Attribute.Date;
+    docs: Schema.Attribute.Component<'tournament.doc', true>;
+    endDate: Schema.Attribute.Date;
     entryFee: Schema.Attribute.String;
+    events: Schema.Attribute.Component<'tournament.event', true>;
     format: Schema.Attribute.Enumeration<['SE', 'DE', 'RR', 'SW']> &
       Schema.Attribute.DefaultTo<'SE'>;
     liveRound: Schema.Attribute.String;
@@ -1139,20 +1239,26 @@ export interface ApiTournamentTournament extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     location: Schema.Attribute.String;
+    memberOnly: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     metaDescription: Schema.Attribute.Text;
     metaTitle: Schema.Attribute.String;
     mode: Schema.Attribute.Enumeration<['op', 'sim']> &
       Schema.Attribute.DefaultTo<'op'>;
     name: Schema.Attribute.String & Schema.Attribute.Required;
+    nature: Schema.Attribute.Enumeration<['national', 'grassroots']> &
+      Schema.Attribute.DefaultTo<'national'>;
     note: Schema.Attribute.String;
     participants: Schema.Attribute.Integer;
     players: Schema.Attribute.Component<'tournament.player', true>;
     prizes: Schema.Attribute.Component<'shared.prize', true>;
     publishedAt: Schema.Attribute.DateTime;
+    regCloseDate: Schema.Attribute.Date;
     regDeadline: Schema.Attribute.Date;
+    regOpenDate: Schema.Attribute.Date;
     rr: Schema.Attribute.JSON;
     rules: Schema.Attribute.Text;
     runnerUp: Schema.Attribute.String;
+    startDate: Schema.Attribute.Date;
     status: Schema.Attribute.Enumeration<['upcoming', 'ongoing', 'completed']> &
       Schema.Attribute.DefaultTo<'upcoming'>;
     sw: Schema.Attribute.JSON;
@@ -1687,6 +1793,8 @@ declare module '@strapi/strapi' {
       'api::partner.partner': ApiPartnerPartner;
       'api::payment-claim.payment-claim': ApiPaymentClaimPaymentClaim;
       'api::setting.setting': ApiSettingSetting;
+      'api::team-registration.team-registration': ApiTeamRegistrationTeamRegistration;
+      'api::tournament-entry.tournament-entry': ApiTournamentEntryTournamentEntry;
       'api::tournament-registration.tournament-registration': ApiTournamentRegistrationTournamentRegistration;
       'api::tournament.tournament': ApiTournamentTournament;
       'plugin::content-releases.release': PluginContentReleasesRelease;

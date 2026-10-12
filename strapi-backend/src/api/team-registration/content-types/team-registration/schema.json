@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "team_registrations",
+  "info": {
+    "singularName": "team-registration",
+    "pluralName": "team-registrations",
+    "displayName": "Đăng ký theo đoàn",
+    "description": "Đơn đăng ký một giải thành tích cao do đội tỉnh/thành gửi — phần đầu đơn (trưởng đoàn, văn bản cử đoàn). Danh sách VĐV nằm ở Bản ghi VĐV dự giải."
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "tournamentDocId": { "type": "string", "required": true },
+    "tournamentName": { "type": "string" },
+    "teamDocId": { "type": "string", "required": true },
+    "teamName": { "type": "string" },
+    "leaderName": { "type": "string" },
+    "leaderTitle": { "type": "string" },
+    "leaderPhone": { "type": "string" },
+    "file": { "type": "media", "multiple": false, "allowedTypes": ["files", "images"] },
+    "note": { "type": "text" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "confirmed", "rejected"],
+      "default": "pending"
+    }
+  }
+}

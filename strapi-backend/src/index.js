@@ -20,7 +20,8 @@ const PUBLIC_READ_SINGLE_TYPE_UIDS = [
 ];
 
 /* CỐ Ý KHÔNG cho đọc công khai: contact-message, tournament-registration,
-   payment-claim — đó là dữ liệu người dùng gửi lên (tên, email, số điện thoại).
+   payment-claim, tournament-entry, team-registration — đó là dữ liệu người dùng
+   gửi lên (tên, email, số điện thoại, CCCD, ngày sinh của VĐV).
    Ghi vào thì qua endpoint /submit riêng, đọc thì chỉ tài khoản CMS. */
 
 // CMS đăng nhập bằng tài khoản plugin::users-permissions.user (Authenticated role) —
@@ -54,6 +55,8 @@ const CONTENT_MANAGE_UIDS = [
   'api::member.member',
   'api::member-org.member-org',
   'api::tournament.tournament',
+  'api::tournament-entry.tournament-entry',
+  'api::team-registration.team-registration',
 ];
 const CONTENT_MANAGE_SINGLE_TYPE_UIDS = [
   'api::setting.setting',

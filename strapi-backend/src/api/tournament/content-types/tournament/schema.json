@@ -12,40 +12,129 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "name": { "type": "string", "required": true },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "nature": {
+      "type": "enumeration",
+      "enum": [
+        "national",
+        "grassroots"
+      ],
+      "default": "national",
+      "description": "national = Giải thành tích cao Quốc gia (chỉ đăng ký qua tài khoản địa phương); grassroots = Giải phong trào"
+    },
+    "memberOnly": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chỉ áp dụng cho giải phong trào: bắt buộc là hội viên mới đăng ký được"
+    },
     "category": {
       "type": "enumeration",
-      "enum": ["Pool 8 bi", "Pool 9 bi", "Pool 10 bi", "Carom 1 băng", "Carom 3 băng", "Snooker"]
+      "enum": [
+        "Pool 8 bi",
+        "Pool 9 bi",
+        "Pool 10 bi",
+        "Carom 1 băng",
+        "Carom 3 băng",
+        "Snooker"
+      ]
     },
     "format": {
       "type": "enumeration",
-      "enum": ["SE", "DE", "RR", "SW"],
+      "enum": [
+        "SE",
+        "DE",
+        "RR",
+        "SW"
+      ],
       "default": "SE"
     },
-    "lives": { "type": "integer", "default": 3 },
+    "lives": {
+      "type": "integer",
+      "default": 3
+    },
     "status": {
       "type": "enumeration",
-      "enum": ["upcoming", "ongoing", "completed"],
+      "enum": [
+        "upcoming",
+        "ongoing",
+        "completed"
+      ],
       "default": "upcoming"
     },
     "mode": {
       "type": "enumeration",
-      "enum": ["op", "sim"],
+      "enum": [
+        "op",
+        "sim"
+      ],
       "default": "op"
     },
-    "date": { "type": "date" },
-    "participants": { "type": "integer" },
-    "location": { "type": "string" },
-    "note": { "type": "string" },
-    "regDeadline": { "type": "date" },
-    "liveRound": { "type": "string" },
-    "champion": { "type": "string" },
-    "runnerUp": { "type": "string" },
-    "third": { "type": "string" },
-    "entryFee": { "type": "string" },
-    "rules": { "type": "text" },
-    "metaTitle": { "type": "string" },
-    "metaDescription": { "type": "text" },
+    "date": {
+      "type": "date"
+    },
+    "startDate": {
+      "type": "date"
+    },
+    "endDate": {
+      "type": "date"
+    },
+    "participants": {
+      "type": "integer"
+    },
+    "location": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "regDeadline": {
+      "type": "date"
+    },
+    "regOpenDate": {
+      "type": "date"
+    },
+    "regCloseDate": {
+      "type": "date"
+    },
+    "liveRound": {
+      "type": "string"
+    },
+    "champion": {
+      "type": "string"
+    },
+    "runnerUp": {
+      "type": "string"
+    },
+    "third": {
+      "type": "string"
+    },
+    "entryFee": {
+      "type": "string"
+    },
+    "rules": {
+      "type": "text"
+    },
+    "metaTitle": {
+      "type": "string"
+    },
+    "metaDescription": {
+      "type": "text"
+    },
+    "events": {
+      "type": "component",
+      "repeatable": true,
+      "component": "tournament.event",
+      "description": "Nội dung thi đấu của giải, mỗi nội dung một mức lệ phí"
+    },
+    "docs": {
+      "type": "component",
+      "repeatable": true,
+      "component": "tournament.doc",
+      "description": "Điều lệ, lịch thi đấu, kết quả..."
+    },
     "players": {
       "type": "component",
       "repeatable": true,

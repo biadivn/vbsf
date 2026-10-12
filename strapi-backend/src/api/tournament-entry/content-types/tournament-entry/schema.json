@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tournament_entries",
+  "info": {
+    "singularName": "tournament-entry",
+    "pluralName": "tournament-entries",
+    "displayName": "VĐV dự giải",
+    "description": "Một VĐV đăng ký một giải. Đội nhập (giải thành tích cao) hoặc VĐV tự đăng ký (giải phong trào). Vận hành duyệt từng người vào danh sách thi đấu chính thức."
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "tournamentDocId": { "type": "string", "required": true },
+    "tournamentName": { "type": "string" },
+    "teamDocId": { "type": "string" },
+    "teamName": { "type": "string" },
+    "source": {
+      "type": "enumeration",
+      "enum": ["team", "self"],
+      "default": "team",
+      "description": "team = đội đăng ký hộ; self = VĐV tự đăng ký (giải phong trào)"
+    },
+    "fullName": { "type": "string", "required": true },
+    "dob": { "type": "date" },
+    "gender": { "type": "enumeration", "enum": ["Nam", "Nữ"] },
+    "cccd": { "type": "string" },
+    "phone": { "type": "string" },
+    "address": { "type": "string" },
+    "events": {
+      "type": "json",
+      "description": "Danh sách tên nội dung thi đấu đã đăng ký"
+    },
+    "feeTotal": { "type": "string" },
+    "memberCode": {
+      "type": "string",
+      "description": "Mã hội viên khớp được theo CCCD lúc duyệt; rỗng = chưa là hội viên"
+    },
+    "memberValid": {
+      "type": "boolean",
+      "default": false,
+      "description": "Ảnh chụp tại thời điểm duyệt: hội viên còn hiệu lực hay không"
+    },
+    "paid": { "type": "boolean", "default": false },
+    "transferImage": { "type": "text", "description": "Ảnh chụp màn hình chuyển khoản (data URI)" },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "official", "rejected"],
+      "default": "pending",
+      "description": "official = đã vào danh sách thi đấu chính thức, được đưa vào bốc thăm"
+    },
+    "note": { "type": "text" }
+  }
+}
