@@ -22,10 +22,10 @@
     "verify": "npm run test && npm run security:scan"
   },
   "dependencies": {
-    "@strapi/database": "5.52.1",
-    "@strapi/plugin-cloud": "5.52.1",
-    "@strapi/plugin-users-permissions": "5.52.1",
-    "@strapi/strapi": "5.52.1",
+    "@strapi/database": "5.57.0",
+    "@strapi/plugin-cloud": "5.57.0",
+    "@strapi/plugin-users-permissions": "5.57.0",
+    "@strapi/strapi": "5.57.0",
     "better-sqlite3": "12.8.0",
     "pg": "^8.23.0",
     "react": "^18.0.0",
@@ -43,7 +43,13 @@
     "installId": "5a7dfb9bfcbaaa7ace3c0bdcf8d8731c18c8175e598a66c2fed3b309b0e44590"
   },
   "overrides": {
-    "sharp": "0.35.4",
-    "nodemailer": "^9.0.2"
+    "sharp": "^0.35.5",
+    "nodemailer": "^10.1.0",
+    "axios": "^1.20.0",
+    "handlebars": "^4.7.10",
+    "source-map-js": "^1.2.2",
+    "brace-expansion": "^5.0.12",
+    "webpack-dev-middleware": "^7.4.6",
+    "fast-uri": "^4.2.2"
   }
 }

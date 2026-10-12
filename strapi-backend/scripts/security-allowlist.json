@@ -3,17 +3,326 @@
     "Ngoại lệ ĐÃ RÀ SOÁT cho security scan. Mỗi mục bắt buộc có lý do và hạn rà",
     "soát lại — quá hạn thì scan FAIL, không có chuyện im lặng bỏ qua mãi mãi.",
     "Chỉ thêm vào đây khi lỗ hổng thực sự không vá được và đã đánh giá là không",
-    "ảnh hưởng tới runtime production."
+    "ảnh hưởng tới runtime production.",
+    "Đợt 10/2026: đã nâng @strapi/strapi 5.52.1 -> 5.57.0 và override axios/handlebars/",
+    "source-map-js/brace-expansion/webpack-dev-middleware/fast-uri/sharp/nodemailer để vá",
+    "thật thay vì bỏ qua. Phần còn lại dưới đây đều quy về MỘT gốc chưa có bản vá: braces."
   ],
   "advisories": [
     {
       "id": "GHSA-fx2h-pf6j-xcff",
       "package": "vite",
       "severity": "high",
-      "reason": "vite@5.4.21 bị @strapi/strapi@5.52.1 ghim cứng; bản vá chỉ có ở vite >6.4.2 nên không nâng được nếu không hạ cấp Strapi (npm audit fix đề xuất @strapi/strapi@4.26.2 — lùi cả một major). Lỗ hổng nằm ở dev server của vite (server.fs.deny bypass) và chỉ khai thác được trên Windows; production chạy container Linux, phục vụ admin panel đã build sẵn, không bật vite dev server.",
-      "reviewBy": "2026-11-30",
+      "reason": "vite bị @strapi/strapi@5.57.0 ghim cứng ở nhánh chưa vá (bản vá ở vite >6.4.2); npm audit fix đề xuất lùi về @strapi/strapi@4.26.2 — lùi cả một major. Lỗ hổng nằm ở dev server của vite (server.fs.deny bypass) và chỉ khai thác được trên Windows; production chạy container Linux, phục vụ admin panel đã build sẵn, không bật vite dev server.",
+      "reviewBy": "2027-01-31",
       "reviewedBy": "VBSF dev",
-      "reviewedOn": "2026-08-28"
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "severity": "high",
+      "reason": "braces@3.0.3 là bản mới nhất và vẫn chưa có bản vá (npm audit ghi range \"*\"); nó đi vào cây qua micromatch/chokidar của chuỗi công cụ build Strapi, không có cách nâng hay override nào thay được. Lỗ hổng là stack exhaustion khi khớp một pattern glob lồng sâu — chỉ khai thác được nếu kẻ tấn công điều khiển được chuỗi glob. Production chạy `strapi start` trên admin đã build sẵn: không chạy watcher, không compile, và không có đường nào để dữ liệu người dùng trở thành pattern glob.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "micromatch",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "chokidar",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "fork-ts-checker-webpack-plugin",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "findup-sync",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "liftoff",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "plop",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "jscodeshift",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "find-yarn-workspace-root2",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "preferred-pm",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "react-router-dom",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "dompurify",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "markdown-it",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "stream-json",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/admin",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/cloud-cli",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/content-manager",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/content-releases",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/content-type-builder",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/core",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/data-transfer",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/database",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/email",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/generators",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/i18n",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/permissions",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/plugin-cloud",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/plugin-users-permissions",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/provider-upload-local",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/review-workflows",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/strapi",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/types",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/upload",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "@strapi/utils",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới braces/vite ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi braces có bản vá.",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-12"
     }
   ]
 }
