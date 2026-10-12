@@ -166,6 +166,30 @@ function officialEligibility(entry) {
   return { ok: reasons.length === 0, reasons };
 }
 
+/**
+ * Vận hành bấm "xác nhận chính thức" (mục 2.2). Kiểm lại điều kiện 2.1 NGAY LÚC
+ * duyệt thay vì tin vào ảnh chụp lúc nộp đơn: hội viên có thể đã hết hạn trong
+ * khoảng thời gian giữa hai mốc đó.
+ * @param entry    bản ghi hiện có
+ * @param incoming field vận hành đang sửa trong cùng request (vd. bật `paid`)
+ * @param members  các hội viên khớp CCCD để soi lại hiệu lực
+ */
+function confirmOfficial(entry, incoming, members, now) {
+  const current = entry || {};
+  const patch = incoming || {};
+  const cccd = patch.cccd !== undefined ? patch.cccd : current.cccd;
+  const match = matchMember(members, cccd, now);
+  const paid = patch.paid !== undefined ? Boolean(patch.paid) : Boolean(current.paid);
+  const check = officialEligibility({ memberValid: match.memberValid, paid });
+  if (!check.ok) {
+    return {
+      ok: false,
+      error: `Chưa đưa vào danh sách thi đấu chính thức được: ${check.reasons.join(' và ')}.`,
+    };
+  }
+  return { ok: true, data: { ...match, paid, status: 'official' } };
+}
+
 module.exports = {
   parseFee,
   formatFee,
@@ -177,4 +201,5 @@ module.exports = {
   normalizeAthletes,
   matchMember,
   officialEligibility,
+  confirmOfficial,
 };

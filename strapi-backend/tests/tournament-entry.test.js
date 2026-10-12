@@ -6,6 +6,7 @@ const { describe } = test;
 const {
   parseFee, formatFee, sumEventFees, eventNames, registrationOpen,
   canSubmit, normalizeAthlete, normalizeAthletes, matchMember, officialEligibility,
+  confirmOfficial,
 } = require('../src/utils/tournament-entry');
 
 const NATIONAL = {
@@ -242,5 +243,45 @@ describe('officialEligibility', () => {
       ['chưa ghi nhận nộp lệ phí']);
     assert.equal(officialEligibility({}).reasons.length, 2);
     assert.equal(officialEligibility(null).reasons.length, 2);
+  });
+});
+
+describe('confirmOfficial', () => {
+  const members = [{ code: 'VBSF-9', cccd: '079095001234', status: 'active', expiry: '2026-12-31' }];
+  const entry = { cccd: '079095001234', paid: false, memberCode: '', memberValid: false };
+
+  test('đủ điều kiện thì cho duyệt và ghi lại mã hội viên vừa soi được', () => {
+    const r = confirmOfficial(entry, { status: 'official', paid: true }, members, new Date('2026-06-01'));
+    assert.equal(r.ok, true);
+    assert.deepEqual(r.data, { memberCode: 'VBSF-9', memberValid: true, paid: true, status: 'official' });
+  });
+
+  test('chưa ghi nhận lệ phí thì chặn', () => {
+    const r = confirmOfficial(entry, { status: 'official' }, members, new Date('2026-06-01'));
+    assert.equal(r.ok, false);
+    assert.match(r.error, /chưa ghi nhận nộp lệ phí/);
+  });
+
+  test('hội viên hết hạn sau khi nộp đơn thì chặn, dù đơn lưu memberValid=true', () => {
+    const stale = { cccd: '079095001234', paid: true, memberValid: true };
+    const r = confirmOfficial(stale, { status: 'official' }, members, new Date('2027-01-01'));
+    assert.equal(r.ok, false);
+    assert.match(r.error, /hội viên còn hiệu lực/);
+  });
+
+  test('thiếu cả hai điều kiện thì nêu cả hai', () => {
+    const r = confirmOfficial({ cccd: '000' }, { status: 'official' }, members, new Date('2026-06-01'));
+    assert.match(r.error, /hội viên còn hiệu lực và chưa ghi nhận nộp lệ phí/);
+  });
+
+  test('vận hành sửa CCCD trong cùng request thì soi theo CCCD mới', () => {
+    const r = confirmOfficial({ cccd: '000', paid: true },
+      { status: 'official', cccd: '079-095 001234' }, members, new Date('2026-06-01'));
+    assert.equal(r.ok, true);
+    assert.equal(r.data.memberCode, 'VBSF-9');
+  });
+
+  test('đầu vào rỗng không ném lỗi', () => {
+    assert.equal(confirmOfficial(null, null, null, new Date()).ok, false);
   });
 });

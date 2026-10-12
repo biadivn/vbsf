@@ -125,6 +125,16 @@ function mapStrapiEntryToRecord(c, item){
     feeStatus: p.feeStatus || 'unpaid', seed: p.seed || undefined, rating: p.rating || undefined
   }));
   if(item.prizes) rec.prizes = item.prizes.map(p=>({ rank: p.rank||'', cash: p.cash||'', item: p.item||'' }));
+  // events/docs (giải đấu): cũng là component repeatable. Map tay thay vì copy
+  // nguyên item để không mang theo "id" của Strapi vào state cục bộ.
+  if(item.events) rec.events = item.events.map(e=>({ name: e.name||'', fee: e.fee||'' }));
+  if(item.docs) rec.docs = item.docs.map(d=>({
+    label: d.label||'',
+    // fileId là thứ gửi lại cho Strapi; url/name chỉ để hiện link trong CMS.
+    fileId: d.file ? d.file.id : null,
+    fileName: d.file ? d.file.name : '',
+    fileUrl: d.file ? mediaUrl(d.file) : ''
+  }));
   return rec;
 }
 
@@ -142,6 +152,20 @@ function tePlayersToStrapiPayload(players){
 function tePrizesToStrapiPayload(prizes){
   return (prizes||[]).map(p=>({ rank: p.rank||'', cash: p.cash||'', item: p.item||'' }));
 }
+/* Nội dung thi đấu + lệ phí từng nội dung. Dòng chưa có tên thì bỏ — nội dung
+   không tên thì VĐV không chọn được mà vẫn chiếm chỗ trong đơn đăng ký. */
+function teEventsToStrapiPayload(events){
+  return (events||[]).filter(e=>e && String(e.name||'').trim()).map(e=>({
+    name: String(e.name).trim(), fee: e.fee||''
+  }));
+}
+/* Tệp đính kèm của giải (điều lệ, biểu mẫu). Chỉ gửi dòng đã tải tệp lên xong
+   — file là media bắt buộc, dòng thiếu fileId sẽ làm Strapi báo lỗi cả payload. */
+function teDocsToStrapiPayload(docs){
+  return (docs||[]).filter(d=>d && d.fileId).map(d=>({
+    label: String(d.label||'').trim() || d.fileName || 'Tài liệu', file: d.fileId
+  }));
+}
 function teBuildTournamentPayload(record){
   return {
     name: record.name, category: teNz(record.category), format: teNz(record.format),
@@ -149,7 +173,15 @@ function teBuildTournamentPayload(record){
     status: teNz(record.status), mode: teNz(record.mode),
     date: teNz(record.date),
     participants: (record.participants!=null && record.participants!=='') ? Number(record.participants) : null,
-    location: teNz(record.location), note: teNz(record.note), regDeadline: teNz(record.regDeadline),
+    // nature trống nghĩa là giải thành tích cao (mặc định của Liên đoàn) — ghi
+    // thẳng ra thay vì để null, để cột "Loại giải" và API đọc cùng một giá trị.
+    nature: record.nature || 'national', memberOnly: !!record.memberOnly,
+    startDate: teNz(record.startDate), endDate: teNz(record.endDate),
+    location: teNz(record.location), note: teNz(record.note),
+    regOpenDate: teNz(record.regOpenDate), regCloseDate: teNz(record.regCloseDate),
+    // regDeadline là field cũ, không còn trên form nhưng vẫn gửi lại nguyên giá
+    // trị để giải tạo trước đây không bị xoá mất hạn đăng ký.
+    regDeadline: teNz(record.regDeadline),
     liveRound: teNz(record.liveRound), entryFee: teNz(record.entryFee),
     // Bục trao giải: champion do engine tự điền khi giải kết thúc, runnerUp/third
     // ban tổ chức nhập tay ở tab Thông tin. Thiếu hai field sau trong payload thì
@@ -157,6 +189,7 @@ function teBuildTournamentPayload(record){
     champion: teNz(record.champion), runnerUp: teNz(record.runnerUp), third: teNz(record.third),
     rules: teNz(record.rules), metaTitle: teNz(record.metaTitle), metaDescription: teNz(record.metaDescription),
     players: tePlayersToStrapiPayload(record.players), prizes: tePrizesToStrapiPayload(record.prizes),
+    events: teEventsToStrapiPayload(record.events), docs: teDocsToStrapiPayload(record.docs),
     bracket: record.bracket||null, rr: record.rr||null, sw: record.sw||null
   };
 }
@@ -214,7 +247,10 @@ async function refreshRemoteCollection(key){
   try{
     let page = 1, all = [], pageCount = 1;
     do{
-      const res = await apiFetch(`/api/${c.apiPath}?pagination[page]=${page}&pagination[pageSize]=100&populate=*`);
+      // populate=* chỉ đi được một tầng: media nằm TRONG component (docs.file)
+      // sẽ về rỗng. Collection nào có component lồng media thì tự khai populate.
+      const populate = c.populate || 'populate=*';
+      const res = await apiFetch(`/api/${c.apiPath}?pagination[page]=${page}&pagination[pageSize]=100&${populate}`);
       if(!res.ok) break;
       const out = await res.json();
       all = all.concat(out.data || []);

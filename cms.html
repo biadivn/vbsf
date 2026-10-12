@@ -91,6 +91,9 @@ tr:last-child td{border-bottom:none}
 tbody tr{transition:background .15s}
 tbody tr:hover{background:#FBFBFE}
 td.actions{text-align:right;white-space:nowrap}
+/* Bảng duyệt đăng ký nhiều cột hơn bảng thường — padding mặc định làm tràn
+   khỏi .tbl-wrap (overflow:hidden) và nuốt mất cột nút thao tác. */
+table.tee-tbl th, table.tee-tbl td{padding:10px 12px}
 
 /* Tags */
 .badge{font-size:12px;font-weight:500;padding:3px 10px;border-radius:100px;background:var(--tag-purple-soft);color:var(--tag-purple);white-space:nowrap;display:inline-block}
@@ -475,6 +478,7 @@ tr.row-hidden{opacity:.5}
 <script src="cms-js/tournament-engine.js?v=__CMS_BUILD__"></script>
 <script src="cms-js/tournament-seeding.js?v=__CMS_BUILD__"></script>
 <script src="cms-js/tournament-editor.js?v=__CMS_BUILD__"></script>
+<script src="cms-js/tournament-entries.js?v=__CMS_BUILD__"></script>
 <script src="cms-js/add-section-modal.js?v=__CMS_BUILD__"></script>
 <script src="cms-js/page-modal.js?v=__CMS_BUILD__"></script>
 <script src="cms-js/export-import.js?v=__CMS_BUILD__"></script>
