@@ -164,6 +164,52 @@ describe('site-js/member-auth', { skip: available ? false : 'không có site-js/
     });
   });
 
+  /* currentOrg()/orgToken() là thứ trang Đăng ký thi đấu dựa vào để biết đang
+     là ĐỘI nào; nhầm giữa hai loại tài khoản là nhầm luôn luồng đăng ký. */
+  describe('phiên tài khoản đội (currentOrg)', () => {
+    test('chưa đăng nhập thì null', () => {
+      assert.strictEqual(loadModule(() => reply(200, {})).auth.currentOrg(), null);
+    });
+
+    test('đăng nhập đội xong thì giữ hồ sơ đội, không đụng phiên hội viên', async () => {
+      const ctx = loadModule(() => reply(200, { token: 'tok-org', org: ORG }));
+      await ctx.auth.loginOrg('0901112233', '123456');
+      assert.strictEqual(ctx.auth.currentOrg().name, 'CLB Sài Gòn');
+      assert.strictEqual(ctx.auth.currentMember(), null);
+    });
+
+    test('khôi phục phiên đội cũng điền currentOrg', async () => {
+      const ctx = loadModule(() => reply(200, { org: ORG }));
+      ctx.store.set('vbsf_org_token', 'tok-org');
+      await ctx.auth.restoreOrg();
+      assert.strictEqual(ctx.auth.currentOrg().code, ORG.code);
+    });
+
+    test('token đội hỏng thì bỏ luôn hồ sơ đang giữ', async () => {
+      const ctx = loadModule((url) => (/\/me$/.test(url) ? reply(401, {}) : reply(200, { token: 't', org: ORG })));
+      await ctx.auth.loginOrg('0901112233', '123456');
+      assert.ok(ctx.auth.currentOrg(), 'điều kiện tiền đề');
+      assert.strictEqual(await ctx.auth.restoreOrg(), null);
+      assert.strictEqual(ctx.auth.currentOrg(), null, 'token hỏng mà vẫn giữ hồ sơ là rò phiên');
+    });
+
+    test('đăng xuất đội xoá cả hồ sơ lẫn token', async () => {
+      const ctx = loadModule(() => reply(200, { token: 'tok-org', org: ORG }));
+      await ctx.auth.loginOrg('0901112233', '123456');
+      ctx.auth.logoutOrg();
+      assert.strictEqual(ctx.auth.currentOrg(), null);
+      assert.strictEqual(ctx.auth.orgToken(), null);
+    });
+
+    test('token thô trả về đúng khoá của từng loại tài khoản', () => {
+      const ctx = loadModule(() => reply(200, {}));
+      ctx.store.set('vbsf_member_token', 'tok-hv');
+      ctx.store.set('vbsf_org_token', 'tok-doi');
+      assert.strictEqual(ctx.auth.memberToken(), 'tok-hv');
+      assert.strictEqual(ctx.auth.orgToken(), 'tok-doi');
+    });
+  });
+
   describe('đăng ký', () => {
     test('hội viên: gửi nguyên payload và lưu token', async () => {
       const ctx = loadModule(() => reply(200, { token: 'tok-new', member: MEMBER }));

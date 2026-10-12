@@ -177,7 +177,9 @@
       { key: 'settings', fallback: {}, load: function () { return api('setting'); } },
       { key: 'contact', fallback: {}, load: function () { return api('contact-info'); } },
       { key: 'news', fallback: [], load: function () { return list('news-articles', 'sort=date:desc&populate=image'); } },
-      { key: 'tournaments', fallback: [], load: function () { return list('tournaments', 'populate=prizes&populate=players'); } },
+      // events/docs phục vụ trang Đăng ký thi đấu; media nằm trong component nên
+      // phải populate lồng, populate=docs một tầng sẽ trả file rỗng.
+      { key: 'tournaments', fallback: [], load: function () { return list('tournaments', 'populate[prizes]=*&populate[players]=*&populate[events]=*&populate[docs][populate]=file'); } },
       { key: 'members', fallback: [], load: function () { return list('members', 'populate=disciplines&populate=avatar'); } },
       { key: 'memberOrgs', fallback: [], load: function () { return list('member-orgs'); } },
       { key: 'partners', fallback: [], load: function () { return list('partners', 'populate=image'); } },
@@ -222,12 +224,16 @@
   }
 
   /** POST tới endpoint form công khai; ném Error kèm thông báo của backend. */
-  async function submitForm(path, payload) {
+  async function submitForm(path, payload, token) {
     var res;
     try {
+      var headers = { 'Content-Type': 'application/json' };
+      /* Endpoint đăng ký thi đấu cần biết người gửi là ĐỘI nào / HỘI VIÊN nào —
+         token của site public, không phải JWT của CMS. */
+      if (token) headers.Authorization = 'Bearer ' + token;
       res = await fetch(STRAPI_URL + '/api/' + path, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify(payload),
       });
     } catch (err) {
@@ -1153,9 +1159,327 @@
     return me;
   }
 
+  /* ---------------- Đăng ký thi đấu ----------------
+     Hai luồng, quyết định bởi `nature` của giải (đặt trong CMS):
+     - national  : chỉ tài khoản ĐỘI tỉnh/thành gửi được, kèm danh sách VĐV.
+                   VĐV không tự đăng ký (quy định hiện hành của Liên đoàn).
+     - grassroots: VĐV tự đăng ký; giải có memberOnly thì phải là hội viên.
+     Cả hai đều vào cùng một nơi để vận hành duyệt TỪNG NGƯỜI vào danh sách thi
+     đấu chính thức trước khi bốc thăm. */
+
+  /** Giải đang đăng ký. Ưu tiên documentId router gắn vào trang; vào bằng hash
+      thì không có, nên dò theo tên giải đang hiển thị trên băng tiêu đề. */
+  function regTournament(page, data) {
+    var list = (data && data.tournaments) || [];
+    if (page.__regDoc) {
+      var byDoc = list.filter(function (t) { return t.documentId === page.__regDoc; })[0];
+      if (byDoc) return byDoc;
+    }
+    var nameEl = page.querySelector('[data-fill="name"]');
+    var name = nameEl ? nameEl.textContent.trim() : '';
+    if (!name || name === 'Tên giải đấu') return null;
+    return list.filter(function (t) { return (t.name || '').trim() === name; })[0] || null;
+  }
+
+  function regEvents(t) {
+    return ((t && t.events) || []).filter(function (e) { return e && e.name; });
+  }
+
+  /** So theo NGÀY để hạn chót tính hết ngày, giống hệt phía máy chủ. */
+  function regDay(v) {
+    if (!v) return null;
+    var d = new Date(v);
+    if (isNaN(d.getTime())) return null;
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  }
+  function regWindow(t) {
+    var now = new Date();
+    var today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    var open = regDay(t && t.regOpenDate);
+    var close = regDay(t && (t.regCloseDate || t.regDeadline));
+    if (open != null && today < open) {
+      return { ok: false, error: 'Giải chưa mở đăng ký. Thời gian nhận đăng ký bắt đầu từ ' + fmtDate(t.regOpenDate) + '.' };
+    }
+    if (close != null && today > close) {
+      return { ok: false, error: 'Giải đã hết hạn đăng ký (hạn chót ' + fmtDate(t.regCloseDate || t.regDeadline) + ').' };
+    }
+    return { ok: true };
+  }
+
+  /* Lệ phí: giải khai nhiều nội dung thì liệt kê từng nội dung, vì người đăng ký
+     chọn nội dung nào thì đóng tiền nội dung đó. Giải chưa khai nội dung thì giữ
+     nguyên ô "Phí tham dự" cũ. */
+  function regFillFees(page, t) {
+    var box = page.querySelector('[data-reg-fee-list]');
+    if (!box) return;
+    var evs = regEvents(t);
+    if (!evs.length) {
+      var base = page.querySelector('[data-reg-fee-base]');
+      if (base && t && t.entryFee) base.textContent = t.entryFee;
+      return;
+    }
+    box.innerHTML = evs.map(function (e) {
+      return '<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:6px">' +
+        '<span style="color:#5C6B63">' + esc(e.name) + '</span>' +
+        '<span style="font-weight:600;color:#21428E;white-space:nowrap">' + esc(e.fee || '—') + '</span></div>';
+    }).join('');
+  }
+
+  function regFillDocs(page, t) {
+    var box = page.querySelector('[data-reg-docs]');
+    var listEl = page.querySelector('[data-reg-docs-list]');
+    if (!box || !listEl) return;
+    var docs = ((t && t.docs) || []).filter(function (d) { return d && d.file && d.file.url; });
+    if (!docs.length) { box.style.display = 'none'; return; }
+    box.style.display = '';
+    listEl.innerHTML = docs.map(function (d) {
+      return '<div><a href="' + esc(mediaUrl(d.file)) + '" target="_blank" rel="nofollow noopener"><i class="ti ti-file-text"></i> ' +
+        esc(d.label || d.file.name || 'Tài liệu') + '</a></div>';
+    }).join('');
+  }
+
+  /* ----- Giải phong trào: ô chọn nội dung + tổng lệ phí tạm tính ----- */
+  function parseFeeNumber(v) {
+    var digits = String(v == null ? '' : v).replace(/[^\d]/g, '');
+    return digits ? Number(digits) : null;
+  }
+  function formatVnd(n) {
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
+  }
+  function regSelfEvents(page) {
+    return Array.prototype.slice.call(page.querySelectorAll('[data-reg-self-ev]:checked'))
+      .map(function (i) { return i.value; });
+  }
+  function regFillSelfEvents(page, t) {
+    var box = page.querySelector('[data-reg-self-events]');
+    var list = page.querySelector('[data-reg-self-events-list]');
+    if (!box || !list) return;
+    var evs = regEvents(t);
+    if (!evs.length) { box.style.display = 'none'; list.innerHTML = ''; return; }
+    box.style.display = '';
+    list.innerHTML = evs.map(function (e) {
+      return '<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#1B2A24;cursor:pointer">' +
+        '<input type="checkbox" data-reg-self-ev value="' + esc(e.name) + '"> ' + esc(e.name) +
+        (e.fee ? ' <span style="color:#8A968F">(' + esc(e.fee) + ')</span>' : '') + '</label>';
+    }).join('');
+    var total = page.querySelector('[data-reg-self-fee]');
+    var recalc = function () {
+      if (!total) return;
+      var picked = regSelfEvents(page);
+      var sum = 0, counted = 0;
+      picked.forEach(function (n) {
+        var ev = evs.filter(function (e) { return e.name === n; })[0];
+        var fee = ev ? parseFeeNumber(ev.fee) : null;
+        if (fee != null) { sum += fee; counted++; }
+      });
+      total.textContent = counted ? 'Tạm tính: ' + formatVnd(sum) : '';
+    };
+    list.querySelectorAll('[data-reg-self-ev]').forEach(function (i) { i.addEventListener('change', recalc); });
+    recalc();
+  }
+
+  /* ----- Giải thành tích cao: bảng nhập VĐV của đội ----- */
+  var REG_CSV_COLS = ['Họ và tên', 'Ngày sinh (yyyy-mm-dd)', 'Giới tính', 'Số căn cước', 'Điện thoại', 'Nội dung (cách nhau bằng dấu ;)'];
+
+  function regAthRow(page, t, row) {
+    var evs = regEvents(t);
+    var r = row || {};
+    var tr = document.createElement('tr');
+    var cell = 'padding:6px 8px;border-top:0.5px solid #E3E8E4';
+    var inp = 'width:100%;border:0.5px solid #E3E8E4;border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12.5px;color:#1B2A24';
+    /* Ô chọn nội dung nằm NGAY DƯỚI tên, không tách thành cột riêng: thêm một
+       cột nữa thì bảng rộng quá khung và cột họ tên bị bóp còn vài ký tự. */
+    var evBox = evs.length
+      ? '<div style="display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:5px">' + evs.map(function (e) {
+          var on = (r.events || []).indexOf(e.name) >= 0;
+          return '<label style="display:flex;align-items:center;gap:4px;white-space:nowrap;color:#5C6B63;font-size:11.5px;cursor:pointer">' +
+            '<input type="checkbox" data-ath-ev value="' + esc(e.name) + '"' + (on ? ' checked' : '') + '> ' + esc(e.name) + '</label>';
+        }).join('') + '</div>'
+      : '';
+    tr.innerHTML =
+      '<td style="' + cell + ';color:#8A968F;vertical-align:top;padding-top:13px" data-reg-ath-no></td>' +
+      '<td style="' + cell + '"><input type="text" data-ath="fullName" style="' + inp + '" value="' + esc(r.fullName || '') + '">' + evBox + '</td>' +
+      '<td style="' + cell + '"><input type="date" data-ath="dob" style="' + inp + '" value="' + esc(r.dob || '') + '"></td>' +
+      '<td style="' + cell + '"><select data-ath="gender" style="' + inp + '">' +
+        ['', 'Nam', 'Nữ'].map(function (g) {
+          return '<option value="' + g + '"' + (r.gender === g ? ' selected' : '') + '>' + (g || '—') + '</option>';
+        }).join('') + '</select></td>' +
+      '<td style="' + cell + '"><input type="text" data-ath="cccd" style="' + inp + '" value="' + esc(r.cccd || '') + '"></td>' +
+      '<td style="' + cell + '"><input type="tel" data-ath="phone" style="' + inp + '" value="' + esc(r.phone || '') + '"></td>' +
+      '<td style="' + cell + ';text-align:right;vertical-align:top;padding-top:11px"><span class="vb-link" data-reg-ath-rm title="Xóa dòng" style="cursor:pointer;color:#9E2A2B">&times;</span></td>';
+    tr.querySelector('[data-reg-ath-rm]').addEventListener('click', function () {
+      tr.parentNode.removeChild(tr);
+      regRenumber(page);
+    });
+    return tr;
+  }
+
+  function regRenumber(page) {
+    var body = page.querySelector('[data-reg-ath-body]');
+    if (!body) return;
+    Array.prototype.slice.call(body.children).forEach(function (tr, i) {
+      var no = tr.querySelector('[data-reg-ath-no]');
+      if (no) no.textContent = String(i + 1);
+    });
+  }
+
+  function regAddAthlete(page, t, row) {
+    var body = page.querySelector('[data-reg-ath-body]');
+    if (!body) return;
+    body.appendChild(regAthRow(page, t, row));
+    regRenumber(page);
+  }
+
+  function regReadAthletes(page) {
+    var body = page.querySelector('[data-reg-ath-body]');
+    if (!body) return [];
+    return Array.prototype.slice.call(body.children).map(function (tr) {
+      var v = function (k) {
+        var el = tr.querySelector('[data-ath="' + k + '"]');
+        return el ? el.value.trim() : '';
+      };
+      return {
+        fullName: v('fullName'), dob: v('dob') || undefined, gender: v('gender') || undefined,
+        cccd: v('cccd'), phone: v('phone'),
+        events: Array.prototype.slice.call(tr.querySelectorAll('[data-ath-ev]:checked'))
+          .map(function (i) { return i.value; }),
+      };
+    }).filter(function (r) {
+      /* Dòng trống hoàn toàn là dòng người dùng thêm rồi bỏ — bỏ qua thay vì bắt
+         họ bấm xóa; dòng có gõ gì đó mà thiếu tên thì để máy chủ báo đúng số dòng. */
+      return r.fullName || r.cccd || r.phone;
+    });
+  }
+
+  /* CSV tối giản: có hỗ trợ ô bọc trong dấu nháy kép vì tên/địa chỉ hay chứa dấu phẩy. */
+  function parseCsv(text) {
+    var rows = [], row = [], field = '', quoted = false;
+    var push = function () { row.push(field); field = ''; };
+    var endRow = function () { push(); if (row.some(function (c) { return c.trim(); })) rows.push(row); row = []; };
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (quoted) {
+        if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (c === '"') quoted = false;
+        else field += c;
+      } else if (c === '"') quoted = true;
+      else if (c === ',' || c === ';' && false) push();
+      else if (c === '\n') endRow();
+      else if (c !== '\r') field += c;
+    }
+    if (field || row.length) endRow();
+    return rows;
+  }
+
+  function regImportCsv(page, t, text) {
+    var rows = parseCsv(text);
+    if (!rows.length) return 0;
+    /* Bỏ dòng tiêu đề nếu người dùng giữ nguyên tệp mẫu. */
+    if (/họ|tên|name/i.test(rows[0][0] || '')) rows = rows.slice(1);
+    var valid = regEvents(t).map(function (e) { return e.name; });
+    var added = 0;
+    rows.forEach(function (c) {
+      var name = (c[0] || '').trim();
+      if (!name) return;
+      var evs = (c[5] || '').split(';').map(function (x) { return x.trim(); })
+        .filter(function (x) { return x && (!valid.length || valid.indexOf(x) >= 0); });
+      regAddAthlete(page, t, {
+        fullName: name, dob: (c[1] || '').trim(), gender: (c[2] || '').trim(),
+        cccd: (c[3] || '').trim(), phone: (c[4] || '').trim(), events: evs,
+      });
+      added++;
+    });
+    return added;
+  }
+
+  function regCsvSample(t) {
+    var evs = regEvents(t).map(function (e) { return e.name; });
+    return REG_CSV_COLS.join(',') + '\n' +
+      ['Nguyễn Văn A', '1998-04-12', 'Nam', '079098001234', '0909123456', evs.slice(0, 2).join(';')].join(',') + '\n';
+  }
+
+  function regDownloadCsv(t) {
+    var blob = new Blob(['﻿' + regCsvSample(t)], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'mau-danh-sach-vdv.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+
+  /* ----- Dựng lại cả trang theo giải đang chọn + trạng thái đăng nhập ----- */
+  async function applyRegistrationPage(page, data) {
+    var t = regTournament(page, data);
+    var show = function (sel, on) { var e = page.querySelector(sel); if (e) e.style.display = on ? '' : 'none'; };
+
+    /* Vào trang bằng hash hoặc link trực tiếp thì router không có dataset để điền
+       băng tiêu đề; điền từ chính bản ghi giải để không còn chữ mẫu "Tên giải đấu". */
+    if (t) {
+      fill(page, 'name', t.name || '');
+      fill(page, 'disc', t.category || '');
+      fill(page, 'date', fmtDate(t.date));
+      fill(page, 'loc', t.location || '');
+      /* Giải chưa khai nội dung lẫn ngày thì dòng phụ chỉ còn mỗi dấu "·". */
+      var sub = page.querySelector('[data-reg-sub]');
+      if (sub) sub.style.display = (t.category || t.date) ? '' : 'none';
+    }
+
+    regFillFees(page, t);
+    regFillDocs(page, t);
+
+    var closed = page.querySelector('[data-reg-closed]');
+    var win = t ? regWindow(t) : { ok: true };
+    if (closed) {
+      closed.innerHTML = win.ok ? '' : '<i class="ti ti-clock-x"></i> ' + esc(win.error);
+      closed.style.display = win.ok ? 'none' : '';
+    }
+
+    /* Giải chưa khai `nature` là giải tạo trước khi có luồng mới — Liên đoàn quy
+       định mặc định là giải thành tích cao. */
+    var national = !t || (t.nature || 'national') === 'national';
+    show('[data-reg-national]', national && win.ok);
+    show('[data-reg-grassroots]', !national && win.ok);
+
+    if (national) {
+      var auth = window.VBSF_AUTH;
+      var org = auth ? auth.currentOrg() : null;
+      if (!org && auth && typeof auth.restoreOrg === 'function') {
+        try { org = await auth.restoreOrg(); } catch (e) { org = null; }
+      }
+      show('[data-reg-team-login]', !org);
+      show('[data-reg-team-form]', !!org);
+      if (org) {
+        setText(page, '[data-reg-team-name]', org.name || '—');
+        setText(page, '[data-reg-team-code]', org.code || '—');
+        setText(page, '[data-reg-team-prov]', org.province || org.orgType || '—');
+        var leader = page.querySelector('[data-reg-leader]');
+        if (leader && !leader.value) leader.value = org.repName || '';
+        var ltitle = page.querySelector('[data-reg-leader-title]');
+        if (ltitle && !ltitle.value) ltitle.value = org.repTitle || '';
+        var lphone = page.querySelector('[data-reg-leader-phone]');
+        if (lphone && !lphone.value) lphone.value = org.repPhone || '';
+        /* Dựng lại bảng VĐV mỗi lần vào trang: cột nội dung phụ thuộc vào giải,
+           giữ bảng của giải trước sẽ cho chọn nội dung không thuộc giải này. */
+        var body = page.querySelector('[data-reg-ath-body]');
+        if (body && page.__regAthFor !== (t && t.documentId)) {
+          body.innerHTML = '';
+          page.__regAthFor = t && t.documentId;
+          regAddAthlete(page, t);
+        }
+      }
+    } else {
+      var me = await applyMemberIdentity(page);
+      regFillSelfEvents(page, t);
+      show('[data-reg-memberonly]', !!(t && t.memberOnly) && !me);
+    }
+    page.__regT = t;
+  }
+
   RENDER['giai-dau-dang-ky'] = function (page, data) {
-    applyMemberIdentity(page);
     applyBankBox(page, data && data.settings);
+    applyRegistrationPage(page, data);
 
     var manualLink = page.querySelector('[data-reg-manual]');
     if (manualLink && !manualLink.__wired) {
@@ -1166,21 +1490,85 @@
       });
     }
 
+    var show = function (el, text) { if (el) { el.innerHTML = text || ''; el.style.display = text ? '' : 'none'; } };
+    var val = function (sel) { var e = page.querySelector(sel); return e ? e.value.trim() : ''; };
+
+    /* ----- nút của luồng đội ----- */
+    var addBtn = page.querySelector('[data-reg-ath-add]');
+    if (addBtn && !addBtn.__wired) {
+      addBtn.__wired = true;
+      addBtn.addEventListener('click', function () { regAddAthlete(page, page.__regT); });
+    }
+    var csvPick = page.querySelector('[data-reg-csv-pick]');
+    var csvFile = page.querySelector('[data-reg-csv-file]');
+    if (csvPick && csvFile && !csvPick.__wired) {
+      csvPick.__wired = true;
+      csvPick.addEventListener('click', function () { csvFile.click(); });
+      csvFile.addEventListener('change', function () {
+        var f = csvFile.files && csvFile.files[0];
+        if (!f) return;
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          var n = regImportCsv(page, page.__regT, String(ev.target.result || ''));
+          csvFile.value = '';
+          show(page.querySelector('[data-reg-team-ok]'), n
+            ? '<i class="ti ti-circle-check-filled"></i> Đã nạp ' + n + ' dòng từ tệp. Kiểm tra lại rồi bấm Gửi danh sách đăng ký.'
+            : '');
+          show(page.querySelector('[data-reg-team-err]'), n ? '' : 'Không đọc được dòng nào trong tệp. Tải tệp CSV mẫu để xem đúng thứ tự cột.');
+        };
+        reader.readAsText(f, 'utf-8');
+      });
+    }
+    var csvSample = page.querySelector('[data-reg-csv-sample]');
+    if (csvSample && !csvSample.__wired) {
+      csvSample.__wired = true;
+      csvSample.addEventListener('click', function () { regDownloadCsv(page.__regT); });
+    }
+
+    var teamBtn = page.querySelector('[data-reg-team-submit]');
+    if (teamBtn && !teamBtn.__wired) {
+      teamBtn.__wired = true;
+      var tOk = page.querySelector('[data-reg-team-ok]');
+      var tErr = page.querySelector('[data-reg-team-err]');
+      teamBtn.addEventListener('click', async function () {
+        show(tOk, ''); show(tErr, '');
+        var t = page.__regT;
+        if (!t) {
+          show(tErr, 'Chưa chọn giải đấu. Vào mục Giải đấu rồi bấm "Đăng ký" ở giải bạn muốn tham dự.');
+          return;
+        }
+        var athletes = regReadAthletes(page);
+        if (!athletes.length) { show(tErr, 'Danh sách vận động viên đang trống.'); return; }
+        var token = window.VBSF_AUTH && window.VBSF_AUTH.orgToken();
+        if (!token) { show(tErr, 'Phiên đăng nhập của đội đã hết hạn. Vui lòng đăng nhập lại.'); return; }
+        teamBtn.disabled = true;
+        try {
+          var msg = await submitForm('tournament-entries/submit-team', {
+            tournamentDocId: t.documentId,
+            leaderName: val('[data-reg-leader]'),
+            leaderTitle: val('[data-reg-leader-title]'),
+            leaderPhone: val('[data-reg-leader-phone]'),
+            note: val('[data-reg-team-note]'),
+            athletes: athletes,
+          }, token);
+          show(tOk, '<i class="ti ti-circle-check-filled"></i> ' + esc(msg));
+        } catch (e) {
+          show(tErr, esc(e.message));
+        } finally { teamBtn.disabled = false; }
+      });
+    }
+
+    /* ----- nút của luồng VĐV tự đăng ký ----- */
     var btn = page.querySelector('[data-reg-tourney-submit]');
     if (!btn || btn.__wired) return;
     btn.__wired = true;
     var ok = page.querySelector('[data-reg-tourney-ok]');
     var err = page.querySelector('[data-reg-tourney-err]');
-    var val = function (sel) { var e = page.querySelector(sel); return e ? e.value.trim() : ''; };
-    var show = function (el, text) { if (el) { el.innerHTML = text || ''; el.style.display = text ? '' : 'none'; } };
 
     btn.addEventListener('click', async function () {
       show(ok, ''); show(err, '');
-      /* Vào thẳng trang bằng link/hash mà chưa chọn giải thì ô tên vẫn là chữ
-         mẫu "Tên giải đấu" — gửi đi sẽ tạo một đăng ký vô nghĩa cho ban tổ chức. */
-      var nameEl = page.querySelector('[data-fill="name"]');
-      var tourName = nameEl ? nameEl.textContent.trim() : '';
-      if (!tourName || tourName === 'Tên giải đấu') {
+      var t = page.__regT;
+      if (!t) {
         show(err, 'Chưa chọn giải đấu. Vào mục Giải đấu rồi bấm "Đăng ký" ở giải bạn muốn tham dự.');
         return;
       }
@@ -1192,16 +1580,18 @@
         var card = page.querySelector('[data-reg-asmember]');
         var usingMember = !!card && card.style.display !== 'none';
         var me = usingMember && window.VBSF_AUTH ? window.VBSF_AUTH.currentMember() : null;
-        var msg = await submitForm('tournament-registrations/submit', {
-          tournamentName: tourName,
-          playerName: me ? me.name : val('[data-reg-player]'),
-          memberCode: me ? me.code : val('[data-reg-code]'),
+        var msg = await submitForm('tournament-entries/submit', {
+          tournamentDocId: t.documentId,
+          fullName: me ? me.name : val('[data-reg-player]'),
+          dob: me ? undefined : (val('[data-reg-dob]') || undefined),
+          cccd: me ? undefined : val('[data-reg-cccd]'),
           phone: me ? me.phone : val('[data-reg-phone2]'),
-          club: me ? me.club : val('[data-reg-club2]'),
+          address: me ? undefined : val('[data-reg-club2]'),
           note: val('[data-reg-note]'),
-        });
+          events: regSelfEvents(page),
+        }, window.VBSF_AUTH && window.VBSF_AUTH.memberToken());
         show(ok, '<i class="ti ti-circle-check-filled"></i> ' + esc(msg));
-        ['[data-reg-player]', '[data-reg-code]', '[data-reg-phone2]', '[data-reg-club2]', '[data-reg-note]']
+        ['[data-reg-player]', '[data-reg-dob]', '[data-reg-cccd]', '[data-reg-phone2]', '[data-reg-club2]', '[data-reg-note]']
           .forEach(function (sel) { var e = page.querySelector(sel); if (e) e.value = ''; });
       } catch (e) {
         show(err, esc(e.message));
@@ -1647,7 +2037,11 @@
        Đặt TRƯỚC guard dataset bên dưới vì điều hướng bằng hash không có dataset. */
     if (dest === 'giai-dau-dang-ky' && page) {
       page.__regManual = false;   // chọn "nhập thủ công" chỉ có hiệu lực trong lần đăng ký đó
-      applyMemberIdentity(page);
+      /* Điều hướng bằng hash không mang dataset; giữ lại documentId của lần bấm
+         "Đăng ký" gần nhất thay vì xoá đi và phải dò lại theo tên giải. */
+      if (dataset && dataset.doc) page.__regDoc = dataset.doc;
+      var regData = await load();
+      if (regData) applyRegistrationPage(page, regData);
     }
 
     var data = await load();

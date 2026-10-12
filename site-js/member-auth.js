@@ -98,6 +98,11 @@
      hai bên cùng đọc một nguồn, không phải đồng bộ hai biến. */
   var currentMember = null;
   function setMember(m) { currentMember = m; return m; }
+  /* Tài khoản đội (hội viên tổ chức) của phiên hiện tại. Trang đăng ký giải
+     thành tích cao cần biết ĐANG LÀ ĐỘI NÀO chứ không chỉ "đã đăng nhập hay
+     chưa", nên giữ nguyên hồ sơ giống currentMember. */
+  var currentOrgAcc = null;
+  function setOrg(o) { currentOrgAcc = o; return o; }
 
   var api = {
     async loginMember(phone, password) {
@@ -115,13 +120,13 @@
     async loginOrg(phone, password) {
       var out = await post('org-auth/login', { phone: phone, password: password });
       writeToken(ORG_TOKEN_KEY, out.token);
-      return flattenOrg(out.org);
+      return setOrg(flattenOrg(out.org));
     },
 
     async registerOrg(payload) {
       var out = await post('org-auth/register', payload);
       writeToken(ORG_TOKEN_KEY, out.token);
-      return flattenOrg(out.org);
+      return setOrg(flattenOrg(out.org));
     },
 
     /** Khôi phục phiên sau khi tải lại trang; token hỏng/hết hạn thì xoá. */
@@ -138,17 +143,17 @@
 
     async restoreOrg() {
       var token = readToken(ORG_TOKEN_KEY);
-      if (!token) return null;
+      if (!token) return setOrg(null);
       try {
-        return flattenOrg((await get('org-auth/me', token)).org);
+        return setOrg(flattenOrg((await get('org-auth/me', token)).org));
       } catch (err) {
         writeToken(ORG_TOKEN_KEY, null);
-        return null;
+        return setOrg(null);
       }
     },
 
     logoutMember() { writeToken(MEMBER_TOKEN_KEY, null); setMember(null); },
-    logoutOrg() { writeToken(ORG_TOKEN_KEY, null); },
+    logoutOrg() { writeToken(ORG_TOKEN_KEY, null); setOrg(null); },
 
     /* Quên mật khẩu — backend luôn trả cùng một thông báo dù số có tài khoản
        hay không, nên phía site cũng chỉ hiển thị nguyên văn thông báo đó. */
@@ -189,6 +194,16 @@
         sau loginMember/registerMember/restoreMember trong cùng lần tải trang —
         bên gọi nào cần chắc chắn thì await restoreMember() trước. */
     currentMember() { return currentMember; },
+
+    /** Tài khoản đội của phiên hiện tại, hoặc null. Cùng quy ước với
+        currentMember(): chỉ có giá trị sau loginOrg/registerOrg/restoreOrg. */
+    currentOrg() { return currentOrgAcc; },
+
+    /* Token thô của phiên, để gọi những API cần danh tính người gửi mà không đi
+       qua module này (vd. gửi danh sách VĐV dự giải). Trả null khi chưa đăng
+       nhập — bên gọi tự quyết định báo lỗi thế nào. */
+    memberToken() { return readToken(MEMBER_TOKEN_KEY); },
+    orgToken() { return readToken(ORG_TOKEN_KEY); },
 
     /** {found, status} — dùng để tính mức hội phí, không trả danh tính. */
     async cccdStatus(cccd) {

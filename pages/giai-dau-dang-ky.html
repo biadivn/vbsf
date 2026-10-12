@@ -1,7 +1,80 @@
-<section class="pg" id="pg-giai-dau-dang-ky"><div class="vb-band"><div style="font-size:11px;color:#C9D9F2"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span data-go="giai-dau">Giải đấu</span> &nbsp;/&nbsp; <span style="color:#FFFFFF">Đăng ký thi đấu</span></div><div style="color:#fff;font-size:22px;font-weight:600;margin-top:6px" data-fill="name">Tên giải đấu</div><div style="color:#C9D9F2;font-size:12.5px;margin-top:4px"><span data-fill="disc">Nội dung</span> · <span data-fill="date">--/--/----</span></div></div>
+<section class="pg" id="pg-giai-dau-dang-ky"><div class="vb-band"><div style="font-size:11px;color:#C9D9F2"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span data-go="giai-dau">Giải đấu</span> &nbsp;/&nbsp; <span style="color:#FFFFFF">Đăng ký thi đấu</span></div><div style="color:#fff;font-size:22px;font-weight:600;margin-top:6px" data-fill="name">Tên giải đấu</div><div data-reg-sub style="color:#C9D9F2;font-size:12.5px;margin-top:4px"><span data-fill="disc">Nội dung</span> · <span data-fill="date">--/--/----</span></div></div>
 <div style="padding:22px 26px;display:flex;gap:22px;flex-wrap:wrap">
 <div style="flex:1.4;min-width:260px">
 <div style="border:0.5px solid #E3E8E4;border-radius:10px;padding:14px 18px;margin-bottom:20px;background:#F5F7F5;display:flex;align-items:center;gap:8px;font-size:12.5px;color:#5C6B63"><i class="ti ti-map-pin"></i> <span data-fill="loc">Địa điểm</span></div>
+
+<!-- Cửa sổ đăng ký đã đóng / chưa mở: chặn ngay, khỏi để người dùng gõ xong
+     cả danh sách rồi mới biết là muộn. -->
+<div data-reg-closed style="display:none;border:0.5px solid #E7D7B5;border-radius:10px;padding:16px 18px;margin-bottom:18px;background:#FBF7EE;font-size:13px;color:#7A5E1E"></div>
+
+<!-- ===== Giải thành tích cao: chỉ đội tỉnh/thành đăng ký (mục 1.3) ===== -->
+<div data-reg-national style="display:none">
+
+  <!-- Chưa đăng nhập bằng tài khoản đội -->
+  <div data-reg-team-login style="display:none;border:0.5px solid #E3E8E4;border-radius:10px;padding:18px;background:#F5F7F5">
+    <div style="font-size:14px;font-weight:600;color:#1B2A24;margin-bottom:6px"><i class="ti ti-shield-lock"></i> Giải thành tích cao — đăng ký qua đội tỉnh/thành</div>
+    <div style="font-size:12.5px;color:#5C6B63;line-height:1.8">
+      Giải này do các đội tỉnh/thành đăng ký kèm danh sách vận động viên của đội; vận động viên không tự đăng ký.
+      Vui lòng đăng nhập bằng <b>tài khoản đội</b> do Liên đoàn cấp.
+      Đội chưa có tài khoản, liên hệ Liên đoàn ở mục <span class="vb-link" data-go="lien-he" style="cursor:pointer">Liên hệ</span>.
+    </div>
+  </div>
+
+  <!-- Đã đăng nhập bằng tài khoản đội -->
+  <div data-reg-team-form style="display:none">
+    <div style="border:0.5px solid #E3E8E4;border-radius:10px;padding:16px 18px;margin-bottom:18px;background:#F5F7F5;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="vb-ph" style="width:44px;height:44px;border-radius:50%;flex-shrink:0"><i class="ti ti-building"></i></div>
+      <div style="flex:1;min-width:180px">
+        <div style="font-size:14px;font-weight:600;color:#1B2A24" data-reg-team-name>—</div>
+        <div style="font-size:11.5px;color:#8A968F;margin-top:2px"><span data-reg-team-code>—</span> · <span data-reg-team-prov>—</span></div>
+      </div>
+    </div>
+
+    <div style="font-size:13px;font-weight:600;color:#21428E;margin-bottom:10px">Trưởng đoàn</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
+      <div class="fld"><span class="lbl">Họ và tên</span><input type="text" data-reg-leader class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Nguyễn Văn A"></div>
+      <div class="fld"><span class="lbl">Chức vụ</span><input type="text" data-reg-leader-title class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="VD: Phụ trách bộ môn"></div>
+    </div>
+    <div class="fld"><span class="lbl">Số điện thoại trưởng đoàn</span><input type="tel" data-reg-leader-phone class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="09xx xxx xxx"></div>
+
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:18px 0 8px">
+      <div style="font-size:13px;font-weight:600;color:#21428E">Danh sách vận động viên</div>
+      <div style="font-size:11.5px;color:#8A968F">Căn cước dùng để đối chiếu với hồ sơ hội viên Liên đoàn</div>
+    </div>
+    <div style="overflow-x:auto;border:0.5px solid #E3E8E4;border-radius:10px">
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:620px">
+        <thead><tr data-reg-ath-head style="background:#F5F7F5">
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:34px">#</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;min-width:200px">Họ và tên <span class="req">*</span></th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:120px">Ngày sinh</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:90px">Giới tính</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:170px">Số căn cước</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:130px">Điện thoại</th>
+          <th style="width:40px"></th>
+        </tr></thead>
+        <tbody data-reg-ath-body></tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center">
+      <button type="button" class="btn-out" data-reg-ath-add style="padding:6px 14px;font-size:12px;cursor:pointer"><i class="ti ti-plus"></i> Thêm vận động viên</button>
+      <button type="button" class="btn-out" data-reg-csv-pick style="padding:6px 14px;font-size:12px;cursor:pointer"><i class="ti ti-file-upload"></i> Nhập từ tệp CSV</button>
+      <span class="vb-link" data-reg-csv-sample style="cursor:pointer;font-size:12px">Tải tệp CSV mẫu</span>
+      <input type="file" data-reg-csv-file accept=".csv,text/csv" style="display:none">
+    </div>
+
+    <div class="fld" style="margin-top:16px"><span class="lbl">Ghi chú</span><textarea data-reg-team-note rows="3" class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Thông tin thêm gửi ban tổ chức (nếu có)..."></textarea></div>
+    <button class="btn-gold" data-reg-team-submit type="button" style="border:none;cursor:pointer">Gửi danh sách đăng ký</button>
+    <div data-reg-team-ok style="display:none;margin-top:10px;font-size:12.5px;color:#00814D"></div>
+    <div data-reg-team-err style="display:none;margin-top:10px;font-size:12.5px;color:#9E2A2B"></div>
+    <div style="font-size:11px;color:#8A968F;margin-top:10px;line-height:1.7">
+      Gửi lại danh sách cho cùng một giải sẽ <b>thay thế</b> danh sách đã gửi trước đó, trừ những vận động viên Liên đoàn đã duyệt vào danh sách chính thức.
+      Liên đoàn xác nhận từng vận động viên vào danh sách thi đấu chính thức trước khi bốc thăm.
+    </div>
+  </div>
+</div>
+
+<!-- ===== Giải phong trào: vận động viên tự đăng ký ===== -->
+<div data-reg-grassroots style="display:none">
 <!-- Hội viên đã đăng nhập: không bắt nhập lại thông tin đã có trong hồ sơ.
      site-js/strapi-content.js bật khối này và ẩn khối nhập tay bên dưới. -->
 <div data-reg-asmember style="display:none;border:0.5px solid #E3E8E4;border-radius:10px;padding:16px 18px;margin-bottom:18px;background:#F5F7F5">
@@ -18,17 +91,31 @@
     <span class="vb-link" data-reg-manual style="cursor:pointer">nhập thông tin thủ công</span>.
   </div>
 </div>
+<!-- Giải chỉ dành cho hội viên mà khách chưa đăng nhập -->
+<div data-reg-memberonly style="display:none;border:0.5px solid #E7D7B5;border-radius:10px;padding:16px 18px;margin-bottom:18px;background:#FBF7EE;font-size:12.5px;color:#7A5E1E;line-height:1.8">
+  <b>Giải chỉ dành cho hội viên Liên đoàn.</b> Vui lòng đăng nhập bằng tài khoản hội viên còn hiệu lực để đăng ký.
+</div>
 <div data-reg-identity>
 <div class="fld"><span class="lbl">Họ và tên cơ thủ <span class="req">*</span></span><input type="text" data-reg-player class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Nguyễn Văn A"></div>
-<div class="fld"><span class="lbl">Mã hội viên VBSF</span><input type="text" data-reg-code class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="VBSF-2026-00xxx"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
+<div class="fld"><span class="lbl">Ngày sinh</span><input type="date" data-reg-dob class="inp" style="width:100%;font-family:inherit;color:#1B2A24"></div>
+<div class="fld"><span class="lbl">Số căn cước</span><input type="text" data-reg-cccd class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Dùng để đối chiếu hồ sơ hội viên"></div>
+</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
 <div class="fld"><span class="lbl">Số điện thoại <span class="req">*</span></span><input type="tel" data-reg-phone2 class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="09xx xxx xxx"></div>
 <div class="fld"><span class="lbl">CLB / Đơn vị</span><input type="text" data-reg-club2 class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Tên CLB"></div>
 </div>
 </div>
+<!-- Nội dung thi đấu của giải — chỉ hiện khi ban tổ chức đã khai nội dung -->
+<div data-reg-self-events style="display:none;margin-bottom:14px">
+  <span class="lbl">Nội dung đăng ký</span>
+  <div data-reg-self-events-list style="display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:6px"></div>
+  <div data-reg-self-fee style="font-size:12px;color:#5C6B63;margin-top:8px"></div>
+</div>
 <div class="fld"><span class="lbl">Ghi chú</span><textarea data-reg-note rows="3" class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Yêu cầu thêm (nếu có)..."></textarea></div>
 <button class="btn-gold" data-reg-tourney-submit type="button" style="border:none;cursor:pointer">Gửi đăng ký</button><div data-reg-tourney-ok style="display:none;margin-top:10px;font-size:12.5px;color:#00814D"></div><div data-reg-tourney-err style="display:none;margin-top:10px;font-size:12.5px;color:#9E2A2B"></div>
 <div style="font-size:11px;color:#8A968F;margin-top:10px"><span data-reg-required-note><span class="req">*</span> Bắt buộc · </span>Ban tổ chức sẽ liên hệ xác nhận qua điện thoại</div>
 </div>
-<div style="flex:1;min-width:230px"><div style="border:0.5px solid #E3E8E4;border-radius:10px;overflow:hidden"><div style="background:#F5F7F5;padding:12px 16px;border-bottom:0.5px solid #E3E8E4"><div style="font-size:13px;font-weight:600;color:#21428E">Lệ phí thi đấu</div></div><div style="padding:16px"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#5C6B63">Phí tham dự</span><span style="font-weight:600;color:#21428E">200.000đ</span></div><div data-qr-box style="display:none;background:#fff;border:0.5px solid #E3E8E4;border-radius:8px;padding:12px;text-align:center;margin-top:12px"><div class="vb-ph" data-qr="tournament" style="width:120px;height:120px;border-radius:8px;margin:0 auto"><i class="ti ti-qrcode" style="font-size:48px"></i></div><div style="font-size:11px;color:#8A968F;margin-top:8px">Quét VietQR bằng app ngân hàng</div></div><div data-qr-bank style="display:none;margin-top:12px;font-size:12px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span style="color:#8A968F">Ngân hàng</span><span data-bank="name">—</span></div><div style="display:flex;justify-content:space-between"><span style="color:#8A968F">Số TK</span><span data-bank="account">—</span></div><div style="display:flex;justify-content:space-between"><span style="color:#8A968F">Chủ TK</span><span style="text-align:right" data-bank="holder">—</span></div></div><div style="font-size:11px;color:#8A968F;margin-top:10px;line-height:1.6">Thanh toán được hướng dẫn qua email sau khi đăng ký được xác nhận.</div></div></div></div>
+</div>
+<div style="flex:1;min-width:230px"><div style="border:0.5px solid #E3E8E4;border-radius:10px;overflow:hidden"><div style="background:#F5F7F5;padding:12px 16px;border-bottom:0.5px solid #E3E8E4"><div style="font-size:13px;font-weight:600;color:#21428E">Lệ phí thi đấu</div></div><div style="padding:16px"><div data-reg-fee-list style="font-size:13px"><div style="display:flex;justify-content:space-between"><span style="color:#5C6B63">Phí tham dự</span><span style="font-weight:600;color:#21428E" data-reg-fee-base>200.000đ</span></div></div><div data-qr-box style="display:none;background:#fff;border:0.5px solid #E3E8E4;border-radius:8px;padding:12px;text-align:center;margin-top:12px"><div class="vb-ph" data-qr="tournament" style="width:120px;height:120px;border-radius:8px;margin:0 auto"><i class="ti ti-qrcode" style="font-size:48px"></i></div><div style="font-size:11px;color:#8A968F;margin-top:8px">Quét VietQR bằng app ngân hàng</div></div><div data-qr-bank style="display:none;margin-top:12px;font-size:12px;line-height:1.9"><div style="display:flex;justify-content:space-between"><span style="color:#8A968F">Ngân hàng</span><span data-bank="name">—</span></div><div style="display:flex;justify-content:space-between"><span style="color:#8A968F">Số TK</span><span data-bank="account">—</span></div><div style="display:flex;justify-content:space-between"><span style="color:#8A968F">Chủ TK</span><span style="text-align:right" data-bank="holder">—</span></div></div><div style="font-size:11px;color:#8A968F;margin-top:10px;line-height:1.6">Lệ phí nộp qua đội hoặc cá nhân tự nộp. Liên đoàn chỉ đưa vào danh sách thi đấu chính thức khi đã ghi nhận nộp lệ phí.</div><div data-reg-docs style="display:none;margin-top:14px;padding-top:12px;border-top:0.5px solid #E3E8E4"><div style="font-size:12px;font-weight:600;color:#21428E;margin-bottom:6px">Tài liệu của giải</div><div data-reg-docs-list style="font-size:12px;line-height:2"></div></div></div></div></div>
 </div></section>

@@ -153,6 +153,7 @@ async function submitSelf(ctx) {
       tournamentDocId: tournament.documentId,
       tournamentName: tournament.name,
       source: 'self',
+      note: text(body.note, 2000) || undefined,
       transferImage: text(body.transferImage, 4_000_000) || undefined,
       paid: false,
       status: 'pending',
