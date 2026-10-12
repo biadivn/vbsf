@@ -220,14 +220,21 @@ const COLLECTIONS = {
     label:'VĐV thuộc đội', icon:'ti-users-group', single:'vận động viên', remote:true, apiPath:'team-athletes',
     filterField:'status',
     fields:[
-      /* Thêm tay trong CMS (vận hành nhập hộ đội): chọn đội, rồi chọn người từ
-         danh sách hội viên cá nhân — các ô hồ sơ bên dưới tự điền theo hồ sơ đó
-         (xem wireModalPickers trong cms-js/modal.js). Máy chủ tự gắn tên đội,
-         mã hội viên và hiệu lực, nên hai ô đó không hiện lúc thêm mới. */
-      {key:'teamDocId', label:'Đội tỉnh/thành', type:'select', required:true, span2:true, hideOnEdit:true,
+      /* Thêm tay trong CMS (vận hành nhập hộ tổ chức): chọn tổ chức, rồi chọn
+         người từ danh sách hội viên cá nhân — các ô hồ sơ bên dưới tự điền theo
+         hồ sơ đó (xem wireModalPickers trong cms-js/modal.js). Máy chủ tự gắn
+         tên tổ chức, mã hội viên và hiệu lực, nên hai ô đó không hiện lúc thêm.
+
+         Danh sách chọn là TOÀN BỘ hội viên tổ chức, không lọc theo loại hình:
+         CLB/trường học cũng có danh sách VĐV của mình (chỉ việc đăng ký giải
+         thành tích cao mới đòi tài khoản đội tỉnh/thành). Nhãn kèm loại hình để
+         phân biệt khi tên gần giống nhau. */
+      {key:'teamDocId', label:'Hội viên tổ chức', type:'select', required:true, span2:true, hideOnEdit:true,
         optionsFn: ()=> (DB.members_org||[])
-          .filter(o=> o.orgType==='Đội tỉnh/thành')
-          .map(o=>({value:o.id, label: o.name + (o.code ? ' · '+o.code : '')}))},
+          .map(o=>({
+            value: o.id,
+            label: o.name + (o.code ? ' · '+o.code : '') + (o.orgType ? ' · '+o.orgType : '')
+          }))},
       {key:'memberDocId', label:'Hội viên cá nhân', type:'select', required:true, span2:true, hideOnEdit:true, transient:true,
         hint:'Chọn hội viên đã có hồ sơ — họ tên, căn cước, ngày sinh và điện thoại tự điền theo hồ sơ.',
         optionsFn: ()=> (DB.members||[])

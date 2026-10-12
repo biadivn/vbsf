@@ -34,7 +34,7 @@ module.exports = createCoreController(UID, () => ({
     const incoming = (ctx.request.body && ctx.request.body.data) || {};
 
     const teamDocId = String(incoming.teamDocId || '').trim();
-    if (!teamDocId) return ctx.badRequest('Chưa chọn đội tỉnh/thành cho vận động viên.');
+    if (!teamDocId) return ctx.badRequest('Chưa chọn hội viên tổ chức cho vận động viên.');
     const org = await strapi.documents(ORG_UID).findOne({ documentId: teamDocId });
     if (!org) return ctx.badRequest('Không tìm thấy hội viên tổ chức đã chọn.');
 

@@ -49,7 +49,7 @@ describe('team-athlete.create: kiểm tra đầu vào', () => {
   beforeEach(() => { seed(); controller = load(); });
 
   const cases = [
-    ['chưa chọn đội', body({ teamDocId: '' }), /Chưa chọn đội/],
+    ['chưa chọn tổ chức', body({ teamDocId: '' }), /Chưa chọn hội viên tổ chức/],
     ['đội không tồn tại', body({ teamDocId: 'khong-co' }), /Không tìm thấy hội viên tổ chức/],
     ['thiếu họ tên', body({ fullName: '  ' }), /Thiếu họ tên hoặc số căn cước/],
     ['thiếu căn cước', body({ cccd: '' }), /Thiếu họ tên hoặc số căn cước/],

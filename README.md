@@ -247,8 +247,9 @@ Hai điều cố ý:
   kiện "hội viên còn hiệu lực" của danh sách thi đấu chính thức (mục 2.1) vẫn do
   Liên đoàn quyết, nhập tệp không tự cấp hiệu lực cho ai.
 
-Thêm từng người trong CMS: *VĐV thuộc đội* → *Thêm vận động viên* → chọn đội rồi
-chọn hội viên cá nhân (họ tên/CCCD/SĐT tự điền theo hồ sơ). Mã hội viên, hiệu lực
+Thêm từng người trong CMS: *VĐV thuộc đội* → *Thêm vận động viên* → chọn hội viên
+tổ chức (mọi loại hình, không chỉ đội tỉnh/thành) rồi chọn hội viên cá nhân (họ
+tên/CCCD/SĐT tự điền theo hồ sơ). Mã hội viên, hiệu lực
 và tên đội do máy chủ tự gắn theo CCCD/`teamDocId`, không nhận từ request — xem
 `strapi-backend/src/api/team-athlete/controllers/team-athlete.js`.
 
