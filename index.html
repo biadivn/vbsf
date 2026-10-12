@@ -164,6 +164,7 @@ body{background:#E4E8E5}
 <script src="site-js/config.js?v=__WEB_BUILD__"></script>
 <script src="site-js/page-config.js?v=__WEB_BUILD__"></script>
 <script src="site-js/member-auth.js?v=__WEB_BUILD__"></script>
+<script src="site-js/team-squad.js?v=__WEB_BUILD__"></script>
 <script src="site-js/strapi-content.js?v=__WEB_BUILD__"></script>
 <script>
 (async function(){
@@ -208,6 +209,11 @@ body{background:#E4E8E5}
           +'<div style="font-size:13px;font-weight:600;color:#21428E;margin-bottom:14px">Thời hạn hội viên</div>'
           +memberExpiryHtml(o)
         +'</div>'
+        /* Danh sách VĐV của đội — chỉ có nghĩa với tài khoản đội tỉnh/thành,
+           CLB/doanh nghiệp không đăng ký giải thành tích cao theo đoàn. */
+        +(o.orgType==='Đội tỉnh/thành'
+          ? '<div data-team-squad style="border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff"></div>'
+          : '')
       +'</div>'
     +'</div>';
   }
@@ -882,6 +888,8 @@ body{background:#E4E8E5}
         orgFormSections.forEach(function(s){s.style.display='none';});
         orgProfileBox.style.display='';
         orgProfileBox.innerHTML=renderOrgProfileHtml(o);
+        var squadBox=orgProfileBox.querySelector('[data-team-squad]');
+        if(squadBox && window.VBSF_SQUAD) window.VBSF_SQUAD.mount(squadBox);
         var logoutBtn=orgProfileBox.querySelector('[data-org-logout]');
         if(logoutBtn) logoutBtn.addEventListener('click',function(){
           if(window.VBSF_AUTH) window.VBSF_AUTH.logoutOrg();

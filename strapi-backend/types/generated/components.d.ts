@@ -68,6 +68,30 @@ export interface SharedPrize extends Struct.ComponentSchema {
   };
 }
 
+export interface TournamentDoc extends Struct.ComponentSchema {
+  collectionName: 'components_tournament_docs';
+  info: {
+    description: '\u0110i\u1EC1u l\u1EC7, l\u1ECBch thi \u0111\u1EA5u, k\u1EBFt qu\u1EA3... \u2014 t\u1EA3i t\u1EC7p n\u00E0o th\u00EC site hi\u1EC7n t\u1EC7p \u0111\u00F3';
+    displayName: 'T\u1EC7p c\u1EE7a gi\u1EA3i';
+  };
+  attributes: {
+    file: Schema.Attribute.Media<'files' | 'images'>;
+    label: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface TournamentEvent extends Struct.ComponentSchema {
+  collectionName: 'components_tournament_events';
+  info: {
+    description: 'M\u1ED9t n\u1ED9i dung thi \u0111\u1EA5u c\u1EE7a gi\u1EA3i k\u00E8m l\u1EC7 ph\u00ED ri\u00EAng';
+    displayName: 'N\u1ED9i dung thi \u0111\u1EA5u';
+  };
+  attributes: {
+    fee: Schema.Attribute.String;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 export interface TournamentPlayer extends Struct.ComponentSchema {
   collectionName: 'components_tournament_players';
   info: {
@@ -93,6 +117,8 @@ declare module '@strapi/strapi' {
       'member.discipline': MemberDiscipline;
       'member.free-match': MemberFreeMatch;
       'shared.prize': SharedPrize;
+      'tournament.doc': TournamentDoc;
+      'tournament.event': TournamentEvent;
       'tournament.player': TournamentPlayer;
     }
   }

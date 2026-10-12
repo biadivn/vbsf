@@ -22,6 +22,7 @@
     "orgType": {
       "type": "enumeration",
       "enum": [
+        "Đội tỉnh/thành",
         "Câu lạc bộ",
         "Doanh nghiệp",
         "Trường học",
@@ -30,6 +31,25 @@
     },
     "taxCode": {
       "type": "string"
+    },
+    "regNo": {
+      "type": "string",
+      "description": "Số ĐKKD / Quyết định thành lập"
+    },
+    "regDate": {
+      "type": "date",
+      "description": "Ngày cấp ĐKKD/QĐ thành lập"
+    },
+    "regAuthority": {
+      "type": "string",
+      "description": "Cơ quan/đơn vị cấp"
+    },
+    "website": {
+      "type": "string"
+    },
+    "activityField": {
+      "type": "string",
+      "description": "Lĩnh vực hoạt động"
     },
     "province": {
       "type": "enumeration",
@@ -152,6 +172,10 @@
         "expired"
       ],
       "default": "active"
+    },
+    "recognizedDate": {
+      "type": "date",
+      "description": "Thời điểm được công nhận hội viên — admin đặt, hiện ở danh sách public"
     }
   }
 }

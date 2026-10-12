@@ -28,17 +28,27 @@ const COLLECTIONS = {
   tournaments: {
     label:'Giải đấu', icon:'ti-trophy', single:'giải đấu', viewDetail:true, noSync:true, cloneable:true,
     remote:true, apiPath:'tournaments', extraFields:['bracket','rr','sw','mode'],
+    populate:'populate[players]=*&populate[prizes]=*&populate[events]=*&populate[docs][populate]=file',
     fields:[
       {key:'name', label:'Tên giải đấu', type:'text', required:true, span2:true},
+      /* nature quyết định ai được đăng ký: giải thành tích cao chỉ nhận đơn của
+         đội tỉnh/thành, giải phong trào thì VĐV tự đăng ký. Site và API đều đọc
+         field này, đổi ở đây là đổi luôn luồng đăng ký. */
+      {key:'nature', label:'Loại giải', type:'select', options:['national','grassroots'],
+        optionLabels:{national:'Thành tích cao — đội tỉnh/thành đăng ký', grassroots:'Phong trào — VĐV tự đăng ký'}},
+      {key:'memberOnly', label:'Chỉ nhận hội viên còn hiệu lực (giải phong trào)', type:'checkbox'},
       {key:'category', label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker']},
       {key:'format', label:'Thể thức thi đấu', type:'select', options:['SE','DE','RR','SW'], optionLabels:{SE:'Đấu loại trực tiếp',DE:'Đấu loại trực tiếp kép',RR:'Vòng tròn',SW:'Swiss (tính mạng)'}},
       {key:'lives', label:'Số mạng (chỉ áp dụng Swiss)', type:'number', placeholder:'Mặc định 3'},
       {key:'status', label:'Trạng thái', type:'select', options:['upcoming','ongoing','completed'], optionLabels:{upcoming:'Sắp diễn ra',ongoing:'Đang diễn ra',completed:'Đã kết thúc'}},
-      {key:'date', label:'Ngày thi đấu', type:'date'},
+      {key:'date', label:'Ngày thi đấu (hiển thị trên site)', type:'date'},
       {key:'participants', label:'Số cơ thủ', type:'number'},
+      {key:'startDate', label:'Khai mạc', type:'date'},
+      {key:'endDate', label:'Bế mạc', type:'date'},
       {key:'location', label:'Địa điểm', type:'text', span2:true},
       {key:'note', label:'Trạng thái đăng ký', type:'text', placeholder:'VD: Mở đăng ký / Sắp mở'},
-      {key:'regDeadline', label:'Hạn đăng ký', type:'date'},
+      {key:'regOpenDate', label:'Mở đăng ký từ ngày', type:'date'},
+      {key:'regCloseDate', label:'Khóa đăng ký sau ngày', type:'date'},
       {key:'liveRound', label:'Vòng đấu hiện tại (khi đang diễn ra)', type:'text', placeholder:'VD: Vòng tứ kết'},
       {key:'champion', label:'Nhà vô địch (nếu đã kết thúc)', type:'text'},
       {key:'runnerUp', label:'Á quân (nếu đã kết thúc)', type:'text'},
@@ -50,6 +60,7 @@ const COLLECTIONS = {
     ],
     columns:[
       {key:'name', label:'Tên giải'},
+      {key:'nature', label:'Loại giải', render:r=> r.nature==='grassroots' ? 'Phong trào' : 'Thành tích cao'},
       {key:'category', label:'Nội dung', badge:true},
       {key:'format', label:'Thể thức', render:r=>({SE:'Loại trực tiếp',DE:'Loại trực tiếp kép',RR:'Vòng tròn',SW:'Swiss'}[r.format]||'Loại trực tiếp')},
       {key:'date', label:'Ngày', muted:true},
@@ -127,8 +138,15 @@ const COLLECTIONS = {
     fields:[
       {key:'code', label:'Mã hội viên tổ chức', type:'text', placeholder:'VBSF-TC-2026-XXX', span2:true, disabled:true, section:'Thông tin tổ chức'},
       {key:'name', label:'Tên tổ chức / CLB', type:'text', required:true, span2:true, section:'Thông tin tổ chức'},
-      {key:'orgType', label:'Loại hình', type:'select', options:['Câu lạc bộ','Doanh nghiệp','Trường học','Tổ chức khác'], section:'Thông tin tổ chức'},
+      /* "Đội tỉnh/thành" là loại hình dùng cho tài khoản ĐỘI — tài khoản này mới
+         được đăng ký giải thành tích cao kèm danh sách VĐV (mục 1.1, 1.3). */
+      {key:'orgType', label:'Loại hình', type:'select', options:['Đội tỉnh/thành','Câu lạc bộ','Doanh nghiệp','Trường học','Tổ chức khác'], section:'Thông tin tổ chức'},
       {key:'taxCode', label:'Mã số thuế', type:'text', section:'Thông tin tổ chức'},
+      {key:'regNo', label:'Số giấy phép / quyết định thành lập', type:'text', section:'Thông tin tổ chức'},
+      {key:'regDate', label:'Ngày cấp', type:'date', section:'Thông tin tổ chức'},
+      {key:'regAuthority', label:'Cơ quan cấp', type:'text', span2:true, section:'Thông tin tổ chức'},
+      {key:'activityField', label:'Lĩnh vực hoạt động', type:'text', span2:true, placeholder:'VD: Đào tạo & tổ chức thi đấu billiards', section:'Thông tin tổ chức'},
+      {key:'website', label:'Website / Fanpage', type:'text', span2:true, section:'Thông tin tổ chức'},
       {key:'province', label:'Tỉnh / Thành', type:'select', options:VN_PROVINCES, section:'Thông tin tổ chức'},
       {key:'address', label:'Địa chỉ', type:'text', span2:true, section:'Thông tin tổ chức'},
       {key:'repName', label:'Người đại diện', type:'text', section:'Người đại diện'},
@@ -140,7 +158,8 @@ const COLLECTIONS = {
       {key:'package', label:'Gói hội viên', type:'select', options:['Gói Cơ bản','Gói Tiêu chuẩn','Gói Nâng cao'], section:'Gói & trạng thái'},
       {key:'joinDate', label:'Ngày gia nhập', type:'date', section:'Gói & trạng thái'},
       {key:'expiry', label:'Ngày hết hạn', type:'date', section:'Gói & trạng thái'},
-      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}, section:'Gói & trạng thái'}
+      {key:'status', label:'Trạng thái', type:'select', options:['active','pending','expired'], optionLabels:{active:'Đang hiệu lực',pending:'Chờ thanh toán',expired:'Hết hạn'}, section:'Gói & trạng thái'},
+      {key:'recognizedDate', label:'Ngày Liên đoàn công nhận', type:'date', section:'Gói & trạng thái'}
     ],
     columns:[
       {key:'name', label:'Tổ chức'},
@@ -192,6 +211,35 @@ const COLLECTIONS = {
       {key:'subject', label:'Chủ đề', muted:true},
       {key:'email', label:'Email', muted:true},
       {key:'handled', label:'Đã xử lý', muted:true}
+    ]
+  },
+  /* Mục 1.2: đội tự thêm/bớt VĐV của đội mình trên site; vận hành Liên đoàn
+     xác nhận từng người ở đây. Chỉ người "Đã xác nhận" mới được đội chọn khi
+     đăng ký giải thành tích cao. */
+  team_athletes: {
+    label:'VĐV thuộc đội', icon:'ti-users-group', single:'vận động viên', remote:true, apiPath:'team-athletes',
+    filterField:'status',
+    fields:[
+      {key:'teamName', label:'Đội', type:'text', disabled:true, span2:true},
+      {key:'fullName', label:'Họ và tên', type:'text', disabled:true},
+      {key:'cccd', label:'Số căn cước', type:'text', disabled:true},
+      {key:'dob', label:'Ngày sinh', type:'date', disabled:true},
+      {key:'gender', label:'Giới tính', type:'text', disabled:true},
+      {key:'phone', label:'Điện thoại', type:'text', disabled:true},
+      {key:'address', label:'Địa chỉ', type:'text', disabled:true},
+      {key:'memberCode', label:'Mã hội viên khớp theo CCCD', type:'text', disabled:true},
+      {key:'memberValid', label:'Hội viên còn hiệu lực', type:'checkbox', disabled:true},
+      {key:'status', label:'Trạng thái', type:'select', options:['pending','confirmed','removed'],
+        optionLabels:{pending:'Chờ xác nhận',confirmed:'Đã xác nhận thuộc đội',removed:'Đã bỏ khỏi đội'}},
+      {key:'note', label:'Ghi chú của Liên đoàn', type:'textarea', rows:3, span2:true}
+    ],
+    columns:[
+      {key:'fullName', label:'Vận động viên'},
+      {key:'teamName', label:'Đội', muted:true},
+      {key:'cccd', label:'Căn cước', muted:true},
+      {key:'memberCode', label:'Mã HV', render:r=> r.memberCode ? (r.memberCode + (r.memberValid?'':' (hết hiệu lực)')) : '—'},
+      {key:'status', label:'Trạng thái', status:true,
+        statusMap:{pending:{t:'Chờ xác nhận',c:'blue'},confirmed:{t:'Đã xác nhận',c:'green'},removed:{t:'Đã bỏ khỏi đội',c:'gray'}}}
     ]
   },
   tournament_registrations: {

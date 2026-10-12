@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "team_athletes",
+  "info": {
+    "singularName": "team-athlete",
+    "pluralName": "team-athletes",
+    "displayName": "VĐV thuộc đội",
+    "description": "Danh sách VĐV của một đội tỉnh/thành (mục 1.2). Đội tự thêm/bớt; Liên đoàn xác nhận từng người. Đăng ký giải chỉ lấy từ những người đã xác nhận."
+  },
+  "options": { "draftAndPublish": false },
+  "pluginOptions": {},
+  "attributes": {
+    "teamDocId": { "type": "string", "required": true },
+    "teamName": { "type": "string" },
+    "fullName": { "type": "string", "required": true },
+    "dob": { "type": "date" },
+    "gender": { "type": "enumeration", "enum": ["Nam", "Nữ"] },
+    "cccd": { "type": "string" },
+    "phone": { "type": "string" },
+    "address": { "type": "string" },
+    "memberCode": {
+      "type": "string",
+      "description": "Mã hội viên khớp được theo CCCD; rỗng = chưa là hội viên Liên đoàn"
+    },
+    "memberValid": { "type": "boolean", "default": false },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "confirmed", "removed"],
+      "default": "pending",
+      "description": "confirmed = Liên đoàn đã xác nhận thuộc đội, mới được đăng ký giải theo đội"
+    },
+    "note": { "type": "text" }
+  }
+}

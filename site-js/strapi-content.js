@@ -177,7 +177,9 @@
       { key: 'settings', fallback: {}, load: function () { return api('setting'); } },
       { key: 'contact', fallback: {}, load: function () { return api('contact-info'); } },
       { key: 'news', fallback: [], load: function () { return list('news-articles', 'sort=date:desc&populate=image'); } },
-      { key: 'tournaments', fallback: [], load: function () { return list('tournaments', 'populate=prizes&populate=players'); } },
+      // events/docs phục vụ trang Đăng ký thi đấu; media nằm trong component nên
+      // phải populate lồng, populate=docs một tầng sẽ trả file rỗng.
+      { key: 'tournaments', fallback: [], load: function () { return list('tournaments', 'populate[prizes]=*&populate[players]=*&populate[events]=*&populate[docs][populate]=file'); } },
       { key: 'members', fallback: [], load: function () { return list('members', 'populate=disciplines&populate=avatar'); } },
       { key: 'memberOrgs', fallback: [], load: function () { return list('member-orgs'); } },
       { key: 'partners', fallback: [], load: function () { return list('partners', 'populate=image'); } },
@@ -222,12 +224,16 @@
   }
 
   /** POST tới endpoint form công khai; ném Error kèm thông báo của backend. */
-  async function submitForm(path, payload) {
+  async function submitForm(path, payload, token) {
     var res;
     try {
+      var headers = { 'Content-Type': 'application/json' };
+      /* Endpoint đăng ký thi đấu cần biết người gửi là ĐỘI nào / HỘI VIÊN nào —
+         token của site public, không phải JWT của CMS. */
+      if (token) headers.Authorization = 'Bearer ' + token;
       res = await fetch(STRAPI_URL + '/api/' + path, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify(payload),
       });
     } catch (err) {
@@ -1153,9 +1159,275 @@
     return me;
   }
 
+  /* ---------------- Đăng ký thi đấu ----------------
+     Hai luồng, quyết định bởi `nature` của giải (đặt trong CMS):
+     - national  : chỉ tài khoản ĐỘI tỉnh/thành gửi được, kèm danh sách VĐV.
+                   VĐV không tự đăng ký (quy định hiện hành của Liên đoàn).
+     - grassroots: VĐV tự đăng ký; giải có memberOnly thì phải là hội viên.
+     Cả hai đều vào cùng một nơi để vận hành duyệt TỪNG NGƯỜI vào danh sách thi
+     đấu chính thức trước khi bốc thăm. */
+
+  /** Giải đang đăng ký. Ưu tiên documentId router gắn vào trang; vào bằng hash
+      thì không có, nên dò theo tên giải đang hiển thị trên băng tiêu đề. */
+  function regTournament(page, data) {
+    var list = (data && data.tournaments) || [];
+    if (page.__regDoc) {
+      var byDoc = list.filter(function (t) { return t.documentId === page.__regDoc; })[0];
+      if (byDoc) return byDoc;
+    }
+    var nameEl = page.querySelector('[data-fill="name"]');
+    var name = nameEl ? nameEl.textContent.trim() : '';
+    if (!name || name === 'Tên giải đấu') return null;
+    return list.filter(function (t) { return (t.name || '').trim() === name; })[0] || null;
+  }
+
+  function regEvents(t) {
+    return ((t && t.events) || []).filter(function (e) { return e && e.name; });
+  }
+
+  /** So theo NGÀY để hạn chót tính hết ngày, giống hệt phía máy chủ. */
+  function regDay(v) {
+    if (!v) return null;
+    var d = new Date(v);
+    if (isNaN(d.getTime())) return null;
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  }
+  function regWindow(t) {
+    var now = new Date();
+    var today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    var open = regDay(t && t.regOpenDate);
+    var close = regDay(t && (t.regCloseDate || t.regDeadline));
+    if (open != null && today < open) {
+      return { ok: false, error: 'Giải chưa mở đăng ký. Thời gian nhận đăng ký bắt đầu từ ' + fmtDate(t.regOpenDate) + '.' };
+    }
+    if (close != null && today > close) {
+      return { ok: false, error: 'Giải đã hết hạn đăng ký (hạn chót ' + fmtDate(t.regCloseDate || t.regDeadline) + ').' };
+    }
+    return { ok: true };
+  }
+
+  /* Lệ phí: giải khai nhiều nội dung thì liệt kê từng nội dung, vì người đăng ký
+     chọn nội dung nào thì đóng tiền nội dung đó. Giải chưa khai nội dung thì giữ
+     nguyên ô "Phí tham dự" cũ. */
+  function regFillFees(page, t) {
+    var box = page.querySelector('[data-reg-fee-list]');
+    if (!box) return;
+    var evs = regEvents(t);
+    if (!evs.length) {
+      var base = page.querySelector('[data-reg-fee-base]');
+      if (base && t && t.entryFee) base.textContent = t.entryFee;
+      return;
+    }
+    box.innerHTML = evs.map(function (e) {
+      return '<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:6px">' +
+        '<span style="color:#5C6B63">' + esc(e.name) + '</span>' +
+        '<span style="font-weight:600;color:#21428E;white-space:nowrap">' + esc(e.fee || '—') + '</span></div>';
+    }).join('');
+  }
+
+  function regFillDocs(page, t) {
+    var box = page.querySelector('[data-reg-docs]');
+    var listEl = page.querySelector('[data-reg-docs-list]');
+    if (!box || !listEl) return;
+    var docs = ((t && t.docs) || []).filter(function (d) { return d && d.file && d.file.url; });
+    if (!docs.length) { box.style.display = 'none'; return; }
+    box.style.display = '';
+    listEl.innerHTML = docs.map(function (d) {
+      return '<div><a href="' + esc(mediaUrl(d.file)) + '" target="_blank" rel="nofollow noopener"><i class="ti ti-file-text"></i> ' +
+        esc(d.label || d.file.name || 'Tài liệu') + '</a></div>';
+    }).join('');
+  }
+
+  /* ----- Giải phong trào: ô chọn nội dung + tổng lệ phí tạm tính ----- */
+  function parseFeeNumber(v) {
+    var digits = String(v == null ? '' : v).replace(/[^\d]/g, '');
+    return digits ? Number(digits) : null;
+  }
+  function formatVnd(n) {
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
+  }
+  function regSelfEvents(page) {
+    return Array.prototype.slice.call(page.querySelectorAll('[data-reg-self-ev]:checked'))
+      .map(function (i) { return i.value; });
+  }
+  function regFillSelfEvents(page, t) {
+    var box = page.querySelector('[data-reg-self-events]');
+    var list = page.querySelector('[data-reg-self-events-list]');
+    if (!box || !list) return;
+    var evs = regEvents(t);
+    if (!evs.length) { box.style.display = 'none'; list.innerHTML = ''; return; }
+    box.style.display = '';
+    list.innerHTML = evs.map(function (e) {
+      return '<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#1B2A24;cursor:pointer">' +
+        '<input type="checkbox" data-reg-self-ev value="' + esc(e.name) + '"> ' + esc(e.name) +
+        (e.fee ? ' <span style="color:#8A968F">(' + esc(e.fee) + ')</span>' : '') + '</label>';
+    }).join('');
+    var total = page.querySelector('[data-reg-self-fee]');
+    var recalc = function () {
+      if (!total) return;
+      var picked = regSelfEvents(page);
+      var sum = 0, counted = 0;
+      picked.forEach(function (n) {
+        var ev = evs.filter(function (e) { return e.name === n; })[0];
+        var fee = ev ? parseFeeNumber(ev.fee) : null;
+        if (fee != null) { sum += fee; counted++; }
+      });
+      total.textContent = counted ? 'Tạm tính: ' + formatVnd(sum) : '';
+    };
+    list.querySelectorAll('[data-reg-self-ev]').forEach(function (i) { i.addEventListener('change', recalc); });
+    recalc();
+  }
+
+  /* ----- Giải thành tích cao: chọn VĐV từ danh sách đội đã được xác nhận -----
+     Không cho gõ tay VĐV ở trang này: quy định là đội đăng ký "kèm danh sách
+     VĐV đã được xác nhận thuộc đội của mình", nên người mới phải đi qua bước
+     thêm vào đội + Liên đoàn xác nhận (trang Hội viên → hồ sơ đội). */
+
+  function regSquadRowHtml(a, evs) {
+    var cell = 'padding:10px 12px;border-top:0.5px solid #E3E8E4';
+    var meta = [a.cccd ? 'CCCD ' + a.cccd : '', a.memberCode || 'chưa là hội viên']
+      .filter(Boolean).join(' · ');
+    return '<div data-squad-row="' + esc(a.documentId) + '" style="' + cell + ';display:flex;gap:12px;flex-wrap:wrap">' +
+      '<label style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:200px;cursor:pointer">' +
+        '<input type="checkbox" data-reg-pick="' + esc(a.documentId) + '" style="margin-top:3px">' +
+        '<span><span style="font-size:13px;font-weight:600;color:#1B2A24">' + esc(a.fullName) + '</span>' +
+        '<span style="display:block;font-size:11.5px;color:#8A968F;margin-top:2px">' + esc(meta) + '</span></span>' +
+      '</label>' +
+      (evs.length
+        ? '<div style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:flex-start">' + evs.map(function (e) {
+            return '<label style="display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:11.5px;color:#5C6B63;cursor:pointer">' +
+              '<input type="checkbox" data-pick-ev value="' + esc(e.name) + '"> ' + esc(e.name) + '</label>';
+          }).join('') + '</div>'
+        : '') +
+    '</div>';
+  }
+
+  /** [{documentId, events}] của những người đang được tick. */
+  function regReadPicks(page) {
+    var out = [];
+    page.querySelectorAll('[data-squad-row]').forEach(function (row) {
+      var cb = row.querySelector('[data-reg-pick]');
+      if (!cb || !cb.checked) return;
+      out.push({
+        documentId: cb.getAttribute('data-reg-pick'),
+        events: Array.prototype.slice.call(row.querySelectorAll('[data-pick-ev]:checked'))
+          .map(function (i) { return i.value; }),
+      });
+    });
+    return out;
+  }
+
+  function regSquadSummary(page, t) {
+    var sum = page.querySelector('[data-reg-squad-sum]');
+    if (!sum) return;
+    var picks = regReadPicks(page);
+    if (!picks.length) { sum.textContent = ''; return; }
+    var evs = regEvents(t);
+    var total = 0, counted = 0;
+    picks.forEach(function (p) {
+      p.events.forEach(function (n) {
+        var ev = evs.filter(function (e) { return e.name === n; })[0];
+        var fee = ev ? parseFeeNumber(ev.fee) : null;
+        if (fee != null) { total += fee; counted++; }
+      });
+    });
+    sum.textContent = 'Đã chọn ' + picks.length + ' vận động viên' +
+      (counted ? ' · tạm tính lệ phí ' + formatVnd(total) : '');
+  }
+
+  async function regFillSquad(page, t) {
+    var listBox = page.querySelector('[data-reg-squad-list]');
+    var emptyBox = page.querySelector('[data-reg-squad-empty]');
+    if (!listBox || !emptyBox) return;
+
+    var squad = [];
+    try {
+      squad = window.VBSF_SQUAD ? await window.VBSF_SQUAD.confirmed() : [];
+    } catch (err) {
+      squad = [];
+    }
+    if (!squad.length) {
+      listBox.style.display = 'none';
+      listBox.innerHTML = '';
+      emptyBox.style.display = '';
+      return;
+    }
+    emptyBox.style.display = 'none';
+    listBox.style.display = '';
+    var evs = regEvents(t);
+    listBox.innerHTML = squad.map(function (a) { return regSquadRowHtml(a, evs); }).join('');
+    listBox.querySelectorAll('input[type=checkbox]').forEach(function (i) {
+      i.addEventListener('change', function () { regSquadSummary(page, t); });
+    });
+    regSquadSummary(page, t);
+  }
+
+  /* ----- Dựng lại cả trang theo giải đang chọn + trạng thái đăng nhập ----- */
+  async function applyRegistrationPage(page, data) {
+    var t = regTournament(page, data);
+    var show = function (sel, on) { var e = page.querySelector(sel); if (e) e.style.display = on ? '' : 'none'; };
+
+    /* Vào trang bằng hash hoặc link trực tiếp thì router không có dataset để điền
+       băng tiêu đề; điền từ chính bản ghi giải để không còn chữ mẫu "Tên giải đấu". */
+    if (t) {
+      fill(page, 'name', t.name || '');
+      fill(page, 'disc', t.category || '');
+      fill(page, 'date', fmtDate(t.date));
+      fill(page, 'loc', t.location || '');
+      /* Giải chưa khai nội dung lẫn ngày thì dòng phụ chỉ còn mỗi dấu "·". */
+      var sub = page.querySelector('[data-reg-sub]');
+      if (sub) sub.style.display = (t.category || t.date) ? '' : 'none';
+    }
+
+    regFillFees(page, t);
+    regFillDocs(page, t);
+
+    var closed = page.querySelector('[data-reg-closed]');
+    var win = t ? regWindow(t) : { ok: true };
+    if (closed) {
+      closed.innerHTML = win.ok ? '' : '<i class="ti ti-clock-x"></i> ' + esc(win.error);
+      closed.style.display = win.ok ? 'none' : '';
+    }
+
+    /* Giải chưa khai `nature` là giải tạo trước khi có luồng mới — Liên đoàn quy
+       định mặc định là giải thành tích cao. */
+    var national = !t || (t.nature || 'national') === 'national';
+    show('[data-reg-national]', national && win.ok);
+    show('[data-reg-grassroots]', !national && win.ok);
+
+    if (national) {
+      var auth = window.VBSF_AUTH;
+      var org = auth ? auth.currentOrg() : null;
+      if (!org && auth && typeof auth.restoreOrg === 'function') {
+        try { org = await auth.restoreOrg(); } catch (e) { org = null; }
+      }
+      show('[data-reg-team-login]', !org);
+      show('[data-reg-team-form]', !!org);
+      if (org) {
+        setText(page, '[data-reg-team-name]', org.name || '—');
+        setText(page, '[data-reg-team-code]', org.code || '—');
+        setText(page, '[data-reg-team-prov]', org.province || org.orgType || '—');
+        var leader = page.querySelector('[data-reg-leader]');
+        if (leader && !leader.value) leader.value = org.repName || '';
+        var ltitle = page.querySelector('[data-reg-leader-title]');
+        if (ltitle && !ltitle.value) ltitle.value = org.repTitle || '';
+        var lphone = page.querySelector('[data-reg-leader-phone]');
+        if (lphone && !lphone.value) lphone.value = org.repPhone || '';
+        /* Nạp lại danh sách đội mỗi lần vào trang: ô chọn nội dung phụ thuộc
+           vào giải, và Liên đoàn có thể vừa xác nhận thêm người. */
+        await regFillSquad(page, t);
+      }
+    } else {
+      var me = await applyMemberIdentity(page);
+      regFillSelfEvents(page, t);
+      show('[data-reg-memberonly]', !!(t && t.memberOnly) && !me);
+    }
+    page.__regT = t;
+  }
+
   RENDER['giai-dau-dang-ky'] = function (page, data) {
-    applyMemberIdentity(page);
     applyBankBox(page, data && data.settings);
+    applyRegistrationPage(page, data);
 
     var manualLink = page.querySelector('[data-reg-manual]');
     if (manualLink && !manualLink.__wired) {
@@ -1166,21 +1438,54 @@
       });
     }
 
+    var show = function (el, text) { if (el) { el.innerHTML = text || ''; el.style.display = text ? '' : 'none'; } };
+    var val = function (sel) { var e = page.querySelector(sel); return e ? e.value.trim() : ''; };
+
+    /* ----- nút của luồng đội ----- */
+    var teamBtn = page.querySelector('[data-reg-team-submit]');
+    if (teamBtn && !teamBtn.__wired) {
+      teamBtn.__wired = true;
+      var tOk = page.querySelector('[data-reg-team-ok]');
+      var tErr = page.querySelector('[data-reg-team-err]');
+      teamBtn.addEventListener('click', async function () {
+        show(tOk, ''); show(tErr, '');
+        var t = page.__regT;
+        if (!t) {
+          show(tErr, 'Chưa chọn giải đấu. Vào mục Giải đấu rồi bấm "Đăng ký" ở giải bạn muốn tham dự.');
+          return;
+        }
+        var picks = regReadPicks(page);
+        if (!picks.length) { show(tErr, 'Chưa chọn vận động viên nào trong danh sách đội.'); return; }
+        var token = window.VBSF_AUTH && window.VBSF_AUTH.orgToken();
+        if (!token) { show(tErr, 'Phiên đăng nhập của đội đã hết hạn. Vui lòng đăng nhập lại.'); return; }
+        teamBtn.disabled = true;
+        try {
+          var msg = await submitForm('tournament-entries/submit-team', {
+            tournamentDocId: t.documentId,
+            leaderName: val('[data-reg-leader]'),
+            leaderTitle: val('[data-reg-leader-title]'),
+            leaderPhone: val('[data-reg-leader-phone]'),
+            note: val('[data-reg-team-note]'),
+            athletes: picks,
+          }, token);
+          show(tOk, '<i class="ti ti-circle-check-filled"></i> ' + esc(msg));
+        } catch (e) {
+          show(tErr, esc(e.message));
+        } finally { teamBtn.disabled = false; }
+      });
+    }
+
+    /* ----- nút của luồng VĐV tự đăng ký ----- */
     var btn = page.querySelector('[data-reg-tourney-submit]');
     if (!btn || btn.__wired) return;
     btn.__wired = true;
     var ok = page.querySelector('[data-reg-tourney-ok]');
     var err = page.querySelector('[data-reg-tourney-err]');
-    var val = function (sel) { var e = page.querySelector(sel); return e ? e.value.trim() : ''; };
-    var show = function (el, text) { if (el) { el.innerHTML = text || ''; el.style.display = text ? '' : 'none'; } };
 
     btn.addEventListener('click', async function () {
       show(ok, ''); show(err, '');
-      /* Vào thẳng trang bằng link/hash mà chưa chọn giải thì ô tên vẫn là chữ
-         mẫu "Tên giải đấu" — gửi đi sẽ tạo một đăng ký vô nghĩa cho ban tổ chức. */
-      var nameEl = page.querySelector('[data-fill="name"]');
-      var tourName = nameEl ? nameEl.textContent.trim() : '';
-      if (!tourName || tourName === 'Tên giải đấu') {
+      var t = page.__regT;
+      if (!t) {
         show(err, 'Chưa chọn giải đấu. Vào mục Giải đấu rồi bấm "Đăng ký" ở giải bạn muốn tham dự.');
         return;
       }
@@ -1192,16 +1497,18 @@
         var card = page.querySelector('[data-reg-asmember]');
         var usingMember = !!card && card.style.display !== 'none';
         var me = usingMember && window.VBSF_AUTH ? window.VBSF_AUTH.currentMember() : null;
-        var msg = await submitForm('tournament-registrations/submit', {
-          tournamentName: tourName,
-          playerName: me ? me.name : val('[data-reg-player]'),
-          memberCode: me ? me.code : val('[data-reg-code]'),
+        var msg = await submitForm('tournament-entries/submit', {
+          tournamentDocId: t.documentId,
+          fullName: me ? me.name : val('[data-reg-player]'),
+          dob: me ? undefined : (val('[data-reg-dob]') || undefined),
+          cccd: me ? undefined : val('[data-reg-cccd]'),
           phone: me ? me.phone : val('[data-reg-phone2]'),
-          club: me ? me.club : val('[data-reg-club2]'),
+          address: me ? undefined : val('[data-reg-club2]'),
           note: val('[data-reg-note]'),
-        });
+          events: regSelfEvents(page),
+        }, window.VBSF_AUTH && window.VBSF_AUTH.memberToken());
         show(ok, '<i class="ti ti-circle-check-filled"></i> ' + esc(msg));
-        ['[data-reg-player]', '[data-reg-code]', '[data-reg-phone2]', '[data-reg-club2]', '[data-reg-note]']
+        ['[data-reg-player]', '[data-reg-dob]', '[data-reg-cccd]', '[data-reg-phone2]', '[data-reg-club2]', '[data-reg-note]']
           .forEach(function (sel) { var e = page.querySelector(sel); if (e) e.value = ''; });
       } catch (e) {
         show(err, esc(e.message));
@@ -1647,7 +1954,11 @@
        Đặt TRƯỚC guard dataset bên dưới vì điều hướng bằng hash không có dataset. */
     if (dest === 'giai-dau-dang-ky' && page) {
       page.__regManual = false;   // chọn "nhập thủ công" chỉ có hiệu lực trong lần đăng ký đó
-      applyMemberIdentity(page);
+      /* Điều hướng bằng hash không mang dataset; giữ lại documentId của lần bấm
+         "Đăng ký" gần nhất thay vì xoá đi và phải dò lại theo tên giải. */
+      if (dataset && dataset.doc) page.__regDoc = dataset.doc;
+      var regData = await load();
+      if (regData) applyRegistrationPage(page, regData);
     }
 
     var data = await load();

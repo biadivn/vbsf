@@ -69,6 +69,16 @@ const FORM_LIMIT = {
   message: 'Bạn gửi quá nhiều lần. Vui lòng thử lại sau một phút.',
 };
 
+/* Khu vực tài khoản đội (danh sách VĐV của đội): 60 lần/phút/IP. Khác form
+   công khai ở hai điểm — đã có token đội mới gọi được, và một lượt làm việc
+   thật là đọc danh sách rồi thêm/bớt vài chục người, nên mức 5 lần/phút của
+   FORM_LIMIT sẽ chặn ngay giữa chừng người dùng hợp lệ. */
+const TEAM_AREA_LIMIT = {
+  max: 60,
+  windowMs: 60 * 1000,
+  message: 'Bạn thao tác quá nhanh. Vui lòng thử lại sau một phút.',
+};
+
 /* Tải tài liệu (Văn bản & Luật): 30 lần/phút/IP. Người thật mở trang rồi tải vài
    file là cùng; con số này đủ rộng cho một lớp học cùng dùng một đường mạng,
    nhưng chặn việc quét sạch kho tài liệu bằng vòng lặp. */
@@ -78,4 +88,4 @@ const DOWNLOAD_LIMIT = {
   message: 'Bạn tải quá nhiều tệp trong thời gian ngắn. Vui lòng thử lại sau một phút.',
 };
 
-module.exports = { rateLimit, AUTH_LIMIT, PASSWORD_RESET_LIMIT, FORM_LIMIT, DOWNLOAD_LIMIT };
+module.exports = { rateLimit, AUTH_LIMIT, PASSWORD_RESET_LIMIT, FORM_LIMIT, TEAM_AREA_LIMIT, DOWNLOAD_LIMIT };

@@ -1,0 +1,12 @@
+{
+  "collectionName": "components_tournament_events",
+  "info": {
+    "displayName": "Nội dung thi đấu",
+    "description": "Một nội dung thi đấu của giải kèm lệ phí riêng"
+  },
+  "options": {},
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "fee": { "type": "string" }
+  }
+}
