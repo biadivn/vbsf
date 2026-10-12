@@ -97,7 +97,8 @@
         '<div style="font-size:11.5px;color:#8A968F">' + state.athletes.length + ' người · ' + confirmed + ' đã xác nhận</div>' +
       '</div>' +
       '<div style="font-size:11.5px;color:#8A968F;line-height:1.7;margin-bottom:8px">' +
-        'Đội tự thêm/bớt vận động viên; Liên đoàn xác nhận từng người. Khi đăng ký giải thành tích cao, đội chỉ chọn được những người đã xác nhận.' +
+        'Đội tự thêm/bớt vận động viên; Liên đoàn xác nhận từng người. Khi đăng ký giải thành tích cao, đội chỉ chọn được những người đã xác nhận.<br>' +
+        'Nhập từ tệp CSV: người chưa có hồ sơ hội viên sẽ được tạo hồ sơ mới (chờ Liên đoàn ghi nhận hội phí); người đã là hội viên chỉ được gắn mã, không tạo trùng.' +
       '</div>' +
       (state.athletes.length
         ? state.athletes.map(rowHtml).join('')

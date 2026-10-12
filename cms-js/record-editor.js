@@ -6,21 +6,32 @@
 let reTab = 'info';
 let reHistFilter = '';
 
+/* Tab phụ của từng collection. Bản ghi MỚI chưa có id nên không có tab nào —
+   danh sách VĐV / lịch sử thi đấu đều cần bản ghi đã tồn tại để gắn vào. */
+function reExtraTabs(key, isNew){
+  if(isNew) return [];
+  if(key==='members') return [{id:'history', label:'Lịch sử thi đấu', icon:'ti-history'}];
+  if(key==='members_org') return [{id:'roster', label:'Danh sách VĐV', icon:'ti-users-group'}];
+  return [];
+}
+
 function renderRecordEditor(key, id){
-  const c = COLLECTIONS[key];
   const isNew = id==='new';
   const record = isNew ? {} : (DB[key].find(r=>r.id===id) || {});
-  const hasHistory = key==='members' && !isNew;
+  const extraTabs = reExtraTabs(key, isNew);
   if(isNew) reTab = 'info';
-  if(!hasHistory && reTab==='history') reTab = 'info';
+  // Đổi từ hội viên sang hội viên tổ chức mà tab cũ không còn thì về "Thông tin".
+  if(reTab!=='info' && !extraTabs.some(t=>t.id===reTab)) reTab = 'info';
 
-  const tabsHtml = hasHistory ? `<div style="display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:20px">
+  const tabsHtml = extraTabs.length ? `<div style="display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:20px">
     <span class="gd-tab ${reTab==='info'?'on':''}" data-retab="info"><i class="ti ti-info-circle" style="margin-right:5px"></i>Thông tin</span>
-    <span class="gd-tab ${reTab==='history'?'on':''}" data-retab="history"><i class="ti ti-history" style="margin-right:5px"></i>Lịch sử thi đấu</span>
+    ${extraTabs.map(t=>`<span class="gd-tab ${reTab===t.id?'on':''}" data-retab="${t.id}"><i class="ti ${t.icon}" style="margin-right:5px"></i>${t.label}</span>`).join('')}
   </div>` : '';
 
-  const body = reTab==='history' ? renderMemberHistoryTab(record) : renderRecordInfoTab(key, record, isNew);
-  return hasHistory ? `<div class="news-editor">${tabsHtml}${body}</div>` : body;
+  const body = reTab==='history' ? renderMemberHistoryTab(record)
+    : reTab==='roster' ? renderOrgRosterTab(record)
+    : renderRecordInfoTab(key, record, isNew);
+  return extraTabs.length ? `<div class="news-editor">${tabsHtml}${body}</div>` : body;
 }
 
 function renderRecordInfoTab(key, record, isNew){
@@ -33,7 +44,7 @@ function renderRecordInfoTab(key, record, isNew){
     if(f.type==='file') editingRecordFiles[f.key] = record[f.key] || null;
   });
   const sections = [];
-  c.fields.forEach(f=>{
+  formFields(c, isNew).forEach(f=>{
     const title = f.section || null;
     let group = sections.find(s=>s.title===title);
     if(!group){ group = {title, fields:[]}; sections.push(group); }
@@ -243,6 +254,12 @@ function attachRecordEditorEvents(key){
   document.querySelectorAll('[data-retab]').forEach(t=>{
     t.addEventListener('click', ()=>{ reTab = t.getAttribute('data-retab'); renderContent(); });
   });
+  if(reTab==='roster' && key==='members_org'){
+    const id = currentView.slice((key+'-edit:').length);
+    const record = DB.members_org.find(r=>r.id===id);
+    if(record) attachOrgRosterEvents(record);
+    return;
+  }
   if(reTab==='history' && key==='members'){
     const id = currentView.slice((key+'-edit:').length);
     const record = DB.members.find(r=>r.id===id);
@@ -292,7 +309,7 @@ async function saveRecordEditor(key){
   const isNew = id==='new';
   const data = {};
   let missingRequired = false;
-  c.fields.forEach(f=>{
+  formFields(c, isNew).forEach(f=>{
     let val;
     if(f.type==='checkbox'){ val = document.getElementById('f_'+f.key).classList.contains('on'); }
     else if(f.type==='image'){ val = modalImageValues[f.key] || ''; }
@@ -307,7 +324,8 @@ async function saveRecordEditor(key){
     }
     if(f.type==='password' && val==='' && !isNew) return;
     if(f.required && (val===''||val===undefined||val===null)) missingRequired = true;
-    data[f.key] = val;
+    // transient: ô chỉ dùng để chọn/điền hộ, không phải field của content-type.
+    if(!f.transient) data[f.key] = val;
   });
   if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
 

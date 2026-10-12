@@ -1,3 +1,79 @@
 'use strict';
+/* Core controller (CMS gọi qua JWT — xem CONTENT_MANAGE_UIDS trong src/index.js)
+   với hai phần thêm:
+
+   - `create`: vận hành thêm VĐV vào đội ngay trong CMS. Tên đội, mã hội viên và
+     hiệu lực hội viên đều do máy chủ tự gắn từ `teamDocId`/`cccd` — không nhận
+     từ request. Nếu nhận thì một bản ghi gõ tay có thể mang mã hội viên của
+     người khác, hoặc tự nhận `memberValid: true`, và điều kiện "hội viên còn
+     hiệu lực" của mục 2.1 mất hết ý nghĩa.
+   - `importRoster`: nhập cả danh sách từ tệp cho một tổ chức (nhập hộ). Quy tắc
+     nằm trong src/utils/org-roster.js, dùng chung với luồng tổ chức tự nhập
+     trên site để hai bên không lệch nhau. */
 const { createCoreController } = require('@strapi/strapi').factories;
-module.exports = createCoreController('api::team-athlete.team-athlete');
+const entryLogic = require('../../../utils/tournament-entry');
+const roster = require('../../../utils/org-roster');
+
+const UID = 'api::team-athlete.team-athlete';
+const ORG_UID = 'api::member-org.member-org';
+const MEMBER_UID = 'api::member.member';
+
+/** Mã hội viên + hiệu lực khớp theo CCCD, soi lại ngay lúc ghi. */
+async function matchByCccd(cccd) {
+  if (!cccd) return { memberCode: '', memberValid: false };
+  const members = await strapi.documents(MEMBER_UID).findMany({
+    filters: { cccd: { $eq: cccd } },
+    fields: ['code', 'cccd', 'status', 'expiry'],
+    limit: 5,
+  });
+  return entryLogic.matchMember(members, cccd);
+}
+
+module.exports = createCoreController(UID, () => ({
+  async create(ctx) {
+    const incoming = (ctx.request.body && ctx.request.body.data) || {};
+
+    const teamDocId = String(incoming.teamDocId || '').trim();
+    if (!teamDocId) return ctx.badRequest('Chưa chọn đội tỉnh/thành cho vận động viên.');
+    const org = await strapi.documents(ORG_UID).findOne({ documentId: teamDocId });
+    if (!org) return ctx.badRequest('Không tìm thấy hội viên tổ chức đã chọn.');
+
+    const fullName = String(incoming.fullName || '').trim();
+    const cccd = roster.cccdKey(incoming.cccd);
+    if (!fullName || !cccd) return ctx.badRequest('Thiếu họ tên hoặc số căn cước của vận động viên.');
+
+    const dup = await strapi.documents(UID).findMany({
+      filters: { teamDocId, cccd: { $eq: cccd }, status: { $ne: 'removed' } },
+      fields: ['documentId'],
+      limit: 1,
+    });
+    if (dup.length) return ctx.badRequest('Vận động viên có số căn cước này đã có trong danh sách đội.');
+
+    ctx.request.body.data = {
+      ...incoming,
+      fullName,
+      cccd,
+      teamDocId,
+      teamName: org.name,
+      ...(await matchByCccd(cccd)),
+      // Thêm tay vẫn đi qua bước xác nhận như đội tự thêm, trừ khi vận hành
+      // chủ động chọn trạng thái khác ngay trong form.
+      status: incoming.status || 'pending',
+    };
+    return super.create(ctx);
+  },
+
+  async importRoster(ctx) {
+    const body = ctx.request.body || {};
+    const teamDocId = String(body.teamDocId || '').trim();
+    if (!teamDocId) return ctx.badRequest('Chưa chọn hội viên tổ chức để nhập danh sách.');
+
+    const org = await strapi.documents(ORG_UID).findOne({ documentId: teamDocId });
+    if (!org) return ctx.badRequest('Không tìm thấy hội viên tổ chức.');
+
+    const out = await roster.applyRosterImport(strapi, { org, rows: body.athletes || [] });
+    if (out.error) return ctx.badRequest(out.error);
+
+    ctx.body = { ok: true, ...out.data };
+  },
+}));

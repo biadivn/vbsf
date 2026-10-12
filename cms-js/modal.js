@@ -20,7 +20,8 @@ function openModal(key, id){
   });
   document.getElementById('modalTitle').textContent = id ? `Sửa ${c.single}` : `Thêm ${c.single}`;
   const body = document.getElementById('modalBody');
-  body.innerHTML = `<div class="form-grid">` + c.fields.map(f=>{
+  const fields = formFields(c, !id);
+  body.innerHTML = `<div class="form-grid">` + fields.map(f=>{
     return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${f.type==='richtext' ? renderRichTextField(f, record[f.key]) : renderField(f, record[f.key])}</div>`;
   }).join('') + `</div>`;
   document.getElementById('modalDeleteBtn').style.display = id ? 'inline-flex' : 'none';
@@ -32,6 +33,7 @@ function openModal(key, id){
   document.querySelectorAll('[data-multiselect]').forEach(chip=>{
     chip.addEventListener('click', ()=> chip.classList.toggle('on'));
   });
+  wireModalPickers(key, !id);
 }
 function openViewModal(key, id){
   pageModal = null; addSectionModal = null;
@@ -257,10 +259,58 @@ function closeModal(){
   document.getElementById('modalOverlay').classList.remove('on');
   editingCollection = null; editingId = null;
 }
+/* Danh sách field của form, đã tính theo chế độ THÊM MỚI hay CHỈNH SỬA.
+
+   Bản ghi do site gửi lên (đăng ký thi đấu, VĐV thuộc đội, báo chuyển khoản)
+   khoá hết ô dữ liệu để vận hành không sửa lệch đơn của người khác. Nhưng khi
+   vận hành TỰ thêm tay thì các ô đó phải mở, nếu không bản ghi mới gửi lên rỗng
+   và Strapi chối ngay ở field bắt buộc.
+
+   Ba cờ dùng trong schema:
+   - hideOnCreate / hideOnEdit: khai hai biến thể cùng một key (vd. "Giải đấu"
+     là select khi thêm mới, là ô khoá khi xem đơn cũ).
+   - lockOnEdit: mở khi thêm mới, khoá khi sửa.
+   - optionsFn: options dựng lúc mở form từ dữ liệu đang có (giải đấu, đội,
+     hội viên) thay vì hằng số trong schema. */
+function formFields(c, isNew){
+  return (c.fields||[])
+    .filter(f=> !(isNew ? f.hideOnCreate : f.hideOnEdit))
+    .map(f=>{
+      const out = {...f};
+      if(f.optionsFn){
+        const dyn = f.optionsFn() || [];
+        out.options = dyn.map(o=>o.value);
+        out.optionLabels = dyn.reduce((m,o)=>{ m[o.value] = o.label; return m; }, {});
+      }
+      if(f.lockOnEdit && !isNew) out.disabled = true;
+      return out;
+    });
+}
+
+/* Modal "VĐV thuộc đội": chọn đội + chọn hội viên cá nhân, các ô hồ sơ tự điền
+   theo hồ sơ hội viên rồi khoá lại. Vận hành không gõ tay họ tên/CCCD ở đây —
+   gõ tay là cách tạo ra người thứ hai cùng một CCCD viết khác nhau. */
+function wireModalPickers(key, isNew){
+  if(key!=='team_athletes' || !isNew) return;
+  const pick = document.getElementById('f_memberDocId');
+  if(!pick) return;
+  const fill = ()=>{
+    const m = (DB.members||[]).find(x=>x.id===pick.value) || {};
+    [['fullName', m.name], ['cccd', m.cccd], ['dob', m.dob], ['phone', m.phone], ['address', m.address]]
+      .forEach(([k, v])=>{ const el = document.getElementById('f_'+k); if(el) el.value = v || ''; });
+  };
+  pick.addEventListener('change', fill);
+  fill();
+}
+
 function renderField(f, value){
   value = value===undefined||value===null ? '' : value;
   const disabledAttr = f.disabled ? 'disabled' : '';
-  const disabledHint = f.disabled ? `<div class="fld-hint"><i class="ti ti-lock"></i> Do hệ thống quản lý, không thể chỉnh sửa</div>` : '';
+  // Ô bị khoá thì nói rõ vì sao; ô mở thì hiện gợi ý của schema (f.hint) nếu có.
+  const hintText = f.disabled ? 'Do hệ thống quản lý, không thể chỉnh sửa' : (f.hint || '');
+  const disabledHint = hintText
+    ? `<div class="fld-hint"><i class="ti ${f.disabled ? 'ti-lock' : 'ti-info-circle'}"></i> ${escapeHtml(hintText)}</div>`
+    : '';
   if(f.type==='select'){
     const opts = f.options.map(o=>{
       const lbl = f.optionLabels ? (f.optionLabels[o]||o) : o;
@@ -325,7 +375,8 @@ async function saveModal(){
   const wasEditing = !!editingId;
   const data = {};
   let missingRequired = false;
-  c.fields.forEach(f=>{
+  // Cùng danh sách field với lúc dựng form — lệch một cái là đọc DOM không có.
+  formFields(c, !wasEditing).forEach(f=>{
     let val;
     if(f.type==='checkbox'){ val = document.getElementById('f_'+f.key).classList.contains('on'); }
     else if(f.type==='image'){ val = modalImageValues[f.key] || ''; }
@@ -340,7 +391,9 @@ async function saveModal(){
     }
     if(f.type==='password' && val==='' && editingId) return;
     if(f.required && (val===''||val===undefined||val===null)) missingRequired = true;
-    data[f.key] = val;
+    // transient: ô chỉ dùng để chọn/điền hộ (vd. "Hội viên cá nhân"), không phải
+    // field của content-type — gửi lên là Strapi chối cả request.
+    if(!f.transient) data[f.key] = val;
   });
   if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
 

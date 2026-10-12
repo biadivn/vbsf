@@ -220,15 +220,27 @@ const COLLECTIONS = {
     label:'VĐV thuộc đội', icon:'ti-users-group', single:'vận động viên', remote:true, apiPath:'team-athletes',
     filterField:'status',
     fields:[
-      {key:'teamName', label:'Đội', type:'text', disabled:true, span2:true},
+      /* Thêm tay trong CMS (vận hành nhập hộ đội): chọn đội, rồi chọn người từ
+         danh sách hội viên cá nhân — các ô hồ sơ bên dưới tự điền theo hồ sơ đó
+         (xem wireModalPickers trong cms-js/modal.js). Máy chủ tự gắn tên đội,
+         mã hội viên và hiệu lực, nên hai ô đó không hiện lúc thêm mới. */
+      {key:'teamDocId', label:'Đội tỉnh/thành', type:'select', required:true, span2:true, hideOnEdit:true,
+        optionsFn: ()=> (DB.members_org||[])
+          .filter(o=> o.orgType==='Đội tỉnh/thành')
+          .map(o=>({value:o.id, label: o.name + (o.code ? ' · '+o.code : '')}))},
+      {key:'memberDocId', label:'Hội viên cá nhân', type:'select', required:true, span2:true, hideOnEdit:true, transient:true,
+        hint:'Chọn hội viên đã có hồ sơ — họ tên, căn cước, ngày sinh và điện thoại tự điền theo hồ sơ.',
+        optionsFn: ()=> (DB.members||[])
+          .map(m=>({value:m.id, label: m.name + (m.code ? ' · '+m.code : '') + (m.cccd ? ' · CCCD '+m.cccd : '')}))},
+      {key:'teamName', label:'Đội', type:'text', disabled:true, span2:true, hideOnCreate:true},
       {key:'fullName', label:'Họ và tên', type:'text', disabled:true},
       {key:'cccd', label:'Số căn cước', type:'text', disabled:true},
       {key:'dob', label:'Ngày sinh', type:'date', disabled:true},
-      {key:'gender', label:'Giới tính', type:'text', disabled:true},
+      {key:'gender', label:'Giới tính', type:'text', disabled:true, hideOnCreate:true},
       {key:'phone', label:'Điện thoại', type:'text', disabled:true},
       {key:'address', label:'Địa chỉ', type:'text', disabled:true},
-      {key:'memberCode', label:'Mã hội viên khớp theo CCCD', type:'text', disabled:true},
-      {key:'memberValid', label:'Hội viên còn hiệu lực', type:'checkbox', disabled:true},
+      {key:'memberCode', label:'Mã hội viên khớp theo CCCD', type:'text', disabled:true, hideOnCreate:true},
+      {key:'memberValid', label:'Hội viên còn hiệu lực', type:'checkbox', disabled:true, hideOnCreate:true},
       {key:'status', label:'Trạng thái', type:'select', options:['pending','confirmed','removed'],
         optionLabels:{pending:'Chờ xác nhận',confirmed:'Đã xác nhận thuộc đội',removed:'Đã bỏ khỏi đội'}},
       {key:'note', label:'Ghi chú của Liên đoàn', type:'textarea', rows:3, span2:true}
@@ -246,12 +258,18 @@ const COLLECTIONS = {
     label:'Đăng ký thi đấu', icon:'ti-clipboard-check', single:'đăng ký', remote:true, apiPath:'tournament-registrations',
     filterField:'status',
     fields:[
-      {key:'tournamentName', label:'Giải đấu', type:'text', disabled:true, span2:true},
-      {key:'playerName', label:'Cơ thủ', type:'text', disabled:true},
-      {key:'memberCode', label:'Mã hội viên', type:'text', disabled:true},
-      {key:'phone', label:'Điện thoại', type:'text', disabled:true},
-      {key:'club', label:'CLB / Đơn vị', type:'text', disabled:true},
-      {key:'note', label:'Ghi chú', type:'textarea', rows:3, span2:true, disabled:true},
+      /* Đơn do cơ thủ gửi từ site thì khoá hết để vận hành không sửa lệch nội
+         dung người ta đã gửi. Vận hành TỰ thêm đơn (nhận qua điện thoại, tại
+         bàn đăng ký) thì chỉ cần giải đấu + tên + điện thoại; CLB/Đơn vị, mã hội
+         viên và ghi chú không nhập ở bước này. */
+      {key:'tournamentName', label:'Giải đấu', type:'select', required:true, span2:true, hideOnEdit:true,
+        optionsFn: ()=> (DB.tournaments||[]).map(t=>({value:t.name, label:t.name}))},
+      {key:'tournamentName', label:'Giải đấu', type:'text', disabled:true, span2:true, hideOnCreate:true},
+      {key:'playerName', label:'Cơ thủ', type:'text', required:true, lockOnEdit:true},
+      {key:'phone', label:'Điện thoại', type:'text', required:true, placeholder:'09xx xxx xxx', lockOnEdit:true},
+      {key:'memberCode', label:'Mã hội viên', type:'text', disabled:true, hideOnCreate:true},
+      {key:'club', label:'CLB / Đơn vị', type:'text', disabled:true, hideOnCreate:true},
+      {key:'note', label:'Ghi chú', type:'textarea', rows:3, span2:true, disabled:true, hideOnCreate:true},
       {key:'status', label:'Trạng thái', type:'select', options:['pending','confirmed','rejected'],
         optionLabels:{pending:'Chờ xác nhận',confirmed:'Đã xác nhận',rejected:'Từ chối'}}
     ],
