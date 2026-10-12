@@ -1,7 +1,8 @@
 /* =========================================================
-   DANH SÁCH VĐV CỦA ĐỘI (mục 1.2)
+   DANH SÁCH VĐV CỦA ĐƠN VỊ (mục 1.2)
 
-   Đội tỉnh/thành tự thêm/bớt VĐV của đội mình; Liên đoàn xác nhận từng người
+   Hội viên tổ chức tự thêm/bớt VĐV của mình — mọi loại hình (đội tỉnh/thành,
+   CLB, trường học...), không phân biệt orgType; Liên đoàn xác nhận từng người
    trong CMS. Chỉ những người ĐÃ XÁC NHẬN mới chọn được khi đăng ký giải thành
    tích cao (mục 1.3) — nên khối này hiện rõ trạng thái từng người thay vì chỉ
    liệt kê tên.
@@ -31,7 +32,7 @@
      để khỏi nhận 400 rồi hiện lỗi đỏ ngay lúc trang vừa mở. */
   async function call(path, body) {
     var token = window.VBSF_AUTH && window.VBSF_AUTH.orgToken();
-    if (!token) throw new Error('Phiên đăng nhập của đội đã hết hạn. Vui lòng đăng nhập lại.');
+    if (!token) throw new Error('Phiên đăng nhập của đơn vị đã hết hạn. Vui lòng đăng nhập lại.');
     var res;
     try {
       res = await fetch(STRAPI_URL + '/api/' + path, {
@@ -93,11 +94,11 @@
     var confirmed = state.athletes.filter(function (a) { return a.status === 'confirmed'; }).length;
     box.innerHTML =
       '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">' +
-        '<div style="font-size:13px;font-weight:600;color:#21428E">Vận động viên của đội</div>' +
+        '<div style="font-size:13px;font-weight:600;color:#21428E">Vận động viên của đơn vị</div>' +
         '<div style="font-size:11.5px;color:#8A968F">' + state.athletes.length + ' người · ' + confirmed + ' đã xác nhận</div>' +
       '</div>' +
       '<div style="font-size:11.5px;color:#8A968F;line-height:1.7;margin-bottom:8px">' +
-        'Đội tự thêm/bớt vận động viên; Liên đoàn xác nhận từng người. Khi đăng ký giải thành tích cao, đội chỉ chọn được những người đã xác nhận.<br>' +
+        'Đơn vị tự thêm/bớt vận động viên; Liên đoàn xác nhận từng người. Khi đăng ký giải thành tích cao, đơn vị chỉ chọn được những người đã xác nhận.<br>' +
         'Nhập từ tệp CSV: người chưa có hồ sơ hội viên sẽ được tạo hồ sơ mới (chờ Liên đoàn ghi nhận hội phí); người đã là hội viên chỉ được gắn mã, không tạo trùng.' +
       '</div>' +
       (state.athletes.length

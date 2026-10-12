@@ -209,11 +209,12 @@ body{background:#E4E8E5}
           +'<div style="font-size:13px;font-weight:600;color:#21428E;margin-bottom:14px">Thời hạn hội viên</div>'
           +memberExpiryHtml(o)
         +'</div>'
-        /* Danh sách VĐV của đội — chỉ có nghĩa với tài khoản đội tỉnh/thành,
-           CLB/doanh nghiệp không đăng ký giải thành tích cao theo đoàn. */
-        +(o.orgType==='Đội tỉnh/thành'
-          ? '<div data-team-squad style="border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff"></div>'
-          : '')
+        /* Danh sách VĐV — mọi hội viên tổ chức đều có, không riêng loại hình
+           "Đội tỉnh/thành": CLB cũng là hội viên tổ chức và cũng gửi đoàn đi
+           giải thành tích cao. Máy chủ cũng chỉ kiểm "có token tổ chức hay
+           không", không kiểm loại hình (xem canSubmit trong
+           strapi-backend/src/utils/tournament-entry.js). */
+        +'<div data-team-squad style="border:0.5px solid #E3E8E4;border-radius:10px;padding:20px;background:#fff"></div>'
       +'</div>'
     +'</div>';
   }

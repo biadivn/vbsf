@@ -1,5 +1,7 @@
 'use strict';
-/* Đội tỉnh/thành tự quản danh sách VĐV của đội mình (mục 1.2), từ SITE PUBLIC.
+/* Hội viên tổ chức tự quản danh sách VĐV của mình (mục 1.2), từ SITE PUBLIC.
+   Mọi loại hình đều dùng được (đội tỉnh/thành, CLB, trường học...) — không kiểm
+   orgType ở đâu cả.
 
    Danh tính lấy từ token site public (kind 'org'), không phải JWT của CMS. Mọi
    truy vấn đều kẹp theo teamDocId của chính người gửi: không có endpoint nào ở
@@ -46,13 +48,13 @@ async function listSquad(teamDocId) {
 
 async function mine(ctx) {
   const team = await readTeam(ctx);
-  if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản đội tỉnh/thành.');
+  if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản hội viên tổ chức.');
   ctx.body = { team: { name: team.name, code: team.code }, athletes: await listSquad(team.documentId) };
 }
 
 async function save(ctx) {
   const team = await readTeam(ctx);
-  if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản đội tỉnh/thành.');
+  if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản hội viên tổ chức.');
 
   const body = ctx.request.body || {};
   const built = entryLogic.normalizeSquadAthlete(body);
@@ -107,7 +109,7 @@ async function save(ctx) {
    đúng kết quả như đội tự nhập. */
 async function saveBulk(ctx) {
   const team = await readTeam(ctx);
-  if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản đội tỉnh/thành.');
+  if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản hội viên tổ chức.');
 
   const rows = ((ctx.request.body || {}).athletes) || [];
   const out = await roster.applyRosterImport(strapi, { org: team, rows });
@@ -128,7 +130,7 @@ async function saveBulk(ctx) {
    trong các đơn đăng ký giải đã gửi, xoá đi là mất dấu vết hồ sơ đã duyệt. */
 async function remove(ctx) {
   const team = await readTeam(ctx);
-  if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản đội tỉnh/thành.');
+  if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản hội viên tổ chức.');
 
   const documentId = text((ctx.request.body || {}).documentId, 60);
   const existing = documentId ? await strapi.documents(UID).findOne({ documentId }) : null;

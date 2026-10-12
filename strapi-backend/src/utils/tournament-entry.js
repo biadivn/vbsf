@@ -2,8 +2,9 @@
 /* Logic thuần của luồng đăng ký thi đấu — tách khỏi controller để test được.
    Hai luồng, quyết định bởi `tournament.nature`:
 
-   - national  (Giải thành tích cao Quốc gia): CHỈ tài khoản đội tỉnh/thành gửi
-     được, kèm danh sách VĐV. VĐV không tự đăng ký.
+   - national  (Giải thành tích cao Quốc gia): CHỈ tài khoản HỘI VIÊN TỔ CHỨC
+     gửi được, kèm danh sách VĐV — mọi loại hình tổ chức (đội tỉnh/thành, CLB,
+     trường học...), không phân biệt orgType. VĐV không tự đăng ký.
    - grassroots (Giải phong trào): VĐV tự đăng ký. Giải có `memberOnly` thì phải
      là hội viên còn hiệu lực mới đăng ký được.
 
@@ -84,7 +85,7 @@ function canSubmit(tournament, actor) {
 
   if (nature === 'national') {
     if (kind !== 'org') {
-      return { ok: false, error: 'Giải thành tích cao chỉ nhận đăng ký qua tài khoản đội tỉnh/thành.' };
+      return { ok: false, error: 'Giải thành tích cao chỉ nhận đăng ký qua tài khoản hội viên tổ chức.' };
     }
   } else if (kind === 'org') {
     return { ok: false, error: 'Giải phong trào do vận động viên tự đăng ký, không đăng ký theo đoàn.' };

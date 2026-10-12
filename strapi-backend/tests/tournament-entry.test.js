@@ -102,15 +102,15 @@ describe('registrationOpen', () => {
 });
 
 describe('canSubmit', () => {
-  test('giải thành tích cao: chỉ tài khoản đội gửi được', () => {
+  test('giải thành tích cao: chỉ tài khoản tổ chức gửi được, mọi loại hình', () => {
     assert.equal(canSubmit(NATIONAL, { kind: 'org' }).ok, true);
-    assert.match(canSubmit(NATIONAL, { kind: 'member' }).error, /đội tỉnh\/thành/);
-    assert.match(canSubmit(NATIONAL, { kind: null }).error, /đội tỉnh\/thành/);
-    assert.match(canSubmit(NATIONAL, null).error, /đội tỉnh\/thành/);
+    assert.match(canSubmit(NATIONAL, { kind: 'member' }).error, /hội viên tổ chức/);
+    assert.match(canSubmit(NATIONAL, { kind: null }).error, /hội viên tổ chức/);
+    assert.match(canSubmit(NATIONAL, null).error, /hội viên tổ chức/);
   });
 
   test('giải không khai nature thì coi là thành tích cao', () => {
-    assert.match(canSubmit({ documentId: 'x' }, { kind: 'member' }).error, /đội tỉnh\/thành/);
+    assert.match(canSubmit({ documentId: 'x' }, { kind: 'member' }).error, /hội viên tổ chức/);
   });
 
   test('giải phong trào: VĐV tự đăng ký, đội không đăng ký hộ', () => {
