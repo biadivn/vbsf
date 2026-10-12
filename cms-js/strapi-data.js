@@ -282,7 +282,12 @@ async function saveRemoteCollectionRecord(key, id, data){
         else if(val === null) payload[f.key] = null;
         continue;
       }
+      // transient: ô chỉ để chọn/điền hộ trong form, không phải field của
+      // content-type. undefined: field không có trong form của chế độ đang mở
+      // (hideOnCreate/hideOnEdit) — gửi lên sẽ ghi rỗng lên dữ liệu đang có.
+      if(f.transient) continue;
       const val = data[f.key];
+      if(val === undefined) continue;
       // Strapi enumeration/date fields từ chối chuỗi rỗng ("") — chỉ nhận đúng
       // một giá trị enum hoặc null. Select/date chưa chọn luôn gửi lên "".
       payload[f.key] = val === '' ? null : val;

@@ -216,6 +216,42 @@ DYNAMIC`) nên không cần xử lý gì thêm.
 > lưu ở edge, còn trình duyệt của người đã truy cập vẫn dùng bản cũ cho tới hết
 > 4 giờ. Đổi URL thì cả hai cùng nạp lại.
 
+## Nhập danh sách VĐV vào hội viên tổ chức
+
+Một tệp CSV (cột: Họ và tên · Số căn cước · Ngày sinh `yyyy-mm-dd` · Giới tính ·
+Điện thoại · Địa chỉ, tối đa 300 dòng/lượt) thêm cả danh sách vào một tổ chức.
+Hai nơi dùng được, **cùng một bộ quy tắc** ở `strapi-backend/src/utils/org-roster.js`:
+
+- **Site public** — tổ chức tự nhập trong hồ sơ của mình:
+  `POST /api/team-athletes/save-bulk` (token site của tổ chức).
+- **CMS** — vận hành nhập hộ: mở *Hội viên tổ chức* → bản ghi → tab **Danh sách
+  VĐV** → *Nhập từ tệp CSV*: `POST /api/team-athletes/import` (JWT của CMS, kèm
+  `teamDocId`).
+
+Mỗi dòng được xử lý như sau:
+
+| Tình huống | Kết quả |
+|---|---|
+| CCCD khớp một hội viên cá nhân đang có | Chỉ gắn mã hội viên, **không** tạo hồ sơ trùng |
+| Chưa có hồ sơ hội viên, dòng đủ CCCD + SĐT hợp lệ | **Tạo hội viên cá nhân mới** (`status: pending`, `club` = tên tổ chức) |
+| Thiếu/sai SĐT, hoặc SĐT đã thuộc hội viên khác | Vẫn vào danh sách của tổ chức, ghi lý do vào *Ghi chú*; không tạo hội viên |
+| CCCD đã có trong danh sách của tổ chức, hoặc trùng dòng phía trên | Bỏ qua |
+| Thiếu họ tên hoặc CCCD | **Huỷ cả lượt**, báo đúng số dòng để sửa tệp rồi nhập lại |
+
+Hai điều cố ý:
+
+- Hồ sơ tạo theo lối này **không có mật khẩu** — người đó chưa đăng nhập site
+  được cho tới khi Liên đoàn đặt mật khẩu trong CMS. Tổ chức nhập hộ thì không
+  được đặt mật khẩu thay người khác.
+- VĐV luôn vào trạng thái `pending` và hội viên mới luôn `status: pending`: điều
+  kiện "hội viên còn hiệu lực" của danh sách thi đấu chính thức (mục 2.1) vẫn do
+  Liên đoàn quyết, nhập tệp không tự cấp hiệu lực cho ai.
+
+Thêm từng người trong CMS: *VĐV thuộc đội* → *Thêm vận động viên* → chọn đội rồi
+chọn hội viên cá nhân (họ tên/CCCD/SĐT tự điền theo hồ sơ). Mã hội viên, hiệu lực
+và tên đội do máy chủ tự gắn theo CCCD/`teamDocId`, không nhận từ request — xem
+`strapi-backend/src/api/team-athlete/controllers/team-athlete.js`.
+
 ## Kiểm thử & security gate
 
 `cd strapi-backend && npm run verify` — unit test (ngưỡng coverage 80%) + security

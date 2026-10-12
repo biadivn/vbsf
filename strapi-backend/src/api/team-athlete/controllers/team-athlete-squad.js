@@ -10,6 +10,7 @@
 
 const auth = require('../../../utils/public-auth');
 const entryLogic = require('../../../utils/tournament-entry');
+const roster = require('../../../utils/org-roster');
 const { text } = require('../../../utils/public-forms');
 
 const UID = 'api::team-athlete.team-athlete';
@@ -99,48 +100,27 @@ async function save(ctx) {
 
 /* Nhập cả danh sách từ tệp CSV. Bỏ qua người đã có trong đội thay vì dừng cả
    lượt nhập: đội thường nhập lại tệp đã bổ sung thêm vài dòng, chặn hết thì
-   lần nào cũng phải tự lọc tay những người đã nhập. */
+   lần nào cũng phải tự lọc tay những người đã nhập.
+
+   Dòng nào chưa có hồ sơ hội viên cá nhân thì được tạo luôn (trạng thái chờ hội
+   phí) — xem src/utils/org-roster.js. Quy tắc nằm ở đó để CMS nhập hộ cũng ra
+   đúng kết quả như đội tự nhập. */
 async function saveBulk(ctx) {
   const team = await readTeam(ctx);
   if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản đội tỉnh/thành.');
 
   const rows = ((ctx.request.body || {}).athletes) || [];
-  if (!Array.isArray(rows) || !rows.length) return ctx.badRequest('Danh sách vận động viên đang trống.');
-  if (rows.length > 300) return ctx.badRequest('Mỗi lần chỉ nhập được tối đa 300 vận động viên.');
-
-  const built = [];
-  for (let i = 0; i < rows.length; i += 1) {
-    const one = entryLogic.normalizeSquadAthlete(rows[i]);
-    if (one.error) return ctx.badRequest(`Dòng ${i + 1}: ${one.error}`);
-    built.push(one.data);
-  }
-
-  const existing = await strapi.documents(UID).findMany({
-    filters: { teamDocId: team.documentId, status: { $ne: 'removed' } },
-    fields: ['cccd'],
-    limit: 500,
-  });
-  const have = new Set(existing.map((r) => r.cccd).filter(Boolean));
-
-  let added = 0;
-  let skipped = 0;
-  for (const row of built) {
-    if (have.has(row.cccd)) { skipped += 1; continue; }
-    have.add(row.cccd);
-    const match = await matchByCccd(row.cccd);
-    await strapi.documents(UID).create({
-      data: { ...row, ...match, teamDocId: team.documentId, teamName: team.name, status: 'pending' },
-      status: 'published',
-    });
-    added += 1;
-  }
+  const out = await roster.applyRosterImport(strapi, { org: team, rows });
+  if (out.error) return ctx.badRequest(out.error);
 
   ctx.body = {
     ok: true,
-    added,
-    skipped,
-    message: `Đã thêm ${added} vận động viên vào danh sách đội` +
-      (skipped ? `, bỏ qua ${skipped} người đã có sẵn` : '') + '. Liên đoàn sẽ xác nhận.',
+    // `added`/`skipped` giữ lại cho giao diện cũ đang đọc hai số này.
+    added: out.data.summary.added,
+    skipped: out.data.summary.skipped,
+    summary: out.data.summary,
+    rows: out.data.rows,
+    message: out.data.message,
   };
 }
 

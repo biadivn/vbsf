@@ -162,3 +162,32 @@ describe('hạn mức của endpoint đăng ký thi đấu & danh sách đội',
     assert.strictEqual(new Set(submitRoutes.map((r) => r.config.middlewares[0])).size, 1);
   });
 });
+
+/* Nhập danh sách VĐV vào MỘT tổ chức bất kỳ thì chọn được tổ chức qua
+   `teamDocId`, nên route này KHÔNG được công khai như các route trong
+   team-athlete-squad.js (ở đó danh tính lấy từ token của chính tổ chức). Để hở
+   `auth: false` là cho người lạ bơm hồ sơ hội viên vào bất kỳ đội nào. */
+describe('route nhập danh sách VĐV cho CMS', () => {
+  const importRoutes = require('../src/api/team-athlete/routes/team-athlete-import').routes;
+  const fs = require('node:fs');
+  const path = require('node:path');
+
+  test('đi qua JWT của CMS và có giới hạn tần suất', async () => {
+    assert.strictEqual(importRoutes.length, 1);
+    const route = importRoutes[0];
+    assert.notStrictEqual(route.config.auth, false, 'route này không được để công khai');
+    assert.strictEqual(route.config.middlewares.length, 1);
+    assert.strictEqual(await passesBefore429(route, TEAM_AREA_LIMIT.max + 2), TEAM_AREA_LIMIT.max);
+  });
+
+  /* Action riêng (không phải CRUD) phải được cấp quyền tường minh cho role
+     Authenticated, nếu không CMS nhận 403 — và 403 ở đây rất khó đoán vì mọi
+     endpoint CRUD khác của cùng content-type vẫn chạy bình thường. */
+  test('quyền của action được cấp trong bootstrap, khớp đúng tên handler', () => {
+    const route = importRoutes[0];
+    const action = 'api::team-athlete.team-athlete.' + route.handler.split('.')[1];
+    const bootstrap = fs.readFileSync(path.join(__dirname, '../src/index.js'), 'utf8');
+    assert.ok(bootstrap.includes(`'${action}'`), `thiếu quyền ${action} trong src/index.js`);
+    assert.ok(bootstrap.includes('CUSTOM_CONTENT_ACTIONS'), 'danh sách quyền phải được dùng trong bootstrap');
+  });
+});

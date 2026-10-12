@@ -70,6 +70,11 @@ const CONTENT_MANAGE_SINGLE_TYPE_UIDS = [
 // Cho phép tài khoản CMS upload ảnh (news.image, partner.image) qua /api/upload.
 const UPLOAD_ACTIONS = ['plugin::upload.content-api.upload'];
 
+/* Action riêng (không phải CRUD) mà CMS cần: nhập danh sách VĐV vào một hội
+   viên tổ chức — xem src/api/team-athlete/routes/team-athlete-import.js. Thiếu
+   dòng này thì nút "Nhập danh sách" trong CMS nhận 403. */
+const CUSTOM_CONTENT_ACTIONS = ['api::team-athlete.team-athlete.importRoster'];
+
 // Tạo tài khoản quản trị lần đầu — CHỈ chạy khi các biến môi trường tương ứng
 // được set trên server (trong strapi-backend/.env, không nằm trong git), và
 // bỏ qua nếu email đã tồn tại. Không hardcode mật khẩu trong mã nguồn.
@@ -160,7 +165,12 @@ module.exports = {
         contentActions.push(`${uid}.find`, `${uid}.findOne`, `${uid}.create`, `${uid}.update`, `${uid}.delete`)
       );
       CONTENT_MANAGE_SINGLE_TYPE_UIDS.forEach((uid) => contentActions.push(`${uid}.find`, `${uid}.update`));
-      await grantPermissions(strapi, authenticatedRole.id, [...AUTHENTICATED_USER_ACTIONS, ...contentActions, ...UPLOAD_ACTIONS]);
+      await grantPermissions(strapi, authenticatedRole.id, [
+        ...AUTHENTICATED_USER_ACTIONS,
+        ...contentActions,
+        ...CUSTOM_CONTENT_ACTIONS,
+        ...UPLOAD_ACTIONS,
+      ]);
     }
 
     await ensureAdminUser(strapi);

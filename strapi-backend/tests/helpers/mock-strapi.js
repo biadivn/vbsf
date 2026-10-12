@@ -103,6 +103,27 @@ function createMockStrapi(seed) {
           const row = rows(uid).find((r) => r.documentId === documentId);
           return row ? { ...row } : null;
         },
+        /* `filters` của Document Service dùng cùng cú pháp toán tử với `where`
+           của db.query, nên dùng lại matches() cho cả hai. */
+        async findMany({ filters, fields, limit, sort } = {}) {
+          let out = rows(uid).filter((r) => matches(r, filters));
+          if (sort) {
+            const [field, dir] = String([].concat(sort)[0] || '').split(':');
+            if (field) {
+              out = out.slice().sort((a, b) => {
+                const cmp = String(a[field] || '').localeCompare(String(b[field] || ''));
+                return dir === 'desc' ? -cmp : cmp;
+              });
+            }
+          }
+          if (limit != null) out = out.slice(0, limit);
+          return out.map((r) => {
+            if (!fields) return { ...r };
+            const picked = { documentId: r.documentId };
+            fields.forEach((f) => { picked[f] = r[f]; });
+            return picked;
+          });
+        },
       };
     },
 
