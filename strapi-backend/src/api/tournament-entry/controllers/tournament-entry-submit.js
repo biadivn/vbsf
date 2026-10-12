@@ -13,6 +13,7 @@ const { text } = require('../../../utils/public-forms');
 const TOURNAMENT_UID = 'api::tournament.tournament';
 const ENTRY_UID = 'api::tournament-entry.tournament-entry';
 const TEAM_REG_UID = 'api::team-registration.team-registration';
+const SQUAD_UID = 'api::team-athlete.team-athlete';
 const ORG_UID = 'api::member-org.member-org';
 const MEMBER_UID = 'api::member.member';
 
@@ -59,10 +60,16 @@ async function submitTeam(ctx) {
   const allowed = entryLogic.canSubmit(tournament, actor);
   if (!allowed.ok) return ctx.badRequest(allowed.error);
 
-  const built = entryLogic.normalizeAthletes(body.athletes, tournament);
-  if (built.error) return ctx.badRequest(built.error);
-
   const team = actor.org;
+  /* Mục 1.3: đơn của đoàn chỉ gồm VĐV ĐÃ ĐƯỢC XÁC NHẬN thuộc đội. Đội chọn
+     người từ danh sách đội của mình; hồ sơ (tên, CCCD, ngày sinh...) lấy từ bản
+     ghi đã duyệt chứ không lấy từ body, để đơn không khai khác hồ sơ đã xác nhận. */
+  const squad = await strapi.documents(SQUAD_UID).findMany({
+    filters: { teamDocId: team.documentId, status: { $ne: 'removed' } },
+    limit: 500,
+  });
+  const built = entryLogic.pickSquadAthletes(squad, body.athletes, tournament);
+  if (built.error) return ctx.badRequest(built.error);
   /* Gửi lại đơn cho cùng một giải = thay danh sách cũ, không cộng dồn. Đội sửa
      sót một dòng mà hoá ra giải có hai bản danh sách thì vận hành không biết
      bản nào đúng. Chỉ xoá những dòng CHƯA duyệt — người đã vào danh sách chính
@@ -80,7 +87,23 @@ async function submitTeam(ctx) {
     await strapi.documents(ENTRY_UID).delete({ documentId: row.documentId });
   }
 
-  const rows = await withMemberMatch(built.data);
+  /* Người đã được duyệt vào danh sách chính thức thì bỏ qua: bản ghi của họ
+     không bị xoá ở trên, ghi thêm một lượt nữa là danh sách có hai dòng cùng
+     một người — một 'official', một 'pending' — và vận hành không biết dòng nào
+     mới là thật. */
+  const officials = await strapi.documents(ENTRY_UID).findMany({
+    filters: {
+      tournamentDocId: tournament.documentId,
+      teamDocId: team.documentId,
+      status: { $eq: 'official' },
+    },
+    fields: ['cccd'],
+    limit: 500,
+  });
+  const alreadyOfficial = new Set(officials.map((r) => r.cccd).filter(Boolean));
+
+  const rows = (await withMemberMatch(built.data)).filter((r) => !alreadyOfficial.has(r.cccd));
+  const kept = built.data.length - rows.length;
   for (const row of rows) {
     await strapi.documents(ENTRY_UID).create({
       data: {
@@ -115,7 +138,10 @@ async function submitTeam(ctx) {
   ctx.body = {
     ok: true,
     count: rows.length,
-    message: `Đã gửi danh sách ${rows.length} vận động viên. Liên đoàn sẽ duyệt từng người vào danh sách thi đấu chính thức.`,
+    keptOfficial: kept,
+    message: `Đã gửi danh sách ${rows.length} vận động viên.` +
+      (kept ? ` ${kept} người đã được duyệt vào danh sách chính thức nên giữ nguyên.` : '') +
+      ' Liên đoàn sẽ duyệt từng người vào danh sách thi đấu chính thức.',
   };
 }
 

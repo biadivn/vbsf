@@ -5,7 +5,7 @@
 const { test, describe } = require('node:test');
 const assert = require('node:assert');
 
-const { AUTH_LIMIT, PASSWORD_RESET_LIMIT } = require('../src/utils/rate-limit');
+const { AUTH_LIMIT, PASSWORD_RESET_LIMIT, FORM_LIMIT, TEAM_AREA_LIMIT } = require('../src/utils/rate-limit');
 const { DEFAULTS } = require('../src/utils/features');
 const { createMockCtx } = require('./helpers/mock-strapi');
 
@@ -128,5 +128,37 @@ describe('route công khai: đúng hạn mức theo nhóm', () => {
     const middlewares = new Set(memberRoutes.routes.filter((r) => !/password$/.test(r.path))
       .map((r) => r.config.middlewares[0]));
     assert.strictEqual(middlewares.size, 1, 'mỗi route mà một bộ đếm riêng thì hạn mức bị nhân lên');
+  });
+});
+
+/* Khu vực tài khoản đội được nới hạn mức so với form công khai — nới nhầm sang
+   các endpoint nhận đơn thì mở cửa cho người lạ bơm đơn vào hệ thống. */
+describe('hạn mức của endpoint đăng ký thi đấu & danh sách đội', () => {
+  const squadRoutes = require('../src/api/team-athlete/routes/team-athlete-squad').routes;
+  const submitRoutes = require('../src/api/tournament-entry/routes/tournament-entry-submit').routes;
+
+  test('mọi route đều công khai nhưng đều có giới hạn tần suất', () => {
+    squadRoutes.concat(submitRoutes).forEach((r) => {
+      assert.strictEqual(r.config.auth, false, r.path);
+      assert.strictEqual(r.config.middlewares.length, 1, r.path);
+    });
+  });
+
+  test('route nhận đơn giữ hạn mức form công khai (5/phút)', async () => {
+    for (const r of submitRoutes) {
+      assert.strictEqual(await passesBefore429(r, FORM_LIMIT.max + 3), FORM_LIMIT.max, r.path);
+    }
+  });
+
+  test('route danh sách đội dùng hạn mức rộng hơn, vì một lượt làm việc là vài chục thao tác', async () => {
+    assert.ok(TEAM_AREA_LIMIT.max > FORM_LIMIT.max, 'nới hạn mức mới có nghĩa');
+    for (const r of squadRoutes) {
+      assert.strictEqual(await passesBefore429(r, TEAM_AREA_LIMIT.max + 2), TEAM_AREA_LIMIT.max, r.path);
+    }
+  });
+
+  test('các route cùng file chia sẻ một bộ đếm', () => {
+    assert.strictEqual(new Set(squadRoutes.map((r) => r.config.middlewares[0])).size, 1);
+    assert.strictEqual(new Set(submitRoutes.map((r) => r.config.middlewares[0])).size, 1);
   });
 });

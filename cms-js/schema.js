@@ -213,6 +213,35 @@ const COLLECTIONS = {
       {key:'handled', label:'Đã xử lý', muted:true}
     ]
   },
+  /* Mục 1.2: đội tự thêm/bớt VĐV của đội mình trên site; vận hành Liên đoàn
+     xác nhận từng người ở đây. Chỉ người "Đã xác nhận" mới được đội chọn khi
+     đăng ký giải thành tích cao. */
+  team_athletes: {
+    label:'VĐV thuộc đội', icon:'ti-users-group', single:'vận động viên', remote:true, apiPath:'team-athletes',
+    filterField:'status',
+    fields:[
+      {key:'teamName', label:'Đội', type:'text', disabled:true, span2:true},
+      {key:'fullName', label:'Họ và tên', type:'text', disabled:true},
+      {key:'cccd', label:'Số căn cước', type:'text', disabled:true},
+      {key:'dob', label:'Ngày sinh', type:'date', disabled:true},
+      {key:'gender', label:'Giới tính', type:'text', disabled:true},
+      {key:'phone', label:'Điện thoại', type:'text', disabled:true},
+      {key:'address', label:'Địa chỉ', type:'text', disabled:true},
+      {key:'memberCode', label:'Mã hội viên khớp theo CCCD', type:'text', disabled:true},
+      {key:'memberValid', label:'Hội viên còn hiệu lực', type:'checkbox', disabled:true},
+      {key:'status', label:'Trạng thái', type:'select', options:['pending','confirmed','removed'],
+        optionLabels:{pending:'Chờ xác nhận',confirmed:'Đã xác nhận thuộc đội',removed:'Đã bỏ khỏi đội'}},
+      {key:'note', label:'Ghi chú của Liên đoàn', type:'textarea', rows:3, span2:true}
+    ],
+    columns:[
+      {key:'fullName', label:'Vận động viên'},
+      {key:'teamName', label:'Đội', muted:true},
+      {key:'cccd', label:'Căn cước', muted:true},
+      {key:'memberCode', label:'Mã HV', render:r=> r.memberCode ? (r.memberCode + (r.memberValid?'':' (hết hiệu lực)')) : '—'},
+      {key:'status', label:'Trạng thái', status:true,
+        statusMap:{pending:{t:'Chờ xác nhận',c:'blue'},confirmed:{t:'Đã xác nhận',c:'green'},removed:{t:'Đã bỏ khỏi đội',c:'gray'}}}
+    ]
+  },
   tournament_registrations: {
     label:'Đăng ký thi đấu', icon:'ti-clipboard-check', single:'đăng ký', remote:true, apiPath:'tournament-registrations',
     filterField:'status',

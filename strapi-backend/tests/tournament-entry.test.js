@@ -6,7 +6,7 @@ const { describe } = test;
 const {
   parseFee, formatFee, sumEventFees, eventNames, registrationOpen,
   canSubmit, normalizeAthlete, normalizeAthletes, matchMember, officialEligibility,
-  confirmOfficial,
+  confirmOfficial, normalizeSquadAthlete, canEditSquadRow, pickSquadAthletes,
 } = require('../src/utils/tournament-entry');
 
 const NATIONAL = {
@@ -283,5 +283,99 @@ describe('confirmOfficial', () => {
 
   test('đầu vào rỗng không ném lỗi', () => {
     assert.equal(confirmOfficial(null, null, null, new Date()).ok, false);
+  });
+});
+
+describe('normalizeSquadAthlete', () => {
+  test('giữ field cho phép, chuẩn hoá CCCD và điện thoại', () => {
+    const { data } = normalizeSquadAthlete({
+      fullName: '  Trần Văn B ', cccd: '079-095 004321', phone: '09xx 777 888',
+      gender: 'Nam', dob: '2000-01-02', address: 'Q1', status: 'confirmed',
+    });
+    assert.equal(data.fullName, 'Trần Văn B');
+    assert.equal(data.cccd, '079095004321');
+    assert.equal(data.phone, '09777888');
+    assert.equal(data.dob, '2000-01-02');
+    // Đội không tự đặt được trạng thái xác nhận.
+    assert.equal(data.status, undefined);
+  });
+
+  test('CCCD là bắt buộc — thiếu thì Liên đoàn không đối chiếu hội viên được', () => {
+    assert.match(normalizeSquadAthlete({ fullName: 'A' }).error, /căn cước/);
+    assert.match(normalizeSquadAthlete({ fullName: 'A', cccd: '---' }).error, /căn cước/);
+  });
+
+  test('thiếu họ tên thì báo lỗi', () => {
+    assert.match(normalizeSquadAthlete({ cccd: '079095004321' }).error, /họ tên/);
+    assert.match(normalizeSquadAthlete(null).error, /họ tên/);
+  });
+
+  test('giới tính lạ thì bỏ trống', () => {
+    assert.equal(normalizeSquadAthlete({ fullName: 'A', cccd: '1', gender: 'X' }).data.gender, undefined);
+  });
+});
+
+describe('canEditSquadRow', () => {
+  test('sửa được người của đội mình khi chưa xác nhận', () => {
+    assert.equal(canEditSquadRow({ teamDocId: 'team1', status: 'pending' }, 'team1').ok, true);
+  });
+
+  test('không với sang đội khác, và báo y như không tìm thấy', () => {
+    const r = canEditSquadRow({ teamDocId: 'team2', status: 'pending' }, 'team1');
+    assert.equal(r.ok, false);
+    assert.match(r.error, /Không tìm thấy/);
+    assert.match(canEditSquadRow(null, 'team1').error, /Không tìm thấy/);
+  });
+
+  test('người đã được xác nhận thì phải bỏ khỏi đội rồi thêm lại', () => {
+    const r = canEditSquadRow({ teamDocId: 'team1', status: 'confirmed' }, 'team1');
+    assert.equal(r.ok, false);
+    assert.match(r.error, /bỏ khỏi đội rồi thêm lại/);
+  });
+});
+
+describe('pickSquadAthletes', () => {
+  const squad = [
+    { documentId: 'a1', fullName: 'Nguyễn A', cccd: '001', status: 'confirmed', dob: '1999-01-01', gender: 'Nam' },
+    { documentId: 'a2', fullName: 'Trần B', cccd: '002', status: 'pending' },
+    { documentId: 'a3', fullName: 'Lê C', cccd: '003', status: 'confirmed' },
+  ];
+
+  test('lấy hồ sơ từ bản ghi đã duyệt, tính lệ phí theo nội dung đã chọn', () => {
+    const { data } = pickSquadAthletes(squad, [{ documentId: 'a1', events: ['Pool 9 bi', 'Pool 10 bi'] }], NATIONAL);
+    assert.equal(data.length, 1);
+    assert.equal(data[0].fullName, 'Nguyễn A');
+    assert.equal(data[0].cccd, '001');
+    assert.equal(data[0].feeTotal, '500.000đ');
+  });
+
+  test('bỏ nội dung không thuộc giải', () => {
+    const { data } = pickSquadAthletes(squad, [{ documentId: 'a1', events: ['Bịa'] }], NATIONAL);
+    assert.deepEqual(data[0].events, []);
+    assert.equal(data[0].feeTotal, undefined);
+  });
+
+  test('VĐV Liên đoàn chưa xác nhận thì chưa đăng ký được', () => {
+    assert.match(pickSquadAthletes(squad, [{ documentId: 'a2' }], NATIONAL).error, /chưa xác nhận thuộc đội/);
+  });
+
+  test('chọn người không thuộc danh sách đội thì báo đúng dòng', () => {
+    assert.match(pickSquadAthletes(squad, [{ documentId: 'a1' }, { documentId: 'xx' }], NATIONAL).error,
+      /Dòng 2: vận động viên không thuộc danh sách đội/);
+  });
+
+  test('chọn trùng một người hai lần', () => {
+    assert.match(pickSquadAthletes(squad, [{ documentId: 'a3' }, { documentId: 'a3' }], NATIONAL).error, /hai lần/);
+  });
+
+  test('danh sách trống hoặc quá dài', () => {
+    assert.match(pickSquadAthletes(squad, [], NATIONAL).error, /Chưa chọn vận động viên/);
+    assert.match(pickSquadAthletes(squad, null, NATIONAL).error, /Chưa chọn vận động viên/);
+    const many = Array.from({ length: 301 }, () => ({ documentId: 'a1' }));
+    assert.match(pickSquadAthletes(squad, many, NATIONAL).error, /tối đa 300/);
+  });
+
+  test('đội chưa có ai trong danh sách', () => {
+    assert.match(pickSquadAthletes(null, [{ documentId: 'a1' }], NATIONAL).error, /không thuộc danh sách đội/);
   });
 });

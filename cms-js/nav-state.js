@@ -22,6 +22,7 @@ const NAV_GROUPS = [
     {key:'tournaments', label:COLLECTIONS.tournaments.label, icon:'ti-trophy'},
   ]},
   {label:'Đăng ký & Liên hệ', items:[
+    {key:'team_athletes', label:COLLECTIONS.team_athletes.label, icon:'ti-users-group'},
     {key:'tournament_registrations', label:COLLECTIONS.tournament_registrations.label, icon:'ti-clipboard-check'},
     {key:'payment_claims', label:COLLECTIONS.payment_claims.label, icon:'ti-cash'},
     {key:'contact_messages', label:COLLECTIONS.contact_messages.label, icon:'ti-mail'},

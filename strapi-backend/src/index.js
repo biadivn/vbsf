@@ -20,9 +20,11 @@ const PUBLIC_READ_SINGLE_TYPE_UIDS = [
 ];
 
 /* CỐ Ý KHÔNG cho đọc công khai: contact-message, tournament-registration,
-   payment-claim, tournament-entry, team-registration — đó là dữ liệu người dùng
-   gửi lên (tên, email, số điện thoại, CCCD, ngày sinh của VĐV).
-   Ghi vào thì qua endpoint /submit riêng, đọc thì chỉ tài khoản CMS. */
+   payment-claim, tournament-entry, team-registration, team-athlete — đó là dữ
+   liệu người dùng gửi lên (tên, email, số điện thoại, CCCD, ngày sinh của VĐV).
+   Ghi vào thì qua endpoint /submit riêng, đọc thì chỉ tài khoản CMS. Riêng
+   team-athlete: đội tự đọc danh sách CỦA ĐỘI MÌNH qua /team-athletes/mine,
+   endpoint đó kẹp theo teamDocId lấy từ token nên không với sang đội khác. */
 
 // CMS đăng nhập bằng tài khoản plugin::users-permissions.user (Authenticated role) —
 // role này cần các quyền CRUD trên chính content-type user để module "Tài khoản CMS"
@@ -57,6 +59,7 @@ const CONTENT_MANAGE_UIDS = [
   'api::tournament.tournament',
   'api::tournament-entry.tournament-entry',
   'api::team-registration.team-registration',
+  'api::team-athlete.team-athlete',
 ];
 const CONTENT_MANAGE_SINGLE_TYPE_UIDS = [
   'api::setting.setting',

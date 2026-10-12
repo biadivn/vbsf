@@ -1069,6 +1069,47 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
   };
 }
 
+export interface ApiTeamAthleteTeamAthlete extends Struct.CollectionTypeSchema {
+  collectionName: 'team_athletes';
+  info: {
+    description: 'Danh s\u00E1ch V\u0110V c\u1EE7a m\u1ED9t \u0111\u1ED9i t\u1EC9nh/th\u00E0nh (m\u1EE5c 1.2). \u0110\u1ED9i t\u1EF1 th\u00EAm/b\u1EDBt; Li\u00EAn \u0111o\u00E0n x\u00E1c nh\u1EADn t\u1EEBng ng\u01B0\u1EDDi. \u0110\u0103ng k\u00FD gi\u1EA3i ch\u1EC9 l\u1EA5y t\u1EEB nh\u1EEFng ng\u01B0\u1EDDi \u0111\u00E3 x\u00E1c nh\u1EADn.';
+    displayName: 'V\u0110V thu\u1ED9c \u0111\u1ED9i';
+    pluralName: 'team-athletes';
+    singularName: 'team-athlete';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    address: Schema.Attribute.String;
+    cccd: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dob: Schema.Attribute.Date;
+    fullName: Schema.Attribute.String & Schema.Attribute.Required;
+    gender: Schema.Attribute.Enumeration<['Nam', 'N\u1EEF']>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::team-athlete.team-athlete'
+    > &
+      Schema.Attribute.Private;
+    memberCode: Schema.Attribute.String;
+    memberValid: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    note: Schema.Attribute.Text;
+    phone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<['pending', 'confirmed', 'removed']> &
+      Schema.Attribute.DefaultTo<'pending'>;
+    teamDocId: Schema.Attribute.String & Schema.Attribute.Required;
+    teamName: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiTeamRegistrationTeamRegistration
   extends Struct.CollectionTypeSchema {
   collectionName: 'team_registrations';
@@ -1793,6 +1834,7 @@ declare module '@strapi/strapi' {
       'api::partner.partner': ApiPartnerPartner;
       'api::payment-claim.payment-claim': ApiPaymentClaimPaymentClaim;
       'api::setting.setting': ApiSettingSetting;
+      'api::team-athlete.team-athlete': ApiTeamAthleteTeamAthlete;
       'api::team-registration.team-registration': ApiTeamRegistrationTeamRegistration;
       'api::tournament-entry.tournament-entry': ApiTournamentEntryTournamentEntry;
       'api::tournament-registration.tournament-registration': ApiTournamentRegistrationTournamentRegistration;

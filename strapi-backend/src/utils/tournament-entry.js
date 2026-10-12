@@ -190,6 +190,98 @@ function confirmOfficial(entry, incoming, members, now) {
   return { ok: true, data: { ...match, paid, status: 'official' } };
 }
 
+/**
+ * Một dòng VĐV mà ĐỘI tự thêm vào danh sách đội mình (mục 1.2).
+ * Khác normalizeAthlete ở chỗ không gắn với giải nào nên không có nội dung/lệ
+ * phí, và CCCD là bắt buộc — đây là cái Liên đoàn dùng để đối chiếu hồ sơ hội
+ * viên khi xác nhận; thiếu nó thì hồ sơ nằm đó không duyệt được.
+ */
+function normalizeSquadAthlete(raw) {
+  const row = raw || {};
+  const fullName = text(row.fullName || row.name, 120);
+  if (!fullName) return { error: 'Thiếu họ tên vận động viên.' };
+  const cccd = text(row.cccd, 20).replace(/[^\dA-Za-z]/g, '');
+  if (!cccd) return { error: 'Thiếu số căn cước — Liên đoàn cần số này để đối chiếu hồ sơ hội viên.' };
+  const gender = text(row.gender, 10);
+  return {
+    data: {
+      fullName,
+      cccd,
+      dob: row.dob || undefined,
+      gender: gender === 'Nam' || gender === 'Nữ' ? gender : undefined,
+      phone: normalizePhone(row.phone) || undefined,
+      address: text(row.address, 300) || undefined,
+    },
+  };
+}
+
+/**
+ * Đội chỉ được sửa hồ sơ VĐV của CHÍNH đội mình, và không được sửa người Liên
+ * đoàn đã xác nhận (sửa xong thì xác nhận cũ không còn nghĩa gì). Muốn đổi thì
+ * bỏ khỏi đội rồi thêm lại để Liên đoàn xác nhận lượt mới.
+ */
+function canEditSquadRow(row, teamDocId) {
+  if (!row) return { ok: false, error: 'Không tìm thấy vận động viên trong danh sách đội.' };
+  if (row.teamDocId !== teamDocId) {
+    return { ok: false, error: 'Không tìm thấy vận động viên trong danh sách đội.' };
+  }
+  if (row.status === 'confirmed') {
+    return {
+      ok: false,
+      error: 'Vận động viên đã được Liên đoàn xác nhận; muốn sửa thông tin thì bỏ khỏi đội rồi thêm lại.',
+    };
+  }
+  return { ok: true };
+}
+
+/**
+ * Dựng danh sách VĐV của một đơn đăng ký giải từ DANH SÁCH ĐỘI đã được Liên
+ * đoàn xác nhận (mục 1.3: đội đăng ký "kèm danh sách VĐV đã được xác nhận
+ * thuộc đội của mình").
+ *
+ * Không nhận VĐV gõ tự do ở bước này: nếu nhận thì đội vòng qua được bước xác
+ * nhận thuộc đội, và danh sách đội thành thứ trang trí.
+ *
+ * @param squad bản ghi team-athlete của đội (mọi trạng thái)
+ * @param picks [{ documentId, events: [] }] do đội chọn
+ */
+function pickSquadAthletes(squad, picks, tournament) {
+  const list = Array.isArray(squad) ? squad : [];
+  const chosen = Array.isArray(picks) ? picks : [];
+  if (!chosen.length) return { error: 'Chưa chọn vận động viên nào trong danh sách đội.' };
+  if (chosen.length > 300) return { error: 'Mỗi đơn chỉ nhận tối đa 300 vận động viên.' };
+
+  const allowedEvents = eventNames(tournament);
+  const out = [];
+  const seen = new Set();
+  for (let i = 0; i < chosen.length; i += 1) {
+    const pick = chosen[i] || {};
+    const row = list.find((a) => a && a.documentId === pick.documentId);
+    if (!row) return { error: `Dòng ${i + 1}: vận động viên không thuộc danh sách đội.` };
+    if (row.status !== 'confirmed') {
+      return { error: `${row.fullName}: Liên đoàn chưa xác nhận thuộc đội, chưa đăng ký giải được.` };
+    }
+    if (seen.has(row.documentId)) return { error: `${row.fullName}: bị chọn hai lần.` };
+    seen.add(row.documentId);
+
+    const events = (Array.isArray(pick.events) ? pick.events : [])
+      .map((e) => text(e, 120))
+      .filter((e) => (allowedEvents.length ? allowedEvents.includes(e) : Boolean(e)));
+
+    out.push({
+      fullName: row.fullName,
+      dob: row.dob || undefined,
+      gender: row.gender || undefined,
+      cccd: row.cccd || undefined,
+      phone: row.phone || undefined,
+      address: row.address || undefined,
+      events,
+      feeTotal: sumEventFees(tournament && tournament.events, events) || undefined,
+    });
+  }
+  return { data: out };
+}
+
 module.exports = {
   parseFee,
   formatFee,
@@ -202,4 +294,7 @@ module.exports = {
   matchMember,
   officialEligibility,
   confirmOfficial,
+  normalizeSquadAthlete,
+  canEditSquadRow,
+  pickSquadAthletes,
 };

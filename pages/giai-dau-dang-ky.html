@@ -38,29 +38,18 @@
     <div class="fld"><span class="lbl">Số điện thoại trưởng đoàn</span><input type="tel" data-reg-leader-phone class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="09xx xxx xxx"></div>
 
     <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:18px 0 8px">
-      <div style="font-size:13px;font-weight:600;color:#21428E">Danh sách vận động viên</div>
-      <div style="font-size:11.5px;color:#8A968F">Căn cước dùng để đối chiếu với hồ sơ hội viên Liên đoàn</div>
+      <div style="font-size:13px;font-weight:600;color:#21428E">Chọn vận động viên dự giải</div>
+      <div style="font-size:11.5px;color:#8A968F">Chỉ hiện những người Liên đoàn đã xác nhận thuộc đội</div>
     </div>
-    <div style="overflow-x:auto;border:0.5px solid #E3E8E4;border-radius:10px">
-      <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:620px">
-        <thead><tr data-reg-ath-head style="background:#F5F7F5">
-          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:34px">#</th>
-          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;min-width:200px">Họ và tên <span class="req">*</span></th>
-          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:120px">Ngày sinh</th>
-          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:90px">Giới tính</th>
-          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:170px">Số căn cước</th>
-          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#5C6B63;width:130px">Điện thoại</th>
-          <th style="width:40px"></th>
-        </tr></thead>
-        <tbody data-reg-ath-body></tbody>
-      </table>
+    <!-- Đội chưa có ai được xác nhận: chỉ hướng về nơi quản lý danh sách đội,
+         không cho gõ tay VĐV ở đây (quy định: đăng ký kèm danh sách đã xác nhận). -->
+    <div data-reg-squad-empty style="display:none;border:0.5px solid #E7D7B5;border-radius:10px;padding:16px 18px;background:#FBF7EE;font-size:12.5px;color:#7A5E1E;line-height:1.8">
+      Đội chưa có vận động viên nào được Liên đoàn xác nhận.
+      Vào <span class="vb-link" data-go="hoi-vien" style="cursor:pointer">Hội viên &rarr; hồ sơ đội</span>
+      để thêm vận động viên vào danh sách đội, Liên đoàn xác nhận xong thì quay lại đây đăng ký.
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center">
-      <button type="button" class="btn-out" data-reg-ath-add style="padding:6px 14px;font-size:12px;cursor:pointer"><i class="ti ti-plus"></i> Thêm vận động viên</button>
-      <button type="button" class="btn-out" data-reg-csv-pick style="padding:6px 14px;font-size:12px;cursor:pointer"><i class="ti ti-file-upload"></i> Nhập từ tệp CSV</button>
-      <span class="vb-link" data-reg-csv-sample style="cursor:pointer;font-size:12px">Tải tệp CSV mẫu</span>
-      <input type="file" data-reg-csv-file accept=".csv,text/csv" style="display:none">
-    </div>
+    <div data-reg-squad-list style="display:none;border:0.5px solid #E3E8E4;border-radius:10px"></div>
+    <div data-reg-squad-sum style="font-size:12px;color:#5C6B63;margin-top:8px"></div>
 
     <div class="fld" style="margin-top:16px"><span class="lbl">Ghi chú</span><textarea data-reg-team-note rows="3" class="inp" style="width:100%;font-family:inherit;color:#1B2A24" placeholder="Thông tin thêm gửi ban tổ chức (nếu có)..."></textarea></div>
     <button class="btn-gold" data-reg-team-submit type="button" style="border:none;cursor:pointer">Gửi danh sách đăng ký</button>

@@ -1278,135 +1278,88 @@
     recalc();
   }
 
-  /* ----- Giải thành tích cao: bảng nhập VĐV của đội ----- */
-  var REG_CSV_COLS = ['Họ và tên', 'Ngày sinh (yyyy-mm-dd)', 'Giới tính', 'Số căn cước', 'Điện thoại', 'Nội dung (cách nhau bằng dấu ;)'];
+  /* ----- Giải thành tích cao: chọn VĐV từ danh sách đội đã được xác nhận -----
+     Không cho gõ tay VĐV ở trang này: quy định là đội đăng ký "kèm danh sách
+     VĐV đã được xác nhận thuộc đội của mình", nên người mới phải đi qua bước
+     thêm vào đội + Liên đoàn xác nhận (trang Hội viên → hồ sơ đội). */
 
-  function regAthRow(page, t, row) {
-    var evs = regEvents(t);
-    var r = row || {};
-    var tr = document.createElement('tr');
-    var cell = 'padding:6px 8px;border-top:0.5px solid #E3E8E4';
-    var inp = 'width:100%;border:0.5px solid #E3E8E4;border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12.5px;color:#1B2A24';
-    /* Ô chọn nội dung nằm NGAY DƯỚI tên, không tách thành cột riêng: thêm một
-       cột nữa thì bảng rộng quá khung và cột họ tên bị bóp còn vài ký tự. */
-    var evBox = evs.length
-      ? '<div style="display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:5px">' + evs.map(function (e) {
-          var on = (r.events || []).indexOf(e.name) >= 0;
-          return '<label style="display:flex;align-items:center;gap:4px;white-space:nowrap;color:#5C6B63;font-size:11.5px;cursor:pointer">' +
-            '<input type="checkbox" data-ath-ev value="' + esc(e.name) + '"' + (on ? ' checked' : '') + '> ' + esc(e.name) + '</label>';
-        }).join('') + '</div>'
-      : '';
-    tr.innerHTML =
-      '<td style="' + cell + ';color:#8A968F;vertical-align:top;padding-top:13px" data-reg-ath-no></td>' +
-      '<td style="' + cell + '"><input type="text" data-ath="fullName" style="' + inp + '" value="' + esc(r.fullName || '') + '">' + evBox + '</td>' +
-      '<td style="' + cell + '"><input type="date" data-ath="dob" style="' + inp + '" value="' + esc(r.dob || '') + '"></td>' +
-      '<td style="' + cell + '"><select data-ath="gender" style="' + inp + '">' +
-        ['', 'Nam', 'Nữ'].map(function (g) {
-          return '<option value="' + g + '"' + (r.gender === g ? ' selected' : '') + '>' + (g || '—') + '</option>';
-        }).join('') + '</select></td>' +
-      '<td style="' + cell + '"><input type="text" data-ath="cccd" style="' + inp + '" value="' + esc(r.cccd || '') + '"></td>' +
-      '<td style="' + cell + '"><input type="tel" data-ath="phone" style="' + inp + '" value="' + esc(r.phone || '') + '"></td>' +
-      '<td style="' + cell + ';text-align:right;vertical-align:top;padding-top:11px"><span class="vb-link" data-reg-ath-rm title="Xóa dòng" style="cursor:pointer;color:#9E2A2B">&times;</span></td>';
-    tr.querySelector('[data-reg-ath-rm]').addEventListener('click', function () {
-      tr.parentNode.removeChild(tr);
-      regRenumber(page);
-    });
-    return tr;
+  function regSquadRowHtml(a, evs) {
+    var cell = 'padding:10px 12px;border-top:0.5px solid #E3E8E4';
+    var meta = [a.cccd ? 'CCCD ' + a.cccd : '', a.memberCode || 'chưa là hội viên']
+      .filter(Boolean).join(' · ');
+    return '<div data-squad-row="' + esc(a.documentId) + '" style="' + cell + ';display:flex;gap:12px;flex-wrap:wrap">' +
+      '<label style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:200px;cursor:pointer">' +
+        '<input type="checkbox" data-reg-pick="' + esc(a.documentId) + '" style="margin-top:3px">' +
+        '<span><span style="font-size:13px;font-weight:600;color:#1B2A24">' + esc(a.fullName) + '</span>' +
+        '<span style="display:block;font-size:11.5px;color:#8A968F;margin-top:2px">' + esc(meta) + '</span></span>' +
+      '</label>' +
+      (evs.length
+        ? '<div style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:flex-start">' + evs.map(function (e) {
+            return '<label style="display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:11.5px;color:#5C6B63;cursor:pointer">' +
+              '<input type="checkbox" data-pick-ev value="' + esc(e.name) + '"> ' + esc(e.name) + '</label>';
+          }).join('') + '</div>'
+        : '') +
+    '</div>';
   }
 
-  function regRenumber(page) {
-    var body = page.querySelector('[data-reg-ath-body]');
-    if (!body) return;
-    Array.prototype.slice.call(body.children).forEach(function (tr, i) {
-      var no = tr.querySelector('[data-reg-ath-no]');
-      if (no) no.textContent = String(i + 1);
-    });
-  }
-
-  function regAddAthlete(page, t, row) {
-    var body = page.querySelector('[data-reg-ath-body]');
-    if (!body) return;
-    body.appendChild(regAthRow(page, t, row));
-    regRenumber(page);
-  }
-
-  function regReadAthletes(page) {
-    var body = page.querySelector('[data-reg-ath-body]');
-    if (!body) return [];
-    return Array.prototype.slice.call(body.children).map(function (tr) {
-      var v = function (k) {
-        var el = tr.querySelector('[data-ath="' + k + '"]');
-        return el ? el.value.trim() : '';
-      };
-      return {
-        fullName: v('fullName'), dob: v('dob') || undefined, gender: v('gender') || undefined,
-        cccd: v('cccd'), phone: v('phone'),
-        events: Array.prototype.slice.call(tr.querySelectorAll('[data-ath-ev]:checked'))
+  /** [{documentId, events}] của những người đang được tick. */
+  function regReadPicks(page) {
+    var out = [];
+    page.querySelectorAll('[data-squad-row]').forEach(function (row) {
+      var cb = row.querySelector('[data-reg-pick]');
+      if (!cb || !cb.checked) return;
+      out.push({
+        documentId: cb.getAttribute('data-reg-pick'),
+        events: Array.prototype.slice.call(row.querySelectorAll('[data-pick-ev]:checked'))
           .map(function (i) { return i.value; }),
-      };
-    }).filter(function (r) {
-      /* Dòng trống hoàn toàn là dòng người dùng thêm rồi bỏ — bỏ qua thay vì bắt
-         họ bấm xóa; dòng có gõ gì đó mà thiếu tên thì để máy chủ báo đúng số dòng. */
-      return r.fullName || r.cccd || r.phone;
-    });
-  }
-
-  /* CSV tối giản: có hỗ trợ ô bọc trong dấu nháy kép vì tên/địa chỉ hay chứa dấu phẩy. */
-  function parseCsv(text) {
-    var rows = [], row = [], field = '', quoted = false;
-    var push = function () { row.push(field); field = ''; };
-    var endRow = function () { push(); if (row.some(function (c) { return c.trim(); })) rows.push(row); row = []; };
-    for (var i = 0; i < text.length; i++) {
-      var c = text[i];
-      if (quoted) {
-        if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
-        else if (c === '"') quoted = false;
-        else field += c;
-      } else if (c === '"') quoted = true;
-      else if (c === ',' || c === ';' && false) push();
-      else if (c === '\n') endRow();
-      else if (c !== '\r') field += c;
-    }
-    if (field || row.length) endRow();
-    return rows;
-  }
-
-  function regImportCsv(page, t, text) {
-    var rows = parseCsv(text);
-    if (!rows.length) return 0;
-    /* Bỏ dòng tiêu đề nếu người dùng giữ nguyên tệp mẫu. */
-    if (/họ|tên|name/i.test(rows[0][0] || '')) rows = rows.slice(1);
-    var valid = regEvents(t).map(function (e) { return e.name; });
-    var added = 0;
-    rows.forEach(function (c) {
-      var name = (c[0] || '').trim();
-      if (!name) return;
-      var evs = (c[5] || '').split(';').map(function (x) { return x.trim(); })
-        .filter(function (x) { return x && (!valid.length || valid.indexOf(x) >= 0); });
-      regAddAthlete(page, t, {
-        fullName: name, dob: (c[1] || '').trim(), gender: (c[2] || '').trim(),
-        cccd: (c[3] || '').trim(), phone: (c[4] || '').trim(), events: evs,
       });
-      added++;
     });
-    return added;
+    return out;
   }
 
-  function regCsvSample(t) {
-    var evs = regEvents(t).map(function (e) { return e.name; });
-    return REG_CSV_COLS.join(',') + '\n' +
-      ['Nguyễn Văn A', '1998-04-12', 'Nam', '079098001234', '0909123456', evs.slice(0, 2).join(';')].join(',') + '\n';
+  function regSquadSummary(page, t) {
+    var sum = page.querySelector('[data-reg-squad-sum]');
+    if (!sum) return;
+    var picks = regReadPicks(page);
+    if (!picks.length) { sum.textContent = ''; return; }
+    var evs = regEvents(t);
+    var total = 0, counted = 0;
+    picks.forEach(function (p) {
+      p.events.forEach(function (n) {
+        var ev = evs.filter(function (e) { return e.name === n; })[0];
+        var fee = ev ? parseFeeNumber(ev.fee) : null;
+        if (fee != null) { total += fee; counted++; }
+      });
+    });
+    sum.textContent = 'Đã chọn ' + picks.length + ' vận động viên' +
+      (counted ? ' · tạm tính lệ phí ' + formatVnd(total) : '');
   }
 
-  function regDownloadCsv(t) {
-    var blob = new Blob(['﻿' + regCsvSample(t)], { type: 'text/csv;charset=utf-8' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'mau-danh-sach-vdv.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
+  async function regFillSquad(page, t) {
+    var listBox = page.querySelector('[data-reg-squad-list]');
+    var emptyBox = page.querySelector('[data-reg-squad-empty]');
+    if (!listBox || !emptyBox) return;
+
+    var squad = [];
+    try {
+      squad = window.VBSF_SQUAD ? await window.VBSF_SQUAD.confirmed() : [];
+    } catch (err) {
+      squad = [];
+    }
+    if (!squad.length) {
+      listBox.style.display = 'none';
+      listBox.innerHTML = '';
+      emptyBox.style.display = '';
+      return;
+    }
+    emptyBox.style.display = 'none';
+    listBox.style.display = '';
+    var evs = regEvents(t);
+    listBox.innerHTML = squad.map(function (a) { return regSquadRowHtml(a, evs); }).join('');
+    listBox.querySelectorAll('input[type=checkbox]').forEach(function (i) {
+      i.addEventListener('change', function () { regSquadSummary(page, t); });
+    });
+    regSquadSummary(page, t);
   }
 
   /* ----- Dựng lại cả trang theo giải đang chọn + trạng thái đăng nhập ----- */
@@ -1460,14 +1413,9 @@
         if (ltitle && !ltitle.value) ltitle.value = org.repTitle || '';
         var lphone = page.querySelector('[data-reg-leader-phone]');
         if (lphone && !lphone.value) lphone.value = org.repPhone || '';
-        /* Dựng lại bảng VĐV mỗi lần vào trang: cột nội dung phụ thuộc vào giải,
-           giữ bảng của giải trước sẽ cho chọn nội dung không thuộc giải này. */
-        var body = page.querySelector('[data-reg-ath-body]');
-        if (body && page.__regAthFor !== (t && t.documentId)) {
-          body.innerHTML = '';
-          page.__regAthFor = t && t.documentId;
-          regAddAthlete(page, t);
-        }
+        /* Nạp lại danh sách đội mỗi lần vào trang: ô chọn nội dung phụ thuộc
+           vào giải, và Liên đoàn có thể vừa xác nhận thêm người. */
+        await regFillSquad(page, t);
       }
     } else {
       var me = await applyMemberIdentity(page);
@@ -1494,37 +1442,6 @@
     var val = function (sel) { var e = page.querySelector(sel); return e ? e.value.trim() : ''; };
 
     /* ----- nút của luồng đội ----- */
-    var addBtn = page.querySelector('[data-reg-ath-add]');
-    if (addBtn && !addBtn.__wired) {
-      addBtn.__wired = true;
-      addBtn.addEventListener('click', function () { regAddAthlete(page, page.__regT); });
-    }
-    var csvPick = page.querySelector('[data-reg-csv-pick]');
-    var csvFile = page.querySelector('[data-reg-csv-file]');
-    if (csvPick && csvFile && !csvPick.__wired) {
-      csvPick.__wired = true;
-      csvPick.addEventListener('click', function () { csvFile.click(); });
-      csvFile.addEventListener('change', function () {
-        var f = csvFile.files && csvFile.files[0];
-        if (!f) return;
-        var reader = new FileReader();
-        reader.onload = function (ev) {
-          var n = regImportCsv(page, page.__regT, String(ev.target.result || ''));
-          csvFile.value = '';
-          show(page.querySelector('[data-reg-team-ok]'), n
-            ? '<i class="ti ti-circle-check-filled"></i> Đã nạp ' + n + ' dòng từ tệp. Kiểm tra lại rồi bấm Gửi danh sách đăng ký.'
-            : '');
-          show(page.querySelector('[data-reg-team-err]'), n ? '' : 'Không đọc được dòng nào trong tệp. Tải tệp CSV mẫu để xem đúng thứ tự cột.');
-        };
-        reader.readAsText(f, 'utf-8');
-      });
-    }
-    var csvSample = page.querySelector('[data-reg-csv-sample]');
-    if (csvSample && !csvSample.__wired) {
-      csvSample.__wired = true;
-      csvSample.addEventListener('click', function () { regDownloadCsv(page.__regT); });
-    }
-
     var teamBtn = page.querySelector('[data-reg-team-submit]');
     if (teamBtn && !teamBtn.__wired) {
       teamBtn.__wired = true;
@@ -1537,8 +1454,8 @@
           show(tErr, 'Chưa chọn giải đấu. Vào mục Giải đấu rồi bấm "Đăng ký" ở giải bạn muốn tham dự.');
           return;
         }
-        var athletes = regReadAthletes(page);
-        if (!athletes.length) { show(tErr, 'Danh sách vận động viên đang trống.'); return; }
+        var picks = regReadPicks(page);
+        if (!picks.length) { show(tErr, 'Chưa chọn vận động viên nào trong danh sách đội.'); return; }
         var token = window.VBSF_AUTH && window.VBSF_AUTH.orgToken();
         if (!token) { show(tErr, 'Phiên đăng nhập của đội đã hết hạn. Vui lòng đăng nhập lại.'); return; }
         teamBtn.disabled = true;
@@ -1549,7 +1466,7 @@
             leaderTitle: val('[data-reg-leader-title]'),
             leaderPhone: val('[data-reg-leader-phone]'),
             note: val('[data-reg-team-note]'),
-            athletes: athletes,
+            athletes: picks,
           }, token);
           show(tOk, '<i class="ti ti-circle-check-filled"></i> ' + esc(msg));
         } catch (e) {
