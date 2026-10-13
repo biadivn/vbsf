@@ -56,8 +56,11 @@
   function rowHtml(a) {
     var st = STATUS[a.status] || STATUS.pending;
     var meta = [fmtDate(a.dob), a.gender, a.phone].filter(Boolean).join(' · ');
+    /* Câu trạng thái do máy chủ soi lại theo hồ sơ hội viên hiện tại
+       (memberStatusLabel); bản cũ chỉ có cờ memberValid nên gọi mọi trường hợp
+       là "hết hiệu lực", kể cả người mới chờ nộp hội phí lần đầu. */
     var member = a.memberCode
-      ? esc(a.memberCode) + (a.memberValid ? '' : ' (hết hiệu lực)')
+      ? esc(a.memberCode) + (a.memberValid ? '' : ' (' + esc(a.memberStatusLabel || 'chưa có hiệu lực').toLowerCase() + ')')
       : 'chưa là hội viên';
     return '<div style="display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-top:0.5px solid #E3E8E4">' +
       '<div style="flex:1;min-width:0">' +

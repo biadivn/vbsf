@@ -317,3 +317,47 @@ describe('withLiveMemberMatch: hiệu lực soi theo hồ sơ hiện tại', () 
     assert.strictEqual(out[0].memberValid, false);
   });
 });
+
+describe('memberStatusLabel: nói đúng vì sao chưa có hiệu lực', () => {
+  test('còn hiệu lực: kèm hạn nếu có', () => {
+    assert.strictEqual(
+      roster.memberStatusLabel({ status: 'active', expiry: '2026-12-31' }, true),
+      'Đang hiệu lực đến 31/12/2026'
+    );
+    assert.strictEqual(roster.memberStatusLabel({ status: 'active' }, true), 'Đang hiệu lực');
+  });
+
+  /* Hai tình huống này từng bị gộp thành "không còn hiệu lực" — người dùng đi
+     gia hạn trong khi thực ra chưa đóng hội phí lần đầu. */
+  test('chờ hội phí khác hẳn hết hạn', () => {
+    assert.strictEqual(roster.memberStatusLabel({ status: 'pending' }, false), 'Chờ thanh toán hội phí');
+    assert.strictEqual(
+      roster.memberStatusLabel({ status: 'expired', expiry: '2025-12-31' }, false),
+      'Hết hạn 31/12/2025'
+    );
+    assert.strictEqual(roster.memberStatusLabel({ status: 'expired' }, false), 'Hết hạn');
+  });
+
+  test('không khớp hội viên nào thì không có câu nào', () => {
+    assert.strictEqual(roster.memberStatusLabel(null, false), '');
+  });
+
+  test('ngày hỏng thì giữ nguyên văn thay vì in "Invalid Date"', () => {
+    assert.match(roster.memberStatusLabel({ status: 'active', expiry: 'không-phải-ngày' }, true), /không-phải-ngày/);
+  });
+});
+
+test('withLiveMemberMatch gắn kèm câu trạng thái cho giao diện', async () => {
+  global.strapi = createMockStrapi({
+    [MEMBER_UID]: [
+      { documentId: 'm1', code: 'VBSF-2026-00001', cccd: '079098001234', status: 'active', expiry: '2099-12-31' },
+      { documentId: 'm2', code: 'VBSF-2026-00003', cccd: '079098006666', status: 'pending' },
+    ],
+  });
+  const out = await roster.withLiveMemberMatch(global.strapi, [
+    { cccd: '079098001234' }, { cccd: '079098006666' }, { cccd: '079098009999' },
+  ], NOW);
+  assert.strictEqual(out[0].memberStatusLabel, 'Đang hiệu lực đến 31/12/2099');
+  assert.strictEqual(out[1].memberStatusLabel, 'Chờ thanh toán hội phí');
+  assert.strictEqual(out[2].memberStatusLabel, '');
+});

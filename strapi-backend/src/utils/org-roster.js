@@ -298,12 +298,39 @@ async function withLiveMemberMatch(strapi, rows, now) {
     })
     : [];
 
-  return list.map((row) => ({ ...row, ...entryLogic.matchMember(members, row && row.cccd, now) }));
+  return list.map((row) => {
+    const match = entryLogic.matchMember(members, row && row.cccd, now);
+    const member = match.memberCode
+      ? members.find((m) => (m.code || '') === match.memberCode)
+      : null;
+    return { ...row, ...match, memberStatusLabel: memberStatusLabel(member, match.memberValid) };
+  });
+}
+
+/* Câu trạng thái hội viên cho giao diện. "Hết hạn" và "chờ hội phí" là hai
+   tình huống khác hẳn nhau — gộp thành "không còn hiệu lực" làm người dùng đi
+   tìm nhầm chỗ (gia hạn thay vì nộp hội phí lần đầu). Chữ phải khớp với
+   taMemberMatch bên CMS (cms-js/utils.js). */
+function memberStatusLabel(member, valid) {
+  if (!member) return '';
+  const expiry = member.expiry ? formatDay(member.expiry) : '';
+  if (valid) return expiry ? `Đang hiệu lực đến ${expiry}` : 'Đang hiệu lực';
+  if (member.status === 'pending') return 'Chờ thanh toán hội phí';
+  return expiry ? `Hết hạn ${expiry}` : 'Hết hạn';
+}
+
+/** yyyy-mm-dd (hoặc Date) -> dd/mm/yyyy. */
+function formatDay(value) {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  const p = (x) => String(x).padStart(2, '0');
+  return `${p(d.getUTCDate())}/${p(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`;
 }
 
 module.exports = {
   MAX_ROWS,
   withLiveMemberMatch,
+  memberStatusLabel,
   MEMBER_UID,
   TEAM_ATHLETE_UID,
   cccdKey,

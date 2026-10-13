@@ -313,8 +313,10 @@ function wireModalPickers(key, isNew){
 function renderField(f, value){
   value = value===undefined||value===null ? '' : value;
   const disabledAttr = f.disabled ? 'disabled' : '';
-  // Ô bị khoá thì nói rõ vì sao; ô mở thì hiện gợi ý của schema (f.hint) nếu có.
-  const hintText = f.disabled ? 'Do hệ thống quản lý, không thể chỉnh sửa' : (f.hint || '');
+  /* Gợi ý riêng của schema (f.hint) được ưu tiên, kể cả khi ô bị khoá: với ô
+     khoá, biết SỬA Ở ĐÂU quan trọng hơn là biết nó bị khoá. Không khai hint thì
+     ô khoá dùng câu mặc định. */
+  const hintText = f.hint || (f.disabled ? 'Do hệ thống quản lý, không thể chỉnh sửa' : '');
   const disabledHint = hintText
     ? `<div class="fld-hint"><i class="ti ${f.disabled ? 'ti-lock' : 'ti-info-circle'}"></i> ${escapeHtml(hintText)}</div>`
     : '';

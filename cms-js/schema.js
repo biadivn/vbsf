@@ -257,6 +257,7 @@ const COLLECTIONS = {
          cũng vô nghĩa vì máy chủ soi lại khi duyệt (confirmOfficial). */
       {key:'memberCodeInfo', label:'Mã hội viên khớp theo CCCD', type:'text', disabled:true,
         transient:true, hideOnCreate:true,
+        hint:'Khớp tự động theo số căn cước với module "Hội viên & Xếp hạng".',
         valueFn: r=> taMemberMatch(r.cccd).code || 'Chưa có hồ sơ hội viên'},
       {key:'memberValidInfo', label:'Hiệu lực hội viên', type:'text', disabled:true,
         transient:true, hideOnCreate:true,
