@@ -49,7 +49,10 @@ async function listSquad(teamDocId) {
 async function mine(ctx) {
   const team = await readTeam(ctx);
   if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản hội viên tổ chức.');
-  ctx.body = { team: { name: team.name, code: team.code }, athletes: await listSquad(team.documentId) };
+  /* Hiệu lực hội viên soi lại theo hồ sơ hiện tại, không trả giá trị đã lưu —
+     hồ sơ hết hạn hay vừa được duyệt hội phí thì đơn vị phải thấy ngay. */
+  const athletes = await roster.withLiveMemberMatch(strapi, await listSquad(team.documentId));
+  ctx.body = { team: { name: team.name, code: team.code }, athletes };
 }
 
 async function save(ctx) {

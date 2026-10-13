@@ -278,8 +278,32 @@ async function applyRosterImport(strapi, { org, rows, now } = {}) {
   return { data: { summary: finalSummary, rows: results, message: summaryMessage(finalSummary) } };
 }
 
+/**
+ * Soi lại mã hội viên + hiệu lực cho một danh sách VĐV, theo hồ sơ hội viên
+ * HIỆN TẠI. Chỉ để hiển thị — không ghi lại vào CSDL.
+ *
+ * Giá trị `memberValid` lưu trên bản ghi VĐV là ảnh chụp lúc thêm vào danh
+ * sách; hồ sơ hội viên hết hạn hay vừa được duyệt hội phí sau đó thì ảnh chụp
+ * sai. Đọc hội viên MỘT lần cho cả danh sách thay vì mỗi dòng một truy vấn.
+ */
+async function withLiveMemberMatch(strapi, rows, now) {
+  const list = Array.isArray(rows) ? rows : [];
+  if (!list.length) return [];
+
+  const keys = [...new Set(list.map((r) => cccdKey(r && r.cccd)).filter(Boolean))];
+  const members = keys.length
+    ? await strapi.db.query(MEMBER_UID).findMany({
+      where: { $or: keys.map((cccd) => ({ cccd })) },
+      select: ['code', 'cccd', 'status', 'expiry'],
+    })
+    : [];
+
+  return list.map((row) => ({ ...row, ...entryLogic.matchMember(members, row && row.cccd, now) }));
+}
+
 module.exports = {
   MAX_ROWS,
+  withLiveMemberMatch,
   MEMBER_UID,
   TEAM_ATHLETE_UID,
   cccdKey,

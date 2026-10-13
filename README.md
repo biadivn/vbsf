@@ -259,6 +259,24 @@ còn là thông tin hiển thị/phân loại trong CMS. Mã hội viên, hiệu
 và tên đội do máy chủ tự gắn theo CCCD/`teamDocId`, không nhận từ request — xem
 `strapi-backend/src/api/team-athlete/controllers/team-athlete.js`.
 
+### Hiệu lực hội viên của một VĐV
+
+`memberValid` lưu trên bản ghi VĐV (và trên đơn đăng ký giải) là **ảnh chụp lúc
+ghi**, không phải sự thật hiện tại — hồ sơ hội viên có thể hết hạn hoặc vừa được
+duyệt hội phí sau đó. Vì vậy mọi nơi HIỂN THỊ đều soi lại theo hồ sơ hội viên
+hiện tại, và không chỗ nào cho bật/tắt tay:
+
+| Nơi | Cách lấy |
+|---|---|
+| CMS · *VĐV thuộc đội* (danh sách + form) | `taMemberMatch()` trong `cms-js/utils.js`, khớp CCCD với `DB.members` |
+| CMS · tab *Đăng ký & Duyệt* của giải | `taMemberMatch()` — khớp với điều kiện máy chủ kiểm lúc duyệt |
+| Site · danh sách VĐV của đơn vị | `withLiveMemberMatch()` trong `strapi-backend/src/utils/org-roster.js` |
+| Máy chủ · tạo/sửa bản ghi VĐV | `matchByCccd()` ghi đè giá trị request gửi lên |
+| Máy chủ · duyệt vào danh sách chính thức | `confirmOfficial()` soi lại ngay lúc duyệt (mục 2.1) |
+
+Muốn đổi hiệu lực của một người thì sửa **hồ sơ hội viên** (trạng thái / ngày hết
+hạn) ở module *Hội viên & Xếp hạng* — đó là nguồn sự thật duy nhất.
+
 ## Kiểm thử & security gate
 
 `cd strapi-backend && npm run verify` — unit test (ngưỡng coverage 80%) + security
