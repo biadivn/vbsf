@@ -267,3 +267,53 @@ describe('applyRosterImport: ghi thật vào CSDL giả', () => {
     assert.strictEqual(strapi._tables[TA_UID].length, 1);
   });
 });
+
+describe('withLiveMemberMatch: hiệu lực soi theo hồ sơ hiện tại', () => {
+  let strapi;
+  beforeEach(() => {
+    strapi = createMockStrapi({
+      [MEMBER_UID]: [
+        { documentId: 'm1', code: 'VBSF-2026-00001', cccd: '079098001234', status: 'active', expiry: '2099-12-31' },
+        { documentId: 'm2', code: 'VBSF-2020-00002', cccd: '079098005555', status: 'active', expiry: '2020-12-31' },
+        { documentId: 'm3', code: 'VBSF-2026-00003', cccd: '079098006666', status: 'pending' },
+      ],
+    });
+    global.strapi = strapi;
+  });
+
+  test('ghi đè giá trị cũ trên bản ghi VĐV bằng giá trị soi lại', async () => {
+    const rows = [
+      // Ảnh chụp cũ nói "không phải hội viên", nay hồ sơ đã có và còn hạn.
+      { fullName: 'Đã thành hội viên', cccd: '079098001234', memberCode: '', memberValid: false },
+      // Ảnh chụp cũ nói còn hiệu lực, nay hồ sơ đã hết hạn.
+      { fullName: 'Hết hạn rồi', cccd: '079098005555', memberCode: 'VBSF-2020-00002', memberValid: true },
+      // Hồ sơ chờ hội phí -> có mã nhưng chưa có hiệu lực.
+      { fullName: 'Chờ hội phí', cccd: '079098006666', memberCode: '', memberValid: true },
+      // Không khớp ai.
+      { fullName: 'Người lạ', cccd: '079098009999', memberCode: 'VBSF-BIA-0001', memberValid: true },
+    ];
+    const out = await roster.withLiveMemberMatch(strapi, rows, NOW);
+
+    assert.deepStrictEqual(out.map((r) => [r.memberCode, r.memberValid]), [
+      ['VBSF-2026-00001', true],
+      ['VBSF-2020-00002', false],
+      ['VBSF-2026-00003', false],
+      ['', false],
+    ]);
+    // Các field khác giữ nguyên, và không ghi gì xuống CSDL.
+    assert.strictEqual(out[0].fullName, 'Đã thành hội viên');
+    assert.strictEqual(strapi._tables[MEMBER_UID].length, 3);
+  });
+
+  test('danh sách rỗng / không phải mảng thì trả mảng rỗng, không truy vấn', async () => {
+    assert.deepStrictEqual(await roster.withLiveMemberMatch(strapi, []), []);
+    assert.deepStrictEqual(await roster.withLiveMemberMatch(strapi, null), []);
+  });
+
+  test('mọi dòng thiếu CCCD: không ai khớp, vẫn trả đủ dòng', async () => {
+    const out = await roster.withLiveMemberMatch(strapi, [{ fullName: 'Thiếu căn cước', cccd: '' }], NOW);
+    assert.strictEqual(out.length, 1);
+    assert.strictEqual(out[0].memberCode, '');
+    assert.strictEqual(out[0].memberValid, false);
+  });
+});

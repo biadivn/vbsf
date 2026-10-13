@@ -16,13 +16,19 @@ const MEMBER_UID = 'api::member.member';
 const MODULE = '../src/api/team-athlete/controllers/team-athlete';
 
 let created;
+let updated;
 
 function load() {
   created = [];
+  updated = [];
   stubCoreControllerFactory({
     async create(ctx) {
       created.push(JSON.parse(JSON.stringify(ctx.request.body.data)));
       return { data: { documentId: 'new1', ...ctx.request.body.data } };
+    },
+    async update(ctx) {
+      updated.push(JSON.parse(JSON.stringify(ctx.request.body.data)));
+      return { data: { documentId: ctx.params.id, ...ctx.request.body.data } };
     },
   });
   delete require.cache[require.resolve(MODULE)];
@@ -164,5 +170,57 @@ describe('team-athlete.importRoster', () => {
     assert.strictEqual(members[2].name, 'Người mới');
     assert.strictEqual(members[2].club, 'Đội Hà Nội');
     assert.strictEqual(members[2].status, 'pending');
+  });
+});
+
+describe('team-athlete.update: hiệu lực hội viên không bật/tắt tay được', () => {
+  let controller;
+  beforeEach(() => { seed(); controller = load(); });
+
+  function ctxFor(documentId, data) {
+    const ctx = createMockCtx({ body: { data } });
+    ctx.params = { id: documentId };
+    ctx.notFound = (message) => { ctx._error = { status: 404, message }; return ctx._error; };
+    return ctx;
+  }
+
+  test('request tự khai memberValid/memberCode bị ghi đè bằng giá trị soi lại theo CCCD', async () => {
+    // a1 có cccd 079098007777 — không khớp hội viên nào trong seed.
+    const ctx = ctxFor('a1', { status: 'confirmed', memberValid: true, memberCode: 'VBSF-BIA-00001' });
+    await controller.update(ctx);
+    assert.strictEqual(ctx._error, null);
+    assert.deepStrictEqual(updated[0], { status: 'confirmed', memberValid: false, memberCode: '' });
+  });
+
+  test('hồ sơ hội viên còn hạn: tự gắn lại mã và hiệu lực dù request không gửi gì', async () => {
+    global.strapi._tables[UID][0].cccd = '079098001234';
+    const ctx = ctxFor('a1', { note: 'Đã đối chiếu giấy tờ' });
+    await controller.update(ctx);
+    assert.strictEqual(updated[0].memberCode, 'VBSF-2026-00001');
+    assert.strictEqual(updated[0].memberValid, true);
+    assert.strictEqual(updated[0].note, 'Đã đối chiếu giấy tờ');
+  });
+
+  test('hội viên hết hạn: giữ mã nhưng hiệu lực về false', async () => {
+    global.strapi._tables[UID][0].cccd = '079098005555';
+    const ctx = ctxFor('a1', {});
+    await controller.update(ctx);
+    assert.strictEqual(updated[0].memberCode, 'VBSF-2020-00002');
+    assert.strictEqual(updated[0].memberValid, false);
+  });
+
+  test('sửa luôn CCCD trong cùng request thì soi theo CCCD mới', async () => {
+    const ctx = ctxFor('a1', { cccd: '079 098 001234' });
+    await controller.update(ctx);
+    assert.strictEqual(updated[0].cccd, '079 098 001234');
+    assert.strictEqual(updated[0].memberCode, 'VBSF-2026-00001');
+    assert.strictEqual(updated[0].memberValid, true);
+  });
+
+  test('bản ghi không tồn tại', async () => {
+    const ctx = ctxFor('khong-co', {});
+    await controller.update(ctx);
+    assert.strictEqual(ctx._error.status, 404);
+    assert.strictEqual(updated.length, 0);
   });
 });

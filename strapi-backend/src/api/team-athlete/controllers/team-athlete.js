@@ -63,6 +63,21 @@ module.exports = createCoreController(UID, () => ({
     return super.create(ctx);
   },
 
+  /* Hiệu lực hội viên là thuộc tính của HỒ SƠ HỘI VIÊN, không phải thứ vận hành
+     bật/tắt trên bản ghi VĐV: mỗi lần lưu, máy chủ soi lại theo CCCD và ghi đè
+     memberCode/memberValid, bất kể request gửi lên gì. CMS cũng không còn ô
+     bật/tắt — nó hiển thị theo hồ sơ hội viên hiện tại. */
+  async update(ctx) {
+    const incoming = (ctx.request.body && ctx.request.body.data) || {};
+
+    const current = await strapi.documents(UID).findOne({ documentId: ctx.params.id });
+    if (!current) return ctx.notFound('Không tìm thấy vận động viên.');
+
+    const cccd = incoming.cccd !== undefined ? roster.cccdKey(incoming.cccd) : current.cccd;
+    ctx.request.body.data = { ...incoming, ...(await matchByCccd(cccd)) };
+    return super.update(ctx);
+  },
+
   async importRoster(ctx) {
     const body = ctx.request.body || {};
     const teamDocId = String(body.teamDocId || '').trim();

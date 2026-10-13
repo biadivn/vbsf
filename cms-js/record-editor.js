@@ -55,7 +55,8 @@ function renderRecordInfoTab(key, record, isNew){
       ${sections.map((s,i)=>`<div class="re-section" style="${i>0?'margin-top:22px;padding-top:18px;border-top:1px solid var(--line)':''}">
         ${s.title ? `<label style="font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:12px">${s.title}</label>` : ''}
         <div class="form-grid">${s.fields.map(f=>{
-          return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${f.type==='richtext' ? renderRichTextField(f, record[f.key]) : renderField(f, record[f.key])}</div>`;
+          const value = fieldValue(f, record);
+          return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${f.type==='richtext' ? renderRichTextField(f, value) : renderField(f, value)}</div>`;
         }).join('')}</div>
       </div>`).join('')}
       ${key==='members' && !isNew ? renderMemberDisciplinesSection(record) : ''}

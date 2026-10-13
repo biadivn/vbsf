@@ -219,6 +219,9 @@ const COLLECTIONS = {
   team_athletes: {
     label:'VĐV thuộc đội', icon:'ti-users-group', single:'vận động viên', remote:true, apiPath:'team-athletes',
     filterField:'status',
+    /* Giá trị máy chủ đã lưu — giữ để đối chiếu/gỡ rối, giao diện hiển thị theo
+       hồ sơ hội viên hiện tại chứ không theo hai field này. */
+    extraFields:['memberCode','memberValid'],
     fields:[
       /* Thêm tay trong CMS (vận hành nhập hộ tổ chức): chọn tổ chức, rồi chọn
          người từ danh sách hội viên cá nhân — các ô hồ sơ bên dưới tự điền theo
@@ -246,8 +249,19 @@ const COLLECTIONS = {
       {key:'gender', label:'Giới tính', type:'text', disabled:true, hideOnCreate:true},
       {key:'phone', label:'Điện thoại', type:'text', disabled:true},
       {key:'address', label:'Địa chỉ', type:'text', disabled:true},
-      {key:'memberCode', label:'Mã hội viên khớp theo CCCD', type:'text', disabled:true, hideOnCreate:true},
-      {key:'memberValid', label:'Hội viên còn hiệu lực', type:'checkbox', disabled:true, hideOnCreate:true},
+      /* Hai ô dưới đây CHỈ ĐỂ XEM và được soi lại từ module "Hội viên & Xếp
+         hạng" mỗi lần mở form (taMemberMatch), không đọc memberCode/memberValid
+         lưu trên bản ghi VĐV và không gửi gì lên máy chủ (transient). Hiệu lực
+         là thuộc tính của HỒ SƠ HỘI VIÊN: hồ sơ hết hạn hay vừa duyệt hội phí
+         thì ô này đổi theo ngay, và vận hành không bật/tắt tay được — bật tay
+         cũng vô nghĩa vì máy chủ soi lại khi duyệt (confirmOfficial). */
+      {key:'memberCodeInfo', label:'Mã hội viên khớp theo CCCD', type:'text', disabled:true,
+        transient:true, hideOnCreate:true,
+        valueFn: r=> taMemberMatch(r.cccd).code || 'Chưa có hồ sơ hội viên'},
+      {key:'memberValidInfo', label:'Hiệu lực hội viên', type:'text', disabled:true,
+        transient:true, hideOnCreate:true,
+        hint:'Lấy theo hồ sơ ở module "Hội viên & Xếp hạng" — sửa trạng thái/hạn hội viên ở đó.',
+        valueFn: r=> taMemberMatch(r.cccd).label},
       {key:'status', label:'Trạng thái', type:'select', options:['pending','confirmed','removed'],
         optionLabels:{pending:'Chờ xác nhận',confirmed:'Đã xác nhận thuộc đội',removed:'Đã bỏ khỏi đội'}},
       {key:'note', label:'Ghi chú của Liên đoàn', type:'textarea', rows:3, span2:true}
@@ -256,7 +270,11 @@ const COLLECTIONS = {
       {key:'fullName', label:'Vận động viên'},
       {key:'teamName', label:'Đội', muted:true},
       {key:'cccd', label:'Căn cước', muted:true},
-      {key:'memberCode', label:'Mã HV', render:r=> r.memberCode ? (r.memberCode + (r.memberValid?'':' (hết hiệu lực)')) : '—'},
+      {key:'memberCode', label:'Mã HV', render:r=>{
+        const m = taMemberMatch(r.cccd);
+        if(!m.code) return '<span class="cell-muted">—</span>';
+        return escapeHtml(m.code) + (m.valid ? '' : ` <span class="cell-muted">(${escapeHtml(m.label.toLowerCase())})</span>`);
+      }},
       {key:'status', label:'Trạng thái', status:true,
         statusMap:{pending:{t:'Chờ xác nhận',c:'blue'},confirmed:{t:'Đã xác nhận',c:'green'},removed:{t:'Đã bỏ khỏi đội',c:'gray'}}}
     ]

@@ -47,10 +47,16 @@ function teEntryCount(record){
 }
 
 /* Lý do một VĐV chưa duyệt được — hiển thị nguyên văn để vận hành biết phải
-   làm gì tiếp (nhắc đội nộp phí, hay hội viên phải gia hạn trước). */
+   làm gì tiếp (nhắc đội nộp phí, hay hội viên phải gia hạn trước).
+
+   Hiệu lực hội viên soi LẠI theo hồ sơ hiện tại (taMemberMatch) chứ không đọc
+   `memberValid` lưu trên đơn: đơn giữ ảnh chụp lúc nộp, mà hồ sơ có thể vừa
+   được duyệt hội phí hoặc vừa hết hạn sau đó. Máy chủ cũng soi lại đúng như vậy
+   khi nhận status 'official' (confirmOfficial), nên hiển thị ở đây phải khớp —
+   không thì CMS báo "chưa đủ điều kiện" trong khi bấm duyệt lại thành công. */
 function teEntryBlockers(e){
   const out = [];
-  if(!e.memberValid) out.push('chưa phải hội viên còn hiệu lực');
+  if(!taMemberMatch(e.cccd).valid) out.push('chưa phải hội viên còn hiệu lực');
   if(!e.paid) out.push('chưa ghi nhận nộp lệ phí');
   return out;
 }
@@ -117,6 +123,7 @@ function renderTeEntriesTab(record){
       ? `<div style="font-size:12px;color:var(--hint);margin-top:2px">Trưởng đoàn: ${escapeHtml(reg.leaderName||'—')}${reg.leaderTitle?` — ${escapeHtml(reg.leaderTitle)}`:''}${reg.leaderPhone?` · ${escapeHtml(reg.leaderPhone)}`:''}${reg.file&&reg.file.url?` · <a href="${escapeAttr(mediaUrl(reg.file))}" target="_blank" rel="noopener">văn bản cử đoàn</a>`:''}</div>`
       : '';
     const rows = g.rows.map(e=>{
+      const match = taMemberMatch(e.cccd);
       const blockers = teEntryBlockers(e);
       const canOfficial = e.status!=='official' && !blockers.length;
       return `<tr>
@@ -126,8 +133,8 @@ function renderTeEntriesTab(record){
           <div style="font-size:11.5px;color:var(--hint)">CCCD: ${e.cccd?escapeHtml(e.cccd):'chưa có'}</div>
         </td>
         <td>
-          <div style="font-size:12.5px">${e.memberCode ? escapeHtml(e.memberCode) : '<span style="color:var(--hint)">chưa là hội viên</span>'}</div>
-          <div style="font-size:11.5px;color:${e.memberValid?'var(--tag-green)':'var(--danger)'}">${e.memberValid?'còn hiệu lực':'không còn hiệu lực'}</div>
+          <div style="font-size:12.5px">${match.code ? escapeHtml(match.code) : '<span style="color:var(--hint)">chưa là hội viên</span>'}</div>
+          <div style="font-size:11.5px;color:${match.valid?'var(--tag-green)':'var(--danger)'}">${escapeHtml(match.label)}</div>
         </td>
         <td>
           <div style="font-size:12.5px">${(Array.isArray(e.events)&&e.events.length)?escapeHtml(e.events.join(', ')):'—'}</div>

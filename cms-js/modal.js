@@ -22,7 +22,8 @@ function openModal(key, id){
   const body = document.getElementById('modalBody');
   const fields = formFields(c, !id);
   body.innerHTML = `<div class="form-grid">` + fields.map(f=>{
-    return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${f.type==='richtext' ? renderRichTextField(f, record[f.key]) : renderField(f, record[f.key])}</div>`;
+    const value = fieldValue(f, record);
+    return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${f.type==='richtext' ? renderRichTextField(f, value) : renderField(f, value)}</div>`;
   }).join('') + `</div>`;
   document.getElementById('modalDeleteBtn').style.display = id ? 'inline-flex' : 'none';
   document.getElementById('modalSaveBtn').style.display = '';
@@ -272,6 +273,12 @@ function closeModal(){
    - lockOnEdit: mở khi thêm mới, khoá khi sửa.
    - optionsFn: options dựng lúc mở form từ dữ liệu đang có (giải đấu, đội,
      hội viên) thay vì hằng số trong schema. */
+/* Giá trị hiển thị của một ô: valueFn tính lúc mở form (vd. hiệu lực hội viên
+   soi lại từ danh sách Hội viên), ngược lại lấy thẳng từ bản ghi. */
+function fieldValue(f, record){
+  return f.valueFn ? f.valueFn(record || {}) : (record || {})[f.key];
+}
+
 function formFields(c, isNew){
   return (c.fields||[])
     .filter(f=> !(isNew ? f.hideOnCreate : f.hideOnEdit))
