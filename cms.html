@@ -73,6 +73,10 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .btn-danger-outline:hover{color:#fff;background:var(--danger);border-color:var(--danger)}
 .btn-icon{background:none;border:1px solid transparent;color:var(--hint);width:28px;height:28px;border-radius:var(--radius);font-size:14px;display:inline-flex;align-items:center;justify-content:center}
 .btn-icon:hover{background:rgba(0,0,0,.04);color:var(--ink)}
+/* Nút thao tác bị khoá: vẫn hiện để vận hành biết chức năng tồn tại, nhưng phải
+   trông rõ là chưa bấm được (lý do nằm ở thuộc tính title). */
+.btn-icon[disabled]{opacity:.32;cursor:not-allowed}
+.btn-icon[disabled]:hover{background:none;color:var(--hint)}
 
 .content{padding:24px 28px 60px}
 .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
