@@ -167,6 +167,27 @@ describe('hạn mức của endpoint đăng ký thi đấu & danh sách đội',
    `teamDocId`, nên route này KHÔNG được công khai như các route trong
    team-athlete-squad.js (ở đó danh tính lấy từ token của chính tổ chức). Để hở
    `auth: false` là cho người lạ bơm hồ sơ hội viên vào bất kỳ đội nào. */
+/* Đọc lại đơn của chính đội: công khai như các endpoint khác của site (danh
+   tính trong token), nhưng KHÔNG dùng hạn mức 5 lần/phút của form nhận đơn —
+   trang đăng ký gọi nó mỗi lần đổi giải. */
+describe('route đọc đơn hiện có của đội', () => {
+  const mineRoutes = require('../src/api/tournament-entry/routes/tournament-entry-mine').routes;
+
+  test('công khai, có giới hạn tần suất của khu vực tài khoản đội', async () => {
+    assert.strictEqual(mineRoutes.length, 1);
+    const route = mineRoutes[0];
+    assert.strictEqual(route.config.auth, false);
+    assert.strictEqual(route.config.middlewares.length, 1);
+    assert.strictEqual(await passesBefore429(route, TEAM_AREA_LIMIT.max + 2), TEAM_AREA_LIMIT.max);
+  });
+
+  test('không dùng chung bộ đếm với route nhận đơn', () => {
+    const submitRoutes = require('../src/api/tournament-entry/routes/tournament-entry-submit').routes;
+    const shared = submitRoutes.some((r) => r.config.middlewares[0] === mineRoutes[0].config.middlewares[0]);
+    assert.strictEqual(shared, false, 'đọc mà chung bộ đếm với gửi thì đọc vài lần là chặn mất việc gửi đơn');
+  });
+});
+
 describe('route nhập danh sách VĐV cho CMS', () => {
   const importRoutes = require('../src/api/team-athlete/routes/team-athlete-import').routes;
   const fs = require('node:fs');

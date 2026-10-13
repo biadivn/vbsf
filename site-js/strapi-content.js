@@ -244,6 +244,18 @@
     return out.message || 'Đã gửi.';
   }
 
+  /** Gọi endpoint của site và trả nguyên JSON (submitForm chỉ trả message). */
+  async function postJson(path, payload, token) {
+    var headers = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = 'Bearer ' + token;
+    var res = await fetch(STRAPI_URL + '/api/' + path, {
+      method: 'POST', headers: headers, body: JSON.stringify(payload || {}),
+    });
+    var out = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error((out.error && out.error.message) || 'Không tải được dữ liệu.');
+    return out;
+  }
+
   /* ---------------- suy dẫn dữ liệu ---------------- */
 
   /* Site phân biệt 4 trạng thái giải đấu; Strapi lưu 3 (`status`) + trạng thái
@@ -1283,20 +1295,42 @@
      VĐV đã được xác nhận thuộc đội của mình", nên người mới phải đi qua bước
      thêm vào đội + Liên đoàn xác nhận (trang Hội viên → hồ sơ đội). */
 
-  function regSquadRowHtml(a, evs) {
+  /* Trạng thái đơn hiện có của một VĐV, hiển thị ngay trên dòng của người đó.
+     'official' đã vào danh sách thi đấu chính thức: máy chủ giữ nguyên bản ghi
+     đó khi đội gửi lại đơn, nên ở đây khoá ô tick luôn — bỏ tick cũng không gỡ
+     được, để ô mở ra chỉ làm người dùng tưởng mình vừa rút người đó. */
+  var REG_ENTRY_STATE = {
+    official: ['Đã vào danh sách chính thức', 'background:#E7F4EC;color:#00814D'],
+    pending: ['Đã đăng ký · chờ Liên đoàn duyệt', 'background:#F4F1E8;color:#9A7B2E'],
+    rejected: ['Đơn đã bị từ chối', 'background:#FBEAEA;color:#9E2A2B'],
+  };
+
+  function regSquadRowHtml(a, evs, entry) {
     var cell = 'padding:10px 12px;border-top:0.5px solid #E3E8E4';
     var meta = [a.cccd ? 'CCCD ' + a.cccd : '', a.memberCode || 'chưa là hội viên']
       .filter(Boolean).join(' · ');
-    return '<div data-squad-row="' + esc(a.documentId) + '" style="' + cell + ';display:flex;gap:12px;flex-wrap:wrap">' +
-      '<label style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:200px;cursor:pointer">' +
-        '<input type="checkbox" data-reg-pick="' + esc(a.documentId) + '" style="margin-top:3px">' +
+    var state = entry ? (REG_ENTRY_STATE[entry.status] || REG_ENTRY_STATE.pending) : null;
+    var locked = !!entry && entry.status === 'official';
+    /* Tick sẵn người đã có trong đơn: gửi lại là THAY danh sách chưa duyệt chứ
+       không cộng dồn, nên để trống ô của họ là lần gửi sau âm thầm rút họ ra. */
+    var picked = !!entry && entry.status !== 'rejected';
+    var pickedEvents = (entry && Array.isArray(entry.events)) ? entry.events : [];
+
+    return '<div data-squad-row="' + esc(a.documentId) + '"' + (entry ? ' data-had-entry="1"' : '') +
+      ' style="' + cell + ';display:flex;gap:12px;flex-wrap:wrap">' +
+      '<label style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:200px;cursor:' + (locked ? 'default' : 'pointer') + '">' +
+        '<input type="checkbox" data-reg-pick="' + esc(a.documentId) + '" style="margin-top:3px"' +
+          (picked ? ' checked' : '') + (locked ? ' disabled' : '') + '>' +
         '<span><span style="font-size:13px;font-weight:600;color:#1B2A24">' + esc(a.fullName) + '</span>' +
-        '<span style="display:block;font-size:11.5px;color:#8A968F;margin-top:2px">' + esc(meta) + '</span></span>' +
+        (state ? ' <span class="vb-badge" style="' + state[1] + ';font-size:10.5px;white-space:nowrap">' + state[0] + '</span>' : '') +
+        '<span style="display:block;font-size:11.5px;color:#8A968F;margin-top:2px">' + esc(meta) +
+          (entry && entry.paid ? ' · đã ghi nhận lệ phí' : '') + '</span></span>' +
       '</label>' +
       (evs.length
         ? '<div style="display:flex;flex-wrap:wrap;gap:4px 14px;align-items:flex-start">' + evs.map(function (e) {
-            return '<label style="display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:11.5px;color:#5C6B63;cursor:pointer">' +
-              '<input type="checkbox" data-pick-ev value="' + esc(e.name) + '"> ' + esc(e.name) + '</label>';
+            var on = pickedEvents.indexOf(e.name) >= 0;
+            return '<label style="display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:11.5px;color:#5C6B63;cursor:' + (locked ? 'default' : 'pointer') + '">' +
+              '<input type="checkbox" data-pick-ev value="' + esc(e.name) + '"' + (on ? ' checked' : '') + (locked ? ' disabled' : '') + '> ' + esc(e.name) + '</label>';
           }).join('') + '</div>'
         : '') +
     '</div>';
@@ -1331,8 +1365,37 @@
         if (fee != null) { total += fee; counted++; }
       });
     });
+    /* Nói thẳng hệ quả của việc gửi lại: ai đang có trong đơn mà lần này không
+       tick thì bị rút khỏi đơn (máy chủ thay danh sách chưa duyệt, không cộng
+       dồn). Đây là chỗ dễ sai nhất khi đội sửa đơn đã gửi. */
+    var had = page.querySelectorAll('[data-squad-row][data-had-entry]').length;
+    var dropped = 0;
+    page.querySelectorAll('[data-squad-row][data-had-entry]').forEach(function (row) {
+      var cb = row.querySelector('[data-reg-pick]');
+      if (cb && !cb.checked) dropped++;
+    });
     sum.textContent = 'Đã chọn ' + picks.length + ' vận động viên' +
-      (counted ? ' · tạm tính lệ phí ' + formatVnd(total) : '');
+      (counted ? ' · tạm tính lệ phí ' + formatVnd(total) : '') +
+      (had ? ' · gửi lại sẽ thay danh sách đã nộp' : '') +
+      (dropped ? ' · ' + dropped + ' người đang có trong đơn sẽ bị rút ra' : '');
+  }
+
+  /** Đơn hiện có của đội cho giải này, tra theo CCCD. Lỗi thì coi như chưa có
+      đơn nào — mất nhãn trạng thái còn hơn là không đăng ký được. */
+  async function regFetchEntries(t) {
+    var token = window.VBSF_AUTH && window.VBSF_AUTH.orgToken();
+    if (!token || !t || !t.documentId) return {};
+    try {
+      var out = await postJson('tournament-entries/mine-team', { tournamentDocId: t.documentId }, token);
+      var byCccd = {};
+      (out.entries || []).forEach(function (e) {
+        var key = String(e.cccd || '').replace(/[^\dA-Za-z]/g, '');
+        if (key) byCccd[key] = e;
+      });
+      return byCccd;
+    } catch (err) {
+      return {};
+    }
   }
 
   async function regFillSquad(page, t) {
@@ -1355,10 +1418,15 @@
     emptyBox.style.display = 'none';
     listBox.style.display = '';
     var evs = regEvents(t);
-    listBox.innerHTML = squad.map(function (a) { return regSquadRowHtml(a, evs); }).join('');
+    var entries = await regFetchEntries(t);
+    listBox.innerHTML = squad.map(function (a) {
+      var key = String(a.cccd || '').replace(/[^\dA-Za-z]/g, '');
+      return regSquadRowHtml(a, evs, key ? entries[key] : null);
+    }).join('');
     listBox.querySelectorAll('input[type=checkbox]').forEach(function (i) {
       i.addEventListener('change', function () { regSquadSummary(page, t); });
     });
+    page.__regEntries = entries;
     regSquadSummary(page, t);
   }
 
@@ -1469,6 +1537,8 @@
             athletes: picks,
           }, token);
           show(tOk, '<i class="ti ti-circle-check-filled"></i> ' + esc(msg));
+          // Vẽ lại danh sách để nhãn "Đã đăng ký" hiện ngay, không phải tải lại trang.
+          await regFillSquad(page, t);
         } catch (e) {
           show(tErr, esc(e.message));
         } finally { teamBtn.disabled = false; }

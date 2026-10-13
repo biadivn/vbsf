@@ -277,6 +277,24 @@ hiện tại, và không chỗ nào cho bật/tắt tay:
 Muốn đổi hiệu lực của một người thì sửa **hồ sơ hội viên** (trạng thái / ngày hết
 hạn) ở module *Hội viên & Xếp hạng* — đó là nguồn sự thật duy nhất.
 
+### Đăng ký giải theo đội: thấy ai đã nộp
+
+Trang đăng ký của hội viên tổ chức đánh dấu sẵn những người đã có trong đơn của
+giải đang chọn — `POST /api/tournament-entries/mine-team` (token tổ chức, kết
+quả kẹp theo `teamDocId` của chính người gửi; collection `tournament-entry` vẫn
+không cho đọc công khai).
+
+| Trạng thái đơn | Hiển thị trên danh sách |
+|---|---|
+| `official` | "Đã vào danh sách chính thức", ô tick **khoá** — máy chủ giữ nguyên bản ghi này khi gửi lại, bỏ tick cũng không rút ra được |
+| `pending` | "Đã đăng ký · chờ Liên đoàn duyệt", tick sẵn + tick sẵn các nội dung đã đăng ký |
+| `rejected` | "Đơn đã bị từ chối", không tick sẵn |
+
+Vì sao tick sẵn: gửi lại đơn là **thay** danh sách chưa duyệt, không cộng dồn
+(xem `submitTeam`). Để trống ô của người đã nộp thì lần gửi sau âm thầm rút họ
+khỏi đơn. Dòng tóm tắt cũng nói thẳng điều đó, và đếm số người sắp bị rút ra nếu
+đội bỏ tick ai đó.
+
 ## Kiểm thử & security gate
 
 `cd strapi-backend && npm run verify` — unit test (ngưỡng coverage 80%) + security

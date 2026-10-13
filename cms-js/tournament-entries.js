@@ -145,7 +145,11 @@ function renderTeEntriesTab(record){
         </label></td>
         <td>${teEntryStatusBadge(e)}${blockers.length&&e.status!=='official'?`<div style="font-size:11.5px;color:var(--hint);margin-top:3px">${escapeHtml(blockers.join('; '))}</div>`:''}</td>
         <td class="actions">
-          ${canOfficial?`<button class="btn-icon" data-tee-official="${e.documentId}" title="Xác nhận vào danh sách chính thức"><i class="ti ti-user-check"></i></button>`:''}
+          ${/* Nút phê duyệt LUÔN hiện khi đơn chưa chính thức, chỉ bị khoá khi
+                còn điều kiện chưa đạt — ẩn hẳn thì ô thao tác trống trơn, vận
+                hành tưởng CMS thiếu chức năng thay vì hiểu là chưa đủ điều kiện
+                (mục 2.1: hội viên còn hiệu lực VÀ đã nộp lệ phí). */''}
+          ${e.status!=='official'?`<button class="btn-icon" data-tee-official="${e.documentId}"${canOfficial?'':' disabled'} title="${canOfficial?'Xác nhận vào danh sách chính thức':escapeAttr('Chưa duyệt được: '+blockers.join('; '))}"><i class="ti ti-user-check"></i></button>`:''}
           ${e.status!=='rejected'?`<button class="btn-icon" data-tee-reject="${e.documentId}" title="Từ chối"><i class="ti ti-user-x"></i></button>`:''}
           ${e.status!=='pending'?`<button class="btn-icon" data-tee-pending="${e.documentId}" title="Đưa về chờ duyệt"><i class="ti ti-rotate"></i></button>`:''}
         </td>

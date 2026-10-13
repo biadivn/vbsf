@@ -51,6 +51,42 @@ async function withMemberMatch(rows) {
   return rows.map((r) => ({ ...r, ...entryLogic.matchMember(members, r.cccd) }));
 }
 
+/* ---------------- Đơn hiện có của chính đội, cho một giải ----------------
+   Trang đăng ký cần biết ai trong danh sách đội ĐÃ được gửi đi rồi, nếu không
+   đội chỉ thấy một rổ checkbox trống và dễ gửi lại người đã nộp, hoặc tệ hơn:
+   gửi lại thiếu người — vì gửi lại là THAY danh sách chưa duyệt, không cộng dồn
+   (xem submitTeam), nên ai không được tick lần này sẽ biến mất khỏi đơn.
+
+   Collection tournament-entry cố ý không cho đọc công khai (chứa CCCD, điện
+   thoại), nên đây là endpoint riêng: danh tính lấy từ token đội và kết quả luôn
+   kẹp theo teamDocId của chính người gửi. */
+async function mineTeam(ctx) {
+  const actor = await readActor(ctx);
+  if (actor.kind !== 'org') {
+    return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản hội viên tổ chức.');
+  }
+  const tournamentDocId = text((ctx.request.body || {}).tournamentDocId, 60);
+  if (!tournamentDocId) return ctx.badRequest('Chưa chọn giải đấu.');
+
+  const rows = await strapi.documents(ENTRY_UID).findMany({
+    filters: { tournamentDocId, teamDocId: actor.org.documentId },
+    fields: ['cccd', 'fullName', 'status', 'paid', 'events'],
+    limit: 500,
+  });
+
+  /* Chỉ trả đúng thứ trang đăng ký cần để đánh dấu lại danh sách — không trả
+     nguyên bản ghi (điện thoại, địa chỉ... không việc gì phải đi ra ngoài). */
+  ctx.body = {
+    entries: rows.map((r) => ({
+      cccd: r.cccd || '',
+      fullName: r.fullName || '',
+      status: r.status || 'pending',
+      paid: Boolean(r.paid),
+      events: Array.isArray(r.events) ? r.events : [],
+    })),
+  };
+}
+
 /* ---------------- Đội tỉnh/thành gửi đơn cho giải thành tích cao ---------------- */
 async function submitTeam(ctx) {
   const body = ctx.request.body || {};
@@ -194,4 +230,4 @@ async function submitSelf(ctx) {
   };
 }
 
-module.exports = { submitTeam, submitSelf };
+module.exports = { mineTeam, submitTeam, submitSelf };

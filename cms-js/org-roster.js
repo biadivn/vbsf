@@ -148,10 +148,13 @@ function renderOrgRosterTab(record){
       </tr></thead><tbody>
       ${rows.map(a=>{
         const st = OR_STATUS[a.status] || OR_STATUS.pending;
+        /* Hiệu lực soi lại từ hồ sơ hội viên, giống hai màn hình kia — không đọc
+           memberCode/memberValid máy chủ trả về (ảnh chụp lúc ghi). */
+        const m = taMemberMatch(a.cccd);
         return `<tr>
           <td>${escapeHtml(a.fullName||'')}</td>
           <td><span class="cell-muted">${escapeHtml(a.cccd||'—')}</span></td>
-          <td><span class="cell-muted">${a.memberCode ? escapeHtml(a.memberCode) + (a.memberValid ? '' : ' (chưa hiệu lực)') : '—'}</span></td>
+          <td><span class="cell-muted">${m.code ? escapeHtml(m.code) + (m.valid ? '' : ` (${escapeHtml(m.label.toLowerCase())})`) : '—'}</span></td>
           <td><span class="status ${st.c}">${st.t}</span></td>
         </tr>`;
       }).join('')}
