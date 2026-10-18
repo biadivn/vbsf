@@ -1,8 +1,10 @@
 name: Deploy VBSF CMS
 
+# Trang CMS tĩnh: runner chèn số build vào cms.html rồi rsync thẳng lên server.
+# Phần backend (Strapi) deploy bằng workflow riêng: deploy-strapi.yml.
 on:
   push:
-    branches: [main]
+    branches: [develop]
     paths:
       - "cms.html"
       - "cms-js/**"
@@ -11,13 +13,23 @@ on:
 
 concurrency:
   group: deploy-cms
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp build id into cms.html
+        run: |
+          set -euo pipefail
+          # Gắn ?v=<commit ngắn> vào script src trong cms.html để Cloudflare luôn
+          # coi mỗi bản deploy là URL mới — tránh phải reload nginx/purge cache
+          # (user deploy không có quyền sudo nginx trên server).
+          sed "s/__CMS_BUILD__/${GITHUB_SHA::7}/g" cms.html > cms.deploy.html
+
       - name: Load deploy SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -28,7 +40,6 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
-          REPO_PATH: ${{ vars.DEPLOY_REPO_PATH || '/opt/vbsf' }}
           CMS_ROOT: ${{ vars.CMS_ROOT || '/var/www/vbsf-cms' }}
         run: |
           set -euo pipefail
@@ -36,21 +47,6 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "$port" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
-          # Cập nhật checkout Git trên server, rồi đồng bộ ra thư mục nginx serve
-          # (chạy rsync trên chính server, tránh round-trip file qua runner).
-          ssh -p "$port" "$DEPLOY_USER@$DEPLOY_HOST" "
-            set -euo pipefail
-            exec 200>'$REPO_PATH/.deploy.lock'
-            flock 200
-            cd '$REPO_PATH'
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p '$CMS_ROOT/cms-js'
-            # Gắn ?v=<commit ngắn> vào script src trong cms.html để Cloudflare luôn
-            # coi mỗi bản deploy là URL mới — tránh phải reload nginx/purge cache
-            # (deploy user không có quyền sudo trên server để tự reload nginx).
-            BUILD_ID=\$(git rev-parse --short HEAD)
-            sed \"s/__CMS_BUILD__/\$BUILD_ID/g\" '$REPO_PATH/cms.html' > /tmp/cms.deploy.html
-            rsync -a /tmp/cms.deploy.html '$CMS_ROOT/cms.html'
-            rsync -a --delete '$REPO_PATH/cms-js/' '$CMS_ROOT/cms-js/'
-          "
+          target="$DEPLOY_USER@$DEPLOY_HOST:$CMS_ROOT"
+          rsync -az -e "ssh -p $port" cms.deploy.html "$target/cms.html"
+          rsync -az --delete -e "ssh -p $port" cms-js/ "$target/cms-js/"

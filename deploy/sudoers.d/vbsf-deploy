@@ -1,0 +1,12 @@
+# Cho phép user deploy restart đúng service Strapi mà không cần mật khẩu —
+# CI chạy không có TTY nên mọi lệnh sudo hỏi mật khẩu sẽ treo rồi fail.
+#
+# Cài: sed 's/__DEPLOY_USER__/<user>/g' deploy/sudoers.d/vbsf-deploy \
+#        | sudo tee /etc/sudoers.d/vbsf-deploy >/dev/null
+#      sudo chmod 440 /etc/sudoers.d/vbsf-deploy
+#      sudo visudo -c -f /etc/sudoers.d/vbsf-deploy
+#
+# Cố tình liệt kê từng lệnh một thay vì cấp sudo toàn phần: khoá SSH deploy nằm
+# trong GitHub Secrets, nếu lộ thì kẻ tấn công cũng chỉ restart được 1 service.
+# Đọc log KHÔNG qua sudo — user deploy nằm trong group systemd-journal.
+__DEPLOY_USER__ ALL=(root) NOPASSWD: /usr/bin/systemctl start vbsf-strapi, /usr/bin/systemctl stop vbsf-strapi, /usr/bin/systemctl restart vbsf-strapi, /usr/bin/systemctl is-active vbsf-strapi, /usr/bin/systemctl show vbsf-strapi

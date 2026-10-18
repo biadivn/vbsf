@@ -1,0 +1,58 @@
+# VBSF Strapi backend — chạy trực tiếp bằng Node (nvm), KHÔNG dùng Docker.
+#
+# Bản build do GitHub Actions tạo ra rồi rsync sang server dưới dạng "release":
+#   /opt/vbsf/releases/<sha>/   mã nguồn + node_modules + admin panel đã build
+#   /opt/vbsf/current -> releases/<sha>    (symlink, đổi khi deploy)
+#   /opt/vbsf/shared/            .env, uploads, .tmp — sống ngoài release
+#
+# Cài đặt: bootstrap-server.sh làm tự động, hoặc làm tay:
+#   sed 's/__DEPLOY_USER__/<user>/g' deploy/systemd/vbsf-strapi.service \
+#     | sudo tee /etc/systemd/system/vbsf-strapi.service >/dev/null
+#   sudo systemctl daemon-reload && sudo systemctl enable --now vbsf-strapi
+#
+# Xem log:  journalctl -u vbsf-strapi -f
+
+[Unit]
+Description=VBSF Strapi backend
+Documentation=https://github.com/biadivn/vbsf/blob/main/deploy/README.md
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=__DEPLOY_USER__
+WorkingDirectory=/opt/vbsf/current
+
+# .env đọc trực tiếp bởi systemd nên phải là KEY=VALUE thuần: không `export`,
+# không nội suy $BIEN, không nối nhiều dòng. Giá trị có khoảng trắng thì bọc "".
+EnvironmentFile=/opt/vbsf/shared/.env
+Environment=NODE_ENV=production
+
+# Script nạp nvm rồi exec thẳng strapi — nhờ vậy nâng Node (đổi .nvmrc) không
+# phải sửa unit file. Đi qua symlink `current` nên luôn chạy release mới nhất.
+ExecStart=/opt/vbsf/current/bin/strapi-run.sh
+
+Restart=always
+RestartSec=5
+# Strapi đóng kết nối DB gọn gàng khi nhận SIGINT.
+KillSignal=SIGINT
+TimeoutStopSec=30
+LimitNOFILE=65535
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=vbsf-strapi
+
+# Siết quyền: tiến trình chỉ cần đọc mã nguồn + ghi vào /opt/vbsf (uploads, .tmp).
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=read-only
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadWritePaths=/opt/vbsf
+
+[Install]
+WantedBy=multi-user.target

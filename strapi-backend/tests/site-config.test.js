@@ -1,8 +1,8 @@
 'use strict';
 /* site-js/config.js quyết định site public gọi Strapi ở đâu. Sai chỗ này thì
    TOÀN BỘ trang không có dữ liệu và không đăng nhập được — đúng sự cố đã xảy ra
-   trên production: site tĩnh ở vbsf.biadi.vn nhưng Strapi lại nằm sau
-   vbsf-cms.biadi.vn, trong khi mã cũ mặc định "cùng domain".
+   trên production: site tĩnh ở vbsf.vn nhưng Strapi lại nằm sau
+   cms.vbsf.vn, trong khi mã cũ mặc định "cùng domain".
 
    File nằm ngoài build context của Docker nên thiếu thì bỏ qua. */
 const { test, describe, afterEach } = require('node:test');
@@ -29,18 +29,28 @@ describe('site-js/config', { skip: available ? false : 'không có site-js/ tron
 
   describe('production — hai domain tách biệt', () => {
     test('site public trỏ sang domain của Strapi, KHÔNG dùng đường dẫn tương đối', () => {
-      const { resolved } = load(https('vbsf.biadi.vn'));
-      assert.strictEqual(resolved, 'https://vbsf-cms.biadi.vn');
+      const { resolved } = load(https('vbsf.vn'));
+      assert.strictEqual(resolved, 'https://cms.vbsf.vn');
       assert.notStrictEqual(resolved, '', 'trỏ same-origin là lỗi đã gây sự cố production');
     });
 
     test('trang CMS dùng đường dẫn tương đối vì ở cùng domain với Strapi', () => {
-      assert.strictEqual(load(https('vbsf-cms.biadi.vn')).resolved, '');
+      assert.strictEqual(load(https('cms.vbsf.vn')).resolved, '');
     });
 
     test('bảng ánh xạ khai báo đủ cả hai domain production', () => {
-      const { mod } = load(https('vbsf.biadi.vn'));
-      assert.deepStrictEqual(Object.keys(mod.STRAPI_BY_HOST).sort(), ['vbsf-cms.biadi.vn', 'vbsf.biadi.vn']);
+      const { mod } = load(https('vbsf.vn'));
+      const hosts = Object.keys(mod.STRAPI_BY_HOST);
+      assert.ok(hosts.includes('vbsf.vn') && hosts.includes('cms.vbsf.vn'), 'thiếu domain production: ' + hosts);
+    });
+
+    test('www.vbsf.vn cũng trỏ sang domain Strapi', () => {
+      assert.strictEqual(load(https('www.vbsf.vn')).resolved, 'https://cms.vbsf.vn');
+    });
+
+    test('domain biadi.vn cũ vẫn chạy trong lúc chuyển đổi', () => {
+      assert.strictEqual(load(https('vbsf.biadi.vn')).resolved, 'https://vbsf-cms.biadi.vn');
+      assert.strictEqual(load(https('vbsf-cms.biadi.vn')).resolved, '');
     });
   });
 
@@ -60,20 +70,20 @@ describe('site-js/config', { skip: available ? false : 'không có site-js/ tron
 
   describe('ghi đè và domain lạ', () => {
     test('window.VBSF_STRAPI_URL đặt sẵn thì được tôn trọng', () => {
-      assert.strictEqual(load(https('vbsf.biadi.vn'), 'https://staging.example.vn').resolved, 'https://staging.example.vn');
+      assert.strictEqual(load(https('vbsf.vn'), 'https://staging.example.vn').resolved, 'https://staging.example.vn');
     });
 
     test('ghi đè bằng chuỗi rỗng (same-origin) cũng được tôn trọng', () => {
-      assert.strictEqual(load(https('vbsf.biadi.vn'), '').resolved, '');
+      assert.strictEqual(load(https('vbsf.vn'), '').resolved, '');
     });
 
-    test('domain chưa khai báo → đoán theo quy ước vbsf-cms.<domain gốc>', () => {
-      assert.strictEqual(load(https('preview.biadi.vn')).resolved, 'https://vbsf-cms.biadi.vn');
-      assert.strictEqual(load(https('vbsf.example.com')).resolved, 'https://vbsf-cms.example.com');
+    test('domain chưa khai báo → đoán theo quy ước cms.<domain gốc>', () => {
+      assert.strictEqual(load(https('preview.vbsf.com')).resolved, 'https://cms.vbsf.com');
+      assert.strictEqual(load(https('vbsf.example.com')).resolved, 'https://cms.example.com');
     });
 
     test('giữ nguyên giao thức của trang khi đoán', () => {
-      assert.strictEqual(load({ protocol: 'http:', hostname: 'vbsf.test.vn' }).resolved, 'http://vbsf-cms.test.vn');
+      assert.strictEqual(load({ protocol: 'http:', hostname: 'vbsf.test.vn' }).resolved, 'http://cms.test.vn');
     });
 
     test('hostname một nhãn (không có dấu chấm) → same-origin', () => {
@@ -83,7 +93,7 @@ describe('site-js/config', { skip: available ? false : 'không có site-js/ tron
 
   describe('hợp đồng với hai module dùng nó', () => {
     test('luôn trả về chuỗi để module con nối trực tiếp vào URL', () => {
-      ['vbsf.biadi.vn', 'vbsf-cms.biadi.vn', 'localhost', 'intranet', 'la.example.com'].forEach((h) => {
+      ['vbsf.vn', 'cms.vbsf.vn', 'localhost', 'intranet', 'la.example.com'].forEach((h) => {
         const { resolved } = load(https(h));
         assert.strictEqual(typeof resolved, 'string', h + ' trả về không phải chuỗi');
         assert.ok(!resolved.endsWith('/'), h + ': không được có dấu / ở cuối, module con tự nối "/api/..."');

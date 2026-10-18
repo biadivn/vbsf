@@ -1,19 +1,24 @@
 name: Deploy VBSF Strapi
 
+# Build chạy TRÊN RUNNER của GitHub Actions, không build trên server: runner
+# npm ci + strapi build, đóng gói thành một "release" rồi rsync sang server;
+# server chỉ đổi symlink và restart systemd (vài giây downtime, rollback nhanh).
 on:
   push:
-    branches: [main]
+    branches: [develop]
     paths:
       - "strapi-backend/**"
+      - "deploy/scripts/**"
+      - "deploy/systemd/**"
+      - ".nvmrc"
       - ".github/workflows/deploy-strapi.yml"
   workflow_dispatch: {}
 
 concurrency:
   group: deploy-strapi
-  cancel-in-progress: true
-
-env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/vbsf-strapi
+  # Không huỷ giữa chừng: bị cắt đúng lúc đang đổi symlink/restart trên server
+  # sẽ để lại trạng thái dở dang.
+  cancel-in-progress: false
 
 jobs:
   verify:
@@ -24,7 +29,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: strapi-backend/package-lock.json
 
@@ -37,79 +42,91 @@ jobs:
         working-directory: strapi-backend
         run: npm run verify
 
-  build-and-push:
+  build-and-deploy:
     needs: verify
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    outputs:
-      image: ${{ steps.meta.outputs.tags }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract image metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest
-            type=sha,format=short
-
-      - name: Build and push image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./strapi-backend
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  deploy:
-    needs: build-and-push
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: strapi-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: strapi-backend
+        run: npm ci --no-audit --no-fund
+
+      - name: Build admin panel
+        working-directory: strapi-backend
+        env:
+          NODE_ENV: production
+          NODE_OPTIONS: --max-old-space-size=4096
+        # Gọi thẳng `strapi build` thay vì `npm run build`: script build có hook
+        # prebuild chạy lại test + security scan, job verify ở trên đã làm rồi.
+        run: npx strapi build
+
+      - name: Assemble release
+        id: release
+        run: |
+          set -euo pipefail
+          name="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          # Tên release có timestamp nên luôn là thư mục MỚI trên server — không
+          # bao giờ rsync đè lên release đang chạy.
+          mkdir -p release
+          rsync -a --delete \
+            --exclude '.git' \
+            --exclude '.env' \
+            --exclude '.tmp' \
+            --exclude 'public/uploads' \
+            --exclude 'node_modules/.cache' \
+            strapi-backend/ release/
+          # .nvmrc đi theo release để strapi-run.sh chọn đúng Node trên server;
+          # bin/ là 2 script server cần (chạy service + kích hoạt release).
+          cp .nvmrc release/.nvmrc
+          mkdir -p release/bin
+          install -m 755 deploy/scripts/strapi-run.sh deploy/scripts/activate-release.sh release/bin/
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          du -sh release
+
       - name: Load deploy SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
-      - name: Pull compose files and restart container on server
+      - name: Ship release to server
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
-          REPO_PATH: ${{ vars.DEPLOY_REPO_PATH || '/opt/vbsf' }}
-          IMAGE_REF: ${{ env.IMAGE_NAME }}:latest
+          DEPLOY_ROOT: ${{ vars.DEPLOY_ROOT || '/opt/vbsf' }}
+          RELEASE_NAME: ${{ steps.release.outputs.name }}
         run: |
           set -euo pipefail
           port="${DEPLOY_PORT:-22}"
           mkdir -p ~/.ssh
           ssh-keyscan -p "$port" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
-          # .env sống trên server (không nằm trong git) và không bị git reset đụng tới.
-          ssh -p "$port" "$DEPLOY_USER@$DEPLOY_HOST" "
-            set -euo pipefail
-            exec 200>'$REPO_PATH/.deploy.lock'
-            flock 200
-            cd '$REPO_PATH'
-            git fetch origin main
-            git reset --hard origin/main
-            cd strapi-backend
-            GHCR_IMAGE='$IMAGE_REF' docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-            GHCR_IMAGE='$IMAGE_REF' docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-            docker image prune -f
-          "
+          # --link-dest: file nào giống hệt release đang chạy thì tạo hardlink
+          # tại chỗ trên server thay vì truyền lại. node_modules gần như không
+          # đổi giữa 2 lần deploy nên thực tế chỉ vài MB đi qua mạng.
+          rsync -az --delete \
+            -e "ssh -p $port" \
+            --link-dest="$DEPLOY_ROOT/current/" \
+            release/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_ROOT/releases/$RELEASE_NAME/"
+
+      - name: Activate release
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_ROOT: ${{ vars.DEPLOY_ROOT || '/opt/vbsf' }}
+          RELEASE_NAME: ${{ steps.release.outputs.name }}
+        # Script tự kiểm tra /_health và tự quay lại release trước nếu bản mới
+        # không lên được, nên bước này fail nghĩa là production vẫn an toàn.
+        run: |
+          set -euo pipefail
+          ssh -p "${DEPLOY_PORT:-22}" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "$DEPLOY_ROOT/releases/$RELEASE_NAME/bin/activate-release.sh"

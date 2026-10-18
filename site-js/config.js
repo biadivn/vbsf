@@ -2,12 +2,12 @@
    VBSF PUBLIC SITE — ĐỊA CHỈ STRAPI
 
    Site public và Strapi nằm ở HAI domain khác nhau trên production:
-     vbsf.biadi.vn      → site tĩnh, nginx KHÔNG proxy /api
-     vbsf-cms.biadi.vn  → CMS + Strapi (nginx proxy /api, /uploads, /admin…)
+     vbsf.vn      → site tĩnh, nginx KHÔNG proxy /api
+     cms.vbsf.vn  → CMS + Strapi (nginx proxy /api, /uploads, /admin…)
 
    Vì vậy site public không thể dùng đường dẫn tương đối như CMS được — phải trỏ
    thẳng sang domain của Strapi. Strapi đã trả đúng header CORS cho origin
-   vbsf.biadi.vn nên gọi chéo domain hoạt động bình thường.
+   vbsf.vn nên gọi chéo domain hoạt động bình thường.
 
    Thêm domain mới thì khai báo ở đây, một chỗ duy nhất. Muốn ghi đè tạm (bản
    staging, ngrok…) thì đặt window.VBSF_STRAPI_URL trước khi nạp file này.
@@ -17,6 +17,11 @@
 
   // Giá trị '' nghĩa là cùng domain (đường dẫn tương đối).
   var STRAPI_BY_HOST = {
+    'vbsf.vn': 'https://cms.vbsf.vn',
+    'www.vbsf.vn': 'https://cms.vbsf.vn',
+    'cms.vbsf.vn': '',
+    // Domain cũ — giữ lại để bản sao đang chạy ở đó không mất dữ liệu trong lúc
+    // chuyển sang vbsf.vn. Xoá được khi biadi.vn đã ngừng phục vụ site này.
     'vbsf.biadi.vn': 'https://vbsf-cms.biadi.vn',
     'vbsf-cms.biadi.vn': '',
   };
@@ -34,11 +39,11 @@
     if (typeof mapped === 'string') return mapped;
 
     /* Domain lạ (preview, bản sao staging…): đoán theo quy ước đặt tên hiện tại
-       — thêm tiền tố "vbsf-cms." vào domain gốc. Sai thì khai báo tường minh ở
+       — thêm tiền tố "cms." vào domain gốc. Sai thì khai báo tường minh ở
        STRAPI_BY_HOST bên trên. */
     var parts = location.hostname.split('.');
     if (parts.length >= 2) {
-      return location.protocol + '//vbsf-cms.' + parts.slice(-2).join('.');
+      return location.protocol + '//cms.' + parts.slice(-2).join('.');
     }
     return '';
   }

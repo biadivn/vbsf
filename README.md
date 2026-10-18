@@ -24,7 +24,7 @@ Cả site public lẫn CMS đều đọc nội dung từ Strapi (xem
   (`[data-section]`, `[data-items]`, `[data-fill]`).
 
 Trên production site public và Strapi nằm ở **hai domain khác nhau**
-(`vbsf.biadi.vn` ↔ `vbsf-cms.biadi.vn`), nên địa chỉ Strapi được khai báo tập
+(`vbsf.vn` ↔ `cms.vbsf.vn`), nên địa chỉ Strapi được khai báo tập
 trung ở [site-js/config.js](site-js/config.js). Thêm domain mới thì sửa đúng một
 chỗ đó; đặt `window.VBSF_STRAPI_URL` trước khi nạp file này để ghi đè tạm.
 
@@ -164,9 +164,10 @@ trong bài viết vẫn dùng thẳng `/uploads`): middleware
 [uploads-noindex](strapi-backend/src/middlewares/uploads-noindex.js) gắn
 `X-Robots-Tag` cho mọi phản hồi dưới `/uploads`.
 
-> **robots.txt không dùng được ở đây.** `/robots.txt` của cả `vbsf.biadi.vn` và
-> `vbsf-cms.biadi.vn` đang do Cloudflare quản lý (Managed robots.txt) và ghi đè
-> file trong repo — kiểm chứng bằng `curl -s https://vbsf-cms.biadi.vn/robots.txt`.
+> **robots.txt có thể không dùng được.** Trên domain cũ (`vbsf.biadi.vn`,
+> `vbsf-cms.biadi.vn`), `/robots.txt` do Cloudflare quản lý (Managed robots.txt)
+> và ghi đè file trong repo — kiểm chứng bằng
+> `curl -s https://cms.vbsf.vn/robots.txt` sau khi chuyển sang domain mới.
 > `strapi-backend/public/robots.txt` đã có `Disallow: /uploads/` để dùng ngay khi
 > tắt tính năng đó trong Cloudflare, nhưng ba lớp trên không phụ thuộc vào nó.
 
@@ -295,12 +296,28 @@ Vì sao tick sẵn: gửi lại đơn là **thay** danh sách chưa duyệt, kh�
 khỏi đơn. Dòng tóm tắt cũng nói thẳng điều đó, và đếm số người sắp bị rút ra nếu
 đội bỏ tick ai đó.
 
+## Triển khai
+
+Push lên nhánh **`develop`** là deploy. GitHub Actions build (`npm ci` +
+`strapi build`) ngay trên runner rồi rsync bản đã build sang server; server
+production chỉ cần **nvm + Node, Postgres, nginx** — không Docker, không build,
+không git checkout. Mỗi lần deploy là một thư mục release mới, đổi symlink
+`current` và restart `vbsf-strapi.service`; health check hỏng thì tự quay về
+release trước.
+
+| | |
+|---|---|
+| Site public | `vbsf.vn` — file tĩnh ở `/var/www/vbsf-web` |
+| CMS + Strapi | `cms.vbsf.vn` — tĩnh ở `/var/www/vbsf-cms`, API/admin proxy sang `127.0.0.1:1337` |
+
+Toàn bộ quy trình, script dựng server và cách rollback: [deploy/README.md](deploy/README.md).
+
 ## Kiểm thử & security gate
 
 `cd strapi-backend && npm run verify` — unit test (ngưỡng coverage 80%) + security
 scan (chặn nếu có lỗ hổng high/critical, secret bị commit, hoặc route công khai
 thiếu rate limit). Gate này chạy tự động trước `npm run build` và trong CI trước
-khi build image / deploy web. Chi tiết ở
+khi build và deploy. Chi tiết ở
 [strapi-backend/README.md](strapi-backend/README.md).
 
 ## Tài khoản hội viên trên site public

@@ -1,7 +1,10 @@
-# VBSF Strapi Backend (local test only)
+# VBSF Strapi Backend
 
-Backend collections mirroring the VBSF CMS prototype (`cms.html` + `cms-js/`), built to
-be run and tested locally — not configured for deployment.
+Backend collections mirroring the VBSF CMS prototype (`cms.html` + `cms-js/`).
+
+Tài liệu này nói về cách chạy **local**. Production chạy bằng Node + systemd
+(không Docker), build trên GitHub Actions rồi rsync release sang server — xem
+[`deploy/README.md`](../deploy/README.md).
 
 ## Chạy — cách 1: npm trực tiếp
 
@@ -31,9 +34,10 @@ docker compose up -d
   không cần Postgres.
 - Dữ liệu Postgres lưu ở Docker volume `postgres_data`, file upload thật lưu ở
   `strapi_uploads` — cả hai đều persistent, sống ngoài vòng đời container (chỉ mất
-  khi chủ động chạy `docker compose down -v`). Xem `deploy/README.md` ở thư mục gốc
-  repo để biết toàn bộ quy trình CI/CD + thiết lập server production (nginx, GHCR,
-  SSH deploy key).
+  khi chủ động chạy `docker compose down -v`). Docker **chỉ dùng cho local/test**;
+  production không dùng `Dockerfile`/`docker-compose*.yml` — xem `deploy/README.md`
+  ở thư mục gốc repo để biết quy trình CI/CD + thiết lập server (nvm, systemd,
+  Postgres trên host, nginx).
 - `strapi` service dùng `depends_on: postgres: condition: service_healthy` nên
   luôn chờ Postgres sẵn sàng trước khi khởi động — không cần chạy `docker compose up`
   nhiều lần vì lỗi kết nối DB lúc container postgres chưa kịp init.
@@ -113,7 +117,7 @@ Components dùng chung: `shared.prize`, `tournament.player` (có quan hệ tuỳ
 
 `npm run build` gọi `prebuild` → `npm run verify` = **unit test + security scan**.
 Không có cờ bỏ qua: cả hai phải xanh thì `strapi build` mới chạy. CI cũng có job
-`verify` riêng chạy trước job build image (xem `.github/workflows/deploy-strapi.yml`
+`verify` riêng chạy trước job build (xem `.github/workflows/deploy-strapi.yml`
 và `deploy-web.yml`).
 
 ```bash

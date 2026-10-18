@@ -1,8 +1,10 @@
 name: Deploy VBSF Web
 
+# Site tĩnh: runner tự chèn số build vào index.html rồi rsync thẳng lên server,
+# server không chạy git/build gì cả.
 on:
   push:
-    branches: [main]
+    branches: [develop]
     paths:
       - "index.html"
       - "pages/**"
@@ -12,7 +14,7 @@ on:
 
 concurrency:
   group: deploy-web
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   verify:
@@ -23,7 +25,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: strapi-backend/package-lock.json
 
@@ -31,7 +33,8 @@ jobs:
         working-directory: strapi-backend
         run: npm ci
 
-      # Gate trước khi build: coverage >= 80% và không có lỗ hổng high/critical.
+      # Gate trước khi deploy: coverage >= 80% và không có lỗ hổng high/critical.
+      # Test của site-js nằm chung bộ test của strapi-backend.
       - name: Verify
         working-directory: strapi-backend
         run: npm run verify
@@ -41,6 +44,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp build id into index.html
+        run: |
+          set -euo pipefail
+          # Gắn ?v=<commit ngắn> vào script src để Cloudflare coi mỗi bản deploy
+          # là URL mới. Không có bước này thì site-js/ mới deploy vẫn bị phục vụ
+          # từ cache tới 4 giờ (Browser Cache TTL mặc định) — người dùng chạy mã
+          # cũ mà không biết.
+          sed "s/__WEB_BUILD__/${GITHUB_SHA::7}/g" index.html > index.deploy.html
+
       - name: Load deploy SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -51,7 +65,6 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
-          REPO_PATH: ${{ vars.DEPLOY_REPO_PATH || '/opt/vbsf' }}
           WEB_ROOT: ${{ vars.WEB_ROOT || '/var/www/vbsf-web' }}
         run: |
           set -euo pipefail
@@ -59,25 +72,9 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "$port" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
-          # Cập nhật checkout Git trên server, rồi đồng bộ ra thư mục nginx serve
-          # (chạy rsync trên chính server, tránh round-trip file qua runner).
-          ssh -p "$port" "$DEPLOY_USER@$DEPLOY_HOST" "
-            set -euo pipefail
-            exec 200>'$REPO_PATH/.deploy.lock'
-            flock 200
-            cd '$REPO_PATH'
-            git fetch origin main
-            git reset --hard origin/main
-            mkdir -p '$WEB_ROOT/pages' '$WEB_ROOT/site-js'
-            # Gắn ?v=<commit ngắn> vào script src trong index.html để Cloudflare
-            # coi mỗi bản deploy là URL mới. Không có bước này thì site-js/ mới
-            # deploy vẫn bị phục vụ từ cache tới 4 giờ (Cache-Control max-age
-            # =14400 do nginx đặt cho .js) — người dùng chạy mã cũ mà không biết.
-            BUILD_ID=\$(git rev-parse --short HEAD)
-            sed \"s/__WEB_BUILD__/\$BUILD_ID/g\" '$REPO_PATH/index.html' > /tmp/index.deploy.html
-            rsync -a /tmp/index.deploy.html '$WEB_ROOT/index.html'
-            rsync -a --delete '$REPO_PATH/pages/' '$WEB_ROOT/pages/'
-            # index.html nạp site-js/ (lớp đọc dữ liệu Strapi + đăng nhập hội
-            # viên) — thiếu thư mục này thì site chạy như bản tĩnh cũ.
-            rsync -a --delete '$REPO_PATH/site-js/' '$WEB_ROOT/site-js/'
-          "
+          target="$DEPLOY_USER@$DEPLOY_HOST:$WEB_ROOT"
+          rsync -az -e "ssh -p $port" index.deploy.html "$target/index.html"
+          rsync -az --delete -e "ssh -p $port" pages/ "$target/pages/"
+          # index.html nạp site-js/ (lớp đọc dữ liệu Strapi + đăng nhập hội
+          # viên) — thiếu thư mục này thì site chạy như bản tĩnh cũ.
+          rsync -az --delete -e "ssh -p $port" site-js/ "$target/site-js/"

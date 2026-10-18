@@ -4,7 +4,7 @@
    ========================================================= */
 // Local dev (file:// hoặc localhost): Strapi chạy riêng ở cổng 1337.
 // Trên live: Strapi được nginx reverse-proxy dưới CÙNG domain với CMS
-// (xem deploy/nginx/vbsf-cms.biadi.vn.conf), nên dùng path tương đối (same-origin).
+// (xem deploy/nginx/cms.vbsf.vn.conf), nên dùng path tương đối (same-origin).
 const STRAPI_URL = (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')
   ? 'http://localhost:1337' : '';
 const CMS_JWT_KEY = 'vbsf_cms_jwt';
