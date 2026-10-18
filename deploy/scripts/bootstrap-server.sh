@@ -117,6 +117,17 @@ fi
 # role — Strapi cần tự tạo bảng nên cấp tường minh.
 sudo -u postgres psql -q -d "$DB_NAME" -c "GRANT ALL ON SCHEMA public TO \"$DB_USER\""
 
+# Kiểm tra bằng đúng đường mà Strapi sẽ đi (TCP tới 127.0.0.1 + mật khẩu), thay
+# vì tin rằng tạo role xong là chạy được: pg_hba.conf khác thường thì lỗi chỉ lộ
+# ra ở lần deploy đầu, lúc đó health check fail mà không rõ vì sao.
+DB_PORT="$(get_env DATABASE_PORT)"; DB_PORT="${DB_PORT:-5432}"
+if PGPASSWORD="$DB_PASS" psql -h 127.0.0.1 -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
+     -tAc 'select 1' >/dev/null 2>&1; then
+  echo "Kết nối $DB_USER@127.0.0.1:$DB_PORT/$DB_NAME OK"
+else
+  die "Không kết nối được Postgres bằng mật khẩu trong $ENV_FILE. Kiểm tra pg_hba.conf có dòng: host all all 127.0.0.1/32 scram-sha-256"
+fi
+
 # ---------------------------------------------------------------- 6. systemd + sudo
 log "systemd service $SERVICE"
 sed "s/__DEPLOY_USER__/$DEPLOY_USER/g" "$REPO_SRC/deploy/systemd/vbsf-strapi.service" \
