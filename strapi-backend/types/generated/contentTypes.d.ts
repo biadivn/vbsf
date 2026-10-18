@@ -462,6 +462,7 @@ export interface ApiContactInfoContactInfo extends Struct.SingleTypeSchema {
     email: Schema.Attribute.Email;
     facebook: Schema.Attribute.String;
     hours: Schema.Attribute.String;
+    i18n: Schema.Attribute.JSON;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -528,6 +529,7 @@ export interface ApiLeaderLeader extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    i18n: Schema.Attribute.JSON;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -563,6 +565,7 @@ export interface ApiLibraryDocLibraryDoc extends Struct.CollectionTypeSchema {
     date: Schema.Attribute.Date;
     file: Schema.Attribute.Media<'files'>;
     fileType: Schema.Attribute.Enumeration<['PDF', 'DOCX', 'XLSX']>;
+    i18n: Schema.Attribute.JSON;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -599,6 +602,7 @@ export interface ApiMediaItemMediaItem extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     date: Schema.Attribute.Date;
+    i18n: Schema.Attribute.JSON;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -906,6 +910,7 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
     date: Schema.Attribute.Date;
     excerpt: Schema.Attribute.Text;
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    i18n: Schema.Attribute.JSON;
     image: Schema.Attribute.Media<'images'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -968,6 +973,7 @@ export interface ApiPartnerPartner extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.RichText;
+    i18n: Schema.Attribute.JSON;
     image: Schema.Attribute.Media<'images'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -1052,6 +1058,7 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
     feeAnnualHalf: Schema.Attribute.String;
     feeFirstTime: Schema.Attribute.String;
     feeRenewal: Schema.Attribute.String;
+    i18n: Schema.Attribute.JSON;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1272,6 +1279,7 @@ export interface ApiTournamentTournament extends Struct.CollectionTypeSchema {
     events: Schema.Attribute.Component<'tournament.event', true>;
     format: Schema.Attribute.Enumeration<['SE', 'DE', 'RR', 'SW']> &
       Schema.Attribute.DefaultTo<'SE'>;
+    i18n: Schema.Attribute.JSON;
     liveRound: Schema.Attribute.String;
     lives: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<3>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;

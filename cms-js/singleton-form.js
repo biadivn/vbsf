@@ -11,11 +11,16 @@ function renderSingletonForm(key, fields){
   fields.forEach(f=>{
     html += `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label>${renderField(f, data[f.key])}</div>`;
   });
-  html += `</div><div class="form-actions"><button class="btn btn-primary" id="saveSingleton"><i class="ti ti-check"></i> Lưu thay đổi</button></div></div>`;
+  const transBtn = (I18N_SINGLETON_FIELDS[key] || []).length
+    ? `<button class="btn btn-ghost" id="singletonI18nBtn"><i class="ti ti-language"></i> Bản tiếng Anh</button>`
+    : '';
+  html += `</div><div class="form-actions">${transBtn}<button class="btn btn-primary" id="saveSingleton"><i class="ti ti-check"></i> Lưu thay đổi</button></div></div>`;
   return html;
 }
 function attachSingletonEvents(key, fields){
   attachModalImageEvents();
+  const transBtn = document.getElementById('singletonI18nBtn');
+  if(transBtn) transBtn.addEventListener('click', ()=> openI18nModal('singleton', key));
   document.getElementById('saveSingleton').addEventListener('click', async ()=>{
     const data = {};
     fields.forEach(f=>{
@@ -23,6 +28,10 @@ function attachSingletonEvents(key, fields){
       const el = document.getElementById('f_'+f.key);
       data[f.key] = f.type==='checkbox' ? el.classList.contains('on') : el.value;
     });
+    /* Bản dịch do màn hình riêng quản lý, không có ô nào ở form này — không
+       mang theo thì bản ghi trong bộ nhớ mất i18n và lần mở màn hình dịch kế
+       tiếp sẽ trắng trơn. */
+    if(DB[key] && DB[key].i18n) data.i18n = DB[key].i18n;
     const ok = await saveSingletonToApi(key, data);
     if(!ok) return;
     DB[key] = data;
