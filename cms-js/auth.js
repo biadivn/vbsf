@@ -184,6 +184,44 @@ function showCmsLogin(message){
   document.getElementById('loginUsername').focus();
 }
 
+/* Vì sao đăng nhập hỏng — nói đúng nguyên nhân thay vì gộp mọi lỗi 400 thành
+   "sai mật khẩu".
+
+   Ba nguyên nhân dưới đây dẫn người dùng đi ba chỗ khác hẳn nhau: đổi mật khẩu,
+   bật `confirmed`, hay bỏ `blocked`. Gộp lại thành một câu thì mỗi lần sự cố là
+   một lần phải mở DevTools/CSDL ra dò.
+
+   Không lo lộ thông tin: chính Strapi đã trả về ba câu khác nhau cho ba trường
+   hợp này, ai gọi thẳng API cũng thấy — hiện ra ở đây không thêm gì mới, chỉ đỡ
+   cho người vận hành. */
+const CMS_LOGIN_ERRORS = [
+  /* Strapi trả đúng câu này cho CẢ hai trường hợp "sai mật khẩu" và "không có
+     tài khoản nào như vậy". Nguyên nhân hay gặp nhất của vế sau: tài khoản được
+     tạo nhầm ở Strapi Admin → Settings (quản trị viên Strapi, bảng admin_users)
+     — loại đó chỉ vào được /admin. Tài khoản của CMS nằm ở Content Manager →
+     User. Nói luôn ở đây để khỏi phải đi dò CSDL mỗi lần. */
+  [/invalid identifier or password/i,
+    'Tên đăng nhập hoặc mật khẩu không đúng. Nếu tài khoản vừa tạo ở Strapi Admin → Settings → Users thì đó là quản trị viên Strapi, chỉ dùng được cho /admin; tài khoản CMS tạo ở Content Manager → User (hoặc ở module "Tài khoản CMS" trong chính CMS này).'],
+  /* Chỉ xuất hiện khi bật xác nhận email trong users-permissions; mặc định của
+     dự án đang TẮT nên confirmed=false vẫn đăng nhập được. */
+  [/not confirmed/i,
+    'Tài khoản chưa được xác nhận. Vào Strapi Admin → Content Manager → User, bật "Confirmed" cho tài khoản này.'],
+  [/blocked/i,
+    'Tài khoản đang bị khoá. Vào Strapi Admin → Content Manager → User, tắt "Blocked" cho tài khoản này.'],
+  [/too many/i,
+    'Thử đăng nhập quá nhiều lần. Vui lòng đợi một phút rồi thử lại.'],
+];
+
+function cmsLoginErrorMessage(status, serverMessage){
+  const msg = String(serverMessage || '');
+  const hit = CMS_LOGIN_ERRORS.find(pair=> pair[0].test(msg));
+  if(hit) return hit[1];
+  // Lỗi lạ: trả nguyên văn câu của máy chủ, còn hơn nuốt mất manh mối duy nhất.
+  if(msg) return msg;
+  if(status===404) return 'Không tìm thấy API đăng nhập. Kiểm tra cấu hình proxy /api của máy chủ.';
+  return 'Không thể đăng nhập. Vui lòng thử lại.';
+}
+
 async function handleCmsLogin(e){
   e.preventDefault();
   const identifier = document.getElementById('loginUsername').value.trim();
@@ -197,7 +235,7 @@ async function handleCmsLogin(e){
     });
     const out = await res.json().catch(()=>({}));
     if(!res.ok){
-      showCmsLogin(out.error && out.error.status===400 ? 'Tên đăng nhập hoặc mật khẩu không đúng' : 'Không thể đăng nhập. Vui lòng thử lại.');
+      showCmsLogin(cmsLoginErrorMessage(res.status, out.error && out.error.message));
       return;
     }
     storeTokens(out.jwt, out.refreshToken);
