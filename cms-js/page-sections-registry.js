@@ -59,8 +59,18 @@ const PAGE_SECTIONS_REGISTRY = {
     ]},
     {key:'ban-lanh-dao', label:'Ban lãnh đạo & sơ đồ tổ chức', title:'Ban lãnh đạo', items:true, itemCount:4, maxItems:20,
       itemFields:[{key:'name', label:'Họ và tên', type:'text'},{key:'role', label:'Chức vụ', type:'text'}]},
+    /* Mỗi bộ môn là một block có hình minh hoạ riêng — khai image ở itemFields
+       là panel tự dựng theo dạng thẻ (xem renderItemsEditorInline).
+       noBackground: section này không nhận ảnh nền, vì nền nằm SAU các thẻ bộ
+       môn nên chỉ làm chữ khó đọc chứ không thấy được ảnh. */
     {key:'bo-mon', label:'Bộ môn thi đấu', title:'Billiards & Snooker', items:true, itemCount:3, maxItems:12,
-      itemFields:[{key:'name', label:'Tên bộ môn', type:'text'},{key:'desc', label:'Mô tả', type:'text'},{key:'tags', label:'Nội dung (phân cách bởi ,)', type:'text'}]}
+      noBackground:true,
+      itemFields:[
+        {key:'image', label:'Hình minh hoạ', type:'image'},
+        {key:'name', label:'Tên bộ môn', type:'text'},
+        {key:'desc', label:'Mô tả', type:'text'},
+        {key:'tags', label:'Nội dung (phân cách bởi ,)', type:'text'}
+      ]}
   ]},
   'tin-tuc': {label:'Tin tức', icon:'ti-news', path:'/tin-tuc', sections:[
     /* Nhãn/tiêu đề/tóm tắt/ngày lấy thẳng từ bản ghi tin tức — gõ tay 4 ô đó chỉ

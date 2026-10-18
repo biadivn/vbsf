@@ -1093,6 +1093,27 @@
     });
   };
 
+  /* Một thẻ bộ môn. Ảnh của mục section lưu thẳng là data URI trong
+     page-content (xem section-detail-panel.js), không phải media của Strapi,
+     nên không đi qua mediaUrl()/imageBox(). */
+  function boMonCard(it) {
+    var img = it.image
+      ? '<div style="height:84px;background-image:url(\'' + esc(it.image) +
+        '\');background-size:cover;background-position:center"></div>'
+      : '<div class="vb-ph" style="height:84px"><i class="ti ti-photo" style="font-size:26px"></i></div>';
+    var tags = String(it.tags || '').split(',').map(function (t) { return t.trim(); })
+      .filter(Boolean)
+      .map(function (t) { return '<span class="vb-tag">' + esc(t) + '</span>'; })
+      .join(' ');
+    return (
+      '<div style="border:0.5px solid #E3E8E4;border-radius:8px;overflow:hidden">' + img +
+      '<div style="padding:12px 14px">' +
+      '<div style="font-size:14px;font-weight:600;color:#21428E">' + esc(it.name || '') + '</div>' +
+      (it.desc ? '<div class="vb-p" style="font-size:12.5px;margin:4px 0 8px">' + esc(it.desc) + '</div>' : '') +
+      tags + '</div></div>'
+    );
+  }
+
   RENDER['gioi-thieu'] = function (page, data) {
     /* Đoạn giới thiệu, tầm nhìn, sứ mệnh và dải 4 ô số liệu đều là cấu hình của
        khối "Thông tin chung", và applyPageContent() đã điền qua data-fill /
@@ -1115,6 +1136,23 @@
         return sc[k] != null && String(sc[k]).trim() !== '';
       });
       stats.style.display = hasStat ? '' : 'none';
+    }
+
+    /* Bộ môn thi đấu: mỗi bộ môn là một block do CMS nhập (hình minh hoạ, tên,
+       mô tả, các nội dung thi đấu). Trước đây trang dựng cứng 3 thẻ Pool /
+       Carom / Snooker trong pages/gioi-thieu.html, nên admin sửa trong CMS
+       không có tác dụng gì mà cũng không báo lỗi — và khi chưa nhập thì đó lại
+       là nội dung mẫu nằm trên trang thật. */
+    var boMon = section(page, 'bo-mon');
+    var boMonBox = items(boMon);
+    if (boMonBox) {
+      var boMonEntry = sectionEntry(data.pageContent, 'gioi-thieu', 'bo-mon') || {};
+      var boMonItems = (boMonEntry.items || []).filter(function (it) {
+        return it && (it.name || it.desc || it.image);
+      });
+      var boMonLimit = parseInt(boMonEntry.itemCount, 10);
+      if (boMonLimit > 0) boMonItems = boMonItems.slice(0, boMonLimit);
+      fillList(boMonBox, boMonItems.map(boMonCard).join(''), 'Chưa cập nhật bộ môn thi đấu.');
     }
 
     // Ban lãnh đạo — collection riêng trong CMS.
@@ -2046,13 +2084,12 @@
   function hydrateBrand(data) {
     var url = (data.settings && data.settings.logo) || '';
     if (!url) return;
+    /* Đặt ảnh BÊN TRONG vòng tròn, giữ nguyên viền tròn như trước: ô này đã là
+       flex căn giữa nên chỉ cần chèn <img> vào. Dùng ảnh nền cho cả ô thì mất
+       viền và logo bị kéo sát mép. */
     document.querySelectorAll('[data-logo-slot]').forEach(function (el) {
-      el.textContent = '';
-      el.style.border = 'none';
-      el.style.backgroundImage = "url('" + url + "')";
-      el.style.backgroundSize = 'contain';
-      el.style.backgroundRepeat = 'no-repeat';
-      el.style.backgroundPosition = 'center';
+      el.innerHTML = '<img src="' + esc(url) + '" alt="Logo VBSF" ' +
+        'style="width:78%;height:78%;object-fit:contain;display:block">';
     });
     /* Tab của trình duyệt: không có <link rel="icon"> sẵn trong HTML nên tự
        thêm, để đổi logo trong CMS là đổi luôn icon trên tab. */
