@@ -46,7 +46,28 @@ function countFor(key){
   return null;
 }
 
+/* Logo ở đầu thanh bên: dùng CHUNG ô "Logo tổ chức" của Thông tin tổ chức với
+   site, không có ô riêng cho CMS. Chưa tải lên thì giữ vòng tròn chữ "VBSF".
+   Gọi trong renderSidebar() vì hàm này chạy cả lúc đăng nhập xong lẫn ngay sau
+   khi lưu Thông tin tổ chức — đổi logo là thấy ngay, không cần tải lại trang. */
+function renderSidebarLogo(){
+  const badge = document.getElementById('sbBadge');
+  if(!badge) return;
+  const logo = (DB.settings && DB.settings.logo) || '';
+  badge.innerHTML = logo
+    ? `<img src="${escapeAttr(logo)}" alt="Logo" style="width:78%;height:78%;object-fit:contain;display:block">`
+    : 'VBSF';
+  let icon = document.querySelector('link[rel="icon"]');
+  if(logo && !icon){
+    icon = document.createElement('link');
+    icon.rel = 'icon';
+    document.head.appendChild(icon);
+  }
+  if(icon) icon.href = logo;
+}
+
 function renderSidebar(){
+  renderSidebarLogo();
   const nav = document.getElementById('sbNav');
   nav.innerHTML = NAV_GROUPS.map(group=>{
     const label = group.label ? `<div class="sb-group-label">${group.label}</div>` : '';

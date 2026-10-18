@@ -69,7 +69,11 @@ function renderSectionDetailPanel(pageKey, key){
   }
   html += `</div>`;
 
-  html += `<div class="sec-detail-group"><div class="sec-detail-group-label">Ảnh nền</div>${renderBackgroundImageInline(buf)}</div>`;
+  /* Section khai noBackground không có ô Ảnh nền: ảnh nền nằm sau nội dung,
+     section nào dựng bằng thẻ thì đặt nền vào chỉ làm chữ khó đọc. */
+  if(!def.noBackground){
+    html += `<div class="sec-detail-group"><div class="sec-detail-group-label">Ảnh nền</div>${renderBackgroundImageInline(buf)}</div>`;
+  }
 
   html += `<div class="sec-detail-actions">
     <button class="btn btn-ghost" id="secDiscardBtn">Hủy thay đổi</button>
