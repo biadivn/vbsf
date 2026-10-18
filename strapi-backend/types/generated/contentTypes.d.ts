@@ -1058,6 +1058,7 @@ export interface ApiSettingSetting extends Struct.SingleTypeSchema {
       'api::setting.setting'
     > &
       Schema.Attribute.Private;
+    logo: Schema.Attribute.Text;
     orgName: Schema.Attribute.String;
     orgShort: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;

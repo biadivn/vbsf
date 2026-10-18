@@ -58,7 +58,7 @@ function openViewModal(key, id){
       else if(f.type==='multiselect'){ val = Array.isArray(val) ? val.map(v=> (f.optionLabels?f.optionLabels[v]:null)||v).join(', ') : val; }
       else if(f.type==='checkbox'){ val = val ? 'Có' : 'Không'; }
       else if(f.type==='password'){ val = val ? '••••••••' : ''; }
-      else if(f.type==='image'){ return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label>${val?`<img src="${val}" style="width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block">`:`<div class="view-value"><span class="cell-muted">—</span></div>`}</div>`; }
+      else if(f.type==='image'){ return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label>${val?imagePreviewHtml(val, f.imageFit):`<div class="view-value"><span class="cell-muted">—</span></div>`}</div>`; }
       else if(f.type==='file'){ return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label><div class="view-value">${val&&val.name?escapeHtml(val.name):'<span class="cell-muted">—</span>'}</div></div>`; }
       else if(f.type==='richtext'){ return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label><div class="view-value">${val||'<span class="cell-muted">—</span>'}</div></div>`; }
       return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label><div class="view-value">${val!==undefined&&val!==null&&val!=='' ? escapeHtml(String(val)) : '<span class="cell-muted">—</span>'}</div></div>`;
@@ -240,8 +240,29 @@ function autoFillFromFile(fieldKey, file){
   });
 }
 
+/* Khung xem trước ảnh: dùng ở cả ba thời điểm (dựng form, chọn ảnh mới, gỡ
+   ảnh) nên dựng một chỗ để ba chỗ không lệch nhau. */
+function imagePreviewHtml(value, fit){
+  if(!value) return `<div style="width:96px;height:96px;border:1px dashed var(--line-strong);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--hint)"><i class="ti ti-photo" style="font-size:22px"></i></div>`;
+  return `<img src="${escapeAttr(value)}" style="width:96px;height:96px;object-fit:${fit==='contain'?'contain':'cover'};border-radius:8px;border:1px solid var(--line);background:var(--surface);display:block">`;
+}
+
 function attachModalImageEvents(){
   attachModalFileEvents();
+  /* Gỡ ảnh: '' (khác undefined) để lúc lưu ghi null lên Strapi — đây là cách
+     DUY NHẤT xoá ảnh đã tải lên, vì chọn tệp chỉ thay chứ không xoá được. */
+  document.querySelectorAll('[data-image-clear]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.getAttribute('data-image-clear');
+      modalImageValues[key] = '';
+      const input = document.querySelector('[data-image-field="'+key+'"]');
+      const fit = input ? input.getAttribute('data-image-fit') : 'cover';
+      if(input) input.value = '';
+      const box = document.getElementById('imgPreview_'+key);
+      if(box) box.innerHTML = imagePreviewHtml('', fit);
+      btn.style.display = 'none';
+    });
+  });
   document.querySelectorAll('[data-image-field]').forEach(input=>{
     input.addEventListener('change', (e)=>{
       const key = input.getAttribute('data-image-field');
@@ -250,7 +271,10 @@ function attachModalImageEvents(){
       const reader = new FileReader();
       reader.onload = (ev)=>{
         modalImageValues[key] = ev.target.result;
-        document.getElementById('imgPreview_'+key).innerHTML = `<img src="${ev.target.result}" style="width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block">`;
+        const box = document.getElementById('imgPreview_'+key);
+        if(box) box.innerHTML = imagePreviewHtml(ev.target.result, input.getAttribute('data-image-fit'));
+        const clearBtn = document.querySelector('[data-image-clear="'+key+'"]');
+        if(clearBtn) clearBtn.style.display = '';
       };
       reader.readAsDataURL(file);
     });
@@ -352,10 +376,16 @@ function renderField(f, value){
     return `<input type="password" id="f_${f.key}" value="${escapeAttr(value)}" placeholder="${escapeAttr(f.placeholder||'')}" autocomplete="new-password" ${disabledAttr}>${disabledHint}`;
   }
   if(f.type==='image'){
+    /* imageFit:'contain' cho ảnh KHÔNG được cắt (logo, mã QR); mặc định 'cover'
+       như cũ cho ảnh minh hoạ/chân dung. */
+    const fit = f.imageFit==='contain' ? 'contain' : 'cover';
     return `<div>
-      <div id="imgPreview_${f.key}" style="margin-bottom:8px">${value ? `<img src="${value}" style="width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block">` : `<div style="width:96px;height:96px;border:1px dashed var(--line-strong);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--hint)"><i class="ti ti-photo" style="font-size:22px"></i></div>`}</div>
-      <input type="file" accept="image/*" data-image-field="${f.key}">
-    </div>`;
+      <div id="imgPreview_${f.key}" style="margin-bottom:8px">${imagePreviewHtml(value, fit)}</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input type="file" accept="image/*" data-image-field="${f.key}" data-image-fit="${fit}">
+        <button type="button" class="btn btn-ghost" data-image-clear="${f.key}" style="${value ? '' : 'display:none'}"><i class="ti ti-trash"></i> Gỡ ảnh</button>
+      </div>
+    </div>${disabledHint}`;
   }
   if(f.type==='file'){
     /* value là object {name, size, url} do mapStrapiEntryToRecord dựng lại từ
