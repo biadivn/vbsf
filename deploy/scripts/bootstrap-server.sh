@@ -152,7 +152,7 @@ cat <<NEXT
        sudo certbot --nginx -d vbsf.vn -d www.vbsf.vn -d cms.vbsf.vn
   3. Thêm public key của CI vào ~/.ssh/authorized_keys, rồi đặt GitHub Secrets
      DEPLOY_HOST / DEPLOY_USER / DEPLOY_SSH_KEY (xem deploy/README.md).
-  4. Đẩy commit lên nhánh develop (hoặc chạy workflow tay) để deploy lần đầu.
+  4. Đẩy commit lên nhánh main (hoặc chạy workflow tay) để deploy lần đầu.
   5. Sau khi Strapi chạy, tạo admin đầu tiên: thêm BOOTSTRAP_ADMIN_EMAIL /
      BOOTSTRAP_ADMIN_PASSWORD vào $ENV_FILE rồi
        sudo systemctl restart $SERVICE

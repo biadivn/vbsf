@@ -1,0 +1,90 @@
+# SERVER CŨ (biadi.vn) — giữ nguyên cách deploy cũ: SSH vào server, chạy
+# `git reset --hard origin/develop` trong checkout /opt/vbsf rồi rsync tại chỗ.
+#
+# Trigger là nhánh **develop**. Server mới (vbsf.vn) deploy từ **main** bằng
+# deploy-web.yml — hai đường hoàn toàn tách biệt: khác nhánh, khác environment
+# (`production` cũ ↔ `production-vbsf-vn` mới), nên secret DEPLOY_HOST của bên
+# này không bao giờ chạm vào bên kia.
+name: Deploy VBSF Web (server cũ)
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - "index.html"
+      - "pages/**"
+      - "site-js/**"
+      - ".github/workflows/legacy-deploy-web.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: legacy-deploy-web
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Unit test + security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: strapi-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: strapi-backend
+        run: npm ci
+
+      # Gate trước khi build: coverage >= 80% và không có lỗ hổng high/critical.
+      - name: Verify
+        working-directory: strapi-backend
+        run: npm run verify
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Load deploy SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Sync static files to server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          REPO_PATH: ${{ vars.DEPLOY_REPO_PATH || '/opt/vbsf' }}
+          WEB_ROOT: ${{ vars.WEB_ROOT || '/var/www/vbsf-web' }}
+        run: |
+          set -euo pipefail
+          port="${DEPLOY_PORT:-22}"
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "$port" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+          # Cập nhật checkout Git trên server, rồi đồng bộ ra thư mục nginx serve
+          # (chạy rsync trên chính server, tránh round-trip file qua runner).
+          ssh -p "$port" "$DEPLOY_USER@$DEPLOY_HOST" "
+            set -euo pipefail
+            exec 200>'$REPO_PATH/.deploy.lock'
+            flock 200
+            cd '$REPO_PATH'
+            git fetch origin develop
+            git reset --hard origin/develop
+            mkdir -p '$WEB_ROOT/pages' '$WEB_ROOT/site-js'
+            # Gắn ?v=<commit ngắn> vào script src trong index.html để Cloudflare
+            # coi mỗi bản deploy là URL mới. Không có bước này thì site-js/ mới
+            # deploy vẫn bị phục vụ từ cache tới 4 giờ (Cache-Control max-age
+            # =14400 do nginx đặt cho .js) — người dùng chạy mã cũ mà không biết.
+            BUILD_ID=\$(git rev-parse --short HEAD)
+            sed \"s/__WEB_BUILD__/\$BUILD_ID/g\" '$REPO_PATH/index.html' > /tmp/index.deploy.html
+            rsync -a /tmp/index.deploy.html '$WEB_ROOT/index.html'
+            rsync -a --delete '$REPO_PATH/pages/' '$WEB_ROOT/pages/'
+            # index.html nạp site-js/ (lớp đọc dữ liệu Strapi + đăng nhập hội
+            # viên) — thiếu thư mục này thì site chạy như bản tĩnh cũ.
+            rsync -a --delete '$REPO_PATH/site-js/' '$WEB_ROOT/site-js/'
+          "

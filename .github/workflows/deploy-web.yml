@@ -4,7 +4,7 @@ name: Deploy VBSF Web
 # server không chạy git/build gì cả.
 on:
   push:
-    branches: [develop]
+    branches: [main]
     paths:
       - "index.html"
       - "pages/**"

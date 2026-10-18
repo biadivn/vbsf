@@ -5,7 +5,7 @@ name: Deploy VBSF Strapi
 # server chỉ đổi symlink và restart systemd (vài giây downtime, rollback nhanh).
 on:
   push:
-    branches: [develop]
+    branches: [main]
     paths:
       - "strapi-backend/**"
       - "deploy/scripts/**"

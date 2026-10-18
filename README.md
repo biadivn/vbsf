@@ -298,7 +298,7 @@ khỏi đơn. Dòng tóm tắt cũng nói thẳng điều đó, và đếm số 
 
 ## Triển khai
 
-Push lên nhánh **`develop`** là deploy. GitHub Actions build (`npm ci` +
+Push lên nhánh **`main`** là deploy. GitHub Actions build (`npm ci` +
 `strapi build`) ngay trên runner rồi rsync bản đã build sang server; server
 production chỉ cần **nvm + Node, Postgres, nginx** — không Docker, không build,
 không git checkout. Mỗi lần deploy là một thư mục release mới, đổi symlink

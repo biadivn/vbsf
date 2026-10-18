@@ -6,7 +6,13 @@ rsync sang server; server chỉ đổi symlink và restart systemd. Server produ
 vì thế chỉ cần một môi trường sạch: **nvm + Node, Postgres, nginx** — không
 Docker, không git checkout, không toolchain build.
 
-Nhánh trigger là **`develop`**. Push lên `main` không deploy gì cả.
+Nhánh trigger là **`main`**.
+
+> Server cũ (`biadi.vn`) vẫn còn và vẫn deploy được, nhưng từ nhánh **`develop`**
+> bằng bộ workflow `legacy-deploy-*.yml` (Docker + GHCR như trước, environment
+> `production`). Hai đường tách biệt hoàn toàn — khác nhánh, khác environment,
+> khác secret — nên không bên nào đẩy nhầm sang máy của bên kia. Khi tắt hẳn
+> server cũ thì xoá 3 file `legacy-deploy-*.yml` là xong.
 
 | Nguồn | Thư mục | Domain | Workflow |
 |---|---|---|---|
@@ -20,7 +26,7 @@ Strapi không có domain riêng — nginx reverse-proxy dưới cùng domain v�
 ## Kiến trúc
 
 ```
-GitHub (nhánh develop)
+GitHub (nhánh main)
    │  push
    ▼
 GitHub Actions runner ── npm ci + strapi build ── rsync ──┐
@@ -160,7 +166,7 @@ muốn duyệt tay trước mỗi lần lên production.
 
 ### 6. Deploy lần đầu + tài khoản admin
 
-Push lên `develop` (hoặc Actions → chọn workflow → *Run workflow*). Khi Strapi đã
+Push lên `main` (hoặc Actions → chọn workflow → *Run workflow*). Khi Strapi đã
 chạy, tạo admin đầu tiên bằng cách thêm vào `/opt/vbsf/shared/.env`:
 
 ```
@@ -174,7 +180,7 @@ và restart lại.
 ## Luồng deploy hằng ngày
 
 ```
-push lên develop
+push lên main
       │
       ├─ verify      npm ci → npm run verify (coverage ≥ 80%, không có CVE high/critical)
       ├─ build       npm ci → strapi build          (trên runner)

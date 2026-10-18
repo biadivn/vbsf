@@ -4,7 +4,7 @@ name: Deploy VBSF CMS
 # Phần backend (Strapi) deploy bằng workflow riêng: deploy-strapi.yml.
 on:
   push:
-    branches: [develop]
+    branches: [main]
     paths:
       - "cms.html"
       - "cms-js/**"

@@ -1,0 +1,123 @@
+# SERVER CŨ (biadi.vn) — giữ nguyên cách deploy cũ: build image Docker, push
+# GHCR, rồi SSH vào server chạy `git reset --hard origin/develop` +
+# `docker compose up -d`.
+#
+# Trigger là nhánh **develop**. Server mới (vbsf.vn) deploy từ **main** bằng
+# deploy-strapi.yml — hai đường hoàn toàn tách biệt: khác nhánh, khác
+# environment (`production` cũ ↔ `production-vbsf-vn` mới), nên secret
+# DEPLOY_HOST của bên này không bao giờ chạm vào bên kia.
+name: Deploy VBSF Strapi (server cũ)
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - "strapi-backend/**"
+      - ".github/workflows/legacy-deploy-strapi.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: legacy-deploy-strapi
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/vbsf-strapi
+
+jobs:
+  verify:
+    name: Unit test + security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: strapi-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: strapi-backend
+        run: npm ci
+
+      # Gate trước khi build: coverage >= 80% và không có lỗ hổng high/critical.
+      - name: Verify
+        working-directory: strapi-backend
+        run: npm run verify
+
+  build-and-push:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./strapi-backend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Load deploy SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Pull compose files and restart container on server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          REPO_PATH: ${{ vars.DEPLOY_REPO_PATH || '/opt/vbsf' }}
+          IMAGE_REF: ${{ env.IMAGE_NAME }}:latest
+        run: |
+          set -euo pipefail
+          port="${DEPLOY_PORT:-22}"
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "$port" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+          # .env sống trên server (không nằm trong git) và không bị git reset đụng tới.
+          ssh -p "$port" "$DEPLOY_USER@$DEPLOY_HOST" "
+            set -euo pipefail
+            exec 200>'$REPO_PATH/.deploy.lock'
+            flock 200
+            cd '$REPO_PATH'
+            git fetch origin develop
+            git reset --hard origin/develop
+            cd strapi-backend
+            GHCR_IMAGE='$IMAGE_REF' docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+            GHCR_IMAGE='$IMAGE_REF' docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+            docker image prune -f
+          "
