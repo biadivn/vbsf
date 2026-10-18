@@ -9,6 +9,7 @@ on:
       - "cms.html"
       - "cms-js/**"
       - ".github/workflows/deploy-cms.yml"
+      - ".github/scripts/**"
   workflow_dispatch: {}
 
 concurrency:
@@ -16,7 +17,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Backend phải lên trước frontend — xem .github/scripts/wait-for-strapi-deploy.sh.
+  wait-strapi:
+    name: Chờ Strapi cùng commit lên xong
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/wait-for-strapi-deploy.sh
+
   deploy:
+    needs: wait-strapi
     runs-on: ubuntu-latest
     environment: production-vbsf-vn
     steps:
