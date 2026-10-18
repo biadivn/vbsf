@@ -474,6 +474,14 @@
        nhất — banner trống trên trang chủ là tệ nhất. Ảnh banner của bài đè lên
        "Ảnh nền" của khối, vì ảnh đi kèm bài mới là thứ người đọc đang xem. */
     var banner = section(page, 'hero-banner');
+    if (banner && !data.news.length) {
+      /* Chưa có bài nào: xoá chữ mẫu và gỡ link, để banner không mời người ta
+         bấm vào một bài không tồn tại. */
+      setText(banner, '[data-hero-name]', 'Chưa có bài viết');
+      setText(banner, '[data-hero-meta]', '');
+      banner.removeAttribute('data-go');
+      banner.removeAttribute('data-doc');
+    }
     if (banner && data.news.length) {
       var feat = pickOne(cfg('hero-banner'), data.news, 'newsIds') || data.news[0];
       if (feat) {
@@ -516,17 +524,14 @@
 
     // Tin nổi bật (cột phải banner) — bài do CMS chọn, mặc định 3 bài mới nhất.
     var sideBox = items(section(page, 'hero-tin-noi-bat'));
-    if (sideBox && data.news.length) {
-      sideBox.innerHTML = pickItems(cfg('hero-tin-noi-bat'), data.news, 'newsIds', 3)
-        .map(function (n) { return newsRowSmall(n, 'width:64px;height:48px;border-radius:6px;flex-shrink:0'); })
-        .join('');
-    }
+    fillList(sideBox, pickItems(cfg('hero-tin-noi-bat'), data.news, 'newsIds', 3)
+      .map(function (n) { return newsRowSmall(n, 'width:64px;height:48px;border-radius:6px;flex-shrink:0'); })
+      .join(''), 'Chưa có bài viết nổi bật.');
 
     // Tin tức mới nhất
     var newsBox = items(section(page, 'tin-tuc-home'));
-    if (newsBox && data.news.length) {
-      newsBox.innerHTML = pickItems(cfg('tin-tuc-home'), data.news, 'newsIds', 3).map(newsCardHome).join('');
-    }
+    fillList(newsBox, pickItems(cfg('tin-tuc-home'), data.news, 'newsIds', 3).map(newsCardHome).join(''),
+      'Chưa có bài viết nào.');
 
     // Lịch giải đấu sắp diễn ra — giải đang diễn ra trước, rồi tới ngày gần nhất
     var schedule = items(section(page, 'lich-giai-dau'));
@@ -540,7 +545,7 @@
         })
         ;
       var picked = pickItems(cfg('lich-giai-dau'), upcoming, 'tournamentIds', 3);
-      if (picked.length) schedule.innerHTML = picked.map(tournamentRowHome).join('');
+      fillList(schedule, picked.map(tournamentRowHome).join(''), 'Chưa có giải đấu nào sắp diễn ra.');
     }
 
     // Top players — mỗi ô là 1 cặp (nhóm | bộ môn), tự động chạy slide
@@ -573,31 +578,54 @@
           '</div></div>'
         );
       }
-      if (grids[0] && male.length) grids[0].innerHTML = male.map(boxHtml).join('');
-      if (grids[1] && rest.length) grids[1].innerHTML = rest.map(boxHtml).join('');
+      fillList(grids[0], male.map(boxHtml).join(''), 'Chưa có dữ liệu xếp hạng.');
+      fillList(grids[1], rest.map(boxHtml).join(''), 'Chưa có dữ liệu xếp hạng.');
+    } else if (top) {
+      top.querySelectorAll('.tp-grid').forEach(function (g) {
+        fillList(g, '', 'Chưa có dữ liệu xếp hạng.');
+      });
     }
 
     // Dải logo đối tác
     var partnerBox = items(section(page, 'doi-tac-home'));
-    if (partnerBox && data.partners.length) {
-      partnerBox.innerHTML = pickItems(cfg('doi-tac-home'), data.partners, 'partnerIds', 5).map(function (p) {
-        return imageBox(p.image, 'width:96px;height:40px;border-radius:6px').replace('ti-photo', 'ti-building');
-      }).join('');
-    }
+    fillList(partnerBox, pickItems(cfg('doi-tac-home'), data.partners, 'partnerIds', 5).map(function (p) {
+      return imageBox(p.image, 'width:96px;height:40px;border-radius:6px').replace('ti-photo', 'ti-building');
+    }).join(''), 'Chưa có đối tác nào.');
   };
+
+  /* ---------- Khối dựng từ dữ liệu: rỗng thì phải NÓI là rỗng ----------
+
+     pages/*.html chứa sẵn nội dung mẫu của giai đoạn dựng prototype (bài viết,
+     giải đấu, đối tác... có tiêu đề và ngày tháng trông y như thật). Trước đây
+     mỗi khối chỉ ghi đè khi CÓ dữ liệu, nên khi Strapi chưa có gì — hoặc khi
+     vận hành vừa xoá sạch trong CMS — trang vẫn hiện nguyên nội dung mẫu.
+
+     Hai cái hại: người xem tưởng Liên đoàn đang có bài/giải đó, và người vận
+     hành tưởng thao tác xoá trong CMS không ăn. Nên từ đây: không có dữ liệu
+     thì thay bằng một dòng "chưa có", không bao giờ để lại markup mẫu. */
+  function emptyNote(text) {
+    return '<div style="font-size:12.5px;color:#8A968F;padding:10px 0">' + esc(text) + '</div>';
+  }
+
+  /** Ghi `html` vào khối; `html` rỗng thì ghi dòng "chưa có" thay vì để nguyên. */
+  function fillList(box, html, emptyText) {
+    if (!box) return;
+    box.innerHTML = html || emptyNote(emptyText || 'Chưa có nội dung.');
+  }
 
   /* Trang Tin tức phân trang THẬT: lọc chuyên mục + tìm kiếm + đổi trang đều
      gửi query lên Strapi, chỉ tải đúng số bài của trang đang xem. */
   var NEWS_PAGE_SIZE = 6;
 
   RENDER['tin-tuc'] = function (page, data) {
-    if (!data.news.length) return;
     var featured = pickItems(sectionEntry(data.pageContent, 'tin-tuc', 'tin-noi-bat'), data.news, 'newsIds', 1)[0]
       || data.news.filter(function (n) { return n.featured; })[0] || data.news[0];
 
     // Bài nổi bật
     var feat = section(page, 'tin-noi-bat');
-    if (feat) {
+    /* Không có bài nào: ẩn hẳn khối nổi bật thay vì để lại bài mẫu trong HTML. */
+    if (feat && !featured) feat.style.display = 'none';
+    if (feat && featured) {
       feat.setAttribute('data-doc', featured.documentId);
       var ph = feat.querySelector('.vb-ph');
       var url = mediaUrl(featured.image);
@@ -619,7 +647,10 @@
 
     // Sidebar "Tin xem nhiều"
     var side = section(page, 'sidebar-tin-tuc');
-    if (side) {
+    if (side && !data.news.length) {
+      var head = side.firstElementChild;
+      side.innerHTML = (head ? head.outerHTML : '') + emptyNote('Chưa có bài viết nào.');
+    } else if (side) {
       var sideHead = side.firstElementChild;
       side.innerHTML = sideHead.outerHTML + data.news.slice(0, 3).map(function (n) {
         return (
@@ -652,13 +683,13 @@
         'populate': 'image',
         'pagination[page]': state.page,
         'pagination[pageSize]': NEWS_PAGE_SIZE,
-        'filters[documentId][$ne]': featured.documentId,
+        'filters[documentId][$ne]': featured ? featured.documentId : undefined,
         'filters[category][$eq]': state.category || undefined,
         'filters[title][$containsi]': state.q || undefined,
       });
       grid.innerHTML = res.data.length
         ? res.data.map(newsCardList).join('')
-        : '<div style="font-size:12.5px;color:#8A968F">Không tìm thấy bài viết phù hợp.</div>';
+        : emptyNote(state.q || state.category ? 'Không tìm thấy bài viết phù hợp.' : 'Chưa có bài viết nào.');
       renderPager(pagerBox, res.pagination, function (p) { state.page = p; show(); });
     }
 
@@ -685,7 +716,6 @@
   };
 
   RENDER['giai-dau'] = function (page, data) {
-    if (!data.tournaments.length) return;
 
     var live = data.tournaments.filter(function (t) { return t.status === 'ongoing'; });
     var liveSec = section(page, 'dang-dien-ra');
@@ -740,16 +770,16 @@
     function renderUpcoming() {
       if (!upcomingBox) return;
       var list = data.tournaments.filter(function (t) { return t.status === 'upcoming' && matches(t); }).sort(byDateAsc);
-      upcomingBox.innerHTML = list.length
-        ? list.map(tournamentRowUpcoming).join('')
-        : '<div style="font-size:12.5px;color:#8A968F">Không có giải đấu nào phù hợp bộ lọc.</div>';
+      var loc = (catSel && catSel.value) || (yearSel && yearSel.value);
+      fillList(upcomingBox, list.map(tournamentRowUpcoming).join(''),
+        loc ? 'Không có giải đấu nào phù hợp bộ lọc.' : 'Chưa có giải đấu nào sắp diễn ra.');
     }
     function renderDone() {
       if (!doneBox) return;
       var list = data.tournaments.filter(function (t) { return t.status === 'completed' && matches(t); }).sort(byDateDesc);
-      doneBox.innerHTML = list.length
-        ? list.map(function (t) { return tournamentRowFinished(t, finalStandings(data, t)); }).join('')
-        : '<div style="font-size:12.5px;color:#8A968F">Không có kết quả nào phù hợp bộ lọc.</div>';
+      var locD = (catSel && catSel.value) || (yearSel && yearSel.value);
+      fillList(doneBox, list.map(function (t) { return tournamentRowFinished(t, finalStandings(data, t)); }).join(''),
+        locD ? 'Không có kết quả nào phù hợp bộ lọc.' : 'Chưa có giải đấu nào đã kết thúc.');
     }
     function renderLive() {
       if (!liveSec) return;
@@ -765,9 +795,18 @@
   };
 
   RENDER['ranking'] = function (page, data) {
-    if (!data.members.length) return;
     var keys = rankingKeys(data.members);
-    if (!keys.length) return;
+    /* Chưa có hội viên/điểm số: dọn sạch bục vinh danh và bảng xếp hạng mẫu,
+       nói rõ là chưa có dữ liệu. */
+    if (!keys.length) {
+      var emptyCar = section(page, 'rk-carousel');
+      if (emptyCar) {
+        emptyCar.querySelectorAll('.rk-car-slide').forEach(function (x) { x.remove(); });
+        fillList(emptyCar, '', 'Chưa có dữ liệu xếp hạng.');
+      }
+      fillList(items(section(page, 'bang-xep-hang')), '', 'Chưa có hội viên nào trong bảng xếp hạng.');
+      return;
+    }
 
     // Carousel Top 3
     var carousel = section(page, 'rk-carousel');
@@ -899,6 +938,7 @@
 
   RENDER['thu-vien'] = function (page, data) {
     var docsBox = items(section(page, 'van-ban-luat'));
+    if (docsBox && !data.libraryDocs.length) fillList(docsBox, '', 'Chưa có văn bản nào.');
     if (docsBox && data.libraryDocs.length) {
       var TAG_STYLE = {
         'Quy chế': 'background:#E8EEF9;color:#21428E',
@@ -932,6 +972,7 @@
     }
 
     var mediaBox = items(section(page, 'thu-vien-media'));
+    if (mediaBox && !data.mediaItems.length) fillList(mediaBox, '', 'Chưa có album ảnh/video nào.');
     if (mediaBox && data.mediaItems.length) {
       mediaBox.innerHTML = data.mediaItems.map(function (m) {
         var cover = (m.assets && m.assets[0]) || null;
@@ -955,7 +996,6 @@
   };
 
   RENDER['doi-tac'] = function (page, data) {
-    if (!data.partners.length) return;
     var TIERS = [
       { name: 'Đối tác chiến lược', named: true },
       { name: 'Nhà tài trợ Kim cương', height: 84, icon: 'ti-building-skyscraper', size: '26px' },
@@ -1016,6 +1056,7 @@
 
     // Ban lãnh đạo — collection riêng trong CMS.
     var box = page.querySelector('[data-leaders]');
+    if (box && !data.leaders.length) fillList(box, '', 'Chưa cập nhật ban lãnh đạo.');
     if (box && data.leaders.length) {
       box.innerHTML = data.leaders.map(function (l) {
         return (
