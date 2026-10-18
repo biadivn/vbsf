@@ -149,9 +149,14 @@ Repo → Settings → Secrets and variables → Actions.
 | `WEB_ROOT` | `/var/www/vbsf-web` |
 | `CMS_ROOT` | `/var/www/vbsf-cms` |
 
-Tạo thêm **Environment** tên `production` (Settings → Environments) — cả 3
-workflow deploy qua environment này; bật "required reviewers" ở đây nếu muốn
-duyệt tay trước mỗi lần lên production.
+Tạo thêm **Environment** tên `production-vbsf-vn` (Settings → Environments) —
+cả 3 workflow deploy qua environment này; bật "required reviewers" ở đây nếu
+muốn duyệt tay trước mỗi lần lên production.
+
+> Tên khác `production` là có chủ đích: environment cũ đó trỏ về server
+> biadi.vn. **Đặt 4 secret ở cấp environment này**, không phải cấp repo —
+> secret của environment ghi đè secret repo trùng tên, nhờ vậy `DEPLOY_HOST`
+> của server cũ không kéo nhầm bản deploy mới về máy cũ.
 
 ### 6. Deploy lần đầu + tài khoản admin
 
