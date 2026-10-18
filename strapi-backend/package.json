@@ -13,6 +13,7 @@
     "start": "strapi start",
     "strapi": "strapi",
     "seed": "node scripts/seed.js",
+    "clear-demo": "node scripts/clear-demo-content.js",
     "migrate:website": "node scripts/migrate-website-content.js",
     "smoke-test": "node scripts/smoke-test.js",
     "upgrade": "npx @strapi/upgrade latest",

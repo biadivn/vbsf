@@ -13,6 +13,7 @@
   "pluginOptions": {},
   "attributes": {
     "orgName": { "type": "string" },
+    "logo": { "type": "text" },
     "about": { "type": "text" },
     "orgShort": { "type": "string" },
     "feeFirstTime": { "type": "string" },

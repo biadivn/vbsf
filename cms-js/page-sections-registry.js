@@ -281,6 +281,12 @@ function normalizePageSections(){
 }
 
 const SETTINGS_FIELDS = [
+  /* Logo: site thay vòng tròn chữ "VBSF" ở đầu trang và ở chân trang bằng ảnh
+     này. Để trống thì site giữ nguyên vòng tròn chữ. Lưu cùng cách với hai mã
+     QR bên dưới (data URI trong một ô text), nên nhớ tải ảnh đã nén — ảnh nằm
+     trong phản hồi /api/setting mà trang nào cũng gọi. */
+  {key:'logo', label:'Logo tổ chức', type:'image', span2:true, imageFit:'contain',
+   hint:'Nền trong suốt (PNG/SVG), nên dưới 200KB. Để trống: site hiện vòng tròn chữ VBSF.'},
   {key:'orgName', label:'Tên đầy đủ tổ chức', type:'text', span2:true},
   {key:'orgShort', label:'Tên viết tắt', type:'text'},
   {key:'feeFirstTime', label:'Lệ phí tham gia lần đầu (VNĐ)', type:'text', placeholder:'200.000đ'},

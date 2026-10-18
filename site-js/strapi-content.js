@@ -478,7 +478,7 @@
       /* Chưa có bài nào: xoá chữ mẫu và gỡ link, để banner không mời người ta
          bấm vào một bài không tồn tại. */
       setText(banner, '[data-hero-name]', 'Chưa có bài viết');
-      setText(banner, '[data-hero-meta]', '');
+      clearText(banner, '[data-hero-meta]');
       banner.removeAttribute('data-go');
       banner.removeAttribute('data-doc');
     }
@@ -498,8 +498,12 @@
        (http…) mở tab mới; còn lại coi như trang trong site. Bỏ trống thì giữ
        nguyên data-go có sẵn trong HTML (trang Trực tiếp). */
     var eventBanner = section(page, 'event-banner');
-    if (eventBanner) {
-      var ebCfg = cfg('event-banner');
+    var ebCfg = eventBanner ? cfg('event-banner') : null;
+    /* Chưa cấu hình trong CMS thì ẩn hẳn: chữ mẫu trong HTML là một sự kiện cụ
+       thể ("Vòng chung kết ... tại Nhà thi đấu Phú Thọ"), để nguyên là quảng
+       cáo một sự kiện không có thật. */
+    if (eventBanner) eventBanner.style.display = ebCfg ? '' : 'none';
+    if (eventBanner && ebCfg) {
       /* Chữ của khối này màu trắng. Tải ảnh banner lên mà để nguyên thì gặp ảnh
          sáng là không đọc được, nên phủ thêm một lớp tối lên trên ảnh. */
       if (ebCfg && ebCfg.backgroundImage) {
@@ -611,6 +615,53 @@
   function fillList(box, html, emptyText) {
     if (!box) return;
     box.innerHTML = html || emptyNote(emptyText || 'Chưa có nội dung.');
+  }
+
+  /** Xoá trắng một ô chữ. setText() cố tình bỏ qua chuỗi rỗng (để không ghi đè
+      nhầm khi dữ liệu thiếu field), nên muốn XOÁ phải đi đường này. */
+  function clearText(scope, selector) {
+    var el = scope && scope.querySelector(selector);
+    if (el) el.textContent = '';
+  }
+
+  /* Trang chi tiết mở mà không có bản ghi — vào thẳng bằng link, bản ghi đã bị
+     xoá, hoặc API lỗi. Phải nói "không tìm thấy" chứ không được để nguyên nội
+     dung mẫu: ở trang Trực tiếp, nội dung mẫu là cả một bảng tỷ số với tên vận
+     động viên cụ thể, người xem không có cách nào biết đó là dữ liệu giả. */
+  function showMissing(page, text) {
+    /* Không ghi đè page.innerHTML: trang chi tiết nằm sẵn trong DOM sau lần nạp
+       đầu, và initTourneyDetail() đã gắn sự kiện vào các tab bên trong — ghi đè
+       là mất hết, lần sau mở một giải CÓ thật thì tab không bấm được nữa. Chỉ
+       ẩn phần thân rồi chèn một khối thông báo, và gỡ được. */
+    var note = page.querySelector('[data-missing-note]');
+    if (!note) {
+      note = document.createElement('div');
+      note.setAttribute('data-missing-note', '');
+      note.style.padding = '26px';
+      page.appendChild(note);
+    }
+    note.innerHTML = emptyNote(text) +
+      '<div style="margin-top:12px"><span class="vb-link" data-go="trang-chu" style="cursor:pointer">← Về trang chủ</span></div>';
+    note.style.display = '';
+    Array.prototype.forEach.call(page.children, function (el) {
+      if (el === note) return;
+      if (el.getAttribute('data-hidden-by-missing') == null) {
+        el.setAttribute('data-hidden-by-missing', el.style.display);
+      }
+      el.style.display = 'none';
+    });
+  }
+
+  /** Ngược của showMissing(): lần này có bản ghi thì mở lại thân trang. */
+  function hideMissing(page) {
+    var note = page.querySelector('[data-missing-note]');
+    if (note) note.style.display = 'none';
+    Array.prototype.forEach.call(page.children, function (el) {
+      var prev = el.getAttribute('data-hidden-by-missing');
+      if (prev == null) return;
+      el.style.display = prev;
+      el.removeAttribute('data-hidden-by-missing');
+    });
   }
 
   /* Trang Tin tức phân trang THẬT: lọc chuyên mục + tìm kiếm + đổi trang đều
@@ -1054,6 +1105,18 @@
        HTML là hỏng mà không ai biết. Khối đọc chung.values thì đã chết sẵn, vì
        CMS ghi vào entry.content chứ không phải entry.values. */
 
+    /* Dải 4 ô số liệu là nội bộ khối "Thông tin chung". HTML mẫu ghi sẵn
+       "200x / 1.500+ hội viên / 120+ CLB / 30+ tỉnh thành" — CMS chưa nhập thì
+       ẩn hẳn dải, vì để lại là Liên đoàn công bố những con số không có thật. */
+    var stats = page.querySelector('[data-stats]');
+    if (stats) {
+      var sc = (sectionEntry(data.pageContent, 'gioi-thieu', 'thong-tin-chung') || {}).content || {};
+      var hasStat = ['stat1Value', 'stat2Value', 'stat3Value', 'stat4Value'].some(function (k) {
+        return sc[k] != null && String(sc[k]).trim() !== '';
+      });
+      stats.style.display = hasStat ? '' : 'none';
+    }
+
     // Ban lãnh đạo — collection riêng trong CMS.
     var box = page.querySelector('[data-leaders]');
     if (box && !data.leaders.length) fillList(box, '', 'Chưa cập nhật ban lãnh đạo.');
@@ -1267,8 +1330,10 @@
     if (!box) return;
     var evs = regEvents(t);
     if (!evs.length) {
+      /* Giải chưa khai lệ phí: để "—". Ô mẫu trong HTML ghi 200.000đ, giữ lại
+         là báo sai số tiền người đăng ký phải nộp. */
       var base = page.querySelector('[data-reg-fee-base]');
-      if (base && t && t.entryFee) base.textContent = t.entryFee;
+      if (base) base.textContent = (t && t.entryFee) ? t.entryFee : '—';
       return;
     }
     box.innerHTML = evs.map(function (e) {
@@ -1771,7 +1836,8 @@
   /** Bài viết: đổ tiêu đề/ảnh/nội dung richtext + tin liên quan. */
   function fillArticle(page, data, docId) {
     var n = data.news.filter(function (a) { return a.documentId === docId; })[0];
-    if (!n) return;
+    if (!n) { showMissing(page, 'Không tìm thấy bài viết này. Bài có thể đã được gỡ.'); return; }
+    hideMissing(page);
 
     var headWrap = page.firstElementChild;
     var crumb = headWrap.querySelector('[style*="font-size:11px"] span:last-child');
@@ -1852,9 +1918,15 @@
   /** Chi tiết giải đấu: bảng giải thưởng + thể lệ lấy từ chính giải đó. */
   function fillTournamentDetail(page, data, docId) {
     var t = data.tournaments.filter(function (x) { return x.documentId === docId; })[0];
-    if (!t) return;
+    if (!t) { showMissing(page, 'Không tìm thấy giải đấu này. Giải có thể đã được gỡ.'); return; }
+    hideMissing(page);
 
     var prizeBody = page.querySelector('[data-tabpanel="chung"] table.rk-tbl tbody');
+    /* Bảng giải thưởng mẫu trong HTML ghi sẵn "20.000.000đ". Giải chưa khai giải
+       thưởng thì phải nói là chưa công bố, không để lại con số đó. */
+    if (prizeBody && !(t.prizes && t.prizes.length)) {
+      prizeBody.innerHTML = '<tr><td colspan="3" style="color:#8A968F">Chưa công bố cơ cấu giải thưởng.</td></tr>';
+    }
     if (prizeBody && t.prizes && t.prizes.length) {
       prizeBody.innerHTML = t.prizes.map(function (p) {
         var cash = p.cash && p.cash !== '—'
@@ -1866,6 +1938,9 @@
     }
 
     var rulesTarget = page.querySelector('[data-rules-target]');
+    if (rulesTarget && !t.rules) {
+      rulesTarget.innerHTML = emptyNote('Chưa công bố thể lệ giải.');
+    }
     if (rulesTarget && t.rules) {
       // Dòng bắt đầu bằng "·" là một điều luật; dòng còn lại là tiêu đề nhóm.
       rulesTarget.innerHTML = t.rules.split('\n').map(function (raw) {
@@ -1882,7 +1957,17 @@
   /** Kết quả trực tiếp: dựng lại từng vòng đấu từ bracket JSON của engine. */
   function fillLiveResults(page, data, docId) {
     var t = data.tournaments.filter(function (x) { return x.documentId === docId; })[0];
-    if (!t || !t.bracket || !t.bracket.rounds) return;
+    if (!t) { showMissing(page, 'Không tìm thấy giải đấu này. Giải có thể đã được gỡ.'); return; }
+    hideMissing(page);
+
+    /* Nội dung mẫu của trang này là CẢ MỘT BẢNG TỶ SỐ với tên vận động viên cụ
+       thể. Chưa có sơ đồ thi đấu mà để nguyên thì người xem không có cách nào
+       biết đó là dữ liệu giả — nên xoá trước, điền sau. */
+    var liveBody = page.children[1];
+    if (!t.bracket || !t.bracket.rounds || !t.bracket.rounds.length) {
+      fillList(liveBody, '', 'Giải chưa bốc thăm xếp cặp. Kết quả sẽ hiển thị khi giải bắt đầu.');
+      return;
+    }
 
     var nameOf = {};
     (t.players || []).forEach(function (p) { nameOf[p.localId] = p.name; });
@@ -1933,11 +2018,9 @@
         ms.map(matchRow).join('') + '</div>';
     });
 
-    var body = page.children[1];
-    if (body && html) {
-      body.innerHTML = html +
-        '<div style="font-size:11px;color:#8A968F;margin-top:14px">Tỷ số theo thể thức đấu loại trực tiếp · Cập nhật tự động khi có kết quả mới</div>';
-    }
+    fillList(liveBody, html && html +
+      '<div style="font-size:11px;color:#8A968F;margin-top:14px">Tỷ số theo thể thức đấu loại trực tiếp · Cập nhật tự động khi có kết quả mới</div>',
+      'Chưa có trận nào bắt đầu. Kết quả sẽ hiển thị ngay khi có.');
   }
 
   /** Kết quả chung cuộc: bảng xếp hạng chi tiết có thể chưa có dữ liệu. */
@@ -1949,7 +2032,38 @@
     }
   }
 
+  var DETAIL_FILL = {
+    'tin-tuc-chi-tiet': fillArticle,
+    'giai-dau-chi-tiet': fillTournamentDetail,
+    'giai-dau-truc-tiep': fillLiveResults,
+  };
+
   /* ---------------- API công khai ---------------- */
+
+  /* Logo do CMS quản lý (Thông tin tổ chức → Logo tổ chức). Nằm ngoài các trang
+     như footer nên điền theo tài liệu, không theo trang. Chưa tải lên thì giữ
+     nguyên vòng tròn chữ "VBSF" trong HTML. */
+  function hydrateBrand(data) {
+    var url = (data.settings && data.settings.logo) || '';
+    if (!url) return;
+    document.querySelectorAll('[data-logo-slot]').forEach(function (el) {
+      el.textContent = '';
+      el.style.border = 'none';
+      el.style.backgroundImage = "url('" + url + "')";
+      el.style.backgroundSize = 'contain';
+      el.style.backgroundRepeat = 'no-repeat';
+      el.style.backgroundPosition = 'center';
+    });
+    /* Tab của trình duyệt: không có <link rel="icon"> sẵn trong HTML nên tự
+       thêm, để đổi logo trong CMS là đổi luôn icon trên tab. */
+    var icon = document.querySelector('link[rel="icon"]');
+    if (!icon) {
+      icon = document.createElement('link');
+      icon.rel = 'icon';
+      document.head.appendChild(icon);
+    }
+    icon.href = url;
+  }
 
   /* Footer nằm ngoài các trang (luôn hiển thị) nên điền một lần, không theo trang. */
   function hydrateFooter(data) {
@@ -2046,7 +2160,7 @@
   async function hydrate(pageId, page) {
     var data = await load();
     if (!data) return;
-    try { hydrateFooter(data); applyPageContent(pageId, page, data); }
+    try { hydrateBrand(data); hydrateFooter(data); applyPageContent(pageId, page, data); }
     catch (err) { console.warn('[VBSF] Lỗi áp nội dung trang.', err); }
     var fn = RENDER[pageId];
     if (!fn) return;
@@ -2073,11 +2187,25 @@
     }
 
     var data = await load();
-    if (!data || !dataset) return;
+    if (!data || !page) return;
     try {
-      if (dest === 'tin-tuc-chi-tiet' && dataset.doc) fillArticle(page, data, dataset.doc);
-      if (dest === 'giai-dau-chi-tiet' && dataset.doc) fillTournamentDetail(page, data, dataset.doc);
-      if (dest === 'giai-dau-truc-tiep' && dataset.doc) fillLiveResults(page, data, dataset.doc);
+      /* Trang chi tiết: chạy KỂ CẢ khi không có dataset.
+
+         Hai đường vào không mang dataset: điều hướng bằng hash (link dán ra
+         ngoài, bấm back) và chính cú bấm vừa rồi — nó gán location.hash nên
+         hashchange gọi lại afterNav() với dataset null. Trước đây cả hai bị
+         guard chặn, nên vào bằng hash là thấy nguyên bài viết/bảng tỷ số mẫu
+         trong pages/*.html, không có gì báo đó là dữ liệu giả.
+
+         Nhớ documentId của lần bấm gần nhất (như __regDoc ở trang đăng ký) để
+         lần gọi thứ hai không coi là "không có bản ghi" và xoá trắng bài vừa
+         mở. Không có documentId nào thì các hàm fill* tự hiện "không tìm
+         thấy". */
+      var detailFill = DETAIL_FILL[dest];
+      if (detailFill) {
+        if (dataset && dataset.doc) page.__detailDoc = dataset.doc;
+        detailFill(page, data, page.__detailDoc || '');
+      }
       if (dest === 'giai-dau-ket-qua') fillFinalResults(page);
     } catch (err) {
       console.warn('[VBSF] Lỗi điền trang "' + dest + '".', err);
