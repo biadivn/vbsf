@@ -14,6 +14,7 @@ on:
       - "cms.html"
       - "cms-js/**"
       - ".github/workflows/legacy-deploy-cms.yml"
+      - ".github/scripts/**"
   workflow_dispatch: {}
 
 concurrency:
@@ -21,7 +22,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Backend phải lên trước frontend — xem .github/scripts/wait-for-strapi-deploy.sh.
+  # Server cũ dùng workflow legacy-deploy-strapi.yml nên phải nói rõ tên và danh
+  # sách đường dẫn kích hoạt nó, khác mặc định (đường của server mới).
+  wait-strapi:
+    name: Chờ Strapi cùng commit lên xong
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          STRAPI_WORKFLOW: legacy-deploy-strapi.yml
+          STRAPI_PATHS_RE: '^(strapi-backend/|\.github/workflows/legacy-deploy-strapi\.yml$)'
+        run: .github/scripts/wait-for-strapi-deploy.sh
+
   deploy:
+    needs: wait-strapi
     runs-on: ubuntu-latest
     environment: production
     steps:
