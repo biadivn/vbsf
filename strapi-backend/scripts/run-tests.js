@@ -51,6 +51,7 @@ const COVERAGE_SCOPE = [
   '../site-js/config.js',
   '../site-js/member-auth.js',
   '../site-js/page-config.js',
+  '../site-js/i18n.js',
   '../cms-js/tournament-seeding.js',
 ];
 

@@ -1,9 +1,65 @@
 /* =========================================================
    SECTION DETAIL PANEL (mô phỏng)
    ========================================================= */
+/* Ngôn ngữ đang nhập cho panel section. Panel đọc/ghi thẳng vào 4 khoá của
+   buffer (title, content, items, backgroundImage); thay vì luồn thêm một tham
+   số qua từng hàm render, đổi ngôn ngữ là TRÁO nội dung 4 khoá đó và cất bản
+   kia vào buf.__shapes. Nhờ vậy toàn bộ phần dựng form bên dưới giữ nguyên.
+
+   Những thứ KHÔNG dịch — số lượng hiển thị, danh sách tin/giải/đối tác đã chọn
+   — bị khoá khi đang nhập tiếng Anh, vì chúng là một bản duy nhất dùng chung. */
+let sectionLang = 'vi';
+
+/** Bốn khoá mà bản dịch có bản riêng. */
+function sectionShapeOf(src, itemCount){
+  return {
+    title: src ? src.title : undefined,
+    content: src && src.content ? {...src.content} : undefined,
+    items: src && src.items ? JSON.parse(JSON.stringify(src.items))
+      : (itemCount != null ? Array.from({length: itemCount}, ()=>({})) : undefined),
+    backgroundImage: (src && src.backgroundImage) || null,
+  };
+}
+
+function stashSectionShape(){
+  const buf = sectionEditBuffer;
+  if(!buf) return;
+  buf.__shapes = buf.__shapes || {};
+  buf.__shapes[sectionLang] = sectionShapeOf(buf);
+}
+
+function applySectionShape(lang){
+  const buf = sectionEditBuffer;
+  if(!buf) return;
+  buf.__shapes = buf.__shapes || {};
+  const viItems = (buf.__shapes.vi && buf.__shapes.vi.items) || [];
+  const shape = buf.__shapes[lang] || sectionShapeOf(null, lang==='en' ? viItems.length : null);
+  /* Bản tiếng Anh phải có đúng số mục như bản tiếng Việt để hai bên khớp theo
+     vị trí — dịch xong mới thêm mục bên tiếng Việt thì mục mới chưa có bản dịch,
+     site tự giữ tiếng Việt cho mục đó. */
+  if(lang==='en' && viItems.length){
+    shape.items = viItems.map((_, i)=> (shape.items && shape.items[i]) || {});
+  }
+  buf.title = shape.title;
+  buf.content = shape.content;
+  buf.items = shape.items;
+  buf.backgroundImage = shape.backgroundImage;
+}
+
+function setSectionLang(next, pageKey, key){
+  if(next===sectionLang) return;
+  const def = getSectionDef(pageKey, key);
+  readSectionInputs(def, sectionEditBuffer);
+  stashSectionShape();
+  sectionLang = next;
+  applySectionShape(next);
+  renderContent();
+}
+
 function ensureSectionEditBuffer(pageKey, key){
   if(sectionEditBuffer && sectionEditBuffer.pageKey===pageKey && sectionEditBuffer.key===key) return;
   const entry = DB.pageSections[pageKey].find(r=>r.key===key) || {};
+  sectionLang = 'vi';
   sectionEditBuffer = {
     pageKey, key,
     title: entry.title,
@@ -16,6 +72,11 @@ function ensureSectionEditBuffer(pageKey, key){
     pickerMode: entry.pickerMode || 'manual',
     autoCount: entry.autoCount,
     backgroundImage: entry.backgroundImage || null
+  };
+  sectionEditBuffer.__shapes = {
+    vi: sectionShapeOf(sectionEditBuffer),
+    en: sectionShapeOf((entry.i18n && entry.i18n.en) || null,
+      sectionEditBuffer.items ? sectionEditBuffer.items.length : null),
   };
 }
 
@@ -38,13 +99,27 @@ function renderSectionDetailPanel(pageKey, key){
       <span class="sec-status-tag ${entry.enabled?'on':'off'}">${entry.enabled?'Đang hiển thị':'Đang ẩn'}</span>
     </div>`;
 
+  /* Công tắc ngôn ngữ: cùng một section, hai bản nội dung. Chỉ hiện khi section
+     thật sự có chữ để dịch — khối chỉ chọn tin/giải/đối tác thì không có gì. */
+  const translatable = def.title!==undefined || def.fields || def.itemFields || !def.noBackground;
+  if(translatable){
+    html += `<div class="sec-detail-group" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div class="sec-detail-group-label" style="margin:0">Ngôn ngữ nội dung</div>
+      <div class="langsw-cms">
+        <button type="button" class="${sectionLang==='vi'?'on':''}" data-sec-lang="vi">Tiếng Việt</button>
+        <button type="button" class="${sectionLang==='en'?'on':''}" data-sec-lang="en">English</button>
+      </div>
+      ${sectionLang==='en' ? `<span class="hint" style="margin:0"><i class="ti ti-info-circle"></i> Ô để trống thì trang tiếng Anh dùng bản tiếng Việt.</span>` : ''}
+    </div>`;
+  }
+
   html += `<div class="sec-detail-group">
     <div class="sec-detail-group-label">Hiển thị</div>`;
   if(def.title!==undefined){
     html += `<div class="fld" style="max-width:420px"><label>Tiêu đề hiển thị</label><input type="text" id="secTitleInput" value="${escapeAttr(buf.title ?? '')}" placeholder="${escapeAttr(def.title||'')}"></div>`;
   }
   if(def.items){
-    html += `<div class="fld" style="max-width:160px;margin-top:${def.title!==undefined?'14px':'0'}"><label>Số lượng hiển thị</label><input type="number" min="1" max="${def.maxItems}" id="secCountInput" value="${buf.itemCount ?? def.itemCount}"></div>`;
+    html += `<div class="fld" style="max-width:160px;margin-top:${def.title!==undefined?'14px':'0'}"><label>Số lượng hiển thị</label><input type="number" min="1" max="${def.maxItems}" id="secCountInput" value="${buf.itemCount ?? def.itemCount}" ${sectionLang==='en'?'disabled':''}></div>`;
   }
   if(def.title===undefined && !def.items){
     html += `<div class="hint">Section này không có tuỳ chọn hiển thị bổ sung.</div>`;
@@ -52,7 +127,11 @@ function renderSectionDetailPanel(pageKey, key){
   html += `</div>`;
 
   html += `<div class="sec-detail-group"><div class="sec-detail-group-label">Nội dung</div>`;
-  if(def.tournamentSelect){
+  /* Danh sách tin/giải/đối tác đã chọn là MỘT bản dùng chung cho cả hai ngôn
+     ngữ (bản dịch của từng bài nằm ở chính bài đó), nên không mở ra ở đây. */
+  if(sectionLang==='en' && (def.tournamentSelect || def.newsPicker || def.partnerPicker)){
+    html += `<div class="hint">Danh sách đã chọn dùng chung cho cả hai ngôn ngữ. Bản tiếng Anh của từng mục nhập ở chính module của mục đó (Tin tức, Giải đấu, Đối tác).</div>`;
+  } else if(def.tournamentSelect){
     html += renderPickerModeSection('tournament', def, buf);
   } else if(def.newsPicker){
     html += renderPickerModeSection('news', def, buf);
@@ -207,11 +286,13 @@ function renderItemsEditorInline(itemFields, items){
     return `<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line-strong);border-radius:10px;margin-bottom:10px" data-sec-ci-row="${idx}">
       ${imageHtml}
       <div style="flex:1;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 14px">${fieldsHtml}</div>
-      <button class="btn-icon" data-sec-ci-remove="${idx}" title="Xóa mục" style="flex-shrink:0"><i class="ti ti-trash"></i></button>
+      ${sectionLang==='en' ? '' : `<button class="btn-icon" data-sec-ci-remove="${idx}" title="Xóa mục" style="flex-shrink:0"><i class="ti ti-trash"></i></button>`}
     </div>`;
   }).join('');
+  /* Thêm/bớt mục chỉ làm ở bản tiếng Việt: bản dịch khớp với bản gốc THEO VỊ
+     TRÍ, thêm bớt lệch một bên là cả hai lệch nhau hết. */
   return `<div id="secCiList">${rows || '<div class="empty" style="padding:24px"><b>Chưa có mục nào</b></div>'}</div>
-    <button class="btn btn-ghost" id="secCiAdd" style="margin-top:4px"><i class="ti ti-plus"></i> Thêm mục</button>`;
+    ${sectionLang==='en' ? '' : `<button class="btn btn-ghost" id="secCiAdd" style="margin-top:4px"><i class="ti ti-plus"></i> Thêm mục</button>`}`;
 }
 
 function renderBackgroundImageInline(buf){
@@ -258,6 +339,10 @@ function attachSectionDetailEvents(pageKey, key){
   const def = getSectionDef(pageKey, key);
   const buf = sectionEditBuffer;
   attachRTEEvents();
+
+  document.querySelectorAll('[data-sec-lang]').forEach(b=>{
+    b.addEventListener('click', ()=> setSectionLang(b.getAttribute('data-sec-lang'), pageKey, key));
+  });
 
   const renameBtn = document.querySelector('[data-rename-section-detail]');
   if(renameBtn) renameBtn.addEventListener('click', ()=>{
@@ -371,6 +456,11 @@ async function saveSectionDetail(pageKey, key){
   const buf = sectionEditBuffer;
 
   readSectionInputs(def, buf);
+  /* Chốt bản đang mở rồi đưa buffer về bản tiếng Việt: các dòng gán bên dưới
+     đọc thẳng buf.* và phải luôn ghi bản tiếng Việt vào entry, bất kể admin
+     đang mở tab nào. */
+  stashSectionShape();
+  applySectionShape('vi');
 
   const entry = DB.pageSections[pageKey].find(r=>r.key===key);
   if(def.title!==undefined) entry.title = buf.title;
@@ -385,6 +475,20 @@ async function saveSectionDetail(pageKey, key){
     if(!def.singleSelect) entry.autoCount = buf.autoCount;
   }
   entry.backgroundImage = buf.backgroundImage;
+
+  /* Bản tiếng Anh nằm trong entry.i18n.en, cùng hình dạng với bản tiếng Việt.
+     Ô nào trống thì site tự dùng bản tiếng Việt (xem site-js/i18n.js), nên cứ
+     ghi nguyên — không phải lọc ở đây. */
+  const enShape = (buf.__shapes && buf.__shapes.en) || null;
+  if(enShape){
+    const en = {};
+    if(def.title!==undefined && enShape.title) en.title = enShape.title;
+    if(def.fields && enShape.content) en.content = enShape.content;
+    if(def.itemFields && enShape.items) en.items = enShape.items;
+    if(enShape.backgroundImage) en.backgroundImage = enShape.backgroundImage;
+    if(Object.keys(en).length) entry.i18n = Object.assign({}, entry.i18n, {en});
+    else if(entry.i18n) delete entry.i18n.en;
+  }
 
   await saveDB(); await savePageContentToApi();
   sectionEditBuffer = null;

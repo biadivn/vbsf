@@ -87,6 +87,44 @@ async function uploadDataUri(dataUri, filenameHint){
   return out[0].id;
 }
 
+/* Như uploadDataUri nhưng trả ĐƯỜNG DẪN thay vì id: bản dịch lưu ảnh dưới dạng
+   chuỗi url trong cột i18n (json), không phải quan hệ media, nên cần url. */
+async function uploadDataUriUrl(dataUri, filenameHint){
+  const blobRes = await fetch(dataUri);
+  const blob = await blobRes.blob();
+  const ext = (blob.type.split('/')[1] || 'png');
+  const form = new FormData();
+  form.append('files', blob, `${filenameHint}-${Date.now()}.${ext}`);
+  const { jwt } = getStoredTokens();
+  const headers = {};
+  if(jwt) headers['Authorization'] = 'Bearer '+jwt;
+  const res = await fetch(STRAPI_URL+'/api/upload', { method:'POST', headers, body: form });
+  if(!res.ok) throw new Error('upload failed');
+  const out = await res.json();
+  return out[0].url;
+}
+
+/* Chỉ ghi cột i18n của một bản ghi. Không đi qua saveRemoteCollectionRecord vì
+   hàm đó dựng payload từ c.fields — gửi kèm cả bản tiếng Việt, trong khi màn
+   hình bản dịch không mở những ô đó ra nên sẽ ghi rỗng đè lên dữ liệu đang có. */
+async function saveRecordTranslationToApi(key, id, i18n){
+  const c = COLLECTIONS[key];
+  try{
+    const res = await apiFetch(`/api/${c.apiPath}/${id}`, {
+      method:'PUT', body: JSON.stringify({ data: { i18n } }),
+    });
+    if(!res.ok){
+      const out = await res.json().catch(()=>({}));
+      showToast((out.error && out.error.message) || 'Không thể lưu bản dịch', true);
+      return false;
+    }
+    return true;
+  }catch(e){
+    showToast('Không thể kết nối máy chủ Strapi', true);
+    return false;
+  }
+}
+
 /* Strapi lưu size của media theo KB (số thực), khác File.size của trình duyệt
    vốn theo byte — hai đơn vị này lẫn nhau thì "1,2 MB" thành "1,2 KB". */
 function strapiSizeLabel(kb){
@@ -111,6 +149,10 @@ function mapStrapiEntryToRecord(c, item){
     }
     rec[f.key] = item[f.key];
   });
+  /* Bản dịch không có trong c.fields (màn hình riêng, xem cms-js/i18n-editor.js)
+     nhưng phải mang theo — rơi mất thì mở màn hình dịch ra là trắng trơn và lưu
+     đè lên bản dịch đang có. */
+  if(item.i18n) rec.i18n = item.i18n;
   // Field không nằm trong form chỉnh sửa (c.fields) nhưng CMS vẫn cần đọc để
   // hiển thị/vận hành — vd. disciplines/freeMatches (hội viên), bracket/rr/sw/mode
   // (giải đấu). Khai báo qua COLLECTIONS[key].extraFields, copy trực tiếp.

@@ -9,6 +9,10 @@
   },
   "options": { "draftAndPublish": false },
   "attributes": {
+    "i18n": {
+      "type": "json",
+      "description": "Bản dịch: { \"en\": { \"<tên field>\": \"...\" } }. Field nào thiếu bản dịch thì site dùng bản tiếng Việt."
+    },
     "name": { "type": "string", "required": true },
     "role": { "type": "string" },
     "order": { "type": "integer", "default": 0 },
