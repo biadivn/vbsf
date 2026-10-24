@@ -3,24 +3,40 @@
    ========================================================= */
 function renderSingletonForm(key, fields){
   const data = DB[key];
+  const transFields = i18nFieldsOfSingleton(key);
+  if(transFields.length && detailLang==='en'){
+    return `<div class="form-card">${renderDetailLangSwitch()}
+      <div>${renderI18nFields(transFields, data)}</div>
+      <div class="form-actions"><button class="btn btn-primary" id="saveSingleton"><i class="ti ti-check"></i> Lưu bản tiếng Anh</button></div>
+    </div>`;
+  }
   /* Ô ảnh dùng chung cơ chế của modal: giá trị nằm ở modalImageValues, không có
      input #f_<key> để đọc lúc lưu. Nạp lại từ bản ghi hiện tại mỗi lần dựng form. */
   modalImageValues = {};
   fields.forEach(f=>{ if(f.type==='image') modalImageValues[f.key] = data[f.key] || null; });
-  let html = `<div class="form-card"><div class="form-grid">`;
+  let html = `<div class="form-card">${transFields.length ? renderDetailLangSwitch() : ''}<div class="form-grid">`;
   fields.forEach(f=>{
     html += `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label>${renderField(f, data[f.key])}</div>`;
   });
-  const transBtn = (I18N_SINGLETON_FIELDS[key] || []).length
-    ? `<button class="btn btn-ghost" id="singletonI18nBtn"><i class="ti ti-language"></i> Bản tiếng Anh</button>`
-    : '';
-  html += `</div><div class="form-actions">${transBtn}<button class="btn btn-primary" id="saveSingleton"><i class="ti ti-check"></i> Lưu thay đổi</button></div></div>`;
+  html += `</div><div class="form-actions"><button class="btn btn-primary" id="saveSingleton"><i class="ti ti-check"></i> Lưu thay đổi</button></div></div>`;
   return html;
 }
 function attachSingletonEvents(key, fields){
+  const transFields = i18nFieldsOfSingleton(key);
+  attachDetailLangSwitch(()=> renderContent());
+
+  if(transFields.length && detailLang==='en'){
+    attachI18nFields();
+    document.getElementById('saveSingleton').addEventListener('click', async ()=>{
+      const ok = await saveI18nValues('singleton', key, null, transFields);
+      if(!ok){ showToast('Không lưu được bản tiếng Anh', true); return; }
+      showToast('Đã lưu bản tiếng Anh');
+      renderContent();
+    });
+    return;
+  }
+
   attachModalImageEvents();
-  const transBtn = document.getElementById('singletonI18nBtn');
-  if(transBtn) transBtn.addEventListener('click', ()=> openI18nModal('singleton', key));
   document.getElementById('saveSingleton').addEventListener('click', async ()=>{
     const data = {};
     fields.forEach(f=>{

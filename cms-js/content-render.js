@@ -127,7 +127,6 @@ function renderListView(key){
         ${c.viewDetail ? `<button class="btn-icon" data-view="${r.id}" title="Xem trước trên website"><i class="ti ti-eye"></i></button>` : ''}
         ${c.cloneable ? `<button class="btn-icon" data-clone="${r.id}" title="Nhân bản"><i class="ti ti-copy"></i></button>` : ''}
         ${c.resetPassword ? `<button class="btn-icon" data-reset-pwd="${r.id}" title="Đặt lại mật khẩu"><i class="ti ti-key"></i></button>` : ''}
-        ${collectionHasI18n(key) ? `<button class="btn-icon" data-i18n-edit="${r.id}" title="Nhập bản tiếng Anh"><i class="ti ti-language"></i></button>` : ''}
         <button class="btn-icon" data-edit="${r.id}" title="Sửa"><i class="ti ti-edit"></i></button>
         <button class="btn-icon" data-del="${r.id}" title="Xóa"><i class="ti ti-trash"></i></button>
       </td>`;
@@ -173,9 +172,6 @@ function attachListEvents(key){
   document.querySelectorAll('[data-edit]').forEach(btn=>{
     const id = btn.getAttribute('data-edit');
     btn.addEventListener('click', ()=> key==='news' ? setView('news-edit:'+id) : key==='tournaments' ? setView('tournament-edit:'+id) : COLLECTIONS[key].pageEdit ? setView(key+'-edit:'+id) : openModal(key, id));
-  });
-  document.querySelectorAll('[data-i18n-edit]').forEach(btn=>{
-    btn.addEventListener('click', ()=> openI18nModal('collection', key, btn.getAttribute('data-i18n-edit')));
   });
   document.querySelectorAll('[data-del]').forEach(btn=>{
     btn.addEventListener('click', ()=>confirmDelete(key, btn.getAttribute('data-del')));

@@ -160,6 +160,41 @@
     if (locale) locale.setAttribute('content', 'en_US');
   }
 
+  /* Tiêu đề/mô tả mặc định của cả site, chốt lại ngay lúc nạp để còn đường về
+     khi rời một trang CÓ khai metadata sang trang KHÔNG khai. */
+  var DEFAULT_HEAD = null;
+
+  function metaDescEl() {
+    return document.querySelector('meta[name="description"]');
+  }
+
+  /**
+   * Đặt tiêu đề tab và mô tả SEO theo trang đang xem, lấy từ "Thông tin trang"
+   * trong CMS (đã phủ bản dịch).
+   *
+   * Trước đây site KHÔNG đọc pageMeta ở đâu cả: ba ô "Tên trang / Meta title /
+   * Meta description" trong CMS là dữ liệu chết, admin nhập vào mà trang không
+   * bao giờ đổi — đúng loại lỗi im lặng như entry.values ngày trước.
+   */
+  function applyPageSeo(pageId, data) {
+    if (!DEFAULT_HEAD) {
+      var d = metaDescEl();
+      DEFAULT_HEAD = { title: document.title, description: d ? d.getAttribute('content') : '' };
+    }
+    var seo = typeof pageSeo === 'function' ? pageSeo(data && data.pageContent, pageId) : null;
+    /* Ô "Meta title (SEO)" thay TOÀN BỘ tiêu đề tab — đó là ý nghĩa của nó.
+       Chưa khai thì ghép "tên trang — tên Liên đoàn": chỉ để mỗi tên trang thì
+       tab ghi độc chữ "Trang chủ", tệ hơn cả lúc chưa có tính năng này.
+       Tên trang đi qua từ điển vì admin có thể chưa dịch tên trang đó — để thô
+       thì bản tiếng Anh lòi ra một vế tiếng Việt. */
+    var title = DEFAULT_HEAD.title;
+    if (seo && seo.metaTitle) title = seo.metaTitle;
+    else if (seo && seo.name) title = translateUi(seo.name, currentLang()) + ' — ' + DEFAULT_HEAD.title;
+    document.title = title;
+    var el = metaDescEl();
+    if (el) el.setAttribute('content', (seo && seo.description) || DEFAULT_HEAD.description);
+  }
+
   /** Gọi một lần lúc trang nạp xong, trước khi điều hướng tới trang đầu tiên. */
   function initLang() {
     translateHead();
@@ -2374,6 +2409,7 @@
 
     var data = await load();
     if (!data || !page) return;
+    try { applyPageSeo(dest, data); } catch (err) { /* thiếu metadata không được chặn điều hướng */ }
     try {
       /* Trang chi tiết: chạy KỂ CẢ khi không có dataset.
 

@@ -1,36 +1,75 @@
 /* =========================================================
-   NHẬP BẢN TIẾNG ANH CHO NỘI DUNG
+   NHẬP NỘI DUNG TIẾNG ANH — CÔNG TẮC NGÔN NGỮ TRONG MÀN HÌNH CHI TIẾT
 
    Mỗi bản ghi có cột `i18n` dạng { en: { "<field>": "..." } }. Site phủ các
-   field đó lên bản ghi khi người xem chọn English, field nào bỏ trống thì giữ
+   field đó lên bản ghi khi người xem chọn English; field nào bỏ trống thì giữ
    bản tiếng Việt (xem site-js/i18n.js).
 
-   Vì sao là một màn hình RIÊNG chứ không phải công tắc VI/EN ngay trên form:
-   người dịch cần nhìn thấy bản tiếng Việt trong lúc gõ. Ở đây mỗi dòng là
-   "bản gốc bên trái — ô nhập bên phải", nên không phải mở hai tab để đối chiếu,
-   và cũng không có cách nào lỡ tay sửa nhầm bản tiếng Việt.
+   Bản trước đặt nút dịch trên TỪNG DÒNG danh sách rồi mở một modal riêng. Nay
+   công tắc Tiếng Việt / English nằm ngay trong màn hình chi tiết: bấm là màn
+   hình đó chuyển sang ngôn ngữ được chọn. Nhờ vậy chỗ sửa nội dung và chỗ dịch
+   nội dung là một, và chỉ còn MỘT cách làm dùng chung cho mọi module — modal
+   bản ghi, trình soạn tin, trình sửa giải đấu, form Thông tin tổ chức/Liên hệ,
+   thẻ Thông tin trang và panel section.
 
-   Dùng chung khung modal với form thường (#modalOverlay). i18nModal khác null
-   nghĩa là đang mở màn hình này — init.js nhìn biến đó để biết nút Lưu gọi hàm
-   nào.
+   Khi đang ở English, form chỉ hiện những field DỊCH ĐƯỢC, mỗi field kèm bản
+   tiếng Việt ngay trên ô nhập để khỏi phải mở hai tab đối chiếu — và không có
+   cách nào lỡ tay sửa nhầm bản gốc.
    ========================================================= */
-let i18nModal = null;
 
-/* renderField() đặt id ô nhập là `f_<key>`. Màn hình này mở ĐÈ lên form đang
-   hiển thị (rõ nhất là Thông tin tổ chức), nên nếu dùng nguyên key thì hai ô
-   trùng id và document.getElementById() trả về ô của form phía dưới — lưu bản
-   dịch là chép nguyên giá trị tiếng Việt sang. Thêm tiền tố để tách hẳn ra. */
+/* Ngôn ngữ đang nhập của màn hình chi tiết đang mở. Mở màn hình nào cũng bắt
+   đầu ở tiếng Việt: vào sửa nội dung là việc thường ngày, dịch là việc thỉnh
+   thoảng. */
+let detailLang = 'vi';
+
+function resetDetailLang() { detailLang = 'vi'; }
+
+/** Công tắc Tiếng Việt / English. `note` hiện thêm khi đang ở English. */
+function renderDetailLangSwitch(note) {
+  const hint = detailLang === 'en'
+    ? `<span class="hint" style="margin:0"><i class="ti ti-info-circle"></i> ${escapeHtml(
+        note || 'Ô để trống thì trang tiếng Anh dùng bản tiếng Việt.')}</span>`
+    : '';
+  return `<div class="detail-lang" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+    <div class="langsw-cms">
+      <button type="button" class="${detailLang === 'vi' ? 'on' : ''}" data-detail-lang="vi">Tiếng Việt</button>
+      <button type="button" class="${detailLang === 'en' ? 'on' : ''}" data-detail-lang="en">English</button>
+    </div>
+    ${hint}
+  </div>`;
+}
+
+/** Bấm công tắc -> đổi ngôn ngữ rồi vẽ lại màn hình bằng `rerender`. */
+function attachDetailLangSwitch(rerender) {
+  document.querySelectorAll('[data-detail-lang]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const next = btn.getAttribute('data-detail-lang');
+      if (next === detailLang) return;
+      detailLang = next;
+      rerender();
+    });
+  });
+}
+
+/* renderField() đặt id ô nhập là `f_<key>`. Form tiếng Anh có thể nằm cùng
+   trang với form tiếng Việt (vd. Thông tin tổ chức), nên nếu dùng nguyên key
+   thì hai ô trùng id và document.getElementById() trả về ô kia — lưu bản dịch
+   là chép nguyên giá trị tiếng Việt sang. Thêm tiền tố để tách hẳn. */
 const I18N_PREFIX = 'i18nen_';
 
 /** Bản sao field với key đã thêm tiền tố, chỉ dùng để dựng và đọc ô nhập. */
 function i18nInputField(f) {
-  return Object.assign({}, f, { key: I18N_PREFIX + f.key, required: false });
+  /* Bỏ placeholder: placeholder của form tiếng Việt là chữ tiếng Việt (vd. "Ban
+     Truyền thông VBSF"), hiện trong ô tiếng Anh trông như ô đã có sẵn giá trị.
+     Bản tiếng Việt đã nằm ngay trên ô rồi nên cũng không cần gợi ý nữa.
+     Bỏ required: thiếu bản dịch là chuyện bình thường, site tự lùi về bản gốc. */
+  return Object.assign({}, f, { key: I18N_PREFIX + f.key, required: false, placeholder: '' });
 }
 
 /** Những field của một module có bản dịch. */
 function i18nFieldsOf(key) {
   const c = COLLECTIONS[key];
-  return c ? (c.fields || []).filter(f => f.i18n) : [];
+  return c ? (c.fields || []).filter((f) => f.i18n) : [];
 }
 
 function collectionHasI18n(key) {
@@ -46,10 +85,18 @@ const I18N_SINGLETON_FIELDS = {
 function i18nFieldsOfSingleton(key) {
   const all = key === 'settings' ? SETTINGS_FIELDS : CONTACT_FIELDS;
   const want = I18N_SINGLETON_FIELDS[key] || [];
-  return all.filter(f => want.includes(f.key));
+  return all.filter((f) => want.includes(f.key));
 }
 
-/** Bản tiếng Việt để hiện cạnh ô nhập — chữ thuần, cắt bớt cho vừa một dòng. */
+/* Thông tin trang: dịch tên và metadata SEO, KHÔNG dịch slug — đường dẫn là
+   một, đổi theo ngôn ngữ thì link cũ gãy mà chẳng được gì. */
+const I18N_PAGE_META_KEYS = ['title', 'metaTitle', 'metaDescription'];
+
+function i18nFieldsOfPageMeta() {
+  return PAGE_META_FIELDS.filter((f) => I18N_PAGE_META_KEYS.includes(f.key));
+}
+
+/** Bản tiếng Việt để hiện cạnh ô nhập — chữ thuần, cắt bớt cho vừa khung. */
 function i18nSourceText(field, record) {
   const raw = record ? record[field.key] : '';
   if (field.type === 'image') return raw ? 'Đang dùng ảnh tiếng Việt' : 'Chưa có ảnh';
@@ -59,32 +106,20 @@ function i18nSourceText(field, record) {
 }
 
 /**
- * Mở màn hình nhập bản tiếng Anh.
- * kind: 'collection' (bản ghi trong DB[key]) hoặc 'singleton' (settings/contact).
+ * Thân form nhập bản tiếng Anh: mỗi dòng là "bản tiếng Việt — ô nhập".
+ * `record` là bản ghi tiếng Việt (chứa cả cột i18n).
  */
-function openI18nModal(kind, key, id) {
-  pageModal = null; addSectionModal = null;
-  editingCollection = null; editingId = null;
-
-  const record = kind === 'singleton' ? (DB[key] || {}) : (DB[key] || []).find(r => r.id === id);
-  if (!record) return;
-  const fields = kind === 'singleton' ? i18nFieldsOfSingleton(key) : i18nFieldsOf(key);
-  if (!fields.length) return;
-
-  const en = (record.i18n && record.i18n.en) || {};
+function renderI18nFields(fields, record) {
+  const en = (record && record.i18n && record.i18n.en) || {};
   modalImageValues = {};
-  fields.forEach(f => { if (f.type === 'image') modalImageValues[I18N_PREFIX + f.key] = en[f.key] || null; });
-  i18nModal = { kind, key, id, fields };
+  fields.forEach((f) => {
+    if (f.type === 'image') modalImageValues[I18N_PREFIX + f.key] = en[f.key] || null;
+  });
 
-  const label = kind === 'singleton'
-    ? (key === 'settings' ? 'Thông tin tổ chức' : 'Liên hệ')
-    : COLLECTIONS[key].single;
-  document.getElementById('modalTitle').textContent = `Bản tiếng Anh — ${label}`;
-
-  const rows = fields.map(f => {
+  return fields.map((f) => {
     const source = i18nSourceText(f, record);
-    const value = en[f.key] || '';
     const inputField = i18nInputField(f);
+    const value = en[f.key] || '';
     const input = f.type === 'richtext'
       ? renderRichTextField(inputField, value)
       : renderField(inputField, value);
@@ -97,21 +132,15 @@ function openI18nModal(kind, key, id) {
       ${input}
     </div>`;
   }).join('');
+}
 
-  document.getElementById('modalBody').innerHTML =
-    `<div class="hint" style="display:flex;gap:8px;margin-bottom:12px"><i class="ti ti-info-circle"></i>
-      Ô nào để trống thì trang tiếng Anh dùng luôn bản tiếng Việt — không bao giờ hiện ô rỗng.</div>` +
-    `<div>${rows}</div>`;
-
-  document.getElementById('modalDeleteBtn').style.display = 'none';
-  document.getElementById('modalSaveBtn').style.display = '';
-  document.querySelector('#modalOverlay .modal').classList.add('wide');
-  document.getElementById('modalOverlay').classList.add('on');
+/** Gắn sự kiện cho các ô vừa dựng (ảnh, soạn thảo). */
+function attachI18nFields() {
   attachRTEEvents();
   attachModalImageEvents();
 }
 
-/** Đọc các ô trong màn hình bản dịch; ô ảnh mới chọn thì tải lên trước. */
+/** Đọc các ô bản dịch; ô ảnh mới chọn thì tải lên Strapi trước. */
 async function readI18nInputs(fields) {
   const en = {};
   for (const f of fields) {
@@ -135,42 +164,43 @@ async function readI18nInputs(fields) {
   return en;
 }
 
-async function saveI18nModal() {
-  if (!i18nModal) return;
-  const { kind, key, id, fields } = i18nModal;
-  const btn = document.getElementById('modalSaveBtn');
-  btn.disabled = true;
-  try {
-    const en = await readI18nInputs(fields);
-    /* Giữ nguyên những khoá ngôn ngữ khác (sau này có thêm tiếng Trung, Nhật...)
-       và những field từng dịch mà lần này không mở ra. */
-    const record = kind === 'singleton' ? (DB[key] || {}) : (DB[key] || []).find(r => r.id === id) || {};
-    const prev = record.i18n && typeof record.i18n === 'object' ? record.i18n : {};
-    const merged = Object.assign({}, prev, { en: Object.assign({}, prev.en || {}, en) });
+/**
+ * Lưu bản dịch đang nhập trên màn hình.
+ *   kind 'collection' -> bản ghi trong DB[key]
+ *   kind 'singleton'  -> settings / contact
+ *   kind 'pagemeta'   -> DB.pageMeta[key]
+ * Trả về true nếu lưu được.
+ */
+async function saveI18nValues(kind, key, id, fields) {
+  const record = kind === 'collection'
+    ? (DB[key] || []).find((r) => r.id === id)
+    : kind === 'pagemeta' ? (DB.pageMeta && DB.pageMeta[key])
+    : DB[key];
+  if (!record) return false;
 
-    /* Chỉ gửi đúng cột i18n. Gửi kèm cả DB[key] thì lọt theo id/documentId/
-       createdAt... mà Strapi chối cả request ("Invalid key id"); single type
-       nhận cập nhật từng phần nên các field khác giữ nguyên. */
-    const ok = kind === 'singleton'
-      ? await saveSingletonToApi(key, { i18n: merged })
-      : await saveRecordTranslationToApi(key, id, merged);
-    if (!ok) return;
+  const en = await readI18nInputs(fields);
+  /* Giữ nguyên những khoá ngôn ngữ khác (sau này có thêm tiếng Trung, Nhật...)
+     và những field từng dịch mà lần này không mở ra. */
+  const prev = record.i18n && typeof record.i18n === 'object' ? record.i18n : {};
+  const merged = Object.assign({}, prev, { en: Object.assign({}, prev.en || {}, en) });
 
-    if (kind === 'singleton') DB[key] = Object.assign({}, DB[key], { i18n: merged });
-    else record.i18n = merged;
-
-    closeI18nModal();
-    renderContent();
-    showToast('Đã lưu bản tiếng Anh');
-  } catch (err) {
-    showToast('Không lưu được bản tiếng Anh', true);
-  } finally {
-    btn.disabled = false;
+  if (kind === 'pagemeta') {
+    /* pageMeta nằm trong page-content (một cục JSON), lưu cả cục như mọi thay
+       đổi khác của module "Trang website". */
+    record.i18n = merged;
+    await saveDB();
+    await savePageContentToApi();
+    return true;
   }
-}
 
-function closeI18nModal() {
-  i18nModal = null;
-  document.querySelector('#modalOverlay .modal').classList.remove('wide');
-  closeModal();
+  /* Chỉ gửi đúng cột i18n. Gửi kèm cả bản ghi thì lọt theo id/documentId/
+     createdAt... mà Strapi chối cả request ("Invalid key id"); cả collection
+     lẫn single type đều nhận cập nhật từng phần. */
+  const ok = kind === 'singleton'
+    ? await saveSingletonToApi(key, { i18n: merged })
+    : await saveRecordTranslationToApi(key, id, merged);
+  if (!ok) return false;
+
+  record.i18n = merged;
+  return true;
 }

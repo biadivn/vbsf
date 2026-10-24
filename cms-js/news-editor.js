@@ -5,11 +5,26 @@ let neBannerImage = null;
 function renderNewsEditor(id){
   const isNew = id==='new';
   const record = isNew ? {} : (DB.news.find(r=>r.id===id) || {});
+
+  /* Bản dịch gắn với bài ĐÃ LƯU: bài mới chưa có documentId để ghi cột i18n. */
+  const canTranslate = !isNew && collectionHasI18n('news');
+  if(canTranslate && detailLang==='en'){
+    return `<div class="news-editor"><div class="form-card" style="max-width:840px">
+      ${renderDetailLangSwitch()}
+      <div>${renderI18nFields(i18nFieldsOf('news'), record)}</div>
+      <div class="form-actions" style="justify-content:flex-end">
+        <button class="btn btn-ghost" id="neCancelBtn">Quay lại danh sách</button>
+        <button class="btn btn-primary" id="neSaveI18nBtn"><i class="ti ti-check"></i> Lưu bản tiếng Anh</button>
+      </div>
+    </div></div>`;
+  }
+
   neBannerImage = record.image || null;
   const catField = COLLECTIONS.news.fields.find(f=>f.key==='category');
   const catOpts = catField.options.map(o=>`<option value="${escapeAttr(o)}" ${record.category===o?'selected':''}>${escapeHtml(o)}</option>`).join('');
   return `<div class="news-editor">
     <div class="form-card" style="max-width:840px">
+      ${canTranslate ? renderDetailLangSwitch() : ''}
       <div class="fld span2">
         <label>Ảnh banner</label>
         <div class="ne-banner" id="neBannerPreview">${renderBannerPreview()}</div>
@@ -51,9 +66,23 @@ function renderBannerPreview(){
     : `<div class="ne-banner-empty"><i class="ti ti-photo-up"></i><span>Chưa có ảnh banner</span></div>`;
 }
 function attachNewsEditorEvents(){
+  const id = currentView.slice('news-edit:'.length);
+  attachDetailLangSwitch(()=> renderContent());
   attachRTEEvents();
   const cancelBtn = document.getElementById('neCancelBtn');
   if(cancelBtn) cancelBtn.addEventListener('click', ()=>setView('news'));
+
+  const saveI18nBtn = document.getElementById('neSaveI18nBtn');
+  if(saveI18nBtn){
+    attachI18nFields();
+    saveI18nBtn.addEventListener('click', async ()=>{
+      const ok = await saveI18nValues('collection', 'news', id, i18nFieldsOf('news'));
+      if(!ok){ showToast('Không lưu được bản tiếng Anh', true); return; }
+      showToast('Đã lưu bản tiếng Anh');
+      renderContent();
+    });
+    return;   // màn hình bản dịch không có các ô của form tiếng Việt
+  }
   const saveBtn = document.getElementById('neSaveBtn');
   if(saveBtn) saveBtn.addEventListener('click', saveNewsEditor);
   const delBtn = document.getElementById('neDeleteBtn');

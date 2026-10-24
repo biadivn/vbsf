@@ -20,7 +20,7 @@ const skip = available ? false : 'không có thư mục site-js trong context n�
 const {
   VBSF_LANGS, VBSF_DEFAULT_LANG, VBSF_DICT_EN,
   normalizeLang, translateUi, enFields,
-  overlayRecord, overlayList, overlaySection, overlayData,
+  overlayRecord, overlayList, overlaySection, overlayData, pageSeo,
 } = available ? require('../../site-js/i18n') : {};
 
 describe('normalizeLang', { skip }, () => {
@@ -269,5 +269,61 @@ describe('overlayData', { skip }, () => {
   test('pageSections có giá trị lạ thì để nguyên, không vỡ', () => {
     const out = overlayData({ pageContent: { data: { pageSections: { x: 'không phải mảng' } } } }, 'en');
     assert.strictEqual(out.pageContent.data.pageSections.x, 'không phải mảng');
+  });
+});
+
+describe('pageSeo — tiêu đề/mô tả của từng trang', { skip }, () => {
+  function pc(meta) {
+    return { data: { pageMeta: meta } };
+  }
+
+  test('trả riêng từng mảnh để bên gọi tự ghép', () => {
+    const out = pageSeo(pc({ 'tin-tuc': { title: 'Tin tức', metaTitle: 'Tin billiards VBSF' } }), 'tin-tuc');
+    assert.deepStrictEqual(out, { metaTitle: 'Tin billiards VBSF', name: 'Tin tức', description: '' });
+  });
+
+  test('chỉ có tên trang thì metaTitle rỗng — bên gọi biết là phải ghép thêm tên Liên đoàn', () => {
+    const out = pageSeo(pc({ 'tin-tuc': { title: 'Tin tức' } }), 'tin-tuc');
+    assert.deepStrictEqual(out, { metaTitle: '', name: 'Tin tức', description: '' });
+  });
+
+  test('trang chưa khai gì thì null — bên gọi giữ tiêu đề mặc định của site', () => {
+    assert.strictEqual(pageSeo(pc({}), 'tin-tuc'), null);
+    assert.strictEqual(pageSeo(pc({ 'tin-tuc': { title: '  ', metaDescription: '' } }), 'tin-tuc'), null);
+    assert.strictEqual(pageSeo(null, 'tin-tuc'), null);
+    assert.strictEqual(pageSeo({ data: {} }, 'tin-tuc'), null);
+  });
+
+  test('chỉ có mô tả cũng tính là có khai', () => {
+    const out = pageSeo(pc({ 'tin-tuc': { metaDescription: 'Mô tả' } }), 'tin-tuc');
+    assert.deepStrictEqual(out, { metaTitle: '', name: '', description: 'Mô tả' });
+  });
+
+  test('sau khi phủ bản dịch thì đọc ra bản tiếng Anh', () => {
+    const data = {
+      pageContent: pc({
+        'tin-tuc': {
+          title: 'Tin tức',
+          metaDescription: 'Tin trong nước',
+          i18n: { en: { title: 'News', metaDescription: '' } },
+        },
+      }),
+    };
+    const en = overlayData(data, 'en');
+    const out = pageSeo(en.pageContent, 'tin-tuc');
+    assert.strictEqual(out.name, 'News');
+    // metaDescription dịch bỏ trống -> giữ bản tiếng Việt
+    assert.strictEqual(out.description, 'Tin trong nước');
+  });
+
+  test('overlayData không đụng tới pageMeta gốc', () => {
+    const data = { pageContent: pc({ 'tin-tuc': { title: 'Tin tức', i18n: { en: { title: 'News' } } } }) };
+    overlayData(data, 'en');
+    assert.strictEqual(data.pageContent.data.pageMeta['tin-tuc'].title, 'Tin tức');
+  });
+
+  test('gói không có pageMeta vẫn chạy', () => {
+    const out = overlayData({ pageContent: { data: { pageSections: {} } } }, 'en');
+    assert.strictEqual(out.pageContent.data.pageMeta, undefined);
   });
 });
