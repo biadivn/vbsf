@@ -507,20 +507,58 @@ function overlayData(data, lang) {
   out.settings = overlayRecord(data.settings, lang);
   out.contact = overlayRecord(data.contact, lang);
 
-  var sections = data.pageContent && data.pageContent.data && data.pageContent.data.pageSections;
-  if (sections) {
-    var translated = {};
-    Object.keys(sections).forEach(function (pageId) {
-      var list = sections[pageId];
-      translated[pageId] = Array.isArray(list)
-        ? list.map(function (e) { return overlaySection(e, lang); })
-        : list;
-    });
-    var inner = {};
-    Object.keys(data.pageContent.data).forEach(function (k) { inner[k] = data.pageContent.data[k]; });
-    inner.pageSections = translated;
-    out.pageContent = { data: inner };
+  var inner = data.pageContent && data.pageContent.data;
+  if (inner) {
+    var copy = {};
+    Object.keys(inner).forEach(function (k) { copy[k] = inner[k]; });
+
+    var sections = inner.pageSections;
+    if (sections) {
+      var translated = {};
+      Object.keys(sections).forEach(function (pageId) {
+        var list = sections[pageId];
+        translated[pageId] = Array.isArray(list)
+          ? list.map(function (e) { return overlaySection(e, lang); })
+          : list;
+      });
+      copy.pageSections = translated;
+    }
+
+    /* Thông tin trang (tên + metadata SEO) cũng có bản dịch, hình dạng giống
+       bản ghi thường nên dùng chung overlayRecord. */
+    var metas = inner.pageMeta;
+    if (metas) {
+      var metaOut = {};
+      Object.keys(metas).forEach(function (pageId) {
+        metaOut[pageId] = overlayRecord(metas[pageId], lang);
+      });
+      copy.pageMeta = metaOut;
+    }
+
+    out.pageContent = { data: copy };
   }
+  return out;
+}
+
+/**
+ * Phần SEO của một trang, TRẢ RIÊNG từng mảnh để bên gọi tự ghép:
+ *   metaTitle   ô SEO riêng — khai thì dùng nguyên văn làm tiêu đề tab
+ *   name        tên trang — chỉ là một VẾ, ghép thêm tên Liên đoàn
+ *   description mô tả SEO
+ * Không gộp sẵn ở đây vì hai vế có luật khác nhau: metaTitle thay toàn bộ tiêu
+ * đề, còn tên trang mà thay toàn bộ thì tab chỉ còn mỗi chữ "Trang chủ".
+ * Trả null khi admin chưa khai gì cho trang đó.
+ */
+function pageSeo(pageContent, pageId) {
+  var metas = pageContent && pageContent.data && pageContent.data.pageMeta;
+  var meta = metas && metas[pageId];
+  if (!meta) return null;
+  var out = {
+    metaTitle: String(meta.metaTitle || '').trim(),
+    name: String(meta.title || '').trim(),
+    description: String(meta.metaDescription || '').trim(),
+  };
+  if (!out.metaTitle && !out.name && !out.description) return null;
   return out;
 }
 
@@ -528,6 +566,6 @@ if (typeof module === 'object' && module.exports) {
   module.exports = {
     VBSF_LANGS, VBSF_DEFAULT_LANG, VBSF_DICT_EN,
     normalizeLang, translateUi, enFields,
-    overlayRecord, overlayList, overlaySection, overlayData,
+    overlayRecord, overlayList, overlaySection, overlayData, pageSeo,
   };
 }
