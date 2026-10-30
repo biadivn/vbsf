@@ -103,13 +103,25 @@ function renderTournamentEditor(id){
 
   const hint = isNew ? `<div style="font-size:12px;color:var(--hint);margin-bottom:16px"><i class="ti ti-info-circle"></i> Lưu thông tin giải đấu trước để mở khóa danh sách người chơi và cặp đấu.</div>` : '';
 
+  /* Bản dịch gắn với giải ĐÃ LƯU; giải mới chưa có documentId để ghi cột i18n.
+     Công tắc đặt ở tab "Thông tin" vì toàn bộ field dịch được nằm ở đó. */
+  const canTranslate = !isNew && teTab==='info' && collectionHasI18n('tournaments');
+
   let body = '';
-  if(teTab==='info') body = renderTeInfoTab(record, isNew);
+  if(canTranslate && detailLang==='en'){
+    body = `<div class="form-card">
+      <div>${renderI18nFields(i18nFieldsOf('tournaments'), record)}</div>
+      <div class="form-actions" style="justify-content:flex-end">
+        <button class="btn btn-primary" id="teSaveI18nBtn"><i class="ti ti-check"></i> Lưu bản tiếng Anh</button>
+      </div>
+    </div>`;
+  }
+  else if(teTab==='info') body = renderTeInfoTab(record, isNew);
   else if(teTab==='players') body = renderTePlayersTab(record);
   else if(teTab==='matches') body = renderTeMatchesTab(record);
   else if(teTab==='entries') body = renderTeEntriesTab(record);
 
-  return `<div class="news-editor">${tabsHtml}${hint}${body}</div>`;
+  return `<div class="news-editor">${tabsHtml}${canTranslate ? renderDetailLangSwitch() : ''}${hint}${body}</div>`;
 }
 
 function renderTeInfoTab(record, isNew){
@@ -953,8 +965,26 @@ function attachTeMatchesTab(record){
 
 function attachTournamentEditorEvents(){
   document.querySelectorAll('[data-tetab]').forEach(t=>{
-    t.addEventListener('click', ()=>{ teTab = t.getAttribute('data-tetab'); renderContent(); });
+    /* Đổi tab thì về tiếng Việt: chỉ tab "Thông tin" có bản dịch, các tab khác
+       (người chơi, cặp đấu, đơn đăng ký) không có gì để dịch. */
+    t.addEventListener('click', ()=>{ teTab = t.getAttribute('data-tetab'); resetDetailLang(); renderContent(); });
   });
+  attachDetailLangSwitch(()=> renderContent());
+
+  const saveI18nBtn = document.getElementById('teSaveI18nBtn');
+  if(saveI18nBtn){
+    attachI18nFields();
+    const tid = currentView.slice('tournament-edit:'.length);
+    saveI18nBtn.addEventListener('click', async ()=>{
+      const ok = await saveI18nValues('collection', 'tournaments', tid, i18nFieldsOf('tournaments'));
+      if(!ok){ showToast('Không lưu được bản tiếng Anh', true); return; }
+      showToast('Đã lưu bản tiếng Anh');
+      renderContent();
+    });
+    const cancel = document.getElementById('teCancelBtn');
+    if(cancel) cancel.addEventListener('click', ()=>{ teResetNewDraft(); setView('tournaments'); });
+    return;   // màn hình bản dịch không có các ô của tab Thông tin
+  }
   const cancelBtn = document.getElementById('teCancelBtn');
   if(cancelBtn) cancelBtn.addEventListener('click', ()=>{ teResetNewDraft(); setView('tournaments'); });
   const saveInfoBtn = document.getElementById('teSaveInfoBtn');

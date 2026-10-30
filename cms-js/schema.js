@@ -7,16 +7,16 @@ const COLLECTIONS = {
   news: {
     label:'Tin tức', icon:'ti-news', single:'bài viết', remote:true, apiPath:'news-articles',
     fields:[
-      {key:'image', label:'Ảnh banner', type:'image', span2:true},
-      {key:'title', label:'Tiêu đề', type:'text', required:true, span2:true},
+      {key:'image', i18n:true, label:'Ảnh banner', type:'image', span2:true},
+      {key:'title', i18n:true, label:'Tiêu đề', type:'text', required:true, span2:true},
       {key:'category', label:'Chuyên mục', type:'select', options:['Hoạt động VBSF','Giải đấu','Đào tạo','Trong nước','Quốc tế']},
       {key:'date', label:'Ngày đăng', type:'date'},
-      {key:'author', label:'Tác giả', type:'text', placeholder:'Ban Truyền thông VBSF'},
+      {key:'author', i18n:true, label:'Tác giả', type:'text', placeholder:'Ban Truyền thông VBSF'},
       {key:'featured', label:'Hiển thị ở mục "Tin nổi bật" (trang chủ)', type:'checkbox'},
-      {key:'excerpt', label:'Tóm tắt', type:'textarea', span2:true},
-      {key:'content', label:'Nội dung chi tiết', type:'richtext', span2:true},
-      {key:'metaTitle', label:'SEO — Meta title', type:'text', span2:true, placeholder:'Để trống sẽ dùng Tiêu đề'},
-      {key:'metaDescription', label:'SEO — Meta description', type:'textarea', span2:true, rows:2, placeholder:'Để trống sẽ dùng Tóm tắt'}
+      {key:'excerpt', i18n:true, label:'Tóm tắt', type:'textarea', span2:true},
+      {key:'content', i18n:true, label:'Nội dung chi tiết', type:'richtext', span2:true},
+      {key:'metaTitle', i18n:true, label:'SEO — Meta title', type:'text', span2:true, placeholder:'Để trống sẽ dùng Tiêu đề'},
+      {key:'metaDescription', i18n:true, label:'SEO — Meta description', type:'textarea', span2:true, rows:2, placeholder:'Để trống sẽ dùng Tóm tắt'}
     ],
     columns:[
       {key:'image', label:'', render:r=> r.image ? `<img src="${r.image}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;display:block">` : `<div style="width:36px;height:36px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--hint)"><i class="ti ti-photo"></i></div>`},
@@ -30,7 +30,7 @@ const COLLECTIONS = {
     remote:true, apiPath:'tournaments', extraFields:['bracket','rr','sw','mode'],
     populate:'populate[players]=*&populate[prizes]=*&populate[events]=*&populate[docs][populate]=file',
     fields:[
-      {key:'name', label:'Tên giải đấu', type:'text', required:true, span2:true},
+      {key:'name', i18n:true, label:'Tên giải đấu', type:'text', required:true, span2:true},
       /* nature quyết định ai được đăng ký: giải thành tích cao chỉ nhận đơn của
          đội tỉnh/thành, giải phong trào thì VĐV tự đăng ký. Site và API đều đọc
          field này, đổi ở đây là đổi luôn luồng đăng ký. */
@@ -45,18 +45,18 @@ const COLLECTIONS = {
       {key:'participants', label:'Số cơ thủ', type:'number'},
       {key:'startDate', label:'Khai mạc', type:'date'},
       {key:'endDate', label:'Bế mạc', type:'date'},
-      {key:'location', label:'Địa điểm', type:'text', span2:true},
-      {key:'note', label:'Trạng thái đăng ký', type:'text', placeholder:'VD: Mở đăng ký / Sắp mở'},
+      {key:'location', i18n:true, label:'Địa điểm', type:'text', span2:true},
+      {key:'note', i18n:true, label:'Trạng thái đăng ký', type:'text', placeholder:'VD: Mở đăng ký / Sắp mở'},
       {key:'regOpenDate', label:'Mở đăng ký từ ngày', type:'date'},
       {key:'regCloseDate', label:'Khóa đăng ký sau ngày', type:'date'},
-      {key:'liveRound', label:'Vòng đấu hiện tại (khi đang diễn ra)', type:'text', placeholder:'VD: Vòng tứ kết'},
+      {key:'liveRound', i18n:true, label:'Vòng đấu hiện tại (khi đang diễn ra)', type:'text', placeholder:'VD: Vòng tứ kết'},
       {key:'champion', label:'Nhà vô địch (nếu đã kết thúc)', type:'text'},
       {key:'runnerUp', label:'Á quân (nếu đã kết thúc)', type:'text'},
       {key:'third', label:'Hạng 3 (nếu đã kết thúc)', type:'text'},
-      {key:'entryFee', label:'Lệ phí tham gia', type:'text', placeholder:'VD: 200.000đ / cơ thủ'},
-      {key:'rules', label:'Thể lệ & luật thi đấu', type:'textarea', span2:true, rows:6, placeholder:'Mỗi dòng là một điều luật...'},
-      {key:'metaTitle', label:'SEO — Meta title', type:'text', span2:true, placeholder:'Để trống sẽ dùng Tên giải đấu'},
-      {key:'metaDescription', label:'SEO — Meta description', type:'textarea', span2:true, rows:2}
+      {key:'entryFee', i18n:true, label:'Lệ phí tham gia', type:'text', placeholder:'VD: 200.000đ / cơ thủ'},
+      {key:'rules', i18n:true, label:'Thể lệ & luật thi đấu', type:'textarea', span2:true, rows:6, placeholder:'Mỗi dòng là một điều luật...'},
+      {key:'metaTitle', i18n:true, label:'SEO — Meta title', type:'text', span2:true, placeholder:'Để trống sẽ dùng Tên giải đấu'},
+      {key:'metaDescription', i18n:true, label:'SEO — Meta description', type:'textarea', span2:true, rows:2}
     ],
     columns:[
       {key:'name', label:'Tên giải'},
@@ -70,7 +70,7 @@ const COLLECTIONS = {
   library_docs: {
     label:'Văn bản & Luật', icon:'ti-file-text', single:'tài liệu', remote:true, apiPath:'library-docs',
     fields:[
-      {key:'title', label:'Tên tài liệu', type:'text', required:true, span2:true},
+      {key:'title', i18n:true, label:'Tên tài liệu', type:'text', required:true, span2:true},
       {key:'fileType', label:'Định dạng', type:'select', options:['PDF','DOCX','XLSX']},
       {key:'tag', label:'Phân loại', type:'select', options:['Quy chế','Luật','Biểu mẫu','Thông báo']},
       {key:'size', label:'Dung lượng', type:'text', placeholder:'Tự điền khi tải tệp lên'},
@@ -90,7 +90,7 @@ const COLLECTIONS = {
   library_media: {
     label:'Thư viện Media', icon:'ti-photo', single:'album', remote:true, apiPath:'media-items',
     fields:[
-      {key:'title', label:'Tên album', type:'text', required:true, span2:true},
+      {key:'title', i18n:true, label:'Tên album', type:'text', required:true, span2:true},
       {key:'mediaType', label:'Loại', type:'select', options:['photo','video'], optionLabels:{photo:'Hình ảnh',video:'Video'}},
       {key:'count', label:'Số lượng ảnh/video', type:'number'},
       {key:'date', label:'Ngày đăng', type:'date'}
@@ -185,9 +185,9 @@ const COLLECTIONS = {
   leaders: {
     label:'Ban lãnh đạo', icon:'ti-user-star', single:'thành viên', remote:true, apiPath:'leaders',
     fields:[
-      {key:'photo', label:'Ảnh chân dung', type:'image', span2:true},
-      {key:'name', label:'Họ và tên', type:'text', required:true, span2:true},
-      {key:'role', label:'Chức vụ', type:'text'},
+      {key:'photo', i18n:true, label:'Ảnh chân dung', type:'image', span2:true},
+      {key:'name', i18n:true, label:'Họ và tên', type:'text', required:true, span2:true},
+      {key:'role', i18n:true, label:'Chức vụ', type:'text'},
       {key:'order', label:'Thứ tự hiển thị', type:'number', placeholder:'Số nhỏ hiện trước'}
     ],
     columns:[
@@ -332,10 +332,10 @@ const COLLECTIONS = {
   partners: {
     label:'Đối tác & Tài trợ', icon:'ti-building', single:'đối tác', remote:true, apiPath:'partners',
     fields:[
-      {key:'image', label:'Hình minh họa', type:'image', span2:true},
-      {key:'name', label:'Tên đối tác', type:'text', required:true, span2:true},
+      {key:'image', i18n:true, label:'Hình minh họa', type:'image', span2:true},
+      {key:'name', i18n:true, label:'Tên đối tác', type:'text', required:true, span2:true},
       {key:'tier', label:'Hạng mục', type:'select', options:['Đối tác chiến lược','Nhà tài trợ Kim cương','Nhà tài trợ Vàng','Đối tác đồng hành'], span2:true},
-      {key:'description', label:'Mô tả ngắn', type:'richtext', span2:true}
+      {key:'description', i18n:true, label:'Mô tả ngắn', type:'richtext', span2:true}
     ],
     columns:[
       {key:'image', label:'', render:r=> r.image ? `<img src="${r.image}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;display:block">` : `<div style="width:36px;height:36px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--hint)"><i class="ti ti-building"></i></div>`},

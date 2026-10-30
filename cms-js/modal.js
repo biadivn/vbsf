@@ -7,6 +7,13 @@ let modalImageValues = {};
 let modalFileValues = {};
 let editingRecordFiles = {};
 function openModal(key, id){
+  resetDetailLang();
+  renderModal(key, id);
+}
+
+/* Dựng lại thân modal theo ngôn ngữ đang chọn. Tách khỏi openModal() để công
+   tắc Tiếng Việt / English vẽ lại được mà không phải mở lại modal. */
+function renderModal(key, id){
   pageModal = null; addSectionModal = null;
   editingCollection = key; editingId = id;
   const c = COLLECTIONS[key];
@@ -14,14 +21,32 @@ function openModal(key, id){
   modalImageValues = {};
   modalFileValues = {};
   editingRecordFiles = {};
+  document.getElementById('modalTitle').textContent = id ? `Sửa ${c.single}` : `Thêm ${c.single}`;
+  const body = document.getElementById('modalBody');
+
+  /* Bản dịch gắn với một bản ghi ĐÃ CÓ: lúc thêm mới chưa có gì để dịch, và
+     cũng chưa có documentId để ghi cột i18n vào đâu. */
+  const canTranslate = !!id && collectionHasI18n(key);
+  const langSwitch = canTranslate ? renderDetailLangSwitch() : '';
+
+  if(canTranslate && detailLang==='en'){
+    const fields = i18nFieldsOf(key);
+    body.innerHTML = langSwitch + `<div>` + renderI18nFields(fields, record) + `</div>`;
+    document.getElementById('modalDeleteBtn').style.display = 'none';
+    document.getElementById('modalSaveBtn').style.display = '';
+    document.querySelector('#modalOverlay .modal').classList.add('wide');
+    document.getElementById('modalOverlay').classList.add('on');
+    attachI18nFields();
+    attachDetailLangSwitch(()=> renderModal(key, id));
+    return;
+  }
+
   c.fields.forEach(f=>{
     if(f.type==='image') modalImageValues[f.key] = record[f.key] || null;
     if(f.type==='file') editingRecordFiles[f.key] = record[f.key] || null;
   });
-  document.getElementById('modalTitle').textContent = id ? `Sửa ${c.single}` : `Thêm ${c.single}`;
-  const body = document.getElementById('modalBody');
   const fields = formFields(c, !id);
-  body.innerHTML = `<div class="form-grid">` + fields.map(f=>{
+  body.innerHTML = langSwitch + `<div class="form-grid">` + fields.map(f=>{
     const value = fieldValue(f, record);
     return `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${f.type==='richtext' ? renderRichTextField(f, value) : renderField(f, value)}</div>`;
   }).join('') + `</div>`;
@@ -35,6 +60,7 @@ function openModal(key, id){
     chip.addEventListener('click', ()=> chip.classList.toggle('on'));
   });
   wireModalPickers(key, !id);
+  attachDetailLangSwitch(()=> renderModal(key, id));
 }
 function openViewModal(key, id){
   pageModal = null; addSectionModal = null;
@@ -282,7 +308,9 @@ function attachModalImageEvents(){
 }
 function closeModal(){
   document.getElementById('modalOverlay').classList.remove('on');
+  document.querySelector('#modalOverlay .modal').classList.remove('wide');
   editingCollection = null; editingId = null;
+  resetDetailLang();
 }
 /* Danh sách field của form, đã tính theo chế độ THÊM MỚI hay CHỈNH SỬA.
 
@@ -409,6 +437,19 @@ function renderField(f, value){
 async function saveModal(){
   const key = editingCollection;
   const c = COLLECTIONS[key];
+
+  /* Đang nhập tiếng Anh: chỉ ghi cột i18n, không đụng bản tiếng Việt — form
+     này không mở những ô đó ra nên lưu kiểu thường sẽ ghi rỗng đè lên. */
+  if(detailLang==='en' && editingId && collectionHasI18n(key)){
+    const id = editingId;
+    const ok = await saveI18nValues('collection', key, id, i18nFieldsOf(key));
+    if(!ok){ showToast('Không lưu được bản tiếng Anh', true); return; }
+    closeModal();
+    renderContent();
+    showToast('Đã lưu bản tiếng Anh');
+    return;
+  }
+
   // closeModal() xoá editingId, nên chốt lại trước — không thì sửa bản ghi cũ
   // vẫn báo "Đã thêm mới".
   const wasEditing = !!editingId;

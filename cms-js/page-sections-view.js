@@ -68,24 +68,61 @@ function renderPageMetaCard(pageKey){
   ensurePageMetaEditBuffer(pageKey);
   const v = pageMetaEditBuffer.values;
   const isCustom = !!DB.customPages[pageKey];
-  const fieldsHtml = PAGE_META_FIELDS.map(f=>
-    `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${renderPageMetaField(f, v[f.key])}</div>`
-  ).join('');
-  return `<div class="card" style="margin-bottom:20px">
-    <div class="card-head">
+  const transFields = i18nFieldsOfPageMeta();
+
+  const head = `<div class="card-head">
       <div>
         <h2>Thông tin trang</h2>
         <div class="desc">Tên, đường dẫn (slug) và metadata SEO của trang này</div>
       </div>
       ${isCustom ? `<button class="btn btn-danger-outline" id="pageDeleteBtn"><i class="ti ti-trash"></i> Xóa trang</button>` : ''}
-    </div>
-    <div class="sec-detail-group"><div class="form-grid">${fieldsHtml}</div></div>
+    </div>`;
+
+  if(detailLang==='en'){
+    /* Bản dịch đọc từ DB.pageMeta chứ không từ buffer: buffer chỉ giữ bản tiếng
+       Việt đang sửa dở. */
+    const meta = (DB.pageMeta && DB.pageMeta[pageKey]) || {};
+    return `<div class="card" style="margin-bottom:20px">${head}
+      <div class="sec-detail-group">${renderDetailLangSwitch('Ô để trống thì trang tiếng Anh dùng bản tiếng Việt. Đường dẫn (slug) dùng chung, không dịch.')}
+        <div>${renderI18nFields(transFields, meta)}</div>
+      </div>
+      <div class="sec-detail-actions">
+        <button class="btn btn-primary" id="pageMetaI18nSaveBtn"><i class="ti ti-check"></i> Lưu bản tiếng Anh</button>
+      </div>
+    </div>`;
+  }
+
+  const fieldsHtml = PAGE_META_FIELDS.map(f=>
+    `<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${renderPageMetaField(f, v[f.key])}</div>`
+  ).join('');
+  return `<div class="card" style="margin-bottom:20px">${head}
+    <div class="sec-detail-group">${renderDetailLangSwitch()}<div class="form-grid">${fieldsHtml}</div></div>
     <div class="sec-detail-actions">
       <button class="btn btn-primary" id="pageMetaSaveBtn"><i class="ti ti-check"></i> Lưu thông tin trang</button>
     </div>
   </div>`;
 }
 function attachPageMetaCardEvents(pageKey){
+  attachDetailLangSwitch(()=> renderContent());
+
+  const i18nSaveBtn = document.getElementById('pageMetaI18nSaveBtn');
+  if(i18nSaveBtn){
+    attachI18nFields();
+    i18nSaveBtn.addEventListener('click', async ()=>{
+      /* pageMeta của trang dựng sẵn có thể chưa tồn tại trong DB (chỉ suy từ
+         registry) — tạo trước, nếu không bản dịch không có chỗ để ghi vào. */
+      if(!DB.pageMeta[pageKey]){
+        ensurePageMetaEditBuffer(pageKey);
+        DB.pageMeta[pageKey] = {...pageMetaEditBuffer.values};
+      }
+      const ok = await saveI18nValues('pagemeta', pageKey, null, i18nFieldsOfPageMeta());
+      if(!ok){ showToast('Không lưu được bản tiếng Anh', true); return; }
+      showToast('Đã lưu bản tiếng Anh');
+      renderContent();
+    });
+    return;   // màn hình bản dịch không có các ô của form tiếng Việt
+  }
+
   const saveBtn = document.getElementById('pageMetaSaveBtn');
   if(saveBtn) saveBtn.addEventListener('click', async ()=>{
     const values = {};
@@ -93,6 +130,10 @@ function attachPageMetaCardEvents(pageKey){
     if(!values.title.trim()){ showToast('Vui lòng nhập tên trang', true); return; }
     if(!values.slug.trim()) values.slug = slugify(values.title);
     if(!values.slug.startsWith('/')) values.slug = '/'+values.slug;
+    /* Bản dịch do màn hình riêng quản lý, form này không có ô nào của nó —
+       không mang theo thì lưu bản tiếng Việt là xoá luôn bản dịch. */
+    const keepI18n = DB.pageMeta[pageKey] && DB.pageMeta[pageKey].i18n;
+    if(keepI18n) values.i18n = keepI18n;
     DB.pageMeta[pageKey] = values;
     if(DB.customPages[pageKey]) DB.customPages[pageKey].label = values.title;
     pageMetaEditBuffer = null;

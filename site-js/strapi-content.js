@@ -30,6 +30,178 @@
 
   var PAGE_SIZE = 200;
 
+  /* ---------------- ngôn ngữ đang xem ----------------
+
+     Logic thuần nằm ở site-js/i18n.js (có unit test); ở đây chỉ là phần dính
+     vào trình duyệt: nhớ lựa chọn, dịch chữ tĩnh trong DOM, và nút đổi ngôn ngữ.
+
+     Đổi ngôn ngữ thì TẢI LẠI TRANG. Render lại tại chỗ nghe gọn hơn nhưng phải
+     dựng lại mọi khối đang mở (tab, phân trang, form dở, trạng thái đăng nhập)
+     — nhiều đường để sót. Tải lại luôn ra đúng trạng thái, và ngôn ngữ thì
+     người xem đổi vài lần một phiên chứ không liên tục. */
+  var LANG_KEY = 'vbsf_lang';
+
+  function normLang(v) {
+    return typeof normalizeLang === 'function' ? normalizeLang(v) : 'vi';
+  }
+
+  var langCache = null;
+  function currentLang() {
+    if (langCache) return langCache;
+    var fromUrl = '';
+    try {
+      fromUrl = new URLSearchParams(location.search).get('lang') || '';
+    } catch (err) { fromUrl = ''; }
+    var stored = '';
+    try { stored = localStorage.getItem(LANG_KEY) || ''; } catch (err) { stored = ''; }
+    /* ?lang= thắng để link dán ra ngoài luôn mở đúng thứ tiếng người gửi thấy,
+       và ghi lại luôn cho những lần sau. */
+    langCache = normLang(fromUrl || stored);
+    if (fromUrl) { try { localStorage.setItem(LANG_KEY, langCache); } catch (err) { /* chặn cookie */ } }
+    return langCache;
+  }
+
+  function setLang(value) {
+    var next = normLang(value);
+    if (next === currentLang()) return;
+    try { localStorage.setItem(LANG_KEY, next); } catch (err) { /* chặn cookie: vẫn đổi được trong lần này */ }
+    /* Giữ nguyên trang đang xem. Có ?lang= trên URL thì phải điều hướng để bỏ
+       nó đi (nếu không, lần tải lại sau vẫn đọc ?lang= cũ và nút bấm như không
+       ăn); không có thì reload() là đủ và chắc chắn tải lại. */
+    if (location.search) location.replace(location.pathname + location.hash);
+    else location.reload();
+  }
+
+  /** Chuỗi ghép từ biến (số lượng, tên bảng...) — không tra từ điển cả câu được. */
+  function L(vi, en) {
+    return currentLang() === 'en' ? en : vi;
+  }
+
+  /* Dịch chữ tĩnh trong một nhánh DOM. Tra theo đúng chuỗi tiếng Việt: không có
+     trong từ điển thì giữ nguyên, nên tên người / mã số / nội dung CMS đi thẳng
+     qua (xem site-js/i18n.js). */
+  var TRANSLATABLE_ATTRS = ['placeholder', 'title', 'alt', 'aria-label'];
+
+  function translateTree(root) {
+    if (currentLang() === 'vi' || !root || typeof translateUi !== 'function') return;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        /* Chữ trong <script>/<style> không phải nội dung hiển thị. */
+        var tag = node.parentNode && node.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+        return node.nodeValue && node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      },
+    });
+    var nodes = [];
+    for (var n = walker.nextNode(); n; n = walker.nextNode()) nodes.push(n);
+    nodes.forEach(function (node) {
+      var out = translateUi(node.nodeValue, 'en');
+      if (out !== node.nodeValue) node.nodeValue = out;
+    });
+
+    TRANSLATABLE_ATTRS.forEach(function (attr) {
+      var targets = root.querySelectorAll ? Array.prototype.slice.call(root.querySelectorAll('[' + attr + ']')) : [];
+      // querySelectorAll chỉ soi con cháu — nhánh mới có thể CHÍNH NÓ là <input
+      // placeholder="..."> nên phải xét thêm chính nó.
+      if (root.hasAttribute && root.hasAttribute(attr)) targets.push(root);
+      targets.forEach(function (el) {
+        var cur = el.getAttribute(attr);
+        var out = translateUi(cur, 'en');
+        if (out !== cur) el.setAttribute(attr, out);
+      });
+    });
+    /* <option> dựng sẵn trong HTML có cả value lẫn nhãn; nhãn đã dịch ở trên,
+       value giữ nguyên để form gửi lên vẫn là giá trị tiếng Việt backend hiểu. */
+  }
+
+  /* Trang dựng lại nhiều khối bằng innerHTML SAU khi render lần đầu (phân trang
+     tin, đổi tab bảng xếp hạng, mở modal...). Bám theo từng chỗ gọi là chắc
+     chắn sót, nên theo dõi chung: hễ có nhánh DOM mới thì dịch nhánh đó.
+     Chỉ nghe childList — việc dịch chỉ ghi nodeValue nên không tự kích lại. */
+  function watchForNewNodes() {
+    if (currentLang() === 'vi' || typeof MutationObserver === 'undefined') return;
+    var pending = [];
+    var timer = null;
+    var observer = new MutationObserver(function (records) {
+      records.forEach(function (rec) {
+        Array.prototype.forEach.call(rec.addedNodes, function (node) {
+          if (node.nodeType === 1 || node.nodeType === 3) pending.push(node);
+        });
+      });
+      if (!pending.length || timer) return;
+      timer = setTimeout(function () {
+        timer = null;
+        var batch = pending;
+        pending = [];
+        batch.forEach(function (node) {
+          if (!node.parentNode) return;              // đã bị gỡ khỏi trang
+          if (node.nodeType === 3) {
+            var out = translateUi(node.nodeValue, 'en');
+            if (out !== node.nodeValue) node.nodeValue = out;
+          } else {
+            translateTree(node);
+          }
+        });
+      }, 0);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  /** Dịch phần nằm ngoài <body>: thẻ <title> và các meta dùng khi chia sẻ link. */
+  function translateHead() {
+    document.documentElement.setAttribute('lang', currentLang());
+    if (currentLang() === 'vi') return;
+    document.title = translateUi(document.title, 'en');
+    document.querySelectorAll('meta[name="description"],meta[property="og:title"],meta[property="og:description"],meta[name="twitter:title"],meta[name="twitter:description"],meta[property="og:site_name"]')
+      .forEach(function (m) {
+        m.setAttribute('content', translateUi(m.getAttribute('content'), 'en'));
+      });
+    var locale = document.querySelector('meta[property="og:locale"]');
+    if (locale) locale.setAttribute('content', 'en_US');
+  }
+
+  /* Tiêu đề/mô tả mặc định của cả site, chốt lại ngay lúc nạp để còn đường về
+     khi rời một trang CÓ khai metadata sang trang KHÔNG khai. */
+  var DEFAULT_HEAD = null;
+
+  function metaDescEl() {
+    return document.querySelector('meta[name="description"]');
+  }
+
+  /**
+   * Đặt tiêu đề tab và mô tả SEO theo trang đang xem, lấy từ "Thông tin trang"
+   * trong CMS (đã phủ bản dịch).
+   *
+   * Trước đây site KHÔNG đọc pageMeta ở đâu cả: ba ô "Tên trang / Meta title /
+   * Meta description" trong CMS là dữ liệu chết, admin nhập vào mà trang không
+   * bao giờ đổi — đúng loại lỗi im lặng như entry.values ngày trước.
+   */
+  function applyPageSeo(pageId, data) {
+    if (!DEFAULT_HEAD) {
+      var d = metaDescEl();
+      DEFAULT_HEAD = { title: document.title, description: d ? d.getAttribute('content') : '' };
+    }
+    var seo = typeof pageSeo === 'function' ? pageSeo(data && data.pageContent, pageId) : null;
+    /* Ô "Meta title (SEO)" thay TOÀN BỘ tiêu đề tab — đó là ý nghĩa của nó.
+       Chưa khai thì ghép "tên trang — tên Liên đoàn": chỉ để mỗi tên trang thì
+       tab ghi độc chữ "Trang chủ", tệ hơn cả lúc chưa có tính năng này.
+       Tên trang đi qua từ điển vì admin có thể chưa dịch tên trang đó — để thô
+       thì bản tiếng Anh lòi ra một vế tiếng Việt. */
+    var title = DEFAULT_HEAD.title;
+    if (seo && seo.metaTitle) title = seo.metaTitle;
+    else if (seo && seo.name) title = translateUi(seo.name, currentLang()) + ' — ' + DEFAULT_HEAD.title;
+    document.title = title;
+    var el = metaDescEl();
+    if (el) el.setAttribute('content', (seo && seo.description) || DEFAULT_HEAD.description);
+  }
+
+  /** Gọi một lần lúc trang nạp xong, trước khi điều hướng tới trang đầu tiên. */
+  function initLang() {
+    translateHead();
+    translateTree(document.body);
+    watchForNewNodes();
+  }
+
   /* ---------------- tiện ích ---------------- */
 
   function esc(s) {
@@ -65,8 +237,12 @@
   }
 
   function mediaUrl(m) {
-    if (!m || !m.url) return '';
-    return m.url.indexOf('http') === 0 ? m.url : STRAPI_URL + m.url;
+    if (!m) return '';
+    /* Ảnh bản dịch tiếng Anh lưu thẳng URL (chuỗi) trong cột i18n, không phải
+       quan hệ media của Strapi — xem site-js/i18n.js. */
+    var url = typeof m === 'string' ? m : m.url;
+    if (!url) return '';
+    return url.indexOf('http') === 0 || url.indexOf('data:') === 0 ? url : STRAPI_URL + url;
   }
 
   /** Ảnh thật nếu có, không thì giữ nguyên ô placeholder .vb-ph của prototype. */
@@ -217,7 +393,10 @@
       if (failed.length) {
         console.warn('[VBSF] Thiếu dữ liệu cho: ' + failed.join(', ') + ' — các phần còn lại vẫn hiển thị.');
       }
-      return bundle;
+      /* Đang xem tiếng Anh thì phủ cột i18n lên đây, MỘT lần. Làm ở chỗ khác —
+         rải ra từng hàm render — là chắc chắn sót chỗ nào đó và trang nửa Việt
+         nửa Anh. */
+      return typeof overlayData === 'function' ? overlayData(bundle, currentLang()) : bundle;
     });
 
     return bundlePromise;
@@ -430,7 +609,7 @@
       ? '<a class="btn-out" data-go="giai-dau-dang-ky" ' + dsAttrs(ds) +
         ' style="padding:6px 14px;font-size:11.5px;white-space:nowrap">Đăng ký</a>'
       : '';
-    var meta = esc(t.location || '') + (t.participants ? ' · ' + t.participants + ' cơ thủ' : '');
+    var meta = esc(t.location || '') + (t.participants ? ' · ' + t.participants + L(' cơ thủ', ' players') : '');
     return (
       '<div class="vb-row" style="flex-wrap:wrap">' +
       '<div class="vb-dateblk"><div class="d">' + db.d + '</div><div class="m">' + db.m + '</div></div>' +
@@ -448,7 +627,8 @@
       '<div class="vb-row"><div style="flex:1">' +
       '<div style="font-size:13.5px;font-weight:500;color:#1B2A24;cursor:pointer" data-go="giai-dau-chi-tiet" ' +
       dsAttrs(ds) + '>' + esc(t.name) + '</div>' +
-      '<div style="font-size:11.5px;color:#8A968F;margin-top:3px"><i class="ti ti-trophy" style="color:var(--gold-ink)"></i> Vô địch: ' +
+      '<div style="font-size:11.5px;color:#8A968F;margin-top:3px"><i class="ti ti-trophy" style="color:var(--gold-ink)"></i> ' +
+      L('Vô địch: ', 'Champion: ') +
       esc(t.champion || '—') + ' · ' + fmtDate(t.date) + '</div></div>' +
       '<span class="vb-tag">' + esc(t.category || '') + '</span>' +
       '<span class="vb-link" style="cursor:pointer" data-go="giai-dau-ket-qua" ' + dsAttrs(ds) + '>Xem kết quả →</span></div>'
@@ -486,7 +666,8 @@
       var feat = pickOne(cfg('hero-banner'), data.news, 'newsIds') || data.news[0];
       if (feat) {
         setText(banner, '[data-hero-name]', feat.title);
-        setText(banner, '[data-hero-meta]', [feat.category, fmtDate(feat.date)].filter(Boolean).join(' · '));
+        setText(banner, '[data-hero-meta]',
+          [translateUi(feat.category, currentLang()), fmtDate(feat.date)].filter(Boolean).join(' · '));
         if (feat.image) setBackground(banner.querySelector('[data-hero-image]'), feat.image);
         // Bấm banner mở đúng bài đó thay vì danh sách tin chung.
         banner.setAttribute('data-go', 'tin-tuc-chi-tiet');
@@ -576,7 +757,7 @@
               avatarCircle(r.avatar, '44px', '', '', '0 auto 6px') +
               '<div style="font-size:11px;font-weight:600;color:#21428E">HẠNG ' + (r.rank || i + 1) + '</div>' +
               '<div style="font-size:12px;margin-top:2px">' + esc(r.name) + '</div>' +
-              '<div style="font-size:12.5px;font-weight:600;color:#21428E;margin-top:2px">' + fmtPoints(r.points) + ' đ</div></div>'
+              '<div style="font-size:12.5px;font-weight:600;color:#21428E;margin-top:2px">' + fmtPoints(r.points) + L(' đ', ' pts') + '</div></div>'
             );
           }).join('') +
           '</div></div>'
@@ -1845,13 +2026,16 @@
         });
         tbody.innerHTML = res.data.length
           ? res.data.map(opts.row).join('')
-          : '<tr><td colspan="4" style="color:#8A968F">Không tìm thấy ' + opts.noun + ' phù hợp.</td></tr>';
+          : '<tr><td colspan="4" style="color:#8A968F">' +
+            L('Không tìm thấy ' + opts.noun + ' phù hợp.', 'No matching ' + opts.nounEn + '.') + '</td></tr>';
         if (countEl) {
           var p = res.pagination;
           var from = (p.page - 1) * MEMBER_PAGE_SIZE + 1;
+          var to = Math.min(from + res.data.length - 1, p.total);
           countEl.textContent = p.total
-            ? 'Tổng ' + p.total + ' ' + opts.noun + ' · hiển thị ' + from + '–' + Math.min(from + res.data.length - 1, p.total)
-            : 'Chưa có ' + opts.noun + ' nào';
+            ? L('Tổng ' + p.total + ' ' + opts.noun + ' · hiển thị ' + from + '–' + to,
+                p.total + ' ' + opts.nounEn + ' · showing ' + from + '–' + to)
+            : L('Chưa có ' + opts.noun + ' nào', 'No ' + opts.nounEn + ' yet');
         }
         renderPager(pagerBox, res.pagination, function (n) { state.page = n; show(); });
       }
@@ -1865,8 +2049,8 @@
       show();
     }
 
-    wirePanel({ tab: 'ca-nhan', path: 'members', row: memberRow, searchSelector: '[data-member-search]', noun: 'hội viên cá nhân', populate: 'avatar' });
-    wirePanel({ tab: 'to-chuc', path: 'member-orgs', row: orgRow, searchSelector: '[data-org-search]', noun: 'hội viên tổ chức' });
+    wirePanel({ tab: 'ca-nhan', path: 'members', row: memberRow, searchSelector: '[data-member-search]', noun: 'hội viên cá nhân', nounEn: 'individual members', populate: 'avatar' });
+    wirePanel({ tab: 'to-chuc', path: 'member-orgs', row: orgRow, searchSelector: '[data-org-search]', noun: 'hội viên tổ chức', nounEn: 'organisation members' });
   };
 
   /* ---------------- các trang chi tiết (điền sau khi điều hướng) ---------------- */
@@ -2225,6 +2409,7 @@
 
     var data = await load();
     if (!data || !page) return;
+    try { applyPageSeo(dest, data); } catch (err) { /* thiếu metadata không được chặn điều hướng */ }
     try {
       /* Trang chi tiết: chạy KỂ CẢ khi không có dataset.
 
@@ -2264,6 +2449,9 @@
 
   window.VBSF_CONTENT = {
     load: load,
+    initLang: initLang,
+    lang: currentLang,
+    setLang: setLang,
     submitPaymentClaim: function (payload) { return submitForm('payment-claims/submit', payload); },
     hydrate: hydrate,
     afterNav: afterNav,

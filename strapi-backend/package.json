@@ -44,6 +44,12 @@
     "installId": "5a7dfb9bfcbaaa7ace3c0bdcf8d8731c18c8175e598a66c2fed3b309b0e44590"
   },
   "overrides": {
+    "dompurify": "^3.4.17",
+    "undici": "^6.29.1",
+    "@modelcontextprotocol/server": "^2.3.1",
+    "follow-redirects": "^1.16.1",
+    "markdown-it": "^14.3.3",
+    "vite": "^6.4.5",
     "sharp": "^0.35.5",
     "nodemailer": "^10.1.0",
     "axios": "^1.20.0",

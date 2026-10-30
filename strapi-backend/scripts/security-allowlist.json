@@ -6,7 +6,8 @@
     "ảnh hưởng tới runtime production.",
     "Đợt 10/2026: đã nâng @strapi/strapi 5.52.1 -> 5.57.0 và override axios/handlebars/",
     "source-map-js/brace-expansion/webpack-dev-middleware/fast-uri/sharp/nodemailer để vá",
-    "thật thay vì bỏ qua. Phần còn lại dưới đây đều quy về MỘT gốc chưa có bản vá: braces."
+    "thật thay vì bỏ qua. Phần còn lại dưới đây đều quy về MỘT gốc chưa có bản vá: braces.",
+    "Đợt 24/10/2026: advisory mới của dompurify/undici/follow-redirects/markdown-it/vite/@modelcontextprotocol đã vá thật bằng overrides. Riêng zod KHÔNG vá được — bản vá bỏ API mà koa-session (bản mới nhất) còn dùng, override vào là Strapi không khởi động nổi."
   ],
   "advisories": [
     {
@@ -323,6 +324,150 @@
       "reviewBy": "2027-01-31",
       "reviewedBy": "VBSF dev",
       "reviewedOn": "2026-10-12"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "zod",
+      "severity": "high",
+      "reason": "zod@4.4.3 bị @strapi/strapi@5.57.0 ghim; bản vá ở zod >=4.6.6 BỎ API z.function().args(), mà koa-session@7.0.2 — bản mới nhất, là dependency của @strapi/core — vẫn gọi API đó. Đã thử override lên zod ^4.6.7: Strapi gãy ngay lúc nạp, `strapi build` chết với \"zod_1.default.function(...).args is not a function\" ở @strapi/core/dist/middlewares/session.js. Không có đường vá nào không làm sập ứng dụng cho tới khi koa-session hoặc Strapi cập nhật. Lỗ hổng là cạn bộ nhớ khi validate collection quá lớn: cần gửi được payload khổng lồ vào một schema zod. Toàn bộ 20 route công khai đều có giới hạn tần suất (chính security scan kiểm điều này), và khu vực admin nằm sau đăng nhập.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/admin",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/content-manager",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/content-type-builder",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/core",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/email",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/i18n",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/openapi",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/plugin-users-permissions",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/strapi",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/types",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/upload",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/utils",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "koa-body",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "koa-session",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "@strapi/provider-email-sendmail",
+      "severity": "high",
+      "reason": "Chỉ bị đánh dấu high vì nằm trên chuỗi phụ thuộc tới zod ở trên; bản thân gói này không có advisory riêng. Gỡ mục này ngay khi zod vá được.",
+      "reviewBy": "2026-12-31",
+      "reviewedBy": "VBSF dev",
+      "reviewedOn": "2026-10-24"
     }
   ]
 }

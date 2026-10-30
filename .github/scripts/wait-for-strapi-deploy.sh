@@ -13,10 +13,20 @@ set -euo pipefail
 
 REPO="${GITHUB_REPOSITORY:?}"
 SHA="${GITHUB_SHA:?}"
-WORKFLOW="deploy-strapi.yml"
 
-# Đúng các đường dẫn kích hoạt deploy-strapi.yml. Sửa paths bên đó thì sửa ở đây.
-STRAPI_PATHS_RE='^(strapi-backend/|deploy/scripts/|deploy/systemd/|\.nvmrc$|\.github/workflows/deploy-strapi\.yml$)'
+# Hai đường deploy dùng chung script này, chỉ khác tên workflow và danh sách
+# đường dẫn kích hoạt nó:
+#   main    → deploy-strapi.yml        (server mới vbsf.vn, systemd + release)
+#   develop → legacy-deploy-strapi.yml (server cũ biadi.vn, Docker + GHCR)
+# Workflow gọi script truyền hai biến dưới đây; không truyền thì mặc định là
+# đường của server mới.
+WORKFLOW="${STRAPI_WORKFLOW:-deploy-strapi.yml}"
+
+# Đúng các đường dẫn kích hoạt workflow Strapi tương ứng. Sửa `paths` bên đó
+# thì sửa luôn ở chỗ truyền biến này. Mặc định để trong NHÁY ĐƠN: `$` ở đây là
+# neo cuối chuỗi của regex, nháy kép thì shell nuốt mất.
+STRAPI_PATHS_DEFAULT='^(strapi-backend/|deploy/scripts/|deploy/systemd/|\.nvmrc$|\.github/workflows/deploy-strapi\.yml$)'
+STRAPI_PATHS_RE="${STRAPI_PATHS_RE:-$STRAPI_PATHS_DEFAULT}"
 
 # Lúc nào cũng CHỜ chứ không bao giờ bỏ qua vì "chưa thấy run": nếu không đọc
 # được danh sách file thì coi như có đụng Strapi, thà chậm còn hơn deploy lệch.

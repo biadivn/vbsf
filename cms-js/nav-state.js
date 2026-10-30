@@ -91,6 +91,9 @@ function getPageEditKey(view){
 }
 
 function setView(view){
+  /* Ngôn ngữ nhập gắn với MÀN HÌNH đang mở, không phải trạng thái toàn cục:
+     rời màn hình này sang màn hình khác thì quay về tiếng Việt. */
+  if(typeof resetDetailLang === 'function') resetDetailLang();
   currentView = view;
   searchTerm = '';
   filterValue = '';
