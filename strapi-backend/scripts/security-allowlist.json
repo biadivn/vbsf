@@ -468,6 +468,69 @@
       "reviewBy": "2026-12-31",
       "reviewedBy": "VBSF dev",
       "reviewedOn": "2026-10-24"
+    },
+    {
+      "id": "GHSA-g3hv-75wg-m249",
+      "package": "minimatch",
+      "severity": "moderate",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "TÊN_NGƯỜI_RÀ_SOÁT",
+      "reviewedOn": "2026-11-01",
+      "reason": "minimatch <11.0.1 bị DoS do khuếch đại globparts. Nằm trong chuỗi công cụ build/CLI của Strapi (@strapi/cloud-cli, glob, typedoc); bản vá minimatch 11 không tương thích nhánh glob/typedoc đang ghim, npm audit chỉ đề xuất lùi @strapi/strapi. Production chạy strapi start trên admin đã build sẵn, dữ liệu người dùng không trở thành pattern glob."
+    },
+    {
+      "id": "GHSA-3g3m-2fjr-6pw4",
+      "package": "glob",
+      "severity": "moderate",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "TÊN_NGƯỜI_RÀ_SOÁT",
+      "reviewedOn": "2026-11-01",
+      "reason": "glob 9–14.0.1: huỷ bằng AbortSignal có thể bị bỏ qua. Chỉ ảnh hưởng khi dùng glob với AbortSignal/timeout; glob nằm trong chuỗi công cụ Strapi, không nhận đầu vào người dùng. Chưa có bản vá tương thích nhánh Strapi đang dùng."
+    },
+    {
+      "id": "GHSA-3g3m-2fjr-6pw4",
+      "package": "rimraf",
+      "severity": "moderate",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "TÊN_NGƯỜI_RÀ_SOÁT",
+      "reviewedOn": "2026-11-01",
+      "reason": "Bắc cầu qua glob (GHSA-3g3m-2fjr-6pw4), xem mục glob. rimraf chỉ dùng xoá thư mục build/cache."
+    },
+    {
+      "id": "GHSA-3g3m-2fjr-6pw4",
+      "package": "react-query",
+      "severity": "moderate",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "TÊN_NGƯỜI_RÀ_SOÁT",
+      "reviewedOn": "2026-11-01",
+      "reason": "Bắc cầu qua broadcast-channel -> rimraf -> glob (GHSA-3g3m-2fjr-6pw4), xem mục glob."
+    },
+    {
+      "id": "GHSA-g3hv-75wg-m249",
+      "package": "typedoc",
+      "severity": "moderate",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "TÊN_NGƯỜI_RÀ_SOÁT",
+      "reviewedOn": "2026-11-01",
+      "reason": "Bắc cầu qua minimatch (GHSA-g3hv-75wg-m249), xem mục minimatch. typedoc chỉ dùng sinh tài liệu kiểu lúc build."
+    },
+    {
+      "id": "GHSA-g3hv-75wg-m249",
+      "package": "typedoc-plugin-markdown",
+      "severity": "moderate",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "TÊN_NGƯỜI_RÀ_SOÁT",
+      "reviewedOn": "2026-11-01",
+      "reason": "Bắc cầu qua typedoc -> minimatch (GHSA-g3hv-75wg-m249), xem mục minimatch."
+    },
+    {
+      "id": "GHSA-g3hv-75wg-m249",
+      "package": "typedoc-github-wiki-theme",
+      "severity": "moderate",
+      "reviewBy": "2027-01-31",
+      "reviewedBy": "TÊN_NGƯỜI_RÀ_SOÁT",
+      "reviewedOn": "2026-11-01",
+      "reason": "Bắc cầu qua typedoc-plugin-markdown -> typedoc -> minimatch (GHSA-g3hv-75wg-m249), xem mục minimatch."
     }
   ]
 }
