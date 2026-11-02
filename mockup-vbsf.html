@@ -1106,9 +1106,116 @@ h1,h2,h3,h4{text-wrap:balance}
         </div>
         </div><!-- /panel pro -->
         <div data-src-panel="amateur" hidden>
-          <div style="padding:56px 26px;text-align:center">
-            <div style="font-size:15px;font-weight:600">Giải nghiệp dư từ Biadi.vn</div>
-            <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Danh sách giải nghiệp dư từ Biadi.vn sẽ sớm được cập nhật tại đây.</div>
+          <div class="vb-sec" style="border-bottom:1px solid #EEF1EE;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-block:14px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap" data-filter="tour">
+              <span class="vb-pill on" data-st="all">Tất cả</span>
+              <span class="vb-pill" data-st="live">Đang diễn ra</span>
+              <span class="vb-pill" data-st="up">Sắp diễn ra</span>
+              <span class="vb-pill" data-st="done">Đã kết thúc</span>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <select class="vb-sel" aria-label="Hạng tay cơ"><option>Tất cả hạng</option><option>Hạng A</option><option>Hạng B</option><option>Hạng C</option><option>Hạng D</option></select>
+              <select class="vb-sel" aria-label="Khu vực"><option>Toàn quốc</option><option>Miền Bắc</option><option>Miền Trung</option><option>Miền Nam</option></select>
+            </div>
+          </div>
+
+          <div class="vb-sec" style="padding-block:12px;background:var(--surface);display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <span class="vb-tag" style="background:#FBF0DC;color:#8A5A1E">Nguồn: Biadi.vn</span>
+            <span style="font-size:12px;color:var(--muted)">Giải phong trào do câu lạc bộ và đơn vị địa phương tổ chức, chia theo hạng tay cơ. Không tính điểm vào bảng xếp hạng quốc gia.</span>
+          </div>
+
+          <div class="vb-sec tour-group" data-st="live">
+            <h2 class="vb-st" style="margin-bottom:14px">Đang diễn ra</h2>
+            <div class="vb-card" style="overflow:hidden">
+              <div style="display:flex;flex-wrap:wrap">
+                <span class="img" style="flex:1;min-width:240px;min-height:160px"><svg aria-label="Bàn pool tại câu lạc bộ"><use href="#ph-table"/></svg></span>
+                <div style="flex:1.4;min-width:260px;padding:18px 20px">
+                  <span class="vb-badge bg-live">● TRỰC TIẾP</span>
+                  <h3 style="font-size:17px;font-weight:600;color:var(--vd);margin-top:10px;line-height:1.3">Giải Bi-a Phong trào Mùa Thu 2026 — hạng C</h3>
+                  <div style="font-size:12.5px;color:var(--muted);margin-top:6px">CLB Thành Danh, Q.7, TP.HCM · 30/10 – 03/11/2026</div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><span class="vb-tag">Pool 8 bi</span><span class="vb-tag">Hạng C</span><span class="vb-tag">64 cơ thủ</span></div>
+                  <div class="row" style="margin-top:14px;background:var(--surface);padding:10px 12px">
+                    <div class="grow" style="font-size:12.5px"><b>Tứ kết 2</b> · Lê Văn Thịnh — Nguyễn Đình Phúc</div>
+                    <span style="font-size:15px;font-weight:700;color:var(--vd);font-variant-numeric:tabular-nums">5 – 3</span>
+                  </div>
+                  <span class="vb-link" style="display:inline-block;margin-top:12px">Xem kết quả trực tiếp →</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="vb-sec tour-group" data-st="up" style="background:var(--surface)">
+            <h2 class="vb-st" style="margin-bottom:14px">Sắp diễn ra</h2>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="row">
+                <div class="vb-dateblk"><div class="d">09</div><div class="m">Th11</div></div>
+                <div class="grow"><div style="font-size:13.5px;font-weight:500">Giải Bi-a Mở rộng CLB Hoàng Gia — hạng B</div>
+                  <div style="font-size:11.5px;color:var(--hint);margin-top:2px">CLB Hoàng Gia, Thanh Xuân, Hà Nội · 48 cơ thủ · lệ phí 150.000đ</div></div>
+                <span class="vb-tag">Pool 9 bi</span><span class="vb-badge bg-open">Mở đăng ký</span>
+                <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button">Đăng ký</button>
+              </div>
+              <div class="row">
+                <div class="vb-dateblk"><div class="d">16</div><div class="m">Th11</div></div>
+                <div class="grow"><div style="font-size:13.5px;font-weight:500">Giải Carom Phong trào Đà Nẵng Mở rộng</div>
+                  <div style="font-size:11.5px;color:var(--hint);margin-top:2px">CLB Sông Hàn, Hải Châu, Đà Nẵng · 32 cơ thủ · lệ phí 120.000đ</div></div>
+                <span class="vb-tag">Carom 1 băng</span><span class="vb-badge bg-open">Mở đăng ký</span>
+                <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button">Đăng ký</button>
+              </div>
+              <div class="row">
+                <div class="vb-dateblk"><div class="d">23</div><div class="m">Th11</div></div>
+                <div class="grow"><div style="font-size:13.5px;font-weight:500">Giải Bi-a Doanh nhân Bình Dương 2026</div>
+                  <div style="font-size:11.5px;color:var(--hint);margin-top:2px">CLB Phú Mỹ, TP. Thủ Dầu Một · 40 cơ thủ · lệ phí 200.000đ</div></div>
+                <span class="vb-tag">Pool 8 bi</span><span class="vb-badge bg-open">Còn 6 suất</span>
+              </div>
+              <div class="row">
+                <div class="vb-dateblk"><div class="d">07</div><div class="m">Th12</div></div>
+                <div class="grow"><div style="font-size:13.5px;font-weight:500">Giải Bi-a Phong trào Cần Thơ — hạng D</div>
+                  <div style="font-size:11.5px;color:var(--hint);margin-top:2px">CLB Tây Đô, Ninh Kiều, Cần Thơ · 56 cơ thủ</div></div>
+                <span class="vb-tag">Pool 8 bi</span><span class="vb-badge bg-soon">Mở đăng ký 20/11</span>
+              </div>
+              <div class="row">
+                <div class="vb-dateblk"><div class="d">21</div><div class="m">Th12</div></div>
+                <div class="grow"><div style="font-size:13.5px;font-weight:500">Giải Bi-a các CLB phong trào Hải Phòng</div>
+                  <div style="font-size:11.5px;color:var(--hint);margin-top:2px">Nhà Văn hóa Lê Chân, Hải Phòng · 18 đội</div></div>
+                <span class="vb-tag">Đồng đội</span><span class="vb-badge bg-soon">Sắp mở</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="vb-sec tour-group" data-st="done">
+            <h2 class="vb-st" style="margin-bottom:14px">Kết quả gần đây</h2>
+            <div class="grid g3">
+              <div class="vb-card">
+                <span class="img ar16"><svg><use href="#ph-balls"/></svg></span>
+                <div style="padding:13px 15px">
+                  <span class="vb-badge bg-done">Đã kết thúc</span>
+                  <h3 class="vb-ttl">Giải Bi-a Phong trào Quận 7 Mở rộng — hạng C</h3>
+                  <div style="font-size:12px;color:var(--muted);margin-top:6px">Vô địch: <b>Trịnh Văn Hòa</b></div>
+                  <div class="vb-dt">Kết thúc 18/10/2026 · TP.HCM · 72 cơ thủ</div>
+                  <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
+                </div>
+              </div>
+              <div class="vb-card">
+                <span class="img ar16"><svg><use href="#ph-cue"/></svg></span>
+                <div style="padding:13px 15px">
+                  <span class="vb-badge bg-done">Đã kết thúc</span>
+                  <h3 class="vb-ttl">Giải Bi-a CLB Meow Mở rộng — hạng B</h3>
+                  <div style="font-size:12px;color:var(--muted);margin-top:6px">Vô địch: <b>Dương Quang Hải</b></div>
+                  <div class="vb-dt">Kết thúc 05/10/2026 · Hà Nội · 48 cơ thủ</div>
+                  <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
+                </div>
+              </div>
+              <div class="vb-card">
+                <span class="img ar16"><svg><use href="#ph-carom"/></svg></span>
+                <div style="padding:13px 15px">
+                  <span class="vb-badge bg-done">Đã kết thúc</span>
+                  <h3 class="vb-ttl">Giải Carom Phong trào Nha Trang 2026</h3>
+                  <div style="font-size:12px;color:var(--muted);margin-top:6px">Vô địch: <b>Hồ Trung Kiên</b></div>
+                  <div class="vb-dt">Kết thúc 21/09/2026 · Khánh Hòa · 36 cơ thủ</div>
+                  <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1611,7 +1718,7 @@ h1,h2,h3,h4{text-wrap:balance}
       var box = pill.closest('[data-filter]');
       box.querySelectorAll('.vb-pill').forEach(function(p){ p.classList.toggle('on', p === pill); });
       if (box.getAttribute('data-filter') === 'news') applyNews();
-      else applyTour(pill.getAttribute('data-st'));
+      else applyTour(box, pill.getAttribute('data-st'));
       return;
     }
 
@@ -1667,8 +1774,9 @@ h1,h2,h3,h4{text-wrap:balance}
   if (q) q.addEventListener('input', applyNews);
 
   /* ---- lọc giải đấu theo trạng thái ---- */
-  function applyTour(state){
-    document.querySelectorAll('#pg-giai-dau .tour-group').forEach(function(g){
+  function applyTour(box, state){
+    var scope = box.closest('[data-src-panel]') || document.getElementById('pg-giai-dau');
+    scope.querySelectorAll('.tour-group').forEach(function(g){
       g.hidden = !(state === 'all' || g.getAttribute('data-st') === state);
     });
   }
