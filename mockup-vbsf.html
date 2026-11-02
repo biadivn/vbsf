@@ -1032,9 +1032,8 @@ h1,h2,h3,h4{text-wrap:balance}
         <div data-src-panel="pro">
         <div class="vb-sec" style="border-bottom:1px solid #EEF1EE;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-block:14px">
           <div style="display:flex;gap:8px;flex-wrap:wrap" data-filter="tour">
-            <span class="vb-pill on" data-st="all">Tất cả</span>
+            <span class="vb-pill on" data-st="up">Sắp diễn ra</span>
             <span class="vb-pill" data-st="live">Đang diễn ra</span>
-            <span class="vb-pill" data-st="up">Sắp diễn ra</span>
             <span class="vb-pill" data-st="done">Đã kết thúc</span>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1043,7 +1042,7 @@ h1,h2,h3,h4{text-wrap:balance}
           </div>
         </div>
 
-        <div class="vb-sec tour-group" data-st="live">
+        <div class="vb-sec tour-group" data-st="live" hidden>
           <h2 class="vb-st" style="margin-bottom:14px">Đang diễn ra</h2>
           <div class="vb-card" style="overflow:hidden;cursor:pointer" data-go="giai-dau-chi-tiet">
             <div style="display:flex;flex-wrap:wrap">
@@ -1095,7 +1094,7 @@ h1,h2,h3,h4{text-wrap:balance}
           </div>
         </div>
 
-        <div class="vb-sec tour-group" data-st="done">
+        <div class="vb-sec tour-group" data-st="done" hidden>
           <h2 class="vb-st" style="margin-bottom:14px">Kết quả gần đây</h2>
           <div class="grid g3">
             <div class="vb-card" style="cursor:pointer" data-go="giai-dau-chi-tiet">
@@ -1134,9 +1133,8 @@ h1,h2,h3,h4{text-wrap:balance}
         <div data-src-panel="amateur" hidden>
           <div class="vb-sec" style="border-bottom:1px solid #EEF1EE;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-block:14px">
             <div style="display:flex;gap:8px;flex-wrap:wrap" data-filter="tour">
-              <span class="vb-pill on" data-st="all">Tất cả</span>
+              <span class="vb-pill on" data-st="up">Sắp diễn ra</span>
               <span class="vb-pill" data-st="live">Đang diễn ra</span>
-              <span class="vb-pill" data-st="up">Sắp diễn ra</span>
               <span class="vb-pill" data-st="done">Đã kết thúc</span>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1150,7 +1148,7 @@ h1,h2,h3,h4{text-wrap:balance}
             <span style="font-size:12px;color:var(--muted)">Giải phong trào do câu lạc bộ và đơn vị địa phương tổ chức, chia theo hạng tay cơ. Không tính điểm vào bảng xếp hạng quốc gia.</span>
           </div>
 
-          <div class="vb-sec tour-group" data-st="live">
+          <div class="vb-sec tour-group" data-st="live" hidden>
             <h2 class="vb-st" style="margin-bottom:14px">Đang diễn ra</h2>
             <div class="vb-card" style="overflow:hidden">
               <div style="display:flex;flex-wrap:wrap">
@@ -1208,7 +1206,7 @@ h1,h2,h3,h4{text-wrap:balance}
             </div>
           </div>
 
-          <div class="vb-sec tour-group" data-st="done">
+          <div class="vb-sec tour-group" data-st="done" hidden>
             <h2 class="vb-st" style="margin-bottom:14px">Kết quả gần đây</h2>
             <div class="grid g3">
               <div class="vb-card">
@@ -1420,6 +1418,10 @@ h1,h2,h3,h4{text-wrap:balance}
           <div class="rkrow"><span class="lb">VĐV trẻ</span><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="vb-pill" data-rank-key="VĐV trẻ|Pool 9 bi">Pool 9 bi</span><span class="vb-pill" data-rank-key="VĐV trẻ|Carom 3 băng">Carom 3 băng</span></div></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px">
             <select class="vb-sel" aria-label="Tỉnh / thành"><option>Toàn quốc</option><option>TP.HCM</option><option>Hà Nội</option><option>Đà Nẵng</option><option>Cần Thơ</option><option>Hải Phòng</option></select>
+            <label style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 12px;gap:8px;max-width:210px;flex:1;min-width:150px">
+              <span style="color:var(--hint);font-size:13px">&#8981;</span>
+              <input id="rank-q" type="search" placeholder="Tìm cơ thủ…" aria-label="Tìm cơ thủ" style="border:none;background:none;outline:none;font-size:12px;width:100%;font-family:inherit;min-width:0;color:var(--ink)">
+            </label>
             <span style="font-size:11.5px;color:var(--hint)">Cập nhật 01/11/2026 · tính điểm 24 tháng gần nhất</span>
           </div>
         </div>
@@ -1892,6 +1894,13 @@ h1,h2,h3,h4{text-wrap:balance}
         </div>
         <div class="vb-sec" style="display:flex;gap:22px;flex-wrap:wrap">
           <div style="flex:1.4;min-width:280px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" data-reg-switch>
+              <span class="vb-pill on" data-reg="national">Giải thành tích cao (national)</span>
+              <span class="vb-pill" data-reg="grassroots">Giải phong trào (grassroots)</span>
+            </div>
+            <p style="font-size:11.5px;color:var(--hint);margin:-8px 0 14px">Luồng đăng ký do field <code>nature</code> của giải quyết định — mockup cho đổi tay để xem cả hai.</p>
+
+            <div data-reg-panel="national">
             <div class="vb-card" style="padding:16px;border-left:3px solid var(--gold);background:#FFFBF4">
               <div style="font-size:13px;font-weight:600;color:var(--vd)">Giải thành tích cao — đăng ký qua đội tỉnh/thành</div>
               <p style="font-size:12.5px;color:var(--muted);margin-top:6px">Giải này do các đội tỉnh/thành đăng ký kèm danh sách vận động viên của đội; vận động viên không tự đăng ký. Đăng nhập bằng <b>tài khoản đội</b> do Liên đoàn cấp. Đội chưa có tài khoản, liên hệ Liên đoàn ở mục <span class="vb-link" data-go="lien-he">Liên hệ</span>.</p>
@@ -1922,6 +1931,35 @@ h1,h2,h3,h4{text-wrap:balance}
               <button class="btn-gold" type="submit" style="margin-top:14px">Gửi đăng ký của đội</button>
               <p class="form-msg" hidden style="font-size:12px;color:var(--ok);margin-top:10px"></p>
             </form>
+            </div><!-- /luồng national -->
+
+            <div data-reg-panel="grassroots" hidden>
+              <div class="vb-card" style="padding:16px;border-left:3px solid var(--ok);background:#F4FBF7">
+                <div style="font-size:13px;font-weight:600;color:var(--vd)">Giải phong trào — cơ thủ tự đăng ký</div>
+                <p style="font-size:12.5px;color:var(--muted);margin-top:6px">Đăng ký bằng hồ sơ hội viên của bạn. Cần đăng ký hộ người khác thì <span class="vb-link">nhập thông tin thủ công</span>. Liên đoàn xác nhận từng cơ thủ vào danh sách thi đấu chính thức trước khi bốc thăm.</p>
+              </div>
+              <div class="mrow" style="margin-top:12px;background:#FFF4E2;border-color:#E8C893">
+                <div class="grow" style="font-size:12.5px;color:#6B4A18"><b>Giải chỉ dành cho hội viên Liên đoàn.</b> Đăng nhập bằng tài khoản hội viên còn hiệu lực để đăng ký.</div>
+                <button class="btn-out" type="button" style="padding:6px 14px;font-size:12px" data-go="hoi-vien">Đăng nhập</button>
+              </div>
+              <form class="demo-form" style="margin-top:16px">
+                <div style="display:flex;gap:12px;flex-wrap:wrap">
+                  <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="pt-name">Họ và tên cơ thủ <span class="req">*</span></label><input class="inp" id="pt-name" required></div>
+                  <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="pt-hv">Mã hội viên</label><input class="inp" id="pt-hv" placeholder="VBSF-2026-…"></div>
+                </div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap">
+                  <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="pt-phone">Số điện thoại <span class="req">*</span></label><input class="inp" id="pt-phone" type="tel" required></div>
+                  <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="pt-club">Câu lạc bộ</label><input class="inp" id="pt-club"></div>
+                </div>
+                <div class="fld" style="max-width:320px"><label class="lbl" for="pt-hang">Hạng tay cơ <span class="req">*</span></label>
+                  <select class="inp" id="pt-hang"><option>Hạng F</option><option>Hạng G</option><option>Hạng H</option></select></div>
+                <div class="mrow" style="background:var(--surface)">
+                  <div class="grow" style="font-size:12.5px">Lệ phí dự giải</div><b style="color:var(--vd)">150.000đ</b>
+                </div>
+                <button class="btn-gold" type="submit" style="margin-top:14px">Gửi đăng ký</button>
+                <p class="form-msg" hidden style="font-size:12px;color:var(--ok);margin-top:10px"></p>
+              </form>
+            </div>
           </div>
           <aside style="flex:1;min-width:230px">
             <div class="vb-card" style="padding:16px">
@@ -2381,6 +2419,18 @@ h1,h2,h3,h4{text-wrap:balance}
       return;
     }
 
+    /* Đăng ký thi đấu: đổi giữa luồng national và grassroots */
+    var regpill = e.target.closest('[data-reg-switch] .vb-pill');
+    if (regpill) {
+      var which = regpill.getAttribute('data-reg');
+      regpill.closest('[data-reg-switch]').querySelectorAll('.vb-pill')
+        .forEach(function(x){ x.classList.toggle('on', x === regpill); });
+      document.querySelectorAll('[data-reg-panel]').forEach(function(pn){
+        pn.hidden = pn.getAttribute('data-reg-panel') !== which;
+      });
+      return;
+    }
+
     /* Thư viện: lọc theo loại tài liệu */
     var libpill = e.target.closest('[data-filter="lib"] .vb-pill');
     if (libpill) {
@@ -2454,12 +2504,22 @@ h1,h2,h3,h4{text-wrap:balance}
   if (libq) libq.addEventListener('input', applyLib);
 
   /* ---- lọc giải đấu theo trạng thái ---- */
+  /* Prod hiện đúng MỘT nhóm trạng thái mỗi lúc, mặc định "Sắp diễn ra". */
   function applyTour(box, state){
     var scope = box.closest('[data-src-panel]') || document.getElementById('pg-giai-dau');
     scope.querySelectorAll('.tour-group').forEach(function(g){
-      g.hidden = !(state === 'all' || g.getAttribute('data-st') === state);
+      g.hidden = g.getAttribute('data-st') !== state;
     });
   }
+
+  /* ---- Ranking: tìm cơ thủ trong bảng đang mở ---- */
+  var rankq = document.getElementById('rank-q');
+  if (rankq) rankq.addEventListener('input', function(){
+    var term = rankq.value.trim().toLowerCase();
+    document.querySelectorAll('[data-rank-pane] tbody tr').forEach(function(tr){
+      tr.hidden = !!term && tr.textContent.toLowerCase().indexOf(term) === -1;
+    });
+  });
 
   /* ---- form: mockup nên chỉ xác nhận tại chỗ, không gửi đi đâu ---- */
   document.querySelectorAll('form.demo-form').forEach(function(f){
