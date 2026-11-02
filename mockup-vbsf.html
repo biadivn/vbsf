@@ -146,6 +146,25 @@ h1,h2,h3,h4{text-wrap:balance}
 .stat span{font-size:11.5px;color:var(--muted)}
 
 /* ---- tabs ---- */
+/* bục top-3 trang Ranking, các bước đăng ký hội viên, khối QR */
+.pod{flex:1;min-width:130px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 10px;text-align:center}
+.pod .ph{font-size:11px;font-weight:600}
+.pod .nm{font-size:13px;font-weight:500;margin-top:8px}
+.pod .un{font-size:11px;color:var(--hint);margin-top:1px}
+.pod .pt{font-size:15px;font-weight:600;color:var(--vd);margin-top:6px}
+.rkbar{padding:14px 26px;border-bottom:1px solid #EEF1EE}
+.rkrow{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;margin-bottom:8px}
+.rkrow > .lb{font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.04em;width:62px;flex-shrink:0}
+.steps{display:flex;gap:0;align-items:center;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--hint)}
+.step .no{width:24px;height:24px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600}
+.step.on{color:var(--vd);font-weight:600}
+.step.on .no{background:var(--vd);border-color:var(--vd);color:#fff}
+.step-sep{flex:1;min-width:20px;height:1px;background:var(--line);margin:0 12px}
+.mrow{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;flex-wrap:wrap}
+.tier{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--vd)}
+.tierdot{width:9px;height:9px;border-radius:50%}
+.soc{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
 .vb-srctabs{display:flex;gap:4px;padding:0 26px;border-bottom:1px solid var(--line);overflow-x:auto}
 .vb-srctab{font:inherit;font-size:13px;font-weight:600;padding:12px 16px;color:var(--muted);background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
 .vb-srctab.on{color:var(--vd);border-bottom-color:var(--vd)}
@@ -406,6 +425,19 @@ h1,h2,h3,h4{text-wrap:balance}
   <text x="32" y="54" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#fff" letter-spacing="1">VBSF</text>
 </symbol>
 
+<!-- mã VietQR minh hoạ -->
+<symbol id="ph-qr" viewBox="0 0 120 120">
+  <rect width="120" height="120" fill="#fff"/>
+  <g fill="#15305F">
+    <path d="M10 10h30v30H10zm6 6v18h18V16z"/><path d="M22 22h6v6h-6z"/>
+    <path d="M80 10h30v30H80zm6 6v18h18V16z"/><path d="M92 22h6v6h-6z"/>
+    <path d="M10 80h30v30H10zm6 6v18h18V86z"/><path d="M22 92h6v6h-6z"/>
+    <path d="M48 10h6v6h-6zm12 0h6v12h-6zM48 22h12v6H48zm18 6h6v6h-6zM48 34h6v6h-6zm12 0h12v6H60z"/>
+    <path d="M10 48h6v6h-6zm12 0h12v6H22zm18 0h6v12h-6zM10 60h12v6H10zm18 0h6v6h-6zm12 6h6v6h-6z"/>
+    <path d="M48 48h6v6h-6zm12 0h6v6h-6zm12 0h6v6h-6zM54 60h6v6h-6zm12 0h12v6H66zM48 72h12v6H48zm18 0h6v6h-6zm12-24h6v6h-6zm12 0h6v12h-6zM84 60h6v6h-6zm18 0h6v6h-6zM90 72h12v6H90z"/>
+    <path d="M48 84h6v12h-6zm12 0h12v6H60zm18 0h6v6h-6zm12 0h6v6h-6zm12 0h6v12h-6zM60 96h6v6h-6zm12 0h12v6H72zM48 102h12v6H48zm24 0h6v6h-6zm12-6h6v12h-6z"/>
+  </g>
+</symbol>
 <!-- chân dung chung cho hồ sơ (4 biến thể màu) -->
 <symbol id="por1" viewBox="0 0 64 64"><rect width="64" height="64" fill="#21428E"/><circle cx="32" cy="25" r="12" fill="#C9D9F2"/><path d="M8 64a24 24 0 0 1 48 0z" fill="#C9D9F2"/></symbol>
 <symbol id="por2" viewBox="0 0 64 64"><rect width="64" height="64" fill="#0E5C43"/><circle cx="32" cy="25" r="12" fill="#CFE8DC"/><path d="M8 64a24 24 0 0 1 48 0z" fill="#CFE8DC"/></symbol>
@@ -452,13 +484,13 @@ h1,h2,h3,h4{text-wrap:balance}
       <!-- ================= TRANG CHỦ ================= -->
       <section class="pg on" id="pg-trang-chu">
         <div class="vb-sec" style="display:flex;gap:16px;flex-wrap:wrap">
-          <div style="flex:1.6;min-width:280px;cursor:pointer" data-go="giai-dau-chi-tiet">
+          <div style="flex:1.6;min-width:280px;cursor:pointer" data-go="tin-tuc-chi-tiet">
             <div style="position:relative;border-radius:8px;overflow:hidden">
-              <span class="img ar16"><svg aria-label="Nhà thi đấu trong đêm khai mạc"><use href="#ph-arena"/></svg></span>
+              <span class="img ar16"><svg aria-label="Quyết định ban hành hệ thống thi đấu quốc gia"><use href="#ph-docs"/></svg></span>
               <div style="position:absolute;left:0;right:0;bottom:0;padding:16px;background:linear-gradient(to top,rgba(8,20,42,.94),rgba(8,20,42,0))">
-                <span style="background:#fff;color:var(--vd);font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:4px">GIẢI ĐẤU NỔI BẬT</span>
-                <div style="color:#fff;font-size:18px;font-weight:600;margin-top:8px;line-height:1.3">Giải các CLB mạnh toàn quốc 2026</div>
-                <div style="color:#C9D9F2;font-size:12px;margin-top:4px">Đang ở vòng bán kết · Nhà thi đấu Phú Thọ, TP.HCM</div>
+                <span style="background:#fff;color:var(--vd);font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:4px">TIN NỔI BẬT</span>
+                <div style="color:#fff;font-size:18px;font-weight:600;margin-top:8px;line-height:1.3">VBSF công bố hệ thống thi đấu quốc gia năm 2027</div>
+                <div style="color:#C9D9F2;font-size:12px;margin-top:4px">Hoạt động VBSF · 28/10/2026</div>
               </div>
             </div>
           </div>
@@ -585,6 +617,18 @@ h1,h2,h3,h4{text-wrap:balance}
             <div style="color:#C9D9F2;font-size:12.5px;margin-top:4px">Đăng ký trực tuyến, theo dõi điểm xếp hạng cá nhân và dự hệ thống giải quốc gia.</div>
           </div>
           <span class="btn-gold" data-go="hoi-vien">Đăng ký hội viên</span>
+        </div>
+
+        <div class="vb-sec" style="text-align:center">
+          <div style="font-size:11px;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px">Đối tác &amp; nhà tài trợ</div>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;cursor:pointer" data-go="doi-tac">
+            <div class="vb-card" style="width:110px;height:44px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:110px;height:44px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:110px;height:44px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:110px;height:44px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:110px;height:44px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+          </div>
+          <span class="vb-link" style="display:inline-block;margin-top:12px" data-go="doi-tac">Xem tất cả đối tác →</span>
         </div>
       </section>
 
@@ -1013,7 +1057,7 @@ h1,h2,h3,h4{text-wrap:balance}
                   <div class="grow" style="font-size:12.5px"><b>Bán kết 1</b> · CLB Sài Gòn Pool — CLB Hà Nội Cue</div>
                   <span style="font-size:15px;font-weight:700;color:var(--vd);font-variant-numeric:tabular-nums">7 – 5</span>
                 </div>
-                <span class="vb-link" style="display:inline-block;margin-top:12px">Xem kết quả trực tiếp →</span>
+                <span class="vb-link" style="display:inline-block;margin-top:12px" data-go="giai-dau-truc-tiep">Xem kết quả trực tiếp →</span>
               </div>
             </div>
           </div>
@@ -1027,14 +1071,14 @@ h1,h2,h3,h4{text-wrap:balance}
               <div class="grow"><div style="font-size:13.5px;font-weight:500">Cúp Carom 3 băng Hà Nội Mở rộng 2026</div>
                 <div style="font-size:11.5px;color:var(--hint);margin-top:2px">CLB Meow Billiards, Hà Nội · 64 cơ thủ · lệ phí 200.000đ</div></div>
               <span class="vb-tag">Carom 3 băng</span><span class="vb-badge bg-open">Mở đăng ký</span>
-              <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button">Đăng ký</button>
+              <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button" data-go="giai-dau-dang-ky">Đăng ký</button>
             </div>
             <div class="row" style="cursor:pointer" data-go="giai-dau-chi-tiet">
               <div class="vb-dateblk"><div class="d">05</div><div class="m">Th12</div></div>
               <div class="grow"><div style="font-size:13.5px;font-weight:500">Giải Snooker Toàn quốc 2026</div>
                 <div style="font-size:11.5px;color:var(--hint);margin-top:2px">Cung Thể thao Đà Nẵng · 48 cơ thủ · lệ phí 250.000đ</div></div>
               <span class="vb-tag">Snooker</span><span class="vb-badge bg-open">Mở đăng ký</span>
-              <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button">Đăng ký</button>
+              <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button" data-go="giai-dau-dang-ky">Đăng ký</button>
             </div>
             <div class="row" style="cursor:pointer" data-go="giai-dau-chi-tiet">
               <div class="vb-dateblk"><div class="d">20</div><div class="m">Th12</div></div>
@@ -1061,7 +1105,7 @@ h1,h2,h3,h4{text-wrap:balance}
                 <h3 class="vb-ttl">Giải Vô địch Quốc gia Pool 9 bi 2026</h3>
                 <div style="font-size:12px;color:var(--muted);margin-top:6px">Vô địch: <b>Nguyễn Phúc Long</b></div>
                 <div class="vb-dt">Kết thúc 26/10/2026 · TP.HCM</div>
-                <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
+                <span class="vb-link" style="display:inline-block;margin-top:8px" data-go="giai-dau-ket-qua">Xem kết quả →</span>
               </div>
             </div>
             <div class="vb-card" style="cursor:pointer" data-go="giai-dau-chi-tiet">
@@ -1071,7 +1115,7 @@ h1,h2,h3,h4{text-wrap:balance}
                 <h3 class="vb-ttl">Giải Carom 3 băng Cúp Mùa Thu 2026</h3>
                 <div style="font-size:12px;color:var(--muted);margin-top:6px">Vô địch: <b>Trần Quốc Bảo</b></div>
                 <div class="vb-dt">Kết thúc 27/09/2026 · Hà Nội</div>
-                <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
+                <span class="vb-link" style="display:inline-block;margin-top:8px" data-go="giai-dau-ket-qua">Xem kết quả →</span>
               </div>
             </div>
             <div class="vb-card" style="cursor:pointer" data-go="giai-dau-chi-tiet">
@@ -1081,7 +1125,7 @@ h1,h2,h3,h4{text-wrap:balance}
                 <h3 class="vb-ttl">Giải Snooker Cúp CLB toàn quốc 2025</h3>
                 <div style="font-size:12px;color:var(--muted);margin-top:6px">Vô địch: <b>Lê Minh Khôi</b></div>
                 <div class="vb-dt">Kết thúc 12/12/2025 · Đà Nẵng</div>
-                <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
+                <span class="vb-link" style="display:inline-block;margin-top:8px" data-go="giai-dau-ket-qua">Xem kết quả →</span>
               </div>
             </div>
           </div>
@@ -1120,7 +1164,7 @@ h1,h2,h3,h4{text-wrap:balance}
                     <div class="grow" style="font-size:12.5px"><b>Tứ kết 2</b> · Lê Văn Thịnh — Nguyễn Đình Phúc</div>
                     <span style="font-size:15px;font-weight:700;color:var(--vd);font-variant-numeric:tabular-nums">5 – 3</span>
                   </div>
-                  <span class="vb-link" style="display:inline-block;margin-top:12px">Xem kết quả trực tiếp →</span>
+                  <span class="vb-link" style="display:inline-block;margin-top:12px" data-go="giai-dau-truc-tiep">Xem kết quả trực tiếp →</span>
                 </div>
               </div>
             </div>
@@ -1134,14 +1178,14 @@ h1,h2,h3,h4{text-wrap:balance}
                 <div class="grow"><div style="font-size:13.5px;font-weight:500">Giải Bi-a Mở rộng CLB Hoàng Gia — hạng F</div>
                   <div style="font-size:11.5px;color:var(--hint);margin-top:2px">CLB Hoàng Gia, Thanh Xuân, Hà Nội · 48 cơ thủ · lệ phí 150.000đ</div></div>
                 <span class="vb-tag">Pool 9 bi</span><span class="vb-badge bg-open">Mở đăng ký</span>
-                <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button">Đăng ký</button>
+                <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button" data-go="giai-dau-dang-ky">Đăng ký</button>
               </div>
               <div class="row">
                 <div class="vb-dateblk"><div class="d">16</div><div class="m">Th11</div></div>
                 <div class="grow"><div style="font-size:13.5px;font-weight:500">Giải Carom Phong trào Đà Nẵng Mở rộng</div>
                   <div style="font-size:11.5px;color:var(--hint);margin-top:2px">CLB Sông Hàn, Hải Châu, Đà Nẵng · 32 cơ thủ · lệ phí 120.000đ</div></div>
                 <span class="vb-tag">Carom 1 băng</span><span class="vb-badge bg-open">Mở đăng ký</span>
-                <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button">Đăng ký</button>
+                <button class="btn-out" style="padding:6px 14px;font-size:12px" type="button" data-go="giai-dau-dang-ky">Đăng ký</button>
               </div>
               <div class="row">
                 <div class="vb-dateblk"><div class="d">23</div><div class="m">Th11</div></div>
@@ -1174,7 +1218,7 @@ h1,h2,h3,h4{text-wrap:balance}
                   <h3 class="vb-ttl">Giải Bi-a Phong trào Quận 7 Mở rộng — hạng G</h3>
                   <div style="font-size:12px;color:var(--muted);margin-top:6px">Vô địch: <b>Trịnh Văn Hòa</b></div>
                   <div class="vb-dt">Kết thúc 18/10/2026 · TP.HCM · 72 cơ thủ</div>
-                  <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
+                  <span class="vb-link" style="display:inline-block;margin-top:8px" data-go="giai-dau-ket-qua">Xem kết quả →</span>
                 </div>
               </div>
               <div class="vb-card">
@@ -1184,7 +1228,7 @@ h1,h2,h3,h4{text-wrap:balance}
                   <h3 class="vb-ttl">Giải Bi-a CLB Meow Mở rộng — hạng F</h3>
                   <div style="font-size:12px;color:var(--muted);margin-top:6px">Vô địch: <b>Dương Quang Hải</b></div>
                   <div class="vb-dt">Kết thúc 05/10/2026 · Hà Nội · 48 cơ thủ</div>
-                  <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
+                  <span class="vb-link" style="display:inline-block;margin-top:8px" data-go="giai-dau-ket-qua">Xem kết quả →</span>
                 </div>
               </div>
               <div class="vb-card">
@@ -1194,7 +1238,7 @@ h1,h2,h3,h4{text-wrap:balance}
                   <h3 class="vb-ttl">Giải Carom Phong trào Nha Trang 2026</h3>
                   <div style="font-size:12px;color:var(--muted);margin-top:6px">Vô địch: <b>Hồ Trung Kiên</b></div>
                   <div class="vb-dt">Kết thúc 21/09/2026 · Khánh Hòa · 36 cơ thủ</div>
-                  <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
+                  <span class="vb-link" style="display:inline-block;margin-top:8px" data-go="giai-dau-ket-qua">Xem kết quả →</span>
                 </div>
               </div>
             </div>
@@ -1227,9 +1271,7 @@ h1,h2,h3,h4{text-wrap:balance}
 
         <div class="tabs" data-tabs="td">
           <span class="tab on" data-tab="td-info">Thông tin chung</span>
-          <span class="tab" data-tab="td-ket-qua">Kết quả</span>
-          <span class="tab" data-tab="td-nhanh">Nhánh đấu</span>
-          <span class="tab" data-tab="td-thuong">Giải thưởng</span>
+          <span class="tab" data-tab="td-thi-dau">Thi đấu</span>
         </div>
 
         <div class="tabpane on" id="td-info">
@@ -1269,9 +1311,46 @@ h1,h2,h3,h4{text-wrap:balance}
               </div>
             </aside>
           </div>
+          <div class="vb-sec" style="background:var(--surface)">
+            <h2 class="vb-h">Cơ cấu giải thưởng</h2>
+            <div class="scroll-x" style="margin-top:12px">
+              <table class="tbl">
+                <thead><tr><th>Thứ hạng</th><th>Tiền thưởng</th><th>Hiện vật</th><th>Điểm xếp hạng</th></tr></thead>
+                <tbody>
+                  <tr><td>Vô địch</td><td>20.000.000đ</td><td>Cúp + Huy chương vàng</td><td>500</td></tr>
+                  <tr><td>Á quân</td><td>10.000.000đ</td><td>Huy chương bạc + Bằng khen</td><td>350</td></tr>
+                  <tr><td>Hạng 3</td><td>5.000.000đ</td><td>Huy chương đồng + Bằng khen</td><td>220</td></tr>
+                  <tr><td>Hạng 4</td><td>3.000.000đ</td><td>Bằng khen</td><td>220</td></tr>
+                  <tr><td>Hạng 5–8</td><td>1.500.000đ</td><td>Bằng khen</td><td>140</td></tr>
+                  <tr><td>Hạng 9–16</td><td>1.000.000đ</td><td>Giấy khen</td><td>80</td></tr>
+                  <tr><td>Hạng 17–32</td><td>—</td><td>Áo đấu VBSF</td><td>40</td></tr>
+                  <tr><td>Break dài nhất</td><td>1.000.000đ</td><td>—</td><td>—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size:11.5px;color:var(--hint);margin-top:12px">Tiền thưởng đã trừ thuế thu nhập theo quy định. Điểm xếp hạng cộng vào bảng quốc gia trong vòng 7 ngày sau khi giải kết thúc.</p>
+          </div>
+          <div class="vb-sec">
+            <h2 class="vb-h">Thể lệ thi đấu</h2>
+            <div class="row" style="margin-top:12px;background:var(--surface)">
+              <div class="grow" style="font-size:13px">Lệ phí tham gia</div>
+              <span style="font-size:14px;font-weight:600;color:var(--vd)">300.000đ / cơ thủ</span>
+            </div>
+            <h3 class="vb-h" style="font-size:14px;margin-top:18px">Luật cơ bản</h3>
+            <div class="art-li" style="font-size:13.5px">Thi đấu theo thể thức đấu loại trực tiếp, tính điểm theo luật hiện hành của nội dung Pool 9 bi.</div>
+            <div class="art-li" style="font-size:13.5px">Mỗi trận theo thể thức best-of, số ván do Ban tổ chức công bố trước ngày thi đấu.</div>
+            <div class="art-li" style="font-size:13.5px">Cơ thủ có mặt trễ quá 15 phút so với giờ thi đấu bị xử thua trận đó.</div>
+            <div class="art-li" style="font-size:13.5px">Trang phục thi đấu theo quy định của Liên đoàn; cơ thủ tự mang cơ cá nhân.</div>
+            <div class="art-li" style="font-size:13.5px">Quyết định của trọng tài chính tại bàn là quyết định cuối cùng trong trận.</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+              <button class="btn-gold" type="button" data-go="giai-dau-dang-ky">Đăng ký thi đấu</button>
+              <button class="btn-out" type="button" data-go="giai-dau-truc-tiep">Xem kết quả trực tiếp</button>
+              <button class="btn-out" type="button" data-go="giai-dau-ket-qua">Xem kết quả chung cuộc</button>
+            </div>
+          </div>
         </div>
 
-        <div class="tabpane" id="td-ket-qua">
+        <div class="tabpane" id="td-thi-dau">
           <div class="vb-sec">
             <h2 class="vb-h">Kết quả các trận vòng trong</h2>
             <div class="scroll-x" style="margin-top:12px">
@@ -1296,10 +1375,7 @@ h1,h2,h3,h4{text-wrap:balance}
               <div class="stat"><b>31</b><span>Tỉnh / thành có cơ thủ dự</span></div>
             </div>
           </div>
-        </div>
-
-        <div class="tabpane" id="td-nhanh">
-          <div class="vb-sec">
+          <div class="vb-sec" style="background:var(--surface)">
             <h2 class="vb-h">Nhánh đấu từ tứ kết</h2>
             <div class="scroll-x" style="margin-top:14px">
               <div style="display:flex;gap:18px;min-width:620px;align-items:stretch">
@@ -1329,83 +1405,129 @@ h1,h2,h3,h4{text-wrap:balance}
           </div>
         </div>
 
-        <div class="tabpane" id="td-thuong">
-          <div class="vb-sec">
-            <h2 class="vb-h">Cơ cấu giải thưởng</h2>
-            <div class="scroll-x" style="margin-top:12px">
-              <table class="tbl">
-                <thead><tr><th>Thứ hạng</th><th>Tiền thưởng</th><th>Hiện vật</th><th>Điểm xếp hạng</th></tr></thead>
-                <tbody>
-                  <tr><td>Vô địch</td><td>20.000.000đ</td><td>Cúp + Huy chương vàng</td><td>500</td></tr>
-                  <tr><td>Á quân</td><td>10.000.000đ</td><td>Huy chương bạc + Bằng khen</td><td>350</td></tr>
-                  <tr><td>Hạng 3</td><td>5.000.000đ</td><td>Huy chương đồng + Bằng khen</td><td>220</td></tr>
-                  <tr><td>Hạng 4</td><td>3.000.000đ</td><td>Bằng khen</td><td>220</td></tr>
-                  <tr><td>Tứ kết (5–8)</td><td>1.500.000đ</td><td>Bằng khen</td><td>140</td></tr>
-                  <tr><td>Break dài nhất</td><td>1.000.000đ</td><td>—</td><td>—</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p style="font-size:11.5px;color:var(--hint);margin-top:12px">Tiền thưởng đã trừ thuế thu nhập theo quy định. Điểm xếp hạng cộng vào bảng quốc gia trong vòng 7 ngày sau khi giải kết thúc.</p>
-          </div>
-        </div>
       </section>
 
       <!-- ================= RANKING ================= -->
       <section class="pg" id="pg-ranking">
         <div class="vb-band">
-          <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span style="color:#fff">Ranking</span></div>
+          <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span style="color:#fff">Bảng xếp hạng</span></div>
           <h1>Bảng xếp hạng quốc gia</h1>
-          <div class="sub">Cập nhật 01/11/2026 · tính điểm 24 tháng gần nhất</div>
+          <div class="sub">Xếp hạng cơ thủ theo từng nội dung thi đấu</div>
         </div>
-        <div class="tabs" data-tabs="rk">
-          <span class="tab on" data-tab="rk-pool">Pool 9 bi</span>
-          <span class="tab" data-tab="rk-carom">Carom 3 băng</span>
-          <span class="tab" data-tab="rk-snooker">Snooker</span>
+        <div class="rkbar" data-rank-bar>
+          <div class="rkrow"><span class="lb">Nam</span><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="vb-pill on" data-rank-key="Nam|Pool">Pool</span><span class="vb-pill" data-rank-key="Nam|Carom 1 băng">Carom 1 băng</span><span class="vb-pill" data-rank-key="Nam|Carom 3 băng">Carom 3 băng</span><span class="vb-pill" data-rank-key="Nam|Snooker">Snooker</span><span class="vb-pill" data-rank-key="Nam|English Billiards">English Billiards</span></div></div>
+          <div class="rkrow"><span class="lb">Nữ</span><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="vb-pill" data-rank-key="Nữ|Pool 9 bi">Pool 9 bi</span><span class="vb-pill" data-rank-key="Nữ|Carom 3 băng">Carom 3 băng</span></div></div>
+          <div class="rkrow"><span class="lb">VĐV trẻ</span><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="vb-pill" data-rank-key="VĐV trẻ|Pool 9 bi">Pool 9 bi</span><span class="vb-pill" data-rank-key="VĐV trẻ|Carom 3 băng">Carom 3 băng</span></div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px">
+            <select class="vb-sel" aria-label="Tỉnh / thành"><option>Toàn quốc</option><option>TP.HCM</option><option>Hà Nội</option><option>Đà Nẵng</option><option>Cần Thơ</option><option>Hải Phòng</option></select>
+            <span style="font-size:11.5px;color:var(--hint)">Cập nhật 01/11/2026 · tính điểm 24 tháng gần nhất</span>
+          </div>
         </div>
-        <div class="tabpane on" id="rk-pool">
+        <div class="rk-pane" data-rank-pane="Nam|Pool">
+          <div class="vb-sec" style="background:var(--surface)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Top 3 · <b>Nam · Pool</b></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"><div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Trần Quốc Bảo</div><div class="un">Hà Nội</div><div class="pt">2.410</div></div><div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Nguyễn Phúc Long</div><div class="un">CLB Sài Gòn, TP.HCM</div><div class="pt">2.485</div></div><div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por3"/></svg></span><div class="nm">Lê Minh Khôi</div><div class="un">Đà Nẵng</div><div class="pt">2.388</div></div></div>
+          </div>
           <div class="vb-sec scroll-x">
             <table class="tbl">
-              <thead><tr><th>#</th><th>Cơ thủ</th><th>Đơn vị</th><th>Giải</th><th>Điểm</th><th>Thay đổi</th></tr></thead>
-              <tbody>
-                <tr><td><span class="rk rk1">1</span></td><td><span class="avat" style="display:inline-flex;vertical-align:middle;margin-right:8px"><svg><use href="#por1"/></svg></span>Nguyễn Phúc Long</td><td>TP.HCM</td><td>9</td><td><b>2.480</b></td><td><span class="up">▲ 2</span></td></tr>
-                <tr><td><span class="rk rk2">2</span></td><td><span class="avat" style="display:inline-flex;vertical-align:middle;margin-right:8px"><svg><use href="#por4"/></svg></span>Phạm Anh Tuấn</td><td>Bình Dương</td><td>10</td><td><b>2.075</b></td><td><span class="eq">— 0</span></td></tr>
-                <tr><td><span class="rk rk3">3</span></td><td><span class="avat" style="display:inline-flex;vertical-align:middle;margin-right:8px"><svg><use href="#por2"/></svg></span>Đỗ Hoàng Nam</td><td>Hà Nội</td><td>8</td><td><b>1.940</b></td><td><span class="dn">▼ 1</span></td></tr>
-                <tr><td><span class="rk">4</span></td><td>Vũ Thành Đạt</td><td>Đà Nẵng</td><td>9</td><td>1.812</td><td><span class="up">▲ 3</span></td></tr>
-                <tr><td><span class="rk">5</span></td><td>Bùi Minh Quân</td><td>TP.HCM</td><td>7</td><td>1.655</td><td><span class="dn">▼ 2</span></td></tr>
-                <tr><td><span class="rk">6</span></td><td>Hoàng Gia Huy</td><td>Cần Thơ</td><td>8</td><td>1.498</td><td><span class="eq">— 0</span></td></tr>
-                <tr><td><span class="rk">7</span></td><td>Ngô Tấn Lộc</td><td>Hải Phòng</td><td>6</td><td>1.340</td><td><span class="up">▲ 1</span></td></tr>
-                <tr><td><span class="rk">8</span></td><td>Đặng Văn Hiếu</td><td>Bình Định</td><td>7</td><td>1.286</td><td><span class="dn">▼ 3</span></td></tr>
-                <tr><td><span class="rk">9</span></td><td>Lý Thành Trung</td><td>TP.HCM</td><td>6</td><td>1.154</td><td><span class="up">▲ 4</span></td></tr>
-                <tr><td><span class="rk">10</span></td><td>Trương Bảo Khánh</td><td>Nghệ An</td><td>5</td><td>1.092</td><td><span class="eq">— 0</span></td></tr>
-              </tbody>
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right;width:56px">Trận</th><th style="text-align:right;width:64px">Điểm</th></tr></thead>
+              <tbody><tr><td><span class="rk rk1">1</span></td><td>Nguyễn Phúc Long</td><td>CLB Sài Gòn, TP.HCM</td><td style="text-align:right">32</td><td style="text-align:right"><b>2.485</b></td></tr><tr><td><span class="rk rk2">2</span></td><td>Trần Quốc Bảo</td><td>Hà Nội</td><td style="text-align:right">29</td><td style="text-align:right"><b>2.410</b></td></tr><tr><td><span class="rk rk3">3</span></td><td>Lê Minh Khôi</td><td>Đà Nẵng</td><td style="text-align:right">27</td><td style="text-align:right"><b>2.388</b></td></tr><tr><td><span class="rk">4</span></td><td>Phạm Anh Tuấn</td><td>Bình Dương</td><td style="text-align:right">25</td><td style="text-align:right"><b>2.075</b></td></tr><tr><td><span class="rk">5</span></td><td>Vũ Thành Đạt</td><td>Đà Nẵng</td><td style="text-align:right">24</td><td style="text-align:right"><b>1.812</b></td></tr><tr><td><span class="rk">6</span></td><td>Bùi Minh Quân</td><td>TP.HCM</td><td style="text-align:right">21</td><td style="text-align:right"><b>1.655</b></td></tr><tr><td><span class="rk">7</span></td><td>Hoàng Gia Huy</td><td>Cần Thơ</td><td style="text-align:right">22</td><td style="text-align:right"><b>1.498</b></td></tr><tr><td><span class="rk">8</span></td><td>Ngô Tấn Lộc</td><td>Hải Phòng</td><td style="text-align:right">19</td><td style="text-align:right"><b>1.340</b></td></tr></tbody>
             </table>
           </div>
         </div>
-        <div class="tabpane" id="rk-carom">
+        <div class="rk-pane" hidden data-rank-pane="Nam|Carom 1 băng">
+          <div class="vb-sec" style="background:var(--surface)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Top 3 · <b>Nam · Carom 1 băng</b></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"><div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Trịnh Bá Phước</div><div class="un">Hà Nội</div><div class="pt">2.088</div></div><div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Đặng Văn Hậu</div><div class="un">Bình Định</div><div class="pt">2.150</div></div><div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por3"/></svg></span><div class="nm">Ngô Gia Huy</div><div class="un">Cần Thơ</div><div class="pt">2.041</div></div></div>
+          </div>
           <div class="vb-sec scroll-x">
             <table class="tbl">
-              <thead><tr><th>#</th><th>Cơ thủ</th><th>Đơn vị</th><th>Giải</th><th>Điểm</th><th>BQ lượt</th></tr></thead>
-              <tbody>
-                <tr><td><span class="rk rk1">1</span></td><td>Trần Quốc Bảo</td><td>Hà Nội</td><td>8</td><td><b>2.355</b></td><td>1,482</td></tr>
-                <tr><td><span class="rk rk2">2</span></td><td>Huỳnh Nhật Tân</td><td>TP.HCM</td><td>9</td><td><b>2.108</b></td><td>1,364</td></tr>
-                <tr><td><span class="rk rk3">3</span></td><td>Phan Đình Khoa</td><td>Khánh Hòa</td><td>7</td><td><b>1.876</b></td><td>1,297</td></tr>
-                <tr><td><span class="rk">4</span></td><td>Nguyễn Hữu Thịnh</td><td>Hà Nội</td><td>8</td><td>1.642</td><td>1,205</td></tr>
-                <tr><td><span class="rk">5</span></td><td>Võ Minh Tiến</td><td>Bình Dương</td><td>6</td><td>1.418</td><td>1,142</td></tr>
-              </tbody>
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right;width:56px">Trận</th><th style="text-align:right;width:64px">Điểm</th></tr></thead>
+              <tbody><tr><td><span class="rk rk1">1</span></td><td>Đặng Văn Hậu</td><td>Bình Định</td><td style="text-align:right">26</td><td style="text-align:right"><b>2.150</b></td></tr><tr><td><span class="rk rk2">2</span></td><td>Trịnh Bá Phước</td><td>Hà Nội</td><td style="text-align:right">24</td><td style="text-align:right"><b>2.088</b></td></tr><tr><td><span class="rk rk3">3</span></td><td>Ngô Gia Huy</td><td>Cần Thơ</td><td style="text-align:right">23</td><td style="text-align:right"><b>2.041</b></td></tr><tr><td><span class="rk">4</span></td><td>Võ Minh Tiến</td><td>Bình Dương</td><td style="text-align:right">20</td><td style="text-align:right"><b>1.766</b></td></tr><tr><td><span class="rk">5</span></td><td>Mai Đức Lộc</td><td>Đồng Nai</td><td style="text-align:right">18</td><td style="text-align:right"><b>1.512</b></td></tr></tbody>
             </table>
           </div>
         </div>
-        <div class="tabpane" id="rk-snooker">
+        <div class="rk-pane" hidden data-rank-pane="Nam|Carom 3 băng">
+          <div class="vb-sec" style="background:var(--surface)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Top 3 · <b>Nam · Carom 3 băng</b></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"><div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Bùi Đức Anh</div><div class="un">TP.HCM</div><div class="pt">2.204</div></div><div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Trần Quốc Bảo</div><div class="un">Hà Nội</div><div class="pt">2.290</div></div><div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por3"/></svg></span><div class="nm">Lý Trường Giang</div><div class="un">Đà Nẵng</div><div class="pt">2.132</div></div></div>
+          </div>
           <div class="vb-sec scroll-x">
             <table class="tbl">
-              <thead><tr><th>#</th><th>Cơ thủ</th><th>Đơn vị</th><th>Giải</th><th>Điểm</th><th>Break cao nhất</th></tr></thead>
-              <tbody>
-                <tr><td><span class="rk rk1">1</span></td><td>Lê Minh Khôi</td><td>Đà Nẵng</td><td>7</td><td><b>2.190</b></td><td>138</td></tr>
-                <tr><td><span class="rk rk2">2</span></td><td>Chu Văn Lâm</td><td>Hà Nội</td><td>6</td><td><b>1.905</b></td><td>121</td></tr>
-                <tr><td><span class="rk rk3">3</span></td><td>Đinh Quang Vinh</td><td>TP.HCM</td><td>7</td><td><b>1.744</b></td><td>115</td></tr>
-                <tr><td><span class="rk">4</span></td><td>Tạ Hoàng Phúc</td><td>Hải Phòng</td><td>5</td><td>1.488</td><td>104</td></tr>
-                <tr><td><span class="rk">5</span></td><td>Mai Đức Lộc</td><td>Đồng Nai</td><td>5</td><td>1.312</td><td>97</td></tr>
-              </tbody>
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right;width:56px">Trận</th><th style="text-align:right;width:64px">Điểm</th></tr></thead>
+              <tbody><tr><td><span class="rk rk1">1</span></td><td>Trần Quốc Bảo</td><td>Hà Nội</td><td style="text-align:right">30</td><td style="text-align:right"><b>2.290</b></td></tr><tr><td><span class="rk rk2">2</span></td><td>Bùi Đức Anh</td><td>TP.HCM</td><td style="text-align:right">28</td><td style="text-align:right"><b>2.204</b></td></tr><tr><td><span class="rk rk3">3</span></td><td>Lý Trường Giang</td><td>Đà Nẵng</td><td style="text-align:right">25</td><td style="text-align:right"><b>2.132</b></td></tr><tr><td><span class="rk">4</span></td><td>Huỳnh Nhật Tân</td><td>TP.HCM</td><td style="text-align:right">24</td><td style="text-align:right"><b>1.978</b></td></tr><tr><td><span class="rk">5</span></td><td>Phan Đình Khoa</td><td>Khánh Hòa</td><td style="text-align:right">21</td><td style="text-align:right"><b>1.804</b></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="rk-pane" hidden data-rank-pane="Nam|Snooker">
+          <div class="vb-sec" style="background:var(--surface)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Top 3 · <b>Nam · Snooker</b></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"><div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Đỗ Thành Nam</div><div class="un">Hải Phòng</div><div class="pt">1.988</div></div><div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Lê Minh Khôi</div><div class="un">Đà Nẵng</div><div class="pt">2.075</div></div><div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por3"/></svg></span><div class="nm">Vũ Hoàng Sơn</div><div class="un">Hà Nội</div><div class="pt">1.902</div></div></div>
+          </div>
+          <div class="vb-sec scroll-x">
+            <table class="tbl">
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right;width:56px">Trận</th><th style="text-align:right;width:64px">Điểm</th></tr></thead>
+              <tbody><tr><td><span class="rk rk1">1</span></td><td>Lê Minh Khôi</td><td>Đà Nẵng</td><td style="text-align:right">22</td><td style="text-align:right"><b>2.075</b></td></tr><tr><td><span class="rk rk2">2</span></td><td>Đỗ Thành Nam</td><td>Hải Phòng</td><td style="text-align:right">20</td><td style="text-align:right"><b>1.988</b></td></tr><tr><td><span class="rk rk3">3</span></td><td>Vũ Hoàng Sơn</td><td>Hà Nội</td><td style="text-align:right">19</td><td style="text-align:right"><b>1.902</b></td></tr><tr><td><span class="rk">4</span></td><td>Chu Văn Lâm</td><td>Hà Nội</td><td style="text-align:right">18</td><td style="text-align:right"><b>1.744</b></td></tr><tr><td><span class="rk">5</span></td><td>Đinh Quang Vinh</td><td>TP.HCM</td><td style="text-align:right">16</td><td style="text-align:right"><b>1.588</b></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="rk-pane" hidden data-rank-pane="Nam|English Billiards">
+          <div class="vb-sec" style="background:var(--surface)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Top 3 · <b>Nam · English Billiards</b></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"><div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Ngô Gia Huy</div><div class="un">Cần Thơ</div><div class="pt">1.755</div></div><div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Hoàng Minh Quân</div><div class="un">Nghệ An</div><div class="pt">1.820</div></div><div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por3"/></svg></span><div class="nm">Bùi Đức Anh</div><div class="un">TP.HCM</div><div class="pt">1.690</div></div></div>
+          </div>
+          <div class="vb-sec scroll-x">
+            <table class="tbl">
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right;width:56px">Trận</th><th style="text-align:right;width:64px">Điểm</th></tr></thead>
+              <tbody><tr><td><span class="rk rk1">1</span></td><td>Hoàng Minh Quân</td><td>Nghệ An</td><td style="text-align:right">14</td><td style="text-align:right"><b>1.820</b></td></tr><tr><td><span class="rk rk2">2</span></td><td>Ngô Gia Huy</td><td>Cần Thơ</td><td style="text-align:right">13</td><td style="text-align:right"><b>1.755</b></td></tr><tr><td><span class="rk rk3">3</span></td><td>Bùi Đức Anh</td><td>TP.HCM</td><td style="text-align:right">12</td><td style="text-align:right"><b>1.690</b></td></tr><tr><td><span class="rk">4</span></td><td>Tạ Hoàng Phúc</td><td>Hải Phòng</td><td style="text-align:right">11</td><td style="text-align:right"><b>1.402</b></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="rk-pane" hidden data-rank-pane="Nữ|Pool 9 bi">
+          <div class="vb-sec" style="background:var(--surface)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Top 3 · <b>Nữ · Pool 9 bi</b></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"><div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Phạm Thu Trang</div><div class="un">TP.HCM</div><div class="pt">1.588</div></div><div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Đinh Thị Lan</div><div class="un">Hà Nội</div><div class="pt">1.640</div></div><div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por3"/></svg></span><div class="nm">Ngô Hải Yến</div><div class="un">Đà Nẵng</div><div class="pt">1.512</div></div></div>
+          </div>
+          <div class="vb-sec scroll-x">
+            <table class="tbl">
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right;width:56px">Trận</th><th style="text-align:right;width:64px">Điểm</th></tr></thead>
+              <tbody><tr><td><span class="rk rk1">1</span></td><td>Đinh Thị Lan</td><td>Hà Nội</td><td style="text-align:right">21</td><td style="text-align:right"><b>1.640</b></td></tr><tr><td><span class="rk rk2">2</span></td><td>Phạm Thu Trang</td><td>TP.HCM</td><td style="text-align:right">20</td><td style="text-align:right"><b>1.588</b></td></tr><tr><td><span class="rk rk3">3</span></td><td>Ngô Hải Yến</td><td>Đà Nẵng</td><td style="text-align:right">18</td><td style="text-align:right"><b>1.512</b></td></tr><tr><td><span class="rk">4</span></td><td>Lưu Khánh Chi</td><td>Cần Thơ</td><td style="text-align:right">16</td><td style="text-align:right"><b>1.344</b></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="rk-pane" hidden data-rank-pane="Nữ|Carom 3 băng">
+          <div class="vb-sec" style="background:var(--surface)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Top 3 · <b>Nữ · Carom 3 băng</b></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"><div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Đinh Thị Lan</div><div class="un">Hà Nội</div><div class="pt">1.402</div></div><div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Vũ Thị Hòa</div><div class="un">TP.HCM</div><div class="pt">1.470</div></div><div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por3"/></svg></span><div class="nm">Trần Mỹ Duyên</div><div class="un">Bình Dương</div><div class="pt">1.268</div></div></div>
+          </div>
+          <div class="vb-sec scroll-x">
+            <table class="tbl">
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right;width:56px">Trận</th><th style="text-align:right;width:64px">Điểm</th></tr></thead>
+              <tbody><tr><td><span class="rk rk1">1</span></td><td>Vũ Thị Hòa</td><td>TP.HCM</td><td style="text-align:right">19</td><td style="text-align:right"><b>1.470</b></td></tr><tr><td><span class="rk rk2">2</span></td><td>Đinh Thị Lan</td><td>Hà Nội</td><td style="text-align:right">17</td><td style="text-align:right"><b>1.402</b></td></tr><tr><td><span class="rk rk3">3</span></td><td>Trần Mỹ Duyên</td><td>Bình Dương</td><td style="text-align:right">15</td><td style="text-align:right"><b>1.268</b></td></tr><tr><td><span class="rk">4</span></td><td>Hồ Thanh Mai</td><td>Khánh Hòa</td><td style="text-align:right">13</td><td style="text-align:right"><b>1.120</b></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="rk-pane" hidden data-rank-pane="VĐV trẻ|Pool 9 bi">
+          <div class="vb-sec" style="background:var(--surface)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Top 3 · <b>VĐV trẻ · Pool 9 bi</b></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"><div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Lý Thành Trung</div><div class="un">TP.HCM</div><div class="pt">1.154</div></div><div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Lý Gia Bảo</div><div class="un">Đà Nẵng</div><div class="pt">1.187</div></div><div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por3"/></svg></span><div class="nm">Trương Bảo Khánh</div><div class="un">Nghệ An</div><div class="pt">1.092</div></div></div>
+          </div>
+          <div class="vb-sec scroll-x">
+            <table class="tbl">
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right;width:56px">Trận</th><th style="text-align:right;width:64px">Điểm</th></tr></thead>
+              <tbody><tr><td><span class="rk rk1">1</span></td><td>Lý Gia Bảo</td><td>Đà Nẵng</td><td style="text-align:right">13</td><td style="text-align:right"><b>1.187</b></td></tr><tr><td><span class="rk rk2">2</span></td><td>Lý Thành Trung</td><td>TP.HCM</td><td style="text-align:right">15</td><td style="text-align:right"><b>1.154</b></td></tr><tr><td><span class="rk rk3">3</span></td><td>Trương Bảo Khánh</td><td>Nghệ An</td><td style="text-align:right">14</td><td style="text-align:right"><b>1.092</b></td></tr><tr><td><span class="rk">4</span></td><td>Nguyễn Hải Đăng</td><td>Hà Nội</td><td style="text-align:right">12</td><td style="text-align:right"><b>986</b></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="rk-pane" hidden data-rank-pane="VĐV trẻ|Carom 3 băng">
+          <div class="vb-sec" style="background:var(--surface)">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Top 3 · <b>VĐV trẻ · Carom 3 băng</b></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end"><div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Phan Đức Thịnh</div><div class="un">TP.HCM</div><div class="pt">972</div></div><div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Đoàn Minh Tuấn</div><div class="un">Hà Nội</div><div class="pt">1.045</div></div><div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por3"/></svg></span><div class="nm">Vương Quốc Huy</div><div class="un">Cần Thơ</div><div class="pt">908</div></div></div>
+          </div>
+          <div class="vb-sec scroll-x">
+            <table class="tbl">
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right;width:56px">Trận</th><th style="text-align:right;width:64px">Điểm</th></tr></thead>
+              <tbody><tr><td><span class="rk rk1">1</span></td><td>Đoàn Minh Tuấn</td><td>Hà Nội</td><td style="text-align:right">12</td><td style="text-align:right"><b>1.045</b></td></tr><tr><td><span class="rk rk2">2</span></td><td>Phan Đức Thịnh</td><td>TP.HCM</td><td style="text-align:right">11</td><td style="text-align:right"><b>972</b></td></tr><tr><td><span class="rk rk3">3</span></td><td>Vương Quốc Huy</td><td>Cần Thơ</td><td style="text-align:right">10</td><td style="text-align:right"><b>908</b></td></tr><tr><td><span class="rk">4</span></td><td>Trịnh Xuân Sơn</td><td>Hải Phòng</td><td style="text-align:right">9</td><td style="text-align:right"><b>864</b></td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1416,49 +1538,105 @@ h1,h2,h3,h4{text-wrap:balance}
         <div class="vb-band">
           <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span style="color:#fff">Thư viện</span></div>
           <h1>Thư viện</h1>
-          <div class="sub">Văn bản, thể lệ, luật thi đấu và hình ảnh giải</div>
+          <div class="sub">Văn bản · luật thi đấu · hình ảnh &amp; video</div>
         </div>
-        <div class="vb-sec">
-          <h2 class="vb-h">Văn bản &amp; thể lệ</h2>
+        <div class="vb-sec" style="border-bottom:1px solid #EEF1EE;display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-block:14px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap" data-filter="lib">
+            <span class="vb-pill on" data-kind="all">Tất cả</span>
+            <span class="vb-pill" data-kind="vanban">Văn bản</span>
+            <span class="vb-pill" data-kind="luat">Luật thi đấu</span>
+            <span class="vb-pill" data-kind="media">Media</span>
+          </div>
+          <label style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 12px;gap:8px;width:100%;max-width:230px">
+            <span style="color:var(--hint);font-size:13px">&#8981;</span>
+            <input id="lib-q" type="search" placeholder="Tìm tài liệu…" aria-label="Tìm tài liệu" style="border:none;background:none;outline:none;font-size:12.5px;width:100%;font-family:inherit;min-width:0;color:var(--ink)">
+          </label>
+        </div>
+
+        <div class="vb-sec lib-block" data-block="docs">
+          <h2 class="vb-h">Văn bản &amp; Luật thi đấu</h2>
           <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
-            <div class="row" style="padding:11px 14px">
-              <span style="width:38px;height:38px;border-radius:8px;background:#FDECEC;color:var(--warn);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">PDF</span>
-              <div class="grow"><div style="font-size:13px">Hệ thống thi đấu quốc gia 2027 — QĐ 142/QĐ-VBSF</div><div style="font-size:11px;color:var(--hint)">28/10/2026 · 1,8 MB</div></div>
+            <div class="mrow lib-item" data-kind="vanban">
+              <span style="width:38px;height:38px;border-radius:8px;background:#FDECEC;color:#9E2A2B;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0">PDF</span>
+              <div class="grow"><div style="font-size:13px">Quy chế hệ thống thi đấu quốc gia 2026</div><div style="font-size:11px;color:var(--hint)">PDF · 1,2 MB · 12/05/2026</div></div>
+              <span class="vb-tag">Quy chế</span>
               <button class="btn-out" type="button" style="padding:6px 14px;font-size:12px">Tải về</button>
             </div>
-            <div class="row" style="padding:11px 14px">
-              <span style="width:38px;height:38px;border-radius:8px;background:#FDECEC;color:var(--warn);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">PDF</span>
-              <div class="grow"><div style="font-size:13px">Luật thi đấu Pool 9 bi — bản áp dụng 2026</div><div style="font-size:11px;color:var(--hint)">12/01/2026 · 3,2 MB</div></div>
+            <div class="mrow lib-item" data-kind="luat">
+              <span style="width:38px;height:38px;border-radius:8px;background:#FDECEC;color:#9E2A2B;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0">PDF</span>
+              <div class="grow"><div style="font-size:13px">Luật thi đấu Pool (8 / 9 / 10 bi)</div><div style="font-size:11px;color:var(--hint)">PDF · 2,4 MB · 01/03/2026</div></div>
+              <span class="vb-tag">Luật</span>
               <button class="btn-out" type="button" style="padding:6px 14px;font-size:12px">Tải về</button>
             </div>
-            <div class="row" style="padding:11px 14px">
-              <span style="width:38px;height:38px;border-radius:8px;background:#FDECEC;color:var(--warn);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">PDF</span>
-              <div class="grow"><div style="font-size:13px">Luật thi đấu Carom 3 băng — bản áp dụng 2026</div><div style="font-size:11px;color:var(--hint)">12/01/2026 · 2,7 MB</div></div>
+            <div class="mrow lib-item" data-kind="luat">
+              <span style="width:38px;height:38px;border-radius:8px;background:#FDECEC;color:#9E2A2B;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0">PDF</span>
+              <div class="grow"><div style="font-size:13px">Luật thi đấu Carom (1 băng &amp; 3 băng)</div><div style="font-size:11px;color:var(--hint)">PDF · 1,8 MB · 01/03/2026</div></div>
+              <span class="vb-tag">Luật</span>
               <button class="btn-out" type="button" style="padding:6px 14px;font-size:12px">Tải về</button>
             </div>
-            <div class="row" style="padding:11px 14px">
-              <span style="width:38px;height:38px;border-radius:8px;background:#E8EEF9;color:var(--vd);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">XLSX</span>
-              <div class="grow"><div style="font-size:13px">Kết quả đầy đủ Giải Vô địch Quốc gia Pool 9 bi 2026</div><div style="font-size:11px;color:var(--hint)">27/10/2026 · 420 KB</div></div>
+            <div class="mrow lib-item" data-kind="luat">
+              <span style="width:38px;height:38px;border-radius:8px;background:#FDECEC;color:#9E2A2B;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0">PDF</span>
+              <div class="grow"><div style="font-size:13px">Luật thi đấu Snooker</div><div style="font-size:11px;color:var(--hint)">PDF · 2,1 MB · 01/03/2026</div></div>
+              <span class="vb-tag">Luật</span>
               <button class="btn-out" type="button" style="padding:6px 14px;font-size:12px">Tải về</button>
             </div>
-            <div class="row" style="padding:11px 14px">
-              <span style="width:38px;height:38px;border-radius:8px;background:#E3F4EC;color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">DOC</span>
-              <div class="grow"><div style="font-size:13px">Mẫu đơn đăng ký hội viên cá nhân</div><div style="font-size:11px;color:var(--hint)">05/03/2026 · 68 KB</div></div>
+            <div class="mrow lib-item" data-kind="vanban">
+              <span style="width:38px;height:38px;border-radius:8px;background:#E3F4EC;color:#00814D;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0">DOCX</span>
+              <div class="grow"><div style="font-size:13px">Đơn đăng ký hội viên (biểu mẫu)</div><div style="font-size:11px;color:var(--hint)">DOCX · 240 KB · 10/01/2026</div></div>
+              <span class="vb-tag">Biểu mẫu</span>
+              <button class="btn-out" type="button" style="padding:6px 14px;font-size:12px">Tải về</button>
+            </div>
+            <div class="mrow lib-item" data-kind="vanban">
+              <span style="width:38px;height:38px;border-radius:8px;background:#FDECEC;color:#9E2A2B;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0">PDF</span>
+              <div class="grow"><div style="font-size:13px">Thông báo lịch thi đấu quý III/2026</div><div style="font-size:11px;color:var(--hint)">PDF · 560 KB · 20/05/2026</div></div>
+              <span class="vb-tag">Thông báo</span>
+              <button class="btn-out" type="button" style="padding:6px 14px;font-size:12px">Tải về</button>
+            </div>
+            <div class="mrow lib-item" data-kind="vanban">
+              <span style="width:38px;height:38px;border-radius:8px;background:#FDECEC;color:#9E2A2B;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0">PDF</span>
+              <div class="grow"><div style="font-size:13px">Hệ thống thi đấu quốc gia 2027 — QĐ 142/QĐ-VBSF</div><div style="font-size:11px;color:var(--hint)">PDF · 1,8 MB · 28/10/2026</div></div>
+              <span class="vb-tag">Quyết định</span>
+              <button class="btn-out" type="button" style="padding:6px 14px;font-size:12px">Tải về</button>
+            </div>
+            <div class="mrow lib-item" data-kind="vanban">
+              <span style="width:38px;height:38px;border-radius:8px;background:#E8EEF9;color:#21428E;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0">XLSX</span>
+              <div class="grow"><div style="font-size:13px">Kết quả Giải VĐQG Pool 9 bi 2026</div><div style="font-size:11px;color:var(--hint)">XLSX · 420 KB · 27/10/2026</div></div>
+              <span class="vb-tag">Kết quả</span>
               <button class="btn-out" type="button" style="padding:6px 14px;font-size:12px">Tải về</button>
             </div>
           </div>
         </div>
-        <div class="vb-sec" style="background:var(--surface)">
-          <h2 class="vb-h">Hình ảnh giải đấu</h2>
-          <div class="grid g3" style="margin-top:12px">
-            <figure class="vb-card"><span class="img ar43"><svg><use href="#ph-arena"/></svg></span><figcaption class="cap">Khai mạc Giải Vô địch Quốc gia 2026</figcaption></figure>
-            <figure class="vb-card"><span class="img ar43"><svg><use href="#ph-balls"/></svg></span><figcaption class="cap">Bi thi đấu đạt chuẩn của giải</figcaption></figure>
-            <figure class="vb-card"><span class="img ar43"><svg><use href="#ph-podium"/></svg></span><figcaption class="cap">Lễ trao giải nội dung Pool 9 bi</figcaption></figure>
-            <figure class="vb-card"><span class="img ar43"><svg><use href="#ph-training"/></svg></span><figcaption class="cap">Khóa đào tạo trọng tài cấp I</figcaption></figure>
-            <figure class="vb-card"><span class="img ar43"><svg><use href="#ph-signing"/></svg></span><figcaption class="cap">Ký hợp tác với Liên đoàn Hàn Quốc</figcaption></figure>
-            <figure class="vb-card"><span class="img ar43"><svg><use href="#ph-cue"/></svg></span><figcaption class="cap">Buổi tập của tuyển quốc gia</figcaption></figure>
+
+        <div class="vb-sec lib-block" data-block="media" style="background:var(--surface)">
+          <div class="sechead"><h2 class="vb-h">Thư viện media</h2><span class="vb-link">Xem tất cả →</span></div>
+          <div class="grid g3">
+            <figure class="vb-card lib-item" data-kind="media">
+              <span style="position:relative;display:block"><span class="img ar43"><svg><use href="#ph-arena"/></svg></span><span style="position:absolute;right:8px;bottom:8px;background:rgba(8,20,42,.86);color:#fff;font-size:10.5px;padding:2px 7px;border-radius:4px">48 ảnh</span></span>
+              <figcaption class="cap">Giải VĐQG Pool 2025</figcaption>
+            </figure>
+            <figure class="vb-card lib-item" data-kind="media">
+              <span style="position:relative;display:block"><span class="img ar43"><svg><use href="#ph-signing"/></svg></span><span style="position:absolute;right:8px;bottom:8px;background:rgba(8,20,42,.86);color:#fff;font-size:10.5px;padding:2px 7px;border-radius:4px">12 ảnh</span></span>
+              <figcaption class="cap">Lễ ký kết hợp tác</figcaption>
+            </figure>
+            <figure class="vb-card lib-item" data-kind="media">
+              <span style="position:relative;display:block"><span class="img ar43"><svg><use href="#ph-carom"/></svg></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.92);color:#21428E;display:flex;align-items:center;justify-content:center;font-size:15px">&#9654;</span></span><span style="position:absolute;right:8px;bottom:8px;background:rgba(8,20,42,.86);color:#fff;font-size:10.5px;padding:2px 7px;border-radius:4px">18:42</span></span>
+              <figcaption class="cap">Chung kết Carom 3 băng 2025</figcaption>
+            </figure>
+            <figure class="vb-card lib-item" data-kind="media">
+              <span style="position:relative;display:block"><span class="img ar43"><svg><use href="#ph-snooker"/></svg></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.92);color:#21428E;display:flex;align-items:center;justify-content:center;font-size:15px">&#9654;</span></span><span style="position:absolute;right:8px;bottom:8px;background:rgba(8,20,42,.86);color:#fff;font-size:10.5px;padding:2px 7px;border-radius:4px">09:15</span></span>
+              <figcaption class="cap">Hướng dẫn luật Snooker</figcaption>
+            </figure>
+            <figure class="vb-card lib-item" data-kind="media">
+              <span style="position:relative;display:block"><span class="img ar43"><svg><use href="#ph-podium"/></svg></span><span style="position:absolute;right:8px;bottom:8px;background:rgba(8,20,42,.86);color:#fff;font-size:10.5px;padding:2px 7px;border-radius:4px">26 ảnh</span></span>
+              <figcaption class="cap">Lễ trao giải Pool 9 bi 2026</figcaption>
+            </figure>
+            <figure class="vb-card lib-item" data-kind="media">
+              <span style="position:relative;display:block"><span class="img ar43"><svg><use href="#ph-training"/></svg></span><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.92);color:#21428E;display:flex;align-items:center;justify-content:center;font-size:15px">&#9654;</span></span><span style="position:absolute;right:8px;bottom:8px;background:rgba(8,20,42,.86);color:#fff;font-size:10.5px;padding:2px 7px;border-radius:4px">12:08</span></span>
+              <figcaption class="cap">Khóa đào tạo trọng tài cấp I</figcaption>
+            </figure>
           </div>
         </div>
+        <p id="lib-empty" hidden style="font-size:13px;color:var(--hint);padding:18px 26px">Không có tài liệu nào khớp với bộ lọc hiện tại.</p>
       </section>
 
       <!-- ================= HỘI VIÊN ================= -->
@@ -1466,83 +1644,186 @@ h1,h2,h3,h4{text-wrap:balance}
         <div class="vb-band">
           <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span style="color:#fff">Hội viên</span></div>
           <h1>Hội viên</h1>
-          <div class="sub">Quyền lợi, hạng hội viên và đăng ký trực tuyến</div>
+          <div class="sub">Đăng ký trực tuyến · theo dõi xếp hạng cá nhân</div>
         </div>
-        <div class="vb-sec">
-          <h2 class="vb-h">Hạng hội viên</h2>
-          <div class="grid g3" style="margin-top:14px">
-            <div class="vb-card" style="padding:18px">
-              <div style="font-size:13px;font-weight:600;color:var(--vd)">Hội viên phong trào</div>
-              <div style="font-size:22px;font-weight:700;color:var(--ink);margin-top:6px">300.000đ<span style="font-size:12px;font-weight:400;color:var(--hint)"> / năm</span></div>
-              <div class="art-li" style="font-size:12.5px">Thẻ hội viên và mã số quốc gia</div>
-              <div class="art-li" style="font-size:12.5px">Dự giải cấp tỉnh / thành</div>
-              <div class="art-li" style="font-size:12.5px">Có điểm xếp hạng</div>
-            </div>
-            <div class="vb-card" style="padding:18px;border:1.5px solid var(--gold)">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-size:13px;font-weight:600;color:var(--vd)">Hội viên thi đấu</div><span class="vb-badge" style="background:#FBF0DC;color:#8A5A1E">Phổ biến</span></div>
-              <div style="font-size:22px;font-weight:700;color:var(--ink);margin-top:6px">600.000đ<span style="font-size:12px;font-weight:400;color:var(--hint)"> / năm</span></div>
-              <div class="art-li" style="font-size:12.5px">Toàn bộ quyền lợi hạng phong trào</div>
-              <div class="art-li" style="font-size:12.5px">Dự giải cấp quốc gia và cúp khu vực</div>
-              <div class="art-li" style="font-size:12.5px">Giảm 20% lệ phí đăng ký thi đấu</div>
-              <div class="art-li" style="font-size:12.5px">Dự các khóa tập huấn của Liên đoàn</div>
-            </div>
-            <div class="vb-card" style="padding:18px">
-              <div style="font-size:13px;font-weight:600;color:var(--vd)">Câu lạc bộ thành viên</div>
-              <div style="font-size:22px;font-weight:700;color:var(--ink);margin-top:6px">3.000.000đ<span style="font-size:12px;font-weight:400;color:var(--hint)"> / năm</span></div>
-              <div class="art-li" style="font-size:12.5px">Đăng ký đội dự giải CLB toàn quốc</div>
-              <div class="art-li" style="font-size:12.5px">Được đăng cai giải trong hệ thống</div>
-              <div class="art-li" style="font-size:12.5px">Hiển thị trong danh bạ CLB trên trang</div>
-            </div>
-          </div>
+        <div class="vb-srctabs" role="tablist" aria-label="Loại hội viên">
+          <button type="button" class="vb-srctab on" role="tab" aria-selected="true" data-hv-tab="ca-nhan">Hội viên cá nhân</button>
+          <button type="button" class="vb-srctab" role="tab" aria-selected="false" data-hv-tab="to-chuc">Hội viên tổ chức</button>
+          <button type="button" class="vb-srctab" role="tab" aria-selected="false" data-go="hoi-vien-danh-sach">Danh sách hội viên</button>
         </div>
-        <div class="vb-sec" style="background:var(--surface);display:flex;gap:22px;flex-wrap:wrap">
-          <div style="flex:1.2;min-width:280px">
-            <h2 class="vb-h">Đăng ký hội viên</h2>
-            <p class="vb-p" style="margin-top:6px">Điền thông tin, Liên đoàn phản hồi trong 3 ngày làm việc kèm hướng dẫn thanh toán.</p>
-            <form class="demo-form" style="margin-top:14px">
-              <div style="display:flex;gap:12px;flex-wrap:wrap">
-                <div class="fld" style="flex:1;min-width:180px"><label class="lbl" for="hv-name">Họ và tên <span class="req">*</span></label><input class="inp" id="hv-name" required></div>
-                <div class="fld" style="flex:1;min-width:180px"><label class="lbl" for="hv-dob">Ngày sinh <span class="req">*</span></label><input class="inp" id="hv-dob" type="date" required></div>
-              </div>
-              <div style="display:flex;gap:12px;flex-wrap:wrap">
-                <div class="fld" style="flex:1;min-width:180px"><label class="lbl" for="hv-phone">Điện thoại <span class="req">*</span></label><input class="inp" id="hv-phone" type="tel" required></div>
-                <div class="fld" style="flex:1;min-width:180px"><label class="lbl" for="hv-mail">Email</label><input class="inp" id="hv-mail" type="email"></div>
-              </div>
-              <div style="display:flex;gap:12px;flex-wrap:wrap">
-                <div class="fld" style="flex:1;min-width:180px"><label class="lbl" for="hv-tier">Hạng hội viên <span class="req">*</span></label>
-                  <select class="inp" id="hv-tier"><option>Hội viên thi đấu</option><option>Hội viên phong trào</option><option>Câu lạc bộ thành viên</option></select></div>
-                <div class="fld" style="flex:1;min-width:180px"><label class="lbl" for="hv-disc">Nội dung chính <span class="req">*</span></label>
-                  <select class="inp" id="hv-disc"><option>Pool 9 bi</option><option>Pool 10 bi</option><option>Carom 3 băng</option><option>Snooker</option></select></div>
-              </div>
-              <div class="fld"><label class="lbl" for="hv-club">Câu lạc bộ đang sinh hoạt</label><input class="inp" id="hv-club" placeholder="Tên CLB (nếu có)"></div>
-              <button class="btn-gold" type="submit">Gửi đăng ký</button>
-              <p class="form-msg" hidden style="font-size:12px;color:var(--ok);margin-top:10px"></p>
-            </form>
-          </div>
-          <div style="flex:1;min-width:240px">
-            <span class="img ar43" style="border-radius:8px"><svg><use href="#ph-balls"/></svg></span>
-            <div class="vb-card" style="padding:16px;margin-top:14px">
-              <h3 class="vb-h" style="font-size:14px">Số liệu hội viên</h3>
-              <div class="grid g4" style="margin-top:10px;grid-template-columns:1fr 1fr">
+
+        <div data-hv-panel="ca-nhan">
+          <div class="vb-sec" style="background:var(--surface);display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+            <div class="vb-card" style="flex:1;min-width:260px;padding:16px">
+              <h2 class="vb-h" style="font-size:14px">Đã là hội viên? Đăng nhập để xem hạng của bạn</h2>
+              <form class="demo-form" style="margin-top:12px">
+                <div class="fld"><label class="lbl" for="lg-phone">Số điện thoại</label><input class="inp" id="lg-phone" type="tel" required></div>
+                <div class="fld"><label class="lbl" for="lg-pass">Mật khẩu</label><input class="inp" id="lg-pass" type="password" required></div>
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+                  <button class="btn-gold" type="submit">Đăng nhập</button>
+                  <span class="vb-link">Quên mật khẩu?</span>
+                </div>
+                <p class="form-msg" hidden style="font-size:11.5px;color:var(--ok);margin-top:8px"></p>
+              </form>
+            </div>
+            <div style="flex:1;min-width:240px">
+              <div class="grid g4" style="grid-template-columns:1fr 1fr">
                 <div class="stat"><b>1.540</b><span>Hội viên cá nhân</span></div>
                 <div class="stat"><b>126</b><span>CLB thành viên</span></div>
                 <div class="stat"><b>412</b><span>Dưới 21 tuổi</span></div>
                 <div class="stat"><b>34</b><span>Tỉnh / thành</span></div>
               </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:12px">Chưa có tài khoản? Điền form bên dưới để đăng ký. Liên đoàn phản hồi trong 3 ngày làm việc.</p>
+            </div>
+          </div>
+
+          <div class="vb-sec" style="border-bottom:1px solid #EEF1EE">
+            <div class="steps">
+              <span class="step on" data-step="1"><span class="no">1</span>Thông tin</span>
+              <span class="step-sep"></span>
+              <span class="step" data-step="2"><span class="no">2</span>Thanh toán</span>
+              <span class="step-sep"></span>
+              <span class="step" data-step="3"><span class="no">3</span>Hoàn tất</span>
+            </div>
+          </div>
+
+          <div class="vb-sec step-pane" data-step-pane="1">
+            <h2 class="vb-h">Thông tin đăng ký</h2>
+            <form class="demo-form" style="margin-top:14px;max-width:760px">
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="hv-name">Họ và tên <span class="req">*</span></label><input class="inp" id="hv-name" required></div>
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="hv-cccd">Số CCCD <span class="req">*</span></label><input class="inp" id="hv-cccd" inputmode="numeric" required></div>
+              </div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="hv-dob">Ngày sinh</label><input class="inp" id="hv-dob" type="date"></div>
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="hv-phone">Số điện thoại <span class="req">*</span></label><input class="inp" id="hv-phone" type="tel" required></div>
+              </div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="hv-mail">Email</label><input class="inp" id="hv-mail" type="email"></div>
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="hv-prov">Tỉnh / Thành</label>
+                  <select class="inp" id="hv-prov"><option>TP.HCM</option><option>Hà Nội</option><option>Đà Nẵng</option><option>Cần Thơ</option><option>Hải Phòng</option><option>Bình Dương</option></select></div>
+              </div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="hv-pass">Mật khẩu <span class="req">*</span></label><input class="inp" id="hv-pass" type="password" required></div>
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="hv-disc">Nội dung chính</label>
+                  <select class="inp" id="hv-disc"><option>Pool 9 bi</option><option>Pool 10 bi</option><option>Carom 1 băng</option><option>Carom 3 băng</option><option>Snooker</option></select></div>
+              </div>
+              <div class="fld"><label class="lbl" for="hv-addr">Địa chỉ nơi ở</label><input class="inp" id="hv-addr"></div>
+              <div class="fld"><label class="lbl" for="hv-club">Câu lạc bộ / Đơn vị</label><input class="inp" id="hv-club" placeholder="Tên CLB (nếu có)"></div>
+              <div class="fld">
+                <span class="lbl">Ảnh đại diện (tùy chọn)</span>
+                <div class="mrow" style="border-style:dashed"><span class="grow" style="font-size:12.5px;color:var(--hint)">Tải ảnh lên (tối đa 3 MB)</span><button class="btn-out" type="button" style="padding:6px 14px;font-size:12px">Chọn ảnh</button></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:4px">
+                <button class="btn-gold" type="submit">Tạo tài khoản hội viên</button>
+                <span style="font-size:11.5px;color:var(--hint)"><span class="req">*</span> Bắt buộc</span>
+              </div>
+              <p class="form-msg" hidden style="font-size:12px;color:var(--ok);margin-top:10px"></p>
+            </form>
+          </div>
+
+          <div class="vb-sec step-pane" data-step-pane="2" hidden style="background:var(--surface)">
+            <h2 class="vb-h">Bước 2 — Thanh toán hội phí</h2>
+            <div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:14px">
+              <div class="vb-card" style="flex:1;min-width:250px;padding:18px">
+                <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px"><span>Hội phí năm 2027</span><b style="color:var(--vd)">600.000đ</b></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-top:8px"><span>Hạng</span><span>Hội viên thi đấu</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-top:8px;padding-top:10px;border-top:1px solid var(--line)"><span>Nội dung chuyển khoản</span><b style="user-select:all">HV-2027-00412</b></div>
+                <div class="mrow" style="margin-top:14px;background:var(--surface)">
+                  <div class="grow" style="font-size:12.5px">
+                    <div>Ngân hàng: <b>Vietcombank</b></div>
+                    <div style="margin-top:3px">Số TK: <b style="user-select:all">0011 0004 12345</b></div>
+                    <div style="margin-top:3px">Chủ TK: <b>LĐ Billiards &amp; Snooker VN</b></div>
+                  </div>
+                </div>
+                <span class="vb-badge bg-soon" style="margin-top:12px;display:inline-block">Chờ thanh toán</span>
+                <p style="font-size:11.5px;color:var(--hint);margin-top:10px">Hệ thống tự xác nhận khi nhận được chuyển khoản đúng nội dung (đối soát VietQR).</p>
+                <button class="btn-gold" type="button" style="margin-top:12px">Tôi đã chuyển khoản</button>
+              </div>
+              <div style="flex:0 0 190px;text-align:center">
+                <span class="img" style="width:170px;height:170px;background:#fff;border:1px solid var(--line);border-radius:8px;display:inline-block"><svg viewBox="0 0 120 120"><use href="#ph-qr"/></svg></span>
+                <div class="cap" style="text-align:center">Quét VietQR bằng app ngân hàng</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="vb-sec step-pane" data-step-pane="3" hidden>
+            <h2 class="vb-h">Bước 3 — Hoàn tất</h2>
+            <div class="vb-card" style="padding:22px;margin-top:14px;max-width:520px;text-align:center">
+              <div style="font-size:30px;color:var(--ok)">✓</div>
+              <div style="font-size:15px;font-weight:600;margin-top:8px">Đã kích hoạt thẻ hội viên</div>
+              <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Mã hội viên <b>VBSF-2027-00412</b> · hiệu lực đến 31/12/2027</div>
+              <button class="btn-out" type="button" style="margin-top:14px" data-go="hoi-vien-chi-tiet">Xem hồ sơ hội viên</button>
+            </div>
+          </div>
+
+          <div class="vb-sec" style="background:var(--surface)">
+            <h2 class="vb-h">Hạng hội viên &amp; hội phí</h2>
+            <div class="grid g3" style="margin-top:14px">
+              <div class="vb-card" style="padding:18px">
+                <div style="font-size:13px;font-weight:600;color:var(--vd)">Hội viên phong trào</div>
+                <div style="font-size:22px;font-weight:700;margin-top:6px">300.000đ<span style="font-size:12px;font-weight:400;color:var(--hint)"> / năm</span></div>
+                <div class="art-li" style="font-size:12.5px">Thẻ hội viên và mã số quốc gia</div>
+                <div class="art-li" style="font-size:12.5px">Dự giải cấp tỉnh / thành</div>
+                <div class="art-li" style="font-size:12.5px">Có điểm xếp hạng</div>
+              </div>
+              <div class="vb-card" style="padding:18px;border:1.5px solid var(--gold)">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-size:13px;font-weight:600;color:var(--vd)">Hội viên thi đấu</div><span class="vb-badge" style="background:#FBF0DC;color:#8A5A1E">Phổ biến</span></div>
+                <div style="font-size:22px;font-weight:700;margin-top:6px">600.000đ<span style="font-size:12px;font-weight:400;color:var(--hint)"> / năm</span></div>
+                <div class="art-li" style="font-size:12.5px">Toàn bộ quyền lợi hạng phong trào</div>
+                <div class="art-li" style="font-size:12.5px">Dự giải quốc gia và cúp khu vực</div>
+                <div class="art-li" style="font-size:12.5px">Giảm 20% lệ phí đăng ký thi đấu</div>
+                <div class="art-li" style="font-size:12.5px">Dự các khóa tập huấn của Liên đoàn</div>
+              </div>
+              <div class="vb-card" style="padding:18px">
+                <div style="font-size:13px;font-weight:600;color:var(--vd)">Câu lạc bộ thành viên</div>
+                <div style="font-size:22px;font-weight:700;margin-top:6px">3.000.000đ<span style="font-size:12px;font-weight:400;color:var(--hint)"> / năm</span></div>
+                <div class="art-li" style="font-size:12.5px">Đăng ký đội dự giải CLB toàn quốc</div>
+                <div class="art-li" style="font-size:12.5px">Được đăng cai giải trong hệ thống</div>
+                <div class="art-li" style="font-size:12.5px">Hiển thị trong danh bạ CLB</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+              <button class="btn-out" type="button" data-go="hoi-vien-gia-han">Gia hạn thẻ hội viên</button>
+              <button class="btn-out" type="button" data-go="hoi-vien-danh-sach">Danh sách hội viên</button>
             </div>
           </div>
         </div>
-        <div class="vb-sec">
-          <h2 class="vb-h">Đối tác &amp; nhà tài trợ</h2>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
-            <div class="vb-card" style="width:116px;height:48px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint);font-weight:600">KIM CƯƠNG</div>
-            <div class="vb-card" style="width:116px;height:48px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint);font-weight:600">VÀNG</div>
-            <div class="vb-card" style="width:116px;height:48px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint);font-weight:600">VÀNG</div>
-            <div class="vb-card" style="width:116px;height:48px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint);font-weight:600">BẠC</div>
-            <div class="vb-card" style="width:116px;height:48px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint);font-weight:600">BẠC</div>
-            <div class="vb-card" style="width:116px;height:48px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint);font-weight:600">ĐỒNG</div>
+
+        <div data-hv-panel="to-chuc" hidden>
+          <div class="vb-sec">
+            <h2 class="vb-h">Đăng ký hội viên tổ chức</h2>
+            <p class="vb-p" style="margin-top:6px;max-width:68ch">Dành cho câu lạc bộ, trung tâm thể thao và đơn vị có đội thi đấu. Sau khi Liên đoàn duyệt, đơn vị được cấp tài khoản đội để đăng ký vận động viên dự giải thành tích cao.</p>
+            <form class="demo-form" style="margin-top:14px;max-width:760px">
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="tc-name">Tên tổ chức <span class="req">*</span></label><input class="inp" id="tc-name" required></div>
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="tc-tax">Mã số thuế</label><input class="inp" id="tc-tax"></div>
+              </div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="tc-rep">Người đại diện <span class="req">*</span></label><input class="inp" id="tc-rep" required></div>
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="tc-phone">Điện thoại <span class="req">*</span></label><input class="inp" id="tc-phone" type="tel" required></div>
+              </div>
+              <div class="fld"><label class="lbl" for="tc-addr">Địa chỉ trụ sở <span class="req">*</span></label><input class="inp" id="tc-addr" required></div>
+              <div class="fld"><label class="lbl" for="tc-note">Số bàn &amp; quy mô CLB</label><textarea class="inp" id="tc-note" rows="3"></textarea></div>
+              <button class="btn-gold" type="submit">Gửi hồ sơ tổ chức</button>
+              <p class="form-msg" hidden style="font-size:12px;color:var(--ok);margin-top:10px"></p>
+            </form>
           </div>
-          <p style="font-size:11.5px;color:var(--hint);margin-top:10px">Ô logo để trống — chờ file thương hiệu từ nhà tài trợ.</p>
+          <div class="vb-sec" style="background:var(--surface)">
+            <h2 class="vb-h">Câu lạc bộ thành viên tiêu biểu</h2>
+            <div class="scroll-x" style="margin-top:12px">
+              <table class="tbl">
+                <thead><tr><th>Tên tổ chức</th><th>Năm gia nhập</th><th>Địa chỉ</th><th>Tình trạng</th></tr></thead>
+                <tbody>
+                  <tr><td>CLB Sài Gòn</td><td>2019</td><td>Quận 1, TP.HCM</td><td><span class="vb-badge bg-open">Đang hiệu lực</span></td></tr>
+                  <tr><td>CLB Thủ Đô</td><td>2020</td><td>Cầu Giấy, Hà Nội</td><td><span class="vb-badge bg-open">Đang hiệu lực</span></td></tr>
+                  <tr><td>CLB Sông Hàn</td><td>2021</td><td>Hải Châu, Đà Nẵng</td><td><span class="vb-badge bg-open">Đang hiệu lực</span></td></tr>
+                  <tr><td>Meow Billiards</td><td>2022</td><td>Thủ Dầu Một, Bình Dương</td><td><span class="vb-badge bg-soon">Chờ thanh toán</span></td></tr>
+                  <tr><td>CLB Cảng</td><td>2023</td><td>Hồng Bàng, Hải Phòng</td><td><span class="vb-badge bg-done">Hết hạn</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1566,6 +1847,13 @@ h1,h2,h3,h4{text-wrap:balance}
               <div style="display:flex;gap:13px"><span style="width:38px;height:38px;border-radius:50%;background:#E8EEF9;color:var(--vd);display:flex;align-items:center;justify-content:center;flex-shrink:0">◷</span>
                 <div><div style="font-size:11px;color:var(--hint)">Giờ làm việc</div><div style="font-size:13px">Thứ 2 – Thứ 6, 8:00 – 17:00</div></div></div>
             </div>
+            <h3 class="vb-h" style="font-size:14px;margin-top:20px">Theo dõi Liên đoàn</h3>
+            <div style="display:flex;gap:9px;margin-top:10px">
+              <span class="soc" title="Facebook">f</span>
+              <span class="soc" title="YouTube">▶</span>
+              <span class="soc" title="Zalo">Z</span>
+              <span class="soc" title="TikTok">♪</span>
+            </div>
             <h3 class="vb-h" style="font-size:14px;margin-top:20px">Đầu mối theo việc</h3>
             <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
               <div class="row" style="padding:10px 12px"><div class="grow" style="font-size:12.5px">Đăng ký thi đấu</div><span style="font-size:12px;color:var(--vd);user-select:all">thidau@vbsf.vn</span></div>
@@ -1581,7 +1869,7 @@ h1,h2,h3,h4{text-wrap:balance}
                 <div class="fld" style="flex:1;min-width:170px"><label class="lbl" for="lh-mail">Email <span class="req">*</span></label><input class="inp" id="lh-mail" type="email" required></div>
               </div>
               <div class="fld"><label class="lbl" for="lh-topic">Chủ đề <span class="req">*</span></label>
-                <select class="inp" id="lh-topic"><option>Đăng ký thi đấu</option><option>Hội viên</option><option>Hợp tác &amp; tài trợ</option><option>Báo chí</option><option>Khác</option></select></div>
+                <select class="inp" id="lh-topic"><option>Hợp tác</option><option>Hội viên</option><option>Giải đấu</option><option>Khác</option></select></div>
               <div class="fld"><label class="lbl" for="lh-msg">Nội dung <span class="req">*</span></label><textarea class="inp" id="lh-msg" rows="5" required></textarea></div>
               <button class="btn-gold" type="submit">Gửi liên hệ</button>
               <p class="form-msg" hidden style="font-size:12px;color:var(--ok);margin-top:10px"></p>
@@ -1589,6 +1877,337 @@ h1,h2,h3,h4{text-wrap:balance}
           </div>
         </div>
       </section>
+
+      <!-- ================= GIẢI ĐẤU — ĐĂNG KÝ ================= -->
+      <section class="pg" id="pg-giai-dau-dang-ky">
+        <div class="vb-band">
+          <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span data-go="giai-dau">Giải đấu</span> &nbsp;/&nbsp; <span style="color:#fff">Đăng ký thi đấu</span></div>
+          <h1>Giải Snooker Toàn quốc 2026</h1>
+          <div class="sub">Snooker · 05–12/12/2026 · Cung Thể thao Đà Nẵng</div>
+        </div>
+        <div class="vb-sec" style="border-bottom:1px solid #EEF1EE;display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding-block:14px">
+          <span class="vb-badge bg-open">Mở đăng ký</span>
+          <span style="font-size:12.5px;color:var(--muted)">Đóng đăng ký 28/11/2026 · còn 14 suất / 48</span>
+          <span style="font-size:12.5px;color:var(--muted);margin-left:auto">Lệ phí 250.000đ / cơ thủ</span>
+        </div>
+        <div class="vb-sec" style="display:flex;gap:22px;flex-wrap:wrap">
+          <div style="flex:1.4;min-width:280px">
+            <div class="vb-card" style="padding:16px;border-left:3px solid var(--gold);background:#FFFBF4">
+              <div style="font-size:13px;font-weight:600;color:var(--vd)">Giải thành tích cao — đăng ký qua đội tỉnh/thành</div>
+              <p style="font-size:12.5px;color:var(--muted);margin-top:6px">Giải này do các đội tỉnh/thành đăng ký kèm danh sách vận động viên của đội; vận động viên không tự đăng ký. Đăng nhập bằng <b>tài khoản đội</b> do Liên đoàn cấp. Đội chưa có tài khoản, liên hệ Liên đoàn ở mục <span class="vb-link" data-go="lien-he">Liên hệ</span>.</p>
+            </div>
+
+            <h2 class="vb-h" style="margin-top:20px">Trưởng đoàn</h2>
+            <form class="demo-form" style="margin-top:12px">
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="dk-td">Họ và tên <span class="req">*</span></label><input class="inp" id="dk-td" required></div>
+                <div class="fld" style="flex:1;min-width:190px"><label class="lbl" for="dk-cv">Chức vụ</label><input class="inp" id="dk-cv" placeholder="Phụ trách bộ môn"></div>
+              </div>
+              <div class="fld" style="max-width:320px"><label class="lbl" for="dk-sdt">Số điện thoại trưởng đoàn <span class="req">*</span></label><input class="inp" id="dk-sdt" type="tel" required></div>
+
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:18px">
+                <h2 class="vb-h">Chọn vận động viên dự giải</h2>
+                <span style="font-size:11.5px;color:var(--hint)">Chỉ hiện những người Liên đoàn đã xác nhận thuộc đội</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                <label class="mrow"><input type="checkbox" id="vdv1" checked><span class="avat"><svg><use href="#por1"/></svg></span><div class="grow" style="font-size:12.5px"><b>Lê Minh Khôi</b><div style="color:var(--hint);font-size:11px">VBSF-2026-00112 · Snooker · hạng 1</div></div><span class="vb-badge bg-open">Đủ điều kiện</span></label>
+                <label class="mrow"><input type="checkbox" id="vdv2" checked><span class="avat"><svg><use href="#por2"/></svg></span><div class="grow" style="font-size:12.5px"><b>Chu Văn Lâm</b><div style="color:var(--hint);font-size:11px">VBSF-2026-00140 · Snooker · hạng 2</div></div><span class="vb-badge bg-open">Đủ điều kiện</span></label>
+                <label class="mrow"><input type="checkbox" id="vdv3"><span class="avat"><svg><use href="#por3"/></svg></span><div class="grow" style="font-size:12.5px"><b>Tạ Hoàng Phúc</b><div style="color:var(--hint);font-size:11px">VBSF-2026-00188 · Snooker · hạng 4</div></div><span class="vb-badge bg-open">Đủ điều kiện</span></label>
+                <label class="mrow" style="opacity:.6"><input type="checkbox" id="vdv4" disabled><span class="avat"><svg><use href="#por4"/></svg></span><div class="grow" style="font-size:12.5px"><b>Mai Đức Lộc</b><div style="color:var(--hint);font-size:11px">VBSF-2025-00402 · thẻ hết hạn 31/12/2025</div></div><span class="vb-badge bg-done">Hết hạn thẻ</span></label>
+              </div>
+              <div class="mrow" style="margin-top:12px;background:var(--surface)">
+                <div class="grow" style="font-size:12.5px">Đã chọn <b>2</b> vận động viên · lệ phí tạm tính</div>
+                <b style="color:var(--vd)">500.000đ</b>
+              </div>
+              <button class="btn-gold" type="submit" style="margin-top:14px">Gửi đăng ký của đội</button>
+              <p class="form-msg" hidden style="font-size:12px;color:var(--ok);margin-top:10px"></p>
+            </form>
+          </div>
+          <aside style="flex:1;min-width:230px">
+            <div class="vb-card" style="padding:16px">
+              <h3 class="vb-h" style="font-size:14px">Mốc thời gian</h3>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;font-size:12.5px">
+                <div><div style="color:var(--hint);font-size:11px">Mở đăng ký</div>05/11/2026</div>
+                <div><div style="color:var(--hint);font-size:11px">Đóng đăng ký</div>28/11/2026</div>
+                <div><div style="color:var(--hint);font-size:11px">Công bố danh sách &amp; bốc thăm</div>01/12/2026</div>
+                <div><div style="color:var(--hint);font-size:11px">Khai mạc</div>05/12/2026</div>
+              </div>
+            </div>
+            <div class="vb-card" style="padding:16px;margin-top:14px">
+              <h3 class="vb-h" style="font-size:14px">Điều kiện dự giải</h3>
+              <div class="art-li" style="font-size:12.5px">Thẻ hội viên còn hiệu lực tới ngày kết thúc giải</div>
+              <div class="art-li" style="font-size:12.5px">Có điểm xếp hạng nội dung Snooker trong 24 tháng</div>
+              <div class="art-li" style="font-size:12.5px">Không trong thời gian bị kỷ luật thi đấu</div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ================= GIẢI ĐẤU — TRỰC TIẾP ================= -->
+      <section class="pg" id="pg-giai-dau-truc-tiep">
+        <div class="vb-band">
+          <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span data-go="giai-dau">Giải đấu</span> &nbsp;/&nbsp; <span style="color:#fff">Kết quả trực tiếp</span></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap">
+            <span class="vb-badge bg-live" style="background:#fff;color:#9E2A2B">● TRỰC TIẾP</span>
+            <h1 style="margin:0">Giải các CLB mạnh toàn quốc 2026</h1>
+          </div>
+          <div class="sub">Nhà thi đấu Phú Thọ, TP.HCM · Vòng bán kết</div>
+        </div>
+        <div class="vb-sec">
+          <h2 class="vb-st" style="margin-bottom:12px">Vòng tứ kết · Đã hoàn thành</h2>
+          <div class="scroll-x">
+            <table class="tbl">
+              <tbody>
+                <tr><td style="width:52px"><span class="vb-badge bg-done">KT</span></td><td style="text-align:right"><b>CLB Sài Gòn Pool</b></td><td style="text-align:center;width:88px;font-weight:700;color:var(--vd)">7 – 3</td><td>CLB Cảng Hải Phòng</td></tr>
+                <tr><td><span class="vb-badge bg-done">KT</span></td><td style="text-align:right"><b>CLB Hà Nội Cue</b></td><td style="text-align:center;font-weight:700;color:var(--vd)">7 – 6</td><td>CLB Tây Đô</td></tr>
+                <tr><td><span class="vb-badge bg-done">KT</span></td><td style="text-align:right"><b>CLB Sông Hàn</b></td><td style="text-align:center;font-weight:700;color:var(--vd)">7 – 2</td><td>CLB Phú Mỹ</td></tr>
+                <tr><td><span class="vb-badge bg-done">KT</span></td><td style="text-align:right"><b>Meow Billiards</b></td><td style="text-align:center;font-weight:700;color:var(--vd)">7 – 5</td><td>CLB Thủ Đô</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h2 class="vb-st" style="margin:24px 0 12px">Vòng bán kết · Đang diễn ra</h2>
+          <div class="scroll-x">
+            <table class="tbl">
+              <tbody>
+                <tr><td style="width:52px"><span class="vb-badge bg-live">LIVE</span></td><td style="text-align:right"><b>CLB Sài Gòn Pool</b></td><td style="text-align:center;width:88px;font-weight:700;color:var(--warn)">7 – 5</td><td>CLB Hà Nội Cue</td></tr>
+                <tr><td><span class="vb-badge bg-soon">SẮP</span></td><td style="text-align:right">CLB Sông Hàn</td><td style="text-align:center;color:var(--hint)">– : –</td><td>Meow Billiards</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:11.5px;color:var(--hint);margin-top:14px">Tỷ số theo thể thức đấu loại trực tiếp (race to 7) · cập nhật tự động khi có kết quả mới.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+            <button class="btn-out" type="button" data-go="giai-dau-chi-tiet">← Thông tin giải</button>
+            <button class="btn-out" type="button" data-go="giai-dau-ket-qua">Kết quả chung cuộc</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= GIẢI ĐẤU — KẾT QUẢ CHUNG CUỘC ================= -->
+      <section class="pg" id="pg-giai-dau-ket-qua">
+        <div class="vb-band">
+          <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span data-go="giai-dau">Giải đấu</span> &nbsp;/&nbsp; <span style="color:#fff">Kết quả chung cuộc</span></div>
+          <h1>Giải Vô địch Quốc gia Pool 9 bi 2026</h1>
+          <div class="sub">Pool 9 bi · kết thúc 26/10/2026 · Nhà thi đấu Phú Thọ, TP.HCM</div>
+        </div>
+        <div class="vb-sec" style="background:var(--surface)">
+          <h2 class="vb-st" style="margin-bottom:14px">Bục nhận giải</h2>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+            <div class="pod" style="border-top:3px solid #A9B2AC"><div class="ph" style="color:#A9B2AC">🥈 HẠNG 2</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por4"/></svg></span><div class="nm">Phạm Anh Tuấn</div><div class="un">Bình Dương</div><div class="pt">350 điểm</div></div>
+            <div class="pod" style="border-top:3px solid #C9A227"><div class="ph" style="color:#C9A227">🥇 HẠNG 1</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por1"/></svg></span><div class="nm">Nguyễn Phúc Long</div><div class="un">CLB Sài Gòn, TP.HCM</div><div class="pt">500 điểm</div></div>
+            <div class="pod" style="border-top:3px solid #C99A6B"><div class="ph" style="color:#C99A6B">🥉 HẠNG 3</div><span class="avat" style="width:52px;height:52px;margin:10px auto;display:block"><svg><use href="#por2"/></svg></span><div class="nm">Đỗ Hoàng Nam</div><div class="un">Hà Nội</div><div class="pt">220 điểm</div></div>
+          </div>
+        </div>
+        <div class="vb-sec">
+          <h2 class="vb-st" style="margin-bottom:12px">Bảng xếp hạng chung cuộc</h2>
+          <div class="scroll-x">
+            <table class="tbl">
+              <thead><tr><th style="width:64px">Hạng</th><th>Vận động viên</th><th>Đơn vị</th><th style="text-align:right">Tiền thưởng</th><th style="text-align:right">Điểm</th></tr></thead>
+              <tbody>
+                <tr><td><span class="rk rk1">1</span></td><td>Nguyễn Phúc Long</td><td>TP.HCM</td><td style="text-align:right">20.000.000đ</td><td style="text-align:right"><b>500</b></td></tr>
+                <tr><td><span class="rk rk2">2</span></td><td>Phạm Anh Tuấn</td><td>Bình Dương</td><td style="text-align:right">10.000.000đ</td><td style="text-align:right"><b>350</b></td></tr>
+                <tr><td><span class="rk rk3">3</span></td><td>Đỗ Hoàng Nam</td><td>Hà Nội</td><td style="text-align:right">5.000.000đ</td><td style="text-align:right"><b>220</b></td></tr>
+                <tr><td><span class="rk">4</span></td><td>Vũ Thành Đạt</td><td>Đà Nẵng</td><td style="text-align:right">3.000.000đ</td><td style="text-align:right">220</td></tr>
+                <tr><td><span class="rk">5</span></td><td>Bùi Minh Quân</td><td>TP.HCM</td><td style="text-align:right">1.500.000đ</td><td style="text-align:right">140</td></tr>
+                <tr><td><span class="rk">6</span></td><td>Hoàng Gia Huy</td><td>Cần Thơ</td><td style="text-align:right">1.500.000đ</td><td style="text-align:right">140</td></tr>
+                <tr><td><span class="rk">7</span></td><td>Ngô Tấn Lộc</td><td>Hải Phòng</td><td style="text-align:right">1.500.000đ</td><td style="text-align:right">140</td></tr>
+                <tr><td><span class="rk">8</span></td><td>Đặng Văn Hiếu</td><td>Bình Định</td><td style="text-align:right">1.500.000đ</td><td style="text-align:right">140</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:14px">Giải đấu đã kết thúc. Kết quả chi tiết từng vòng và thống kê đầy đủ được lưu trong hệ thống xếp hạng VBSF.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+            <button class="btn-out" type="button" data-go="giai-dau">← Quay lại Giải đấu</button>
+            <button class="btn-out" type="button" data-go="ranking">Xem bảng xếp hạng</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= HỘI VIÊN — DANH SÁCH ================= -->
+      <section class="pg" id="pg-hoi-vien-danh-sach">
+        <div class="vb-band">
+          <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span data-go="hoi-vien">Hội viên</span> &nbsp;/&nbsp; <span style="color:#fff">Danh sách</span></div>
+          <h1>Danh sách hội viên</h1>
+          <div class="sub">Tra cứu hội viên cá nhân và tổ chức của Liên đoàn</div>
+        </div>
+        <div class="vb-srctabs" role="tablist" aria-label="Loại danh sách">
+          <button type="button" class="vb-srctab on" role="tab" aria-selected="true" data-ds-tab="ca-nhan">Hội viên cá nhân</button>
+          <button type="button" class="vb-srctab" role="tab" aria-selected="false" data-ds-tab="to-chuc">Hội viên tổ chức</button>
+        </div>
+        <div class="vb-sec" style="border-bottom:1px solid #EEF1EE;display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-block:14px">
+          <select class="vb-sel" aria-label="Trạng thái"><option>Tất cả trạng thái</option><option>Đang hiệu lực</option><option>Chờ thanh toán</option><option>Hết hạn</option></select>
+          <select class="vb-sel" aria-label="Tỉnh / thành"><option>Toàn quốc</option><option>TP.HCM</option><option>Hà Nội</option><option>Đà Nẵng</option></select>
+          <label style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 12px;gap:8px;max-width:240px;flex:1;min-width:170px">
+            <span style="color:var(--hint);font-size:13px">&#8981;</span>
+            <input type="search" placeholder="Tìm theo tên hoặc mã HV…" aria-label="Tìm hội viên" style="border:none;background:none;outline:none;font-size:12.5px;width:100%;font-family:inherit;min-width:0;color:var(--ink)">
+          </label>
+        </div>
+        <div data-ds-panel="ca-nhan">
+          <div class="vb-sec scroll-x">
+            <table class="tbl">
+              <thead><tr><th>Họ tên</th><th>Mã hội viên</th><th>Đơn vị</th><th>Nội dung</th><th>Tình trạng</th></tr></thead>
+              <tbody>
+                <tr style="cursor:pointer" data-go="hoi-vien-chi-tiet"><td><span class="avat" style="display:inline-flex;vertical-align:middle;margin-right:8px"><svg><use href="#por1"/></svg></span>Nguyễn Phúc Long</td><td>VBSF-2026-00098</td><td>TP.HCM</td><td>Pool 9 bi</td><td><span class="vb-badge bg-open">Đang hiệu lực</span></td></tr>
+                <tr><td><span class="avat" style="display:inline-flex;vertical-align:middle;margin-right:8px"><svg><use href="#por2"/></svg></span>Trần Quốc Bảo</td><td>VBSF-2026-00071</td><td>Hà Nội</td><td>Carom 3 băng</td><td><span class="vb-badge bg-open">Đang hiệu lực</span></td></tr>
+                <tr><td><span class="avat" style="display:inline-flex;vertical-align:middle;margin-right:8px"><svg><use href="#por3"/></svg></span>Lê Minh Khôi</td><td>VBSF-2026-00112</td><td>Đà Nẵng</td><td>Snooker</td><td><span class="vb-badge bg-open">Đang hiệu lực</span></td></tr>
+                <tr><td><span class="avat" style="display:inline-flex;vertical-align:middle;margin-right:8px"><svg><use href="#por4"/></svg></span>Phạm Anh Tuấn</td><td>VBSF-2026-00123</td><td>Bình Dương</td><td>Pool 10 bi</td><td><span class="vb-badge bg-soon">Chờ thanh toán</span></td></tr>
+                <tr><td><span class="avat" style="display:inline-flex;vertical-align:middle;margin-right:8px"><svg><use href="#por1"/></svg></span>Đỗ Thành Nam</td><td>VBSF-2025-00410</td><td>Hải Phòng</td><td>Snooker</td><td><span class="vb-badge bg-done">Hết hạn</span></td></tr>
+              </tbody>
+            </table>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px">
+              <span style="font-size:11.5px;color:var(--hint)">Tổng 1.540 hội viên cá nhân · hiển thị 1–5</span>
+              <span style="display:flex;gap:6px"><span class="vb-pill on">1</span><span class="vb-pill">2</span><span class="vb-pill">3</span><span class="vb-pill">→</span></span>
+            </div>
+          </div>
+        </div>
+        <div data-ds-panel="to-chuc" hidden>
+          <div class="vb-sec scroll-x">
+            <table class="tbl">
+              <thead><tr><th>Tên tổ chức</th><th>Năm gia nhập</th><th>Địa chỉ</th><th>Số VĐV</th><th>Tình trạng</th></tr></thead>
+              <tbody>
+                <tr><td>CLB Sài Gòn</td><td>2019</td><td>Quận 1, TP.HCM</td><td>42</td><td><span class="vb-badge bg-open">Đang hiệu lực</span></td></tr>
+                <tr><td>CLB Thủ Đô</td><td>2020</td><td>Cầu Giấy, Hà Nội</td><td>38</td><td><span class="vb-badge bg-open">Đang hiệu lực</span></td></tr>
+                <tr><td>CLB Sông Hàn</td><td>2021</td><td>Hải Châu, Đà Nẵng</td><td>27</td><td><span class="vb-badge bg-open">Đang hiệu lực</span></td></tr>
+                <tr><td>Meow Billiards</td><td>2022</td><td>Thủ Dầu Một, Bình Dương</td><td>21</td><td><span class="vb-badge bg-soon">Chờ thanh toán</span></td></tr>
+                <tr><td>CLB Cảng</td><td>2023</td><td>Hồng Bàng, Hải Phòng</td><td>16</td><td><span class="vb-badge bg-done">Hết hạn</span></td></tr>
+              </tbody>
+            </table>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px">
+              <span style="font-size:11.5px;color:var(--hint)">Tổng 126 hội viên tổ chức · hiển thị 1–5</span>
+              <span style="display:flex;gap:6px"><span class="vb-pill on">1</span><span class="vb-pill">2</span><span class="vb-pill">→</span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= HỘI VIÊN — CHI TIẾT ================= -->
+      <section class="pg" id="pg-hoi-vien-chi-tiet">
+        <div class="vb-band">
+          <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span data-go="hoi-vien-danh-sach">Hội viên / Danh sách</span> &nbsp;/&nbsp; <span style="color:#fff">Hồ sơ hội viên</span></div>
+        </div>
+        <div class="vb-sec" style="display:flex;gap:22px;flex-wrap:wrap">
+          <div style="flex:1;min-width:240px;max-width:300px">
+            <span class="img ar43" style="border-radius:8px"><svg><use href="#por1"/></svg></span>
+            <div class="vb-card" style="padding:16px;margin-top:14px">
+              <h3 class="vb-h" style="font-size:14px">Thời hạn hội viên</h3>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px"><span class="vb-badge bg-open">Đang hiệu lực</span></div>
+              <div style="font-size:12.5px;color:var(--muted);margin-top:8px">Có hiệu lực đến <b>31/12/2026</b></div>
+              <button class="btn-gold" type="button" style="width:100%;margin-top:12px" data-go="hoi-vien-gia-han">Gia hạn thẻ</button>
+            </div>
+          </div>
+          <div style="flex:2;min-width:280px">
+            <h1 style="font-size:22px;font-weight:600;color:var(--vd)">Nguyễn Phúc Long</h1>
+            <div style="font-size:12.5px;color:var(--hint);margin-top:4px">Mã HV: <b style="color:var(--ink);user-select:all">VBSF-2026-00098</b> · CLB Sài Gòn, TP.HCM · Hội viên thi đấu</div>
+            <div class="grid g4" style="margin-top:16px">
+              <div class="stat"><b>1</b><span>Hạng Pool quốc gia</span></div>
+              <div class="stat"><b>2.485</b><span>Điểm xếp hạng</span></div>
+              <div class="stat"><b>32</b><span>Trận 24 tháng</span></div>
+              <div class="stat"><b>4</b><span>Chức vô địch</span></div>
+            </div>
+            <h2 class="vb-h" style="margin-top:22px">Thành tích gần đây</h2>
+            <div class="scroll-x" style="margin-top:10px">
+              <table class="tbl">
+                <thead><tr><th>Giải đấu</th><th>Nội dung</th><th>Thành tích</th><th style="text-align:right">Điểm</th></tr></thead>
+                <tbody>
+                  <tr><td>Giải Vô địch Quốc gia Pool 9 bi 2026</td><td>Pool 9 bi</td><td><b>Vô địch</b></td><td style="text-align:right">500</td></tr>
+                  <tr><td>Cúp Pool khu vực phía Nam 2026</td><td>Pool 9 bi</td><td>Á quân</td><td style="text-align:right">210</td></tr>
+                  <tr><td>Giải Pool 9 bi các tỉnh phía Bắc 2026</td><td>Pool 9 bi</td><td>Vô địch</td><td style="text-align:right">300</td></tr>
+                  <tr><td>Giải các CLB mạnh toàn quốc 2025</td><td>Pool 10 bi</td><td>Bán kết</td><td style="text-align:right">132</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= HỘI VIÊN — GIA HẠN ================= -->
+      <section class="pg" id="pg-hoi-vien-gia-han">
+        <div class="vb-band">
+          <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span data-go="hoi-vien">Hội viên</span> &nbsp;/&nbsp; <span style="color:#fff">Gia hạn hội viên</span></div>
+          <h1>Gia hạn hội viên</h1>
+          <div class="sub">Thanh toán hội phí năm 2027</div>
+        </div>
+        <div class="vb-sec" style="display:flex;gap:22px;flex-wrap:wrap">
+          <div class="vb-card" style="flex:1.2;min-width:270px;padding:18px">
+            <h2 class="vb-h" style="font-size:15px">Thanh toán gia hạn hội phí</h2>
+            <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-top:14px"><span>Hội viên</span><b>Nguyễn Phúc Long · VBSF-2026-00098</b></div>
+            <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-top:8px"><span>Hội phí năm 2027</span><b style="color:var(--vd)">600.000đ</b></div>
+            <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-top:8px;padding-top:10px;border-top:1px solid var(--line)"><span>Nội dung chuyển khoản</span><b style="user-select:all">GIAHAN-00098</b></div>
+            <div class="mrow" style="margin-top:14px;background:var(--surface)">
+              <div class="grow" style="font-size:12.5px">
+                <div>Ngân hàng: <b>Vietcombank</b></div>
+                <div style="margin-top:3px">Số TK: <b style="user-select:all">0011 0004 12345</b></div>
+                <div style="margin-top:3px">Chủ TK: <b>LĐ Billiards &amp; Snooker VN</b></div>
+              </div>
+            </div>
+            <span class="vb-badge bg-soon" style="margin-top:12px;display:inline-block">Chờ thanh toán</span>
+            <p style="font-size:11.5px;color:var(--hint);margin-top:10px">Hệ thống tự động xác nhận khi nhận được chuyển khoản đúng nội dung (đối soát VietQR). Thẻ gia hạn ngay sau khi đối soát xong.</p>
+            <button class="btn-gold" type="button" style="margin-top:12px">Tôi đã chuyển khoản</button>
+          </div>
+          <div style="flex:0 0 200px;text-align:center">
+            <span class="img" style="width:180px;height:180px;background:#fff;border:1px solid var(--line);border-radius:8px;display:inline-block"><svg viewBox="0 0 120 120"><use href="#ph-qr"/></svg></span>
+            <div class="cap" style="text-align:center">Quét VietQR bằng app ngân hàng</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ĐỐI TÁC ================= -->
+      <section class="pg" id="pg-doi-tac">
+        <div class="vb-band">
+          <div class="crumb"><span data-go="trang-chu">Trang chủ</span> &nbsp;/&nbsp; <span style="color:#fff">Đối tác &amp; Nhà tài trợ</span></div>
+          <h1>Đối tác &amp; Nhà tài trợ</h1>
+          <div class="sub">Đồng hành cùng sự phát triển của billiards Việt Nam</div>
+        </div>
+        <div class="vb-sec">
+          <p class="vb-p" style="max-width:68ch">Liên đoàn Billiards &amp; Snooker Việt Nam trân trọng cảm ơn các đối tác và nhà tài trợ đã đồng hành, góp phần thúc đẩy phong trào và nâng tầm các giải đấu billiards &amp; snooker trên cả nước.</p>
+          <h2 class="vb-h" style="margin-top:22px">Đối tác chiến lược</h2>
+          <div class="grid g3" style="margin-top:12px">
+            <div class="vb-card" style="padding:18px">
+              <div class="logobox" style="height:56px;background:var(--surface);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--hint);font-weight:600">LOGO</div>
+              <div style="font-size:13px;font-weight:600;margin-top:12px">Biadi.vn</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">Đối tác công nghệ &amp; hệ thống xếp hạng</div>
+            </div>
+            <div class="vb-card" style="padding:18px">
+              <div class="logobox" style="height:56px;background:var(--surface);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--hint);font-weight:600">LOGO</div>
+              <div style="font-size:13px;font-weight:600;margin-top:12px">Hệ thống CLB Meow</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">Đối tác hệ thống câu lạc bộ</div>
+            </div>
+            <div class="vb-card" style="padding:18px">
+              <div class="logobox" style="height:56px;background:var(--surface);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--hint);font-weight:600">LOGO</div>
+              <div style="font-size:13px;font-weight:600;margin-top:12px">Cue Sports Asia</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">Đối tác thiết bị thi đấu</div>
+            </div>
+          </div>
+        </div>
+        <div class="vb-sec" style="background:var(--surface)">
+          <div class="tier"><span class="tierdot" style="background:#7FD4E8"></span>Nhà tài trợ Kim cương</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+            <div class="vb-card" style="width:150px;height:60px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:150px;height:60px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+          </div>
+          <div class="tier" style="margin-top:22px"><span class="tierdot" style="background:#E9C45C"></span>Nhà tài trợ Vàng</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+            <div class="vb-card" style="width:126px;height:52px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:126px;height:52px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:126px;height:52px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+          </div>
+          <div class="tier" style="margin-top:22px"><span class="tierdot" style="background:#C9A78B"></span>Đối tác đồng hành</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+            <div class="vb-card" style="width:106px;height:46px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:106px;height:46px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:106px;height:46px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+            <div class="vb-card" style="width:106px;height:46px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--hint)">LOGO</div>
+          </div>
+          <p style="font-size:11.5px;color:var(--hint);margin-top:14px">Ô logo để trống — chờ file thương hiệu từ nhà tài trợ.</p>
+        </div>
+        <div class="vb-sec" style="background:var(--vd);display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+          <div style="flex:1;min-width:240px">
+            <div style="color:#fff;font-size:17px;font-weight:600">Trở thành đối tác của VBSF</div>
+            <div style="color:#C9D9F2;font-size:12.5px;margin-top:4px">Cùng đồng hành phát triển phong trào billiards &amp; snooker và kết nối với cộng đồng cơ thủ toàn quốc.</div>
+          </div>
+          <span class="btn-gold" data-go="lien-he">Liên hệ hợp tác</span>
+        </div>
+      </section>
+
       </main>
 
       <!-- ================= FOOTER ================= -->
@@ -1608,6 +2227,7 @@ h1,h2,h3,h4{text-wrap:balance}
             <a data-go="gioi-thieu">Giới thiệu</a>
             <a data-go="gioi-thieu">Cơ cấu tổ chức</a>
             <a data-go="thu-vien">Văn bản &amp; thể lệ</a>
+            <a data-go="doi-tac">Đối tác &amp; nhà tài trợ</a>
             <a data-go="lien-he">Liên hệ</a>
           </div>
           <div class="vb-fcol">
@@ -1636,15 +2256,27 @@ h1,h2,h3,h4{text-wrap:balance}
   'use strict';
 
   /* ---- điều hướng giữa các "trang" ---- */
-  var PAGES = ['trang-chu','gioi-thieu','tin-tuc','tin-tuc-chi-tiet','giai-dau','giai-dau-chi-tiet','ranking','thu-vien','hoi-vien','lien-he'];
+  var PAGES = ['trang-chu','gioi-thieu','tin-tuc','tin-tuc-chi-tiet','giai-dau','giai-dau-chi-tiet',
+               'giai-dau-dang-ky','giai-dau-truc-tiep','giai-dau-ket-qua','ranking','thu-vien',
+               'hoi-vien','hoi-vien-danh-sach','hoi-vien-chi-tiet','hoi-vien-gia-han','doi-tac','lien-he'];
   var URLS = {
     'trang-chu':'/', 'gioi-thieu':'/gioi-thieu', 'tin-tuc':'/tin-tuc',
     'tin-tuc-chi-tiet':'/tin-tuc/he-thong-thi-dau-quoc-gia-2027',
     'giai-dau':'/giai-dau', 'giai-dau-chi-tiet':'/giai-dau/vo-dich-quoc-gia-pool-9-bi-2026',
-    'ranking':'/ranking', 'thu-vien':'/thu-vien', 'hoi-vien':'/hoi-vien', 'lien-he':'/lien-he'
+    'giai-dau-dang-ky':'/giai-dau/snooker-toan-quoc-2026/dang-ky',
+    'giai-dau-truc-tiep':'/giai-dau/cac-clb-manh-toan-quoc-2026/truc-tiep',
+    'giai-dau-ket-qua':'/giai-dau/vo-dich-quoc-gia-pool-9-bi-2026/ket-qua',
+    'ranking':'/ranking', 'thu-vien':'/thu-vien', 'hoi-vien':'/hoi-vien',
+    'hoi-vien-danh-sach':'/hoi-vien/danh-sach', 'hoi-vien-chi-tiet':'/hoi-vien/vbsf-2026-00098',
+    'hoi-vien-gia-han':'/hoi-vien/gia-han', 'doi-tac':'/doi-tac', 'lien-he':'/lien-he'
   };
-  /* trang chi tiết không có mục riêng trên thanh nav — sáng mục cha */
-  var NAV_OF = {'tin-tuc-chi-tiet':'tin-tuc','giai-dau-chi-tiet':'giai-dau'};
+  /* trang con không có mục riêng trên thanh nav — sáng mục cha */
+  var NAV_OF = {
+    'tin-tuc-chi-tiet':'tin-tuc',
+    'giai-dau-chi-tiet':'giai-dau', 'giai-dau-dang-ky':'giai-dau',
+    'giai-dau-truc-tiep':'giai-dau', 'giai-dau-ket-qua':'giai-dau',
+    'hoi-vien-danh-sach':'hoi-vien', 'hoi-vien-chi-tiet':'hoi-vien', 'hoi-vien-gia-han':'hoi-vien'
+  };
 
   var nav = document.getElementById('mainnav');
   var navtgl = document.getElementById('navtgl');
@@ -1693,7 +2325,7 @@ h1,h2,h3,h4{text-wrap:balance}
       return;
     }
 
-    var pill = e.target.closest('[data-filter] .vb-pill');
+    var pill = e.target.closest('[data-filter="news"] .vb-pill, [data-filter="tour"] .vb-pill');
     if (pill) {
       var box = pill.closest('[data-filter]');
       box.querySelectorAll('.vb-pill').forEach(function(p){ p.classList.toggle('on', p === pill); });
@@ -1704,16 +2336,57 @@ h1,h2,h3,h4{text-wrap:balance}
 
     var srctab = e.target.closest('.vb-srctab');
     if (srctab) {
+      /* mỗi hàng tab khai báo tiền tố riêng: data-src-tab / data-hv-tab / data-ds-tab,
+         panel tương ứng là data-<tiền tố>-panel trong cùng section. */
+      var kinds = ['src','hv','ds'];
+      var kind = null, which = null;
+      for (var k = 0; k < kinds.length; k++) {
+        var v = srctab.getAttribute('data-' + kinds[k] + '-tab');
+        if (v) { kind = kinds[k]; which = v; break; }
+      }
+      if (!which) return;   /* nút trong hàng tab nhưng điều hướng bằng data-go */
+
       var list = srctab.closest('.vb-srctabs');
-      var which = srctab.getAttribute('data-src-tab');
       list.querySelectorAll('.vb-srctab').forEach(function(b){
         var on = b === srctab;
         b.classList.toggle('on', on);
         b.setAttribute('aria-selected', on ? 'true' : 'false');
       });
-      document.querySelectorAll('[data-src-panel]').forEach(function(panel){
-        panel.hidden = panel.getAttribute('data-src-panel') !== which;
+      var section = srctab.closest('.pg') || document;
+      section.querySelectorAll('[data-' + kind + '-panel]').forEach(function(panel){
+        panel.hidden = panel.getAttribute('data-' + kind + '-panel') !== which;
       });
+      return;
+    }
+
+    /* Ranking: nút nội dung chọn bảng tương ứng */
+    var rkpill = e.target.closest('[data-rank-key]');
+    if (rkpill) {
+      var key = rkpill.getAttribute('data-rank-key');
+      document.querySelectorAll('[data-rank-key]').forEach(function(x){ x.classList.toggle('on', x === rkpill); });
+      document.querySelectorAll('[data-rank-pane]').forEach(function(pane){
+        pane.hidden = pane.getAttribute('data-rank-pane') !== key;
+      });
+      return;
+    }
+
+    /* Hội viên: bấm vào một bước để xem màn hình của bước đó */
+    var step = e.target.closest('.step');
+    if (step) {
+      var n = step.getAttribute('data-step');
+      document.querySelectorAll('.step').forEach(function(x){ x.classList.toggle('on', x === step); });
+      document.querySelectorAll('[data-step-pane]').forEach(function(pane){
+        pane.hidden = pane.getAttribute('data-step-pane') !== n;
+      });
+      return;
+    }
+
+    /* Thư viện: lọc theo loại tài liệu */
+    var libpill = e.target.closest('[data-filter="lib"] .vb-pill');
+    if (libpill) {
+      libpill.closest('[data-filter="lib"]').querySelectorAll('.vb-pill')
+        .forEach(function(x){ x.classList.toggle('on', x === libpill); });
+      applyLib();
       return;
     }
 
@@ -1752,6 +2425,33 @@ h1,h2,h3,h4{text-wrap:balance}
     if (empty) empty.hidden = shown > 0;
   }
   if (q) q.addEventListener('input', applyNews);
+
+  /* ---- lọc thư viện: loại tài liệu + ô tìm ---- */
+  var libq = document.getElementById('lib-q');
+  var libEmpty = document.getElementById('lib-empty');
+
+  function applyLib(){
+    var active = document.querySelector('[data-filter="lib"] .vb-pill.on');
+    var kind = active ? active.getAttribute('data-kind') : 'all';
+    var term = (libq && libq.value || '').trim().toLowerCase();
+    var shown = 0;
+
+    document.querySelectorAll('#pg-thu-vien .lib-item').forEach(function(item){
+      var okKind = kind === 'all' ||
+                   (kind === 'media' ? item.getAttribute('data-kind') === 'media'
+                                     : item.getAttribute('data-kind') === kind);
+      var okTerm = !term || item.textContent.toLowerCase().indexOf(term) !== -1;
+      var ok = okKind && okTerm;
+      item.hidden = !ok;
+      if (ok) shown++;
+    });
+    /* khối nào không còn mục nào thì ẩn cả tiêu đề khối */
+    document.querySelectorAll('#pg-thu-vien .lib-block').forEach(function(block){
+      block.hidden = block.querySelectorAll('.lib-item:not([hidden])').length === 0;
+    });
+    if (libEmpty) libEmpty.hidden = shown > 0;
+  }
+  if (libq) libq.addEventListener('input', applyLib);
 
   /* ---- lọc giải đấu theo trạng thái ---- */
   function applyTour(box, state){
