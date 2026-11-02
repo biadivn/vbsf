@@ -153,6 +153,9 @@ h1,h2,h3,h4{text-wrap:balance}
 .stat span{font-size:11.5px;color:var(--muted)}
 
 /* ---- tabs ---- */
+.vb-srctabs{display:flex;gap:4px;padding:0 26px;border-bottom:1px solid var(--line);overflow-x:auto}
+.vb-srctab{font:inherit;font-size:13px;font-weight:600;padding:12px 16px;color:var(--muted);background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
+.vb-srctab.on{color:var(--vd);border-bottom-color:var(--vd)}
 .tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);padding:0 26px;flex-wrap:wrap}
 .tab{font-size:13.5px;color:var(--hint);padding:13px 0;border-bottom:2px solid transparent;cursor:pointer}
 .tab.on{color:var(--vd);font-weight:600;border-bottom-color:var(--vd)}
@@ -996,6 +999,11 @@ h1,h2,h3,h4{text-wrap:balance}
           <h1>Giải đấu</h1>
           <div class="sub">Hệ thống thi đấu quốc gia · lịch &amp; kết quả</div>
         </div>
+        <div class="vb-srctabs" role="tablist" aria-label="Nguồn giải đấu">
+          <button type="button" class="vb-srctab on" role="tab" aria-selected="true" data-src-tab="pro">VBSF - Giải chuyên nghiệp</button>
+          <button type="button" class="vb-srctab" role="tab" aria-selected="false" data-src-tab="amateur">Biadi.vn - Giải nghiệp dư</button>
+        </div>
+        <div data-src-panel="pro">
         <div class="vb-sec" style="border-bottom:1px solid #EEF1EE;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-block:14px">
           <div style="display:flex;gap:8px;flex-wrap:wrap" data-filter="tour">
             <span class="vb-pill on" data-st="all">Tất cả</span>
@@ -1094,6 +1102,13 @@ h1,h2,h3,h4{text-wrap:balance}
                 <span class="vb-link" style="display:inline-block;margin-top:8px">Xem kết quả →</span>
               </div>
             </div>
+          </div>
+        </div>
+        </div><!-- /panel pro -->
+        <div data-src-panel="amateur" hidden>
+          <div style="padding:56px 26px;text-align:center">
+            <div style="font-size:15px;font-weight:600">Giải nghiệp dư từ Biadi.vn</div>
+            <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Danh sách giải nghiệp dư từ Biadi.vn sẽ sớm được cập nhật tại đây.</div>
           </div>
         </div>
       </section>
@@ -1597,6 +1612,21 @@ h1,h2,h3,h4{text-wrap:balance}
       box.querySelectorAll('.vb-pill').forEach(function(p){ p.classList.toggle('on', p === pill); });
       if (box.getAttribute('data-filter') === 'news') applyNews();
       else applyTour(pill.getAttribute('data-st'));
+      return;
+    }
+
+    var srctab = e.target.closest('.vb-srctab');
+    if (srctab) {
+      var list = srctab.closest('.vb-srctabs');
+      var which = srctab.getAttribute('data-src-tab');
+      list.querySelectorAll('.vb-srctab').forEach(function(b){
+        var on = b === srctab;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('[data-src-panel]').forEach(function(panel){
+        panel.hidden = panel.getAttribute('data-src-panel') !== which;
+      });
       return;
     }
 
