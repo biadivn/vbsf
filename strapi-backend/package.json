@@ -15,6 +15,7 @@
     "seed": "node scripts/seed.js",
     "clear-demo": "node scripts/clear-demo-content.js",
     "migrate:website": "node scripts/migrate-website-content.js",
+    "import:facebook": "node scripts/import-facebook-news.js",
     "smoke-test": "node scripts/smoke-test.js",
     "upgrade": "npx @strapi/upgrade latest",
     "upgrade:dry": "npx @strapi/upgrade latest --dry",
