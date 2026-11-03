@@ -137,6 +137,8 @@ function renderSectionDetailPanel(pageKey, key){
     html += renderPickerModeSection('news', def, buf);
   } else if(def.partnerPicker){
     html += renderPartnerPickerInline(buf);
+  } else if(def.heroImage){
+    html += renderHeroImagesInline(buf);
   } else if(def.fields){
     html += `<div class="form-grid">` + def.fields.map(f=>
       `<div class="fld ${f.span2?'span2':''}"><label>${f.label}</label>${f.type==='textarea' ? renderRichTextField(f, buf.content[f.key]) : renderField(f, buf.content[f.key])}</div>`
@@ -295,6 +297,29 @@ function renderItemsEditorInline(itemFields, items){
     ${sectionLang==='en' ? '' : `<button class="btn btn-ghost" id="secCiAdd" style="margin-top:4px"><i class="ti ti-plus"></i> Thêm mục</button>`}`;
 }
 
+function heroPreviewUrl(url){
+  return !url || /^(https?:|data:)/.test(url) ? url : STRAPI_URL + url;
+}
+function renderHeroImagesInline(buf){
+  const content = buf.content || {};
+  const slots = [
+    {key:'desktop', label:'Ảnh desktop', required: sectionLang==='vi',
+      hint: sectionLang==='vi' ? 'Bắt buộc.' : 'Để trống thì dùng ảnh desktop tiếng Việt.'},
+    {key:'mobile', label:'Ảnh mobile',
+      hint: sectionLang==='vi' ? 'Để trống thì dùng ảnh desktop.' : 'Để trống thì dùng ảnh desktop tiếng Anh, chưa có thì dùng ảnh tiếng Việt.'}
+  ];
+  return `<div class="form-grid">` + slots.map(sl=>{
+    const url = content[sl.key];
+    return `<div class="fld">
+      <label>${sl.label}${sl.required ? ' <span class="req">*</span>' : ''}</label>
+      ${url ? `<img src="${escapeAttr(heroPreviewUrl(url))}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--line);display:block;margin-bottom:10px">` : ''}
+      <input type="file" accept="image/*" data-hero-upload="${sl.key}">
+      <div class="hint" style="margin-top:8px">${sl.hint}</div>
+      ${url ? `<button class="btn btn-danger-outline" data-hero-remove="${sl.key}" style="margin-top:10px"><i class="ti ti-trash"></i> Xóa ảnh</button>` : ''}
+    </div>`;
+  }).join('') + `</div>`;
+}
+
 function renderBackgroundImageInline(buf){
   return `
     ${buf.backgroundImage ? `<div style="margin-bottom:12px"><img src="${buf.backgroundImage}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--line);display:block"></div>` : ''}
@@ -434,6 +459,45 @@ function attachSectionDetailEvents(pageKey, key){
     });
   });
 
+  /* Ảnh hero tải thẳng lên thư viện media của Strapi rồi chỉ lưu đường dẫn:
+     ảnh banner nặng, nhét data URI vào page-content thì mọi lượt xem site
+     đều phải tải cả mấy ảnh đó trong một cục JSON. */
+  document.querySelectorAll('[data-hero-upload]').forEach(el=>{
+    el.addEventListener('change', (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const slot = el.getAttribute('data-hero-upload');
+      const lang = sectionLang;
+      el.disabled = true;
+      const reader = new FileReader();
+      reader.onload = async (ev)=>{
+        try{
+          const url = await uploadDataUriUrl(ev.target.result, `hero-${slot}-${lang}`);
+          /* Admin có thể đã đổi tab ngôn ngữ trong lúc chờ tải lên. */
+          if(sectionEditBuffer!==buf) return;
+          readSectionInputs(def, buf);
+          if(lang===sectionLang){ buf.content = Object.assign({}, buf.content, {[slot]: url}); }
+          else {
+            const shape = buf.__shapes[lang];
+            shape.content = Object.assign({}, shape.content, {[slot]: url});
+          }
+          renderContent();
+        }catch(err){
+          el.disabled = false;
+          showToast('Không tải được ảnh lên máy chủ', true);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+  document.querySelectorAll('[data-hero-remove]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      readSectionInputs(def, buf);
+      buf.content = Object.assign({}, buf.content, {[el.getAttribute('data-hero-remove')]: ''});
+      renderContent();
+    });
+  });
+
   const bgInput = document.getElementById('secBgFileInput');
   if(bgInput) bgInput.addEventListener('change', (e)=>{
     const file = e.target.files[0];
@@ -461,6 +525,14 @@ async function saveSectionDetail(pageKey, key){
      đang mở tab nào. */
   stashSectionShape();
   applySectionShape('vi');
+
+  if(def.heroImage && !(buf.content && buf.content.desktop)){
+    showToast('Vui lòng tải lên ảnh desktop tiếng Việt', true);
+    /* Buffer đã về bản tiếng Việt ở trên — mở luôn tab đó cho admin thấy ô thiếu. */
+    sectionLang = 'vi';
+    renderContent();
+    return;
+  }
 
   const entry = DB.pageSections[pageKey].find(r=>r.key===key);
   if(def.title!==undefined) entry.title = buf.title;

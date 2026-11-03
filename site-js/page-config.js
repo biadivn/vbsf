@@ -77,6 +77,36 @@ function contentValue(entry, key, derived) {
   return derived == null ? '' : String(derived);
 }
 
+/**
+ * Ảnh của khối "Hero image" (section tự thêm trong CMS) cho một ngôn ngữ.
+ * CMS lưu ảnh tiếng Việt ở entry.content, tiếng Anh ở entry.i18n.en.content,
+ * mỗi bên hai ô { desktop, mobile }. Chỉ ảnh desktop tiếng Việt là bắt buộc.
+ *
+ *   Thiếu ảnh tiếng Anh  → dùng ảnh tiếng Việt.
+ *   Thiếu ảnh mobile     → dùng ảnh desktop.
+ *
+ * Mobile tiếng Anh ưu tiên desktop tiếng Anh hơn mobile tiếng Việt: chữ trên
+ * banner sai ngôn ngữ dễ thấy hơn khung ảnh bị thu nhỏ.
+ *
+ * Gọi được cả trên entry gốc lẫn entry đã qua overlaySection (i18n.js): ô tiếng
+ * Anh nào có giá trị thì đã đè lên content, ô trống thì content giữ bản Việt.
+ * Trả null khi không có ảnh nào để hiện.
+ */
+function heroImages(entry, lang) {
+  var vi = (entry && entry.content) || {};
+  var en = (lang === 'en' && entry && entry.i18n && entry.i18n.en && entry.i18n.en.content) || {};
+  var pick = function () {
+    for (var i = 0; i < arguments.length; i++) {
+      var v = arguments[i];
+      if (v != null && String(v).trim() !== '') return String(v);
+    }
+    return '';
+  };
+  var desktop = pick(en.desktop, vi.desktop);
+  if (!desktop) return null;
+  return { desktop: desktop, mobile: pick(en.mobile, en.desktop, vi.mobile, desktop) };
+}
+
 if (typeof module === 'object' && module.exports) {
-  module.exports = { sectionEntry, sectionHidden, pickItems, pickOne, contentValue };
+  module.exports = { sectionEntry, sectionHidden, pickItems, pickOne, contentValue, heroImages };
 }

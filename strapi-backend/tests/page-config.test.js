@@ -13,7 +13,7 @@ const path = require('node:path');
 const available = fs.existsSync(path.join(__dirname, '..', '..', 'site-js', 'page-config.js'));
 const skip = available ? false : 'không có thư mục site-js trong context này';
 const {
-  sectionEntry, sectionHidden, pickItems, pickOne, contentValue,
+  sectionEntry, sectionHidden, pickItems, pickOne, contentValue, heroImages,
 } = available ? require('../../site-js/page-config') : {};
 
 /** page-content đúng hình dạng Strapi trả về. */
@@ -146,5 +146,54 @@ describe('contentValue', { skip }, () => {
     assert.strictEqual(contentValue(null, 'title'), '');
     assert.strictEqual(contentValue({}, 'title'), '');
     assert.strictEqual(contentValue({ content: {} }, 'title', null), '');
+  });
+});
+
+describe('heroImages', { skip }, () => {
+  const entry = (vi, en) => ({ key: 'hero', content: vi, ...(en ? { i18n: { en: { content: en } } } : {}) });
+
+  test('chưa có ảnh desktop tiếng Việt thì không hiện gì', () => {
+    assert.strictEqual(heroImages(entry({}), 'vi'), null);
+    assert.strictEqual(heroImages(null, 'vi'), null);
+  });
+  test('thiếu ảnh mobile thì dùng ảnh desktop', () => {
+    assert.deepStrictEqual(heroImages(entry({ desktop: 'd.jpg' }), 'vi'), { desktop: 'd.jpg', mobile: 'd.jpg' });
+  });
+  test('đủ ảnh tiếng Việt', () => {
+    assert.deepStrictEqual(heroImages(entry({ desktop: 'd.jpg', mobile: 'm.jpg' }), 'vi'), { desktop: 'd.jpg', mobile: 'm.jpg' });
+  });
+  test('trang tiếng Việt bỏ qua ảnh tiếng Anh', () => {
+    const e = entry({ desktop: 'd.jpg' }, { desktop: 'en-d.jpg', mobile: 'en-m.jpg' });
+    assert.deepStrictEqual(heroImages(e, 'vi'), { desktop: 'd.jpg', mobile: 'd.jpg' });
+  });
+  test('thiếu ảnh tiếng Anh thì dùng ảnh tiếng Việt', () => {
+    assert.deepStrictEqual(heroImages(entry({ desktop: 'd.jpg', mobile: 'm.jpg' }), 'en'), { desktop: 'd.jpg', mobile: 'm.jpg' });
+    assert.deepStrictEqual(heroImages(entry({ desktop: 'd.jpg', mobile: 'm.jpg' }, { desktop: '' }), 'en'), { desktop: 'd.jpg', mobile: 'm.jpg' });
+  });
+  test('chỉ có mobile tiếng Anh: desktop vẫn lấy bản Việt', () => {
+    const e = entry({ desktop: 'd.jpg' }, { mobile: 'en-m.jpg' });
+    assert.deepStrictEqual(heroImages(e, 'en'), { desktop: 'd.jpg', mobile: 'en-m.jpg' });
+  });
+  test('có desktop tiếng Anh mà thiếu mobile tiếng Anh: mobile dùng desktop tiếng Anh', () => {
+    const e = entry({ desktop: 'd.jpg', mobile: 'm.jpg' }, { desktop: 'en-d.jpg' });
+    assert.deepStrictEqual(heroImages(e, 'en'), { desktop: 'en-d.jpg', mobile: 'en-d.jpg' });
+  });
+});
+
+describe('heroImages sau overlaySection', { skip }, () => {
+  /* Site phủ bản dịch lên dữ liệu ngay lúc tải (overlayData), nên lúc dựng khối
+     hero thì entry.content đã bị ô tiếng Anh đè. Kết quả phải giống entry gốc. */
+  const { overlaySection } = available ? require('../../site-js/i18n') : {};
+  test('cho cùng kết quả với entry gốc', () => {
+    const cases = [
+      [{ desktop: 'd', mobile: 'm' }, { desktop: 'en-d' }],
+      [{ desktop: 'd', mobile: 'm' }, { mobile: 'en-m' }],
+      [{ desktop: 'd' }, { desktop: 'en-d', mobile: 'en-m' }],
+      [{ desktop: 'd', mobile: 'm' }, null],
+    ];
+    cases.forEach(([vi, en]) => {
+      const e = { key: 'hero', content: vi, ...(en ? { i18n: { en: { content: en } } } : {}) };
+      assert.deepStrictEqual(heroImages(overlaySection(e, 'en'), 'en'), heroImages(e, 'en'));
+    });
   });
 });

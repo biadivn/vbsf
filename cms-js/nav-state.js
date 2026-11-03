@@ -55,7 +55,7 @@ function renderSidebarLogo(){
   if(!badge) return;
   const logo = (DB.settings && DB.settings.logo) || '';
   badge.innerHTML = logo
-    ? `<img src="${escapeAttr(logo)}" alt="Logo" style="width:78%;height:78%;object-fit:contain;display:block">`
+    ? `<img src="${escapeAttr(logo)}" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">`
     : 'VBSF';
   let icon = document.querySelector('link[rel="icon"]');
   if(logo && !icon){
