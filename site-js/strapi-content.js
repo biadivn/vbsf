@@ -2268,12 +2268,12 @@
   function hydrateBrand(data) {
     var url = (data.settings && data.settings.logo) || '';
     if (!url) return;
-    /* Đặt ảnh BÊN TRONG vòng tròn, giữ nguyên viền tròn như trước: ô này đã là
-       flex căn giữa nên chỉ cần chèn <img> vào. Dùng ảnh nền cho cả ô thì mất
-       viền và logo bị kéo sát mép. */
+    /* Đặt ảnh BÊN TRONG vòng tròn, giữ nguyên viền tròn như trước. Logo thường
+       là ảnh vuông nên cho phủ kín (cover) và bo tròn theo khung, không để
+       contain vì sẽ hở 4 góc trong vòng tròn. */
     document.querySelectorAll('[data-logo-slot]').forEach(function (el) {
       el.innerHTML = '<img src="' + esc(url) + '" alt="Logo VBSF" ' +
-        'style="width:78%;height:78%;object-fit:contain;display:block">';
+        'style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">';
     });
     /* Tab của trình duyệt: không có <link rel="icon"> sẵn trong HTML nên tự
        thêm, để đổi logo trong CMS là đổi luôn icon trên tab. */
