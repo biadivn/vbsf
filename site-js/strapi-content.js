@@ -2318,39 +2318,133 @@
     el.style.backgroundPosition = 'center';
   }
 
-  /* Khối "Hero image" admin tự thêm trong CMS: không có sẵn trong pages/*.html
-     nên dựng ở đây, đặt cạnh khối đứng trước nó trong danh sách CMS (cùng cha,
-     để reorderSections còn hoán vị được). Thiếu ảnh mobile/tiếng Anh thì
-     heroImages() (page-config.js) tự lấy ảnh thay thế. */
-  function buildCustomHeroes(pageId, page, list, data) {
+  /* ---- Section admin tự thêm trong CMS ("Thêm section mới") ----
+     Không có sẵn trong pages/*.html nên dựng ở đây từ định nghĩa CMS lưu trong
+     page-content.customSections. Bản dịch đã được overlayData phủ lên từ lúc
+     tải, nên đọc entry như bình thường. Định nghĩa cũ (trước khi CMS ghi
+     customType) thì suy loại từ cờ; giải đấu/người chơi cũ không phân biệt
+     được nên bỏ qua. */
+  function customType(def) {
+    if (def.customType) return def.customType;
+    if (def.heroImage) return 'hero';
+    if (def.newsPicker) return 'news';
+    if (def.fields && def.fields.some(function (f) { return f.key === 'body'; })) return 'text';
+    return '';
+  }
+
+  function customHead(title, linkText, go) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+      '<h3 class="vb-st" data-title>' + esc(title || '') + '</h3>' +
+      (go ? '<span class="vb-link" data-go="' + go + '">' + linkText + '</span>' : '') + '</div>';
+  }
+
+  /** Hội viên có điểm cao nhất (lấy bộ môn điểm cao nhất của mỗi người). */
+  function topMembers(members, n) {
+    var best = function (m) {
+      return (m.disciplines || []).reduce(function (mx, d) { return Math.max(mx, d.points || 0); }, 0);
+    };
+    return members.slice().sort(function (a, b) { return best(b) - best(a); }).slice(0, n);
+  }
+
+  var CUSTOM_RENDER = {
+    hero: function (el, entry, def) {
+      var img = heroImages(entry, currentLang());
+      if (!img) return false;
+      el.innerHTML =
+        '<picture><source media="(max-width:760px)" srcset="' + esc(mediaUrl(img.mobile)) + '">' +
+        '<img src="' + esc(mediaUrl(img.desktop)) + '" alt="' + esc(def.label || '') +
+        '" style="display:block;width:100%;height:auto"></picture>';
+    },
+    text: function (el, entry) {
+      var body = contentValue(entry, 'body');
+      if (!body) return false;
+      el.className = 'vb-sec';
+      // HTML do admin soạn trong ô rich text của CMS — như [data-fill-html].
+      el.innerHTML = '<div style="font-size:13.5px;line-height:1.65;color:#1B2A24">' + body + '</div>';
+    },
+    news: function (el, entry, def, data) {
+      el.className = 'vb-sec';
+      el.innerHTML = customHead(entry.title || def.title, L('Xem tất cả →', 'View all →'), 'tin-tuc') +
+        '<div data-items style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px"></div>';
+      fillList(items(el), pickItems(entry, data.news, 'newsIds', 3).map(newsCardHome).join(''), L('Chưa có tin tức.', 'No news yet.'));
+    },
+    tournaments: function (el, entry, def, data) {
+      // Như "Lịch giải đấu" trang chủ: đang diễn ra trước, rồi ngày gần nhất.
+      var list = data.tournaments
+        .filter(function (t) { return t.status !== 'completed'; })
+        .sort(function (a, b) {
+          if (a.status === 'ongoing' && b.status !== 'ongoing') return -1;
+          if (b.status === 'ongoing' && a.status !== 'ongoing') return 1;
+          return byDateAsc(a, b);
+        })
+        .slice(0, 5);
+      el.className = 'vb-sec';
+      el.innerHTML = customHead(entry.title || def.title, L('Tất cả giải đấu →', 'All tournaments →'), 'giai-dau') +
+        '<div data-items style="display:flex;flex-direction:column;gap:10px"></div>';
+      fillList(items(el), list.map(tournamentRowHome).join(''), L('Chưa có giải đấu nào sắp diễn ra.', 'No upcoming tournaments.'));
+    },
+    players: function (el, entry, def, data) {
+      el.className = 'vb-sec';
+      el.innerHTML = customHead(entry.title || def.title, L('Xem bảng xếp hạng →', 'View rankings →'), 'ranking') +
+        '<div data-items style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px"></div>';
+      fillList(items(el), topMembers(data.members, 6).map(function (m) {
+        return '<div class="vb-card" style="padding:12px;text-align:center">' +
+          avatarCircle(m.avatar, '52px', '', '18px', '0 auto 8px') +
+          '<div style="font-size:12.5px;font-weight:500">' + esc(m.name) + '</div>' +
+          '<div style="font-size:11px;color:#8A968F;margin-top:2px">' + esc(m.club || m.province || '') + '</div></div>';
+      }).join(''), L('Chưa có hội viên.', 'No members yet.'));
+    },
+  };
+
+  /** Phần tử con trực tiếp của trang chứa `el` — để khối tự thêm nằm ngoài các
+      hàng flex (vd. hàng banner + tin nổi bật ở trang chủ) thay vì chen vào. */
+  function topLevel(page, el) {
+    while (el && el.parentNode !== page) el = el.parentNode;
+    return el;
+  }
+
+  function buildCustomSections(pageId, page, list, data) {
     var customs = data.pageContent.data.customSections;
     var defs = (customs && customs[pageId]) || [];
     list.forEach(function (entry, i) {
       if (!entry || !entry.key || section(page, entry.key)) return;
       var def = defs.filter(function (d) { return d && d.key === entry.key; })[0];
-      if (!def || !def.heroImage) return;
-      var img = heroImages(entry, currentLang());
-      if (!img) return;
+      var render = def && CUSTOM_RENDER[customType(def)];
+      if (!render) return;
       var el = document.createElement('div');
       el.setAttribute('data-section', entry.key);
-      el.innerHTML =
-        '<picture><source media="(max-width:760px)" srcset="' + esc(mediaUrl(img.mobile)) + '">' +
-        '<img src="' + esc(mediaUrl(img.desktop)) + '" alt="' + esc(def.label || '') +
-        '" style="display:block;width:100%;height:auto"></picture>';
+      if (render(el, entry, def, data) === false) return;
+      // Đặt sau khối đứng trước nó trong danh sách CMS; reorderSections chỉnh lại sau.
       var prev = null;
-      for (var j = i - 1; j >= 0 && !prev; j--) prev = list[j] && section(page, list[j].key);
-      if (prev) { prev.parentNode.insertBefore(el, prev.nextSibling); return; }
-      var next = null;
-      for (var k = i + 1; k < list.length && !next; k++) next = list[k] && section(page, list[k].key);
-      if (next) next.parentNode.insertBefore(el, next);
-      else page.appendChild(el);
+      for (var j = i - 1; j >= 0 && !prev; j--) prev = list[j] && topLevel(page, section(page, list[j].key));
+      if (prev) page.insertBefore(el, prev.nextSibling);
+      else page.insertBefore(el, page.firstChild);
+    });
+  }
+
+  /* Admin xoá khối có sẵn khỏi trang trong CMS: khối vẫn nằm trong HTML tĩnh
+     nên phải ẩn. Chỉ ẩn khoá từng có trong danh sách (pageSectionKeysEverAdded)
+     mà nay không còn — khối CMS chưa từng biết tới thì giữ nguyên. Thêm lại
+     trong CMS là khoá quay về danh sách và khối hiện lại. */
+  function hideRemovedSections(pageId, page, list, data) {
+    var ever = data.pageContent.data.pageSectionKeysEverAdded;
+    var keys = (ever && ever[pageId]) || [];
+    var present = {};
+    list.forEach(function (e) { if (e && e.key) present[e.key] = true; });
+    keys.forEach(function (key) {
+      if (present[key]) return;
+      var el = section(page, key);
+      if (el) el.style.display = 'none';
     });
   }
 
   function applyPageContent(pageId, page, data) {
     var all = data.pageContent && data.pageContent.data && data.pageContent.data.pageSections;
     var list = (all && all[pageId]) || [];
-    buildCustomHeroes(pageId, page, list, data);
+    if (all) {
+      hideRemovedSections(pageId, page, list, data);
+      buildCustomSections(pageId, page, list, data);
+    }
     list.forEach(function (entry) {
       if (!entry || !entry.key) return;
       var el = section(page, entry.key);
