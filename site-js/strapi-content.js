@@ -2318,9 +2318,39 @@
     el.style.backgroundPosition = 'center';
   }
 
+  /* Khối "Hero image" admin tự thêm trong CMS: không có sẵn trong pages/*.html
+     nên dựng ở đây, đặt cạnh khối đứng trước nó trong danh sách CMS (cùng cha,
+     để reorderSections còn hoán vị được). Thiếu ảnh mobile/tiếng Anh thì
+     heroImages() (page-config.js) tự lấy ảnh thay thế. */
+  function buildCustomHeroes(pageId, page, list, data) {
+    var customs = data.pageContent.data.customSections;
+    var defs = (customs && customs[pageId]) || [];
+    list.forEach(function (entry, i) {
+      if (!entry || !entry.key || section(page, entry.key)) return;
+      var def = defs.filter(function (d) { return d && d.key === entry.key; })[0];
+      if (!def || !def.heroImage) return;
+      var img = heroImages(entry, currentLang());
+      if (!img) return;
+      var el = document.createElement('div');
+      el.setAttribute('data-section', entry.key);
+      el.innerHTML =
+        '<picture><source media="(max-width:760px)" srcset="' + esc(mediaUrl(img.mobile)) + '">' +
+        '<img src="' + esc(mediaUrl(img.desktop)) + '" alt="' + esc(def.label || '') +
+        '" style="display:block;width:100%;height:auto"></picture>';
+      var prev = null;
+      for (var j = i - 1; j >= 0 && !prev; j--) prev = list[j] && section(page, list[j].key);
+      if (prev) { prev.parentNode.insertBefore(el, prev.nextSibling); return; }
+      var next = null;
+      for (var k = i + 1; k < list.length && !next; k++) next = list[k] && section(page, list[k].key);
+      if (next) next.parentNode.insertBefore(el, next);
+      else page.appendChild(el);
+    });
+  }
+
   function applyPageContent(pageId, page, data) {
     var all = data.pageContent && data.pageContent.data && data.pageContent.data.pageSections;
     var list = (all && all[pageId]) || [];
+    buildCustomHeroes(pageId, page, list, data);
     list.forEach(function (entry) {
       if (!entry || !entry.key) return;
       var el = section(page, entry.key);

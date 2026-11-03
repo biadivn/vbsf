@@ -10,7 +10,14 @@ const CUSTOM_SECTION_TYPES = [
   {type:'news', label:'Tin tức', icon:'ti-news', desc:'Chọn & sắp xếp tin tức, hoặc tự động lấy tin mới nhất',
     build:(key,label)=>({key, label, custom:true, newsPicker:true, title:label})},
   {type:'text', label:'Văn bản', icon:'ti-align-left', desc:'Khối nội dung tự do, soạn thảo dạng rich text',
-    build:(key,label)=>({key, label, custom:true, fields:[{key:'body', label:'Nội dung', type:'textarea', span2:true}]})}
+    build:(key,label)=>({key, label, custom:true, fields:[{key:'body', label:'Nội dung', type:'textarea', span2:true}]})},
+  /* Ảnh lưu theo ngôn ngữ như các ô khác (content / i18n.en.content); site chọn
+     ảnh thay thế khi thiếu — xem heroImages() trong site-js/page-config.js. */
+  {type:'hero', label:'Hero image', icon:'ti-photo', desc:'Ảnh banner lớn, ảnh riêng cho desktop / mobile và tiếng Việt / tiếng Anh',
+    build:(key,label)=>({key, label, custom:true, heroImage:true, noBackground:true, fields:[
+      {key:'desktop', label:'Ảnh desktop', type:'image'},
+      {key:'mobile', label:'Ảnh mobile', type:'image'}
+    ]})}
 ];
 function openAddSectionModal(pageKey){
   editingCollection = null; editingId = null; pageModal = null;
