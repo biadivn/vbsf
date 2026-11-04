@@ -83,6 +83,14 @@ footer.docftr{text-align:center;color:var(--muted);font-size:12px;padding:30px 0
 .vb-srctabs{display:flex;gap:4px;padding:0 26px;border-bottom:1px solid #E3E8E4;overflow-x:auto}
 .vb-srctab{font:inherit;font-size:13px;font-weight:600;padding:12px 16px;color:#5C6B63;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap}
 .vb-srctab.on{color:#21428E;border-bottom-color:#21428E}
+.rk-source-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:22px 26px 8px}
+.rk-source-tab{display:flex;align-items:center;gap:12px;width:100%;min-height:76px;padding:12px 14px;text-align:left;font:inherit;color:#1B2A24;background:#fff;border:1px solid #E3E8E4;border-radius:12px;cursor:pointer}
+.rk-source-tab.on{border-color:#21428E;box-shadow:0 0 0 2px rgba(33,66,142,.14)}
+.rk-source-logo{display:flex;align-items:center;justify-content:center;flex:0 0 50px;height:50px;border-radius:12px;background:#E9EDF7;color:#21428E;font-size:14px;font-weight:700}
+.rk-source-title{font-size:14px;font-weight:600;line-height:1.4}
+.rk-source-subtitle{font-size:12px;color:#727B8B;line-height:1.4}
+.rk-source-coming-soon{padding:56px 26px;text-align:center}
+@media(max-width:640px){.rk-source-tabs{grid-template-columns:1fr;padding:16px 16px 8px}.rk-source-tab{min-height:68px}.rk-source-coming-soon{padding:44px 20px}}
 .vb-sel{font-size:12px;color:#3C4A43;border:1px solid #E3E8E4;border-radius:6px;padding:6px 12px;background:#fff;white-space:nowrap}
 .vb-row{display:flex;align-items:center;gap:14px;border:0.5px solid #E3E8E4;border-radius:8px;padding:12px 14px;background:#fff}
 .vb-dateblk{text-align:center;background:#21428E;color:#fff;border-radius:6px;padding:7px 10px;min-width:50px}
@@ -504,6 +512,21 @@ body{background:#E4E8E5}
   }
 
   function initRanking(rankPage){
+    var srcTabs=rankPage.querySelectorAll('[data-rk-src-tab]');
+    var srcPanels=rankPage.querySelectorAll('[data-rk-src-panel]');
+    srcTabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        var key=tab.getAttribute('data-rk-src-tab');
+        srcTabs.forEach(function(item){
+          var active=item===tab;
+          item.classList.toggle('on',active);
+          item.setAttribute('aria-selected',active?'true':'false');
+        });
+        srcPanels.forEach(function(panel){
+          panel.style.display=panel.getAttribute('data-rk-src-panel')===key?'':'none';
+        });
+      });
+    });
     var rPills=rankPage.querySelectorAll('.vb-pill');
     var rSearch=rankPage.querySelector('[data-rank-search]');
     var rRows=rankPage.querySelectorAll('[data-section="bang-xep-hang"] tbody[data-items] tr');
