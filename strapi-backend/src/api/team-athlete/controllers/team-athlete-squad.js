@@ -115,7 +115,7 @@ async function saveBulk(ctx) {
   if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản hội viên tổ chức.');
 
   const rows = ((ctx.request.body || {}).athletes) || [];
-  const out = await roster.applyRosterImport(strapi, { org: team, rows });
+  const out = await roster.applyRosterImport(strapi, { org: team, rows, strict: true });
   if (out.error) return ctx.badRequest(out.error);
 
   ctx.body = {

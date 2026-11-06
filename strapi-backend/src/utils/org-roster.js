@@ -72,7 +72,7 @@ function memberCodeSeries(existingCodes, prefix, pad, count) {
  *          với action ∈ 'skip' (không thêm) | 'link' (đã có hội viên) |
  *          'create' (tạo hội viên mới) | 'squad-only' (chỉ vào danh sách đội).
  */
-function planRosterImport({ rows, squad, members, now } = {}) {
+function planRosterImport({ rows, squad, members, now, strict } = {}) {
   const list = Array.isArray(rows) ? rows : [];
   if (!list.length) return { error: 'Danh sách vận động viên đang trống.' };
   if (list.length > MAX_ROWS) {
@@ -91,7 +91,7 @@ function planRosterImport({ rows, squad, members, now } = {}) {
   const seen = new Set();
   for (let i = 0; i < list.length; i += 1) {
     const line = i + 1;
-    const built = entryLogic.normalizeSquadAthlete(list[i]);
+    const built = entryLogic.normalizeSquadAthlete(list[i], { strict: Boolean(strict) });
     if (built.error) return { error: `Dòng ${line}: ${built.error}` };
 
     const athlete = built.data;
@@ -190,7 +190,7 @@ function summaryMessage(summary) {
  * Ghi lần lượt chứ không Promise.all: thứ tự mã hội viên phải khớp thứ tự dòng,
  * và 300 insert song song vào SQLite/Postgres không nhanh hơn đáng kể.
  */
-async function applyRosterImport(strapi, { org, rows, now } = {}) {
+async function applyRosterImport(strapi, { org, rows, now, strict } = {}) {
   if (!org || !org.documentId) return { error: 'Không tìm thấy tổ chức.' };
 
   const squad = await strapi.documents(TEAM_ATHLETE_UID).findMany({
@@ -204,7 +204,7 @@ async function applyRosterImport(strapi, { org, rows, now } = {}) {
     select: ['code', 'cccd', 'phone', 'status', 'expiry'],
   });
 
-  const planned = planRosterImport({ rows, squad, members, now });
+  const planned = planRosterImport({ rows, squad, members, now, strict });
   if (planned.error) return { error: planned.error };
   const { items, summary } = planned.data;
 

@@ -361,3 +361,12 @@ test('withLiveMemberMatch gắn kèm câu trạng thái cho giao diện', async 
   assert.strictEqual(out[1].memberStatusLabel, 'Chờ thanh toán hội phí');
   assert.strictEqual(out[2].memberStatusLabel, '');
 });
+
+test('strict: dòng thiếu ngày sinh/giới tính/điện thoại huỷ cả lượt và nêu số dòng', () => {
+  const { planRosterImport } = require('../src/utils/org-roster');
+  const ok = { fullName: 'A', cccd: '079095004321', dob: '2000-01-02', gender: 'Nam', phone: '0909123456' };
+  const bad = { fullName: 'B', cccd: '079095004322', dob: '2000-01-02', gender: 'Nam' };
+  assert.ok(planRosterImport({ rows: [ok], squad: [], members: [], strict: true }).data);
+  assert.match(planRosterImport({ rows: [ok, bad], squad: [], members: [], strict: true }).error, /^Dòng 2:.*điện thoại/);
+  assert.ok(planRosterImport({ rows: [ok, bad], squad: [], members: [] }).data);
+});
