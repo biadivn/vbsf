@@ -49,7 +49,7 @@ function teFieldValue(f){
 }
 function teSyncInfoFieldsIntoRecord(record){
   if(teTab!=='info') return;
-  COLLECTIONS.tournaments.fields.forEach(f=>{
+  COLLECTIONS.tournaments.fields.filter(f=>!f.editorHidden).forEach(f=>{
     const val = teFieldValue(f);
     if(val!==undefined) record[f.key] = val;
   });
@@ -151,27 +151,21 @@ function renderTeInfoTab(record, isNew){
     <td>${d.fileUrl
       ? `<a href="${escapeAttr(d.fileUrl)}" target="_blank" rel="noopener">${escapeHtml(d.fileName||'Tệp đính kèm')}</a>`
       : `<span style="color:var(--hint)">${d.uploading ? 'Đang tải lên…' : 'Chưa có tệp'}</span>`}
-      <input type="file" data-doc-file="${i}" accept=".pdf,.doc,.docx,.xls,.xlsx" style="display:block;margin-top:6px;font-size:12px"></td>
+      <input type="file" data-doc-file="${i}" accept=".pdf,application/pdf" style="display:block;margin-top:6px;font-size:12px"></td>
     <td class="actions"><button class="btn-icon" data-te-rm-doc="${i}" title="Xóa tài liệu"><i class="ti ti-trash"></i></button></td>
   </tr>`).join('');
   const docsBlock = `<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)">
-      <label style="font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:4px">Tài liệu của giải</label>
-      <div style="font-size:12px;color:var(--hint);margin-bottom:10px"><i class="ti ti-info-circle"></i> Điều lệ, biểu mẫu đăng ký… hiển thị cho đội tải về ở trang giải đấu.</div>
+      <label style="font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:4px">Tài liệu của Giải đấu (PDF)</label>
+      <div style="font-size:12px;color:var(--hint);margin-bottom:10px"><i class="ti ti-info-circle"></i> Chỉ nhận file PDF. Hiển thị cho đội tải về ở trang giải đấu.</div>
       ${record.docs.length ? `<div class="tbl-wrap"><table><thead><tr><th>Tên tài liệu</th><th>Tệp</th><th style="width:50px"></th></tr></thead><tbody>${docRows}</tbody></table></div>` : ''}
       <button type="button" class="btn btn-ghost" id="teAddDocBtn" style="margin-top:10px"><i class="ti ti-plus"></i> Thêm tài liệu</button>
     </div>`;
 
   return `<div class="form-card" style="max-width:760px">
     <div class="form-grid">
-      ${c.fields.map(f=>`<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${renderField(f, record[f.key])}</div>`).join('')}
+      ${c.fields.filter(f=>!f.editorHidden).map(f=>`<div class="fld ${f.span2?'span2':''}"><label>${f.label}${f.required?' <span class="req">*</span>':''}</label>${renderField(f, record[f.key])}</div>`).join('')}
     </div>
-    ${eventsBlock}
     ${docsBlock}
-    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)">
-      <label style="font-size:12.5px;color:var(--ink);font-weight:600;display:block;margin-bottom:10px">Giải thưởng theo hạng</label>
-      <div class="tbl-wrap"><table><thead><tr><th style="width:110px">Thứ hạng</th><th>Giải thưởng tiền mặt</th><th>Hiện vật</th><th style="width:50px"></th></tr></thead><tbody>${prizeRows}</tbody></table></div>
-      <button type="button" class="btn btn-ghost" id="teAddPrizeBtn" style="margin-top:10px"><i class="ti ti-plus"></i> Thêm hạng</button>
-    </div>
     <div class="form-actions" style="justify-content:space-between">
       ${!isNew ? `<button class="btn btn-danger-outline" id="teDeleteBtn"><i class="ti ti-trash"></i> Xóa giải đấu</button>` : `<span></span>`}
       <div style="display:flex;gap:8px">
@@ -1095,6 +1089,7 @@ function attachTournamentEditorEvents(){
       const record = teCurrentRecord();
       const file = e.target.files[0];
       if(!record || !file) return;
+      if(!/\.pdf$/i.test(file.name)){ showToast('Chỉ chấp nhận file PDF', true); e.target.value = ''; return; }
       if(teInfoDraft()){
         showToast('Lưu thông tin giải đấu trước khi tải tài liệu lên', true);
         e.target.value = '';
@@ -1166,18 +1161,20 @@ async function teSaveInfo(){
   const c = COLLECTIONS.tournaments;
   const data = {};
   let missingRequired = false;
-  c.fields.forEach(f=>{
+  c.fields.filter(f=>!f.editorHidden).forEach(f=>{
     const val = teFieldValue(f);
     if(f.required && (val===''||val===undefined||val===null)) missingRequired = true;
     data[f.key] = val;
   });
   if(missingRequired){ showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', true); return; }
+  if(!data.date && data.startDate) data.date = data.startDate;
   if(isNew){
     data.players = [];
     data.prizes = (teNewDraft && teNewDraft.prizes) ? teNewDraft.prizes : TE_DEFAULT_PRIZES.map(p=>({...p}));
     data.events = (teNewDraft && teNewDraft.events) ? teNewDraft.events : [];
     data.docs = [];
     data.mode = 'op';
+    data.format = data.format || 'SE'; data.lives = data.lives || 3; data.status = data.status || 'upcoming';
     const createdId = await teCreateTournamentOnStrapi(data);
     if(!createdId) return;
     data.id = createdId;

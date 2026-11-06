@@ -69,7 +69,7 @@ function i18nInputField(f) {
 /** Những field của một module có bản dịch. */
 function i18nFieldsOf(key) {
   const c = COLLECTIONS[key];
-  return c ? (c.fields || []).filter((f) => f.i18n) : [];
+  return c ? (c.fields || []).filter((f) => f.i18n && !f.editorHidden) : [];
 }
 
 function collectionHasI18n(key) {
