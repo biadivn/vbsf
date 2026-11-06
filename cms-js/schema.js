@@ -34,11 +34,11 @@ const COLLECTIONS = {
       /* nature quyết định ai được đăng ký: giải thành tích cao chỉ nhận đơn của
          đội tỉnh/thành, giải phong trào thì VĐV tự đăng ký. Site và API đều đọc
          field này, đổi ở đây là đổi luôn luồng đăng ký. */
-      {key:'nature', editorHidden:true, label:'Đối tượng đăng ký', type:'select', options:['national','grassroots'],
+      {key:'nature', label:'Loại giải', type:'select', options:['national','grassroots'],
         optionLabels:{national:'Thành tích cao — đội tỉnh/thành đăng ký', grassroots:'Phong trào — VĐV tự đăng ký'}},
       {key:'memberOnly', editorHidden:true, label:'Chỉ nhận hội viên còn hiệu lực (giải phong trào)', type:'checkbox'},
       {key:'category', editorHidden:true, label:'Nội dung thi đấu', type:'select', options:['Pool 8 bi','Pool 9 bi','Pool 10 bi','Carom 1 băng','Carom 3 băng','Snooker']},
-      {key:'format', label:'Loại giải', type:'select', options:['SE','DE','RR','SW'], optionLabels:{SE:'Đấu loại trực tiếp',DE:'Đấu loại trực tiếp kép',RR:'Vòng tròn',SW:'Swiss (tính mạng)'}},
+      {key:'format', editorHidden:true, label:'Thể thức thi đấu', type:'select', options:['SE','DE','RR','SW'], optionLabels:{SE:'Đấu loại trực tiếp',DE:'Đấu loại trực tiếp kép',RR:'Vòng tròn',SW:'Swiss (tính mạng)'}},
       {key:'lives', editorHidden:true, label:'Số mạng (chỉ áp dụng Swiss)', type:'number', placeholder:'Mặc định 3'},
       {key:'status', editorHidden:true, label:'Trạng thái', type:'select', options:['upcoming','ongoing','completed'], optionLabels:{upcoming:'Sắp diễn ra',ongoing:'Đang diễn ra',completed:'Đã kết thúc'}},
       {key:'date', editorHidden:true, label:'Ngày thi đấu (hiển thị trên site)', type:'date'},
