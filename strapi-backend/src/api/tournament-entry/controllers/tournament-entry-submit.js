@@ -8,6 +8,7 @@
 
 const auth = require('../../../utils/public-auth');
 const entryLogic = require('../../../utils/tournament-entry');
+const confirmation = require('../../../utils/confirmation-file');
 const { text } = require('../../../utils/public-forms');
 
 const TOURNAMENT_UID = 'api::tournament.tournament';
@@ -106,6 +107,13 @@ async function submitTeam(ctx) {
   });
   const built = entryLogic.pickSquadAthletes(squad, body.athletes, tournament);
   if (built.error) return ctx.badRequest(built.error);
+
+  /* Danh sách VĐV phải kèm PDF xác nhận của địa phương. Kiểm tra và lưu tệp
+     TRƯỚC khi xoá danh sách cũ, để tệp lỗi không làm mất đơn đã gửi. */
+  const pdf = confirmation.parsePdfUpload(body.localConfirmation);
+  if (pdf.error) return ctx.badRequest(pdf.error);
+  const fileId = await confirmation.uploadPdf(strapi, pdf);
+
   /* Gửi lại đơn cho cùng một giải = thay danh sách cũ, không cộng dồn. Đội sửa
      sót một dòng mà hoá ra giải có hai bản danh sách thì vận hành không biết
      bản nào đúng. Chỉ xoá những dòng CHƯA duyệt — người đã vào danh sách chính
@@ -166,6 +174,7 @@ async function submitTeam(ctx) {
       leaderTitle: text(body.leaderTitle, 160) || undefined,
       leaderPhone: text(body.leaderPhone, 20) || undefined,
       note: text(body.note, 2000) || undefined,
+      file: fileId,
       status: 'pending',
     },
     status: 'published',

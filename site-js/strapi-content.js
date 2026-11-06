@@ -1851,9 +1851,21 @@
         if (!picks.length) { show(tErr, 'Chưa chọn vận động viên nào trong danh sách đội.'); return; }
         var token = window.VBSF_AUTH && window.VBSF_AUTH.orgToken();
         if (!token) { show(tErr, 'Phiên đăng nhập của đội đã hết hạn. Vui lòng đăng nhập lại.'); return; }
+        var pdfInput = page.querySelector('[data-reg-local-confirm]');
+        var pdfFile = pdfInput && pdfInput.files && pdfInput.files[0];
+        if (!pdfFile) { show(tErr, 'Vui lòng đính kèm file PDF xác nhận của địa phương.'); return; }
+        if (!/\.pdf$/i.test(pdfFile.name)) { show(tErr, 'File xác nhận của địa phương phải là PDF.'); return; }
+        if (pdfFile.size > 5 * 1024 * 1024) { show(tErr, 'File PDF quá lớn (tối đa 5MB).'); return; }
         teamBtn.disabled = true;
         try {
+          var pdfData = await new Promise(function (resolve, reject) {
+            var r = new FileReader();
+            r.onload = function (ev) { resolve(String(ev.target.result || '')); };
+            r.onerror = function () { reject(new Error('Không đọc được file PDF.')); };
+            r.readAsDataURL(pdfFile);
+          });
           var msg = await submitForm('tournament-entries/submit-team', {
+            localConfirmation: { name: pdfFile.name, data: pdfData },
             tournamentDocId: t.documentId,
             leaderName: val('[data-reg-leader]'),
             leaderTitle: val('[data-reg-leader-title]'),

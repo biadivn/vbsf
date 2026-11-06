@@ -102,16 +102,16 @@
       '</div>' +
       '<div style="font-size:11.5px;color:#8A968F;line-height:1.7;margin-bottom:8px">' +
         'Đơn vị tự thêm/bớt vận động viên; Liên đoàn xác nhận từng người. Khi đăng ký giải thành tích cao, đơn vị chỉ chọn được những người đã xác nhận.<br>' +
-        'Nhập từ tệp CSV: người chưa có hồ sơ hội viên sẽ được tạo hồ sơ mới (chờ Liên đoàn ghi nhận hội phí); người đã là hội viên chỉ được gắn mã, không tạo trùng.' +
+        'Nhập từ tệp Excel (.xlsx): người chưa có hồ sơ hội viên sẽ được tạo hồ sơ mới (chờ Liên đoàn ghi nhận hội phí); người đã là hội viên chỉ được gắn mã, không tạo trùng.' +
       '</div>' +
       (state.athletes.length
         ? state.athletes.map(rowHtml).join('')
         : '<div style="font-size:12.5px;color:#8A968F;padding:12px 0;border-top:0.5px solid #E3E8E4">Chưa có vận động viên nào trong danh sách đội.</div>') +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">' +
         '<button class="btn-out" data-squad-add type="button" style="cursor:pointer"><i class="ti ti-plus"></i> Thêm vận động viên</button>' +
-        '<button class="btn-out" data-squad-csv-pick type="button" style="cursor:pointer"><i class="ti ti-file-upload"></i> Nhập từ tệp CSV</button>' +
-        '<span class="vb-link" data-squad-csv-sample style="cursor:pointer;font-size:12px">Tải tệp CSV mẫu</span>' +
-        '<input type="file" data-squad-csv-file accept=".csv,text/csv" style="display:none">' +
+        '<button class="btn-out" data-squad-csv-pick type="button" style="cursor:pointer"><i class="ti ti-file-upload"></i> Nhập từ tệp Excel</button>' +
+        '<span class="vb-link" data-squad-csv-sample style="cursor:pointer;font-size:12px">Tải tệp Excel mẫu</span>' +
+        '<input type="file" data-squad-csv-file accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display:none">' +
       '</div>' +
       formHtml() +
       '<div data-squad-ok style="display:none;margin-top:10px;font-size:12.5px;color:#00814D"></div>' +
@@ -119,55 +119,79 @@
     wire(box, state);
   }
 
-  /* CSV tối giản, có hỗ trợ ô bọc nháy kép vì tên/địa chỉ hay chứa dấu phẩy. */
-  function parseCsv(text) {
-    var rows = [], row = [], field = '', quoted = false;
-    var push = function () { row.push(field); field = ''; };
-    var endRow = function () {
-      push();
-      if (row.some(function (c) { return c.trim(); })) rows.push(row);
-      row = [];
-    };
-    for (var i = 0; i < text.length; i++) {
-      var c = text[i];
-      if (quoted) {
-        if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
-        else if (c === '"') quoted = false;
-        else field += c;
-      } else if (c === '"') quoted = true;
-      else if (c === ',') push();
-      else if (c === '\n') endRow();
-      else if (c !== '\r') field += c;
+  var COLS = ['Họ và tên', 'Số căn cước', 'Ngày sinh (yyyy-mm-dd)', 'Giới tính', 'Điện thoại', 'Địa chỉ'];
+  var XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+
+  /* Thư viện đọc/ghi Excel chỉ tải khi đội thật sự bấm nhập hoặc tải mẫu —
+     trang hội viên không phải gánh thêm ~900KB cho người không dùng tới. */
+  var xlsxLoading = null;
+  function loadXlsx() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (!xlsxLoading) {
+      xlsxLoading = new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = XLSX_URL;
+        s.onload = function () { resolve(window.XLSX); };
+        s.onerror = function () { xlsxLoading = null; reject(new Error('Không tải được bộ đọc Excel. Kiểm tra kết nối rồi thử lại.')); };
+        document.head.appendChild(s);
+      });
     }
-    if (field || row.length) endRow();
-    return rows;
+    return xlsxLoading;
   }
 
-  var CSV_COLS = ['Họ và tên', 'Số căn cước', 'Ngày sinh (yyyy-mm-dd)', 'Giới tính', 'Điện thoại', 'Địa chỉ'];
+  /* Ô ngày của Excel là số/Date, không phải chuỗi — chuẩn hoá về yyyy-mm-dd để
+     máy chủ nhận đúng như khi gõ tay. Ô chữ thì giữ nguyên người dùng gõ. */
+  function cellText(v) {
+    if (v == null) return '';
+    if (v instanceof Date) {
+      if (isNaN(v.getTime())) return '';
+      var p = function (x) { return String(x).padStart(2, '0'); };
+      return v.getFullYear() + '-' + p(v.getMonth() + 1) + '-' + p(v.getDate());
+    }
+    return String(v).trim();
+  }
 
-  function csvToAthletes(text) {
-    var rows = parseCsv(text);
-    if (rows.length && /họ|tên|name/i.test(rows[0][0] || '')) rows = rows.slice(1);
+  /** Bảng (mảng các dòng) → danh sách VĐV; bỏ dòng tiêu đề nếu có. */
+  function rowsToAthletes(rows) {
+    rows = (rows || []).filter(function (r) { return r.some(function (c) { return cellText(c); }); });
+    if (rows.length && /họ|tên|name/i.test(cellText(rows[0][0]))) rows = rows.slice(1);
     return rows.map(function (c) {
       return {
-        fullName: (c[0] || '').trim(), cccd: (c[1] || '').trim(),
-        dob: (c[2] || '').trim() || undefined, gender: (c[3] || '').trim(),
-        phone: (c[4] || '').trim(), address: (c[5] || '').trim(),
+        fullName: cellText(c[0]), cccd: cellText(c[1]),
+        dob: cellText(c[2]) || undefined, gender: cellText(c[3]),
+        phone: cellText(c[4]), address: cellText(c[5]),
       };
     }).filter(function (r) { return r.fullName || r.cccd; });
   }
 
-  function downloadSample() {
-    var text = CSV_COLS.join(',') + '\n' +
-      ['Nguyễn Văn A', '079098001234', '1998-04-12', 'Nam', '0909123456', 'Quận 1, TP.HCM'].join(',') + '\n';
-    var blob = new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'mau-vdv-cua-doi.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
+  async function readExcelFile(file) {
+    var X = await loadXlsx();
+    var wb = X.read(await file.arrayBuffer(), { type: 'array', cellDates: true });
+    var ws = wb.Sheets[wb.SheetNames[0]];
+    if (!ws) return [];
+    return rowsToAthletes(X.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' }));
+  }
+
+  async function downloadSample() {
+    var X = await loadXlsx();
+    /* Cột căn cước + điện thoại để dạng chữ: gõ số trần thì Excel làm mất số 0
+       đầu (0909... → 909...). */
+    var ws = X.utils.aoa_to_sheet([
+      COLS,
+      ['Nguyễn Văn A', '079098001234', '1998-04-12', 'Nam', '0909123456', 'Quận 1, TP.HCM'],
+    ]);
+    ws['!cols'] = [{ wch: 24 }, { wch: 16 }, { wch: 22 }, { wch: 10 }, { wch: 14 }, { wch: 30 }];
+    for (var r = 2; r <= 200; r++) {
+      ['B', 'C', 'E'].forEach(function (col) {
+        var ref = col + r;
+        if (!ws[ref]) ws[ref] = { t: 's', v: '', z: '@' };
+        else ws[ref].z = '@';
+      });
+    }
+    ws['!ref'] = 'A1:F200';
+    var wb = X.utils.book_new();
+    X.utils.book_append_sheet(wb, ws, 'VĐV');
+    X.writeFile(wb, 'mau-vdv-cua-doi.xlsx');
   }
 
   function wire(box, state) {
@@ -206,26 +230,26 @@
     var csvPick = box.querySelector('[data-squad-csv-pick]');
     var csvFile = box.querySelector('[data-squad-csv-file]');
     csvPick.addEventListener('click', function () { csvFile.click(); });
-    csvFile.addEventListener('change', function () {
+    csvFile.addEventListener('change', async function () {
       var f = csvFile.files && csvFile.files[0];
       if (!f) return;
-      var reader = new FileReader();
-      reader.onload = async function (ev) {
-        msg(ok, ''); msg(err, '');
-        var athletes = csvToAthletes(String(ev.target.result || ''));
-        csvFile.value = '';
+      msg(ok, ''); msg(err, '');
+      try {
+        if (!/\.xlsx?$/i.test(f.name)) throw new Error('Chỉ nhận tệp Excel (.xlsx). Tải tệp Excel mẫu để xem đúng định dạng.');
+        var athletes = await readExcelFile(f);
         if (!athletes.length) {
-          msg(err, 'Không đọc được dòng nào trong tệp. Tải tệp CSV mẫu để xem đúng thứ tự cột.');
-          return;
+          throw new Error('Không đọc được dòng nào trong tệp. Tải tệp Excel mẫu để xem đúng thứ tự cột.');
         }
-        try {
-          var out = await call('team-athletes/save-bulk', { athletes: athletes });
-          await reload(box, state, out.message);
-        } catch (ex) { msg(err, ex.message); }
-      };
-      reader.readAsText(f, 'utf-8');
+        var out = await call('team-athletes/save-bulk', { athletes: athletes });
+        await reload(box, state, out.message);
+      } catch (ex) {
+        msg(err, ex.message || 'Không đọc được tệp Excel.');
+      } finally { csvFile.value = ''; }
     });
-    box.querySelector('[data-squad-csv-sample]').addEventListener('click', downloadSample);
+    box.querySelector('[data-squad-csv-sample]').addEventListener('click', function () {
+      msg(err, '');
+      downloadSample().catch(function (ex) { msg(err, ex.message); });
+    });
 
     box.querySelectorAll('[data-squad-rm]').forEach(function (b) {
       b.addEventListener('click', async function () {

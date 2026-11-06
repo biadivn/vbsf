@@ -5,7 +5,8 @@ module.exports = [
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::query',
-  'strapi::body',
+  // PDF xác nhận của địa phương đi kèm đơn đăng ký dưới dạng base64 (tối đa 5MB).
+  { name: 'strapi::body', config: { jsonLimit: '8mb', formLimit: '8mb' } },
   'strapi::session',
   'strapi::favicon',
   'strapi::public',
