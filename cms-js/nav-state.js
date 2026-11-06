@@ -100,5 +100,14 @@ function setView(view){
   renderSidebar();
   renderTopbar();
   renderContent();
+  /* Dữ liệu remote chỉ được nạp lúc đăng nhập, nên hồ sơ người dùng gửi từ site
+     (đăng ký hội viên, hội viên tổ chức...) sau đó sẽ không hiện. Mở danh sách
+     thì nạp lại và vẽ lại. */
+  const c = COLLECTIONS[view];
+  if(c && c.remote && !c.strapiUsers && typeof refreshRemoteCollection === 'function'){
+    refreshRemoteCollection(view).then(()=>{
+      if(currentView === view) renderContent();
+    });
+  }
 }
 

@@ -81,9 +81,9 @@
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
         '<div><div style="font-size:11px;color:#8A968F;margin-bottom:4px">Họ và tên *</div><input type="text" data-squad-name style="' + inp + '"></div>' +
         '<div><div style="font-size:11px;color:#8A968F;margin-bottom:4px">Số căn cước *</div><input type="text" data-squad-cccd style="' + inp + '"></div>' +
-        '<div><div style="font-size:11px;color:#8A968F;margin-bottom:4px">Ngày sinh</div><input type="date" data-squad-dob style="' + inp + '"></div>' +
-        '<div><div style="font-size:11px;color:#8A968F;margin-bottom:4px">Giới tính</div><select data-squad-gender style="' + inp + '"><option value="">—</option><option>Nam</option><option>Nữ</option></select></div>' +
-        '<div><div style="font-size:11px;color:#8A968F;margin-bottom:4px">Điện thoại</div><input type="tel" data-squad-phone style="' + inp + '"></div>' +
+        '<div><div style="font-size:11px;color:#8A968F;margin-bottom:4px">Ngày sinh *</div><input type="date" data-squad-dob style="' + inp + '"></div>' +
+        '<div><div style="font-size:11px;color:#8A968F;margin-bottom:4px">Giới tính *</div><select data-squad-gender style="' + inp + '"><option value="">—</option><option>Nam</option><option>Nữ</option></select></div>' +
+        '<div><div style="font-size:11px;color:#8A968F;margin-bottom:4px">Điện thoại *</div><input type="tel" data-squad-phone style="' + inp + '"></div>' +
         '<div><div style="font-size:11px;color:#8A968F;margin-bottom:4px">Địa chỉ</div><input type="text" data-squad-address style="' + inp + '"></div>' +
       '</div>' +
       '<div style="display:flex;gap:8px;margin-top:12px">' +
@@ -213,6 +213,10 @@
 
     box.querySelector('[data-squad-save]').addEventListener('click', async function (e) {
       msg(ok, ''); msg(err, '');
+      var missing = [['[data-squad-name]', 'họ và tên'], ['[data-squad-cccd]', 'số căn cước'], ['[data-squad-dob]', 'ngày sinh'],
+        ['[data-squad-gender]', 'giới tính'], ['[data-squad-phone]', 'điện thoại']]
+        .filter(function (f) { return !val(f[0]); }).map(function (f) { return f[1]; });
+      if (missing.length) { msg(err, 'Vui lòng nhập: ' + missing.join(', ') + ' (chỉ địa chỉ là không bắt buộc).'); return; }
       e.target.disabled = true;
       try {
         var out = await call('team-athletes/save', {

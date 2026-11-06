@@ -60,7 +60,7 @@ async function save(ctx) {
   if (!team) return ctx.badRequest('Vui lòng đăng nhập bằng tài khoản hội viên tổ chức.');
 
   const body = ctx.request.body || {};
-  const built = entryLogic.normalizeSquadAthlete(body);
+  const built = entryLogic.normalizeSquadAthlete(body, { strict: true });
   if (built.error) return ctx.badRequest(built.error);
 
   const documentId = text(body.documentId, 60);

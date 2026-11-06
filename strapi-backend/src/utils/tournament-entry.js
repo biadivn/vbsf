@@ -197,13 +197,20 @@ function confirmOfficial(entry, incoming, members, now) {
  * phí, và CCCD là bắt buộc — đây là cái Liên đoàn dùng để đối chiếu hồ sơ hội
  * viên khi xác nhận; thiếu nó thì hồ sơ nằm đó không duyệt được.
  */
-function normalizeSquadAthlete(raw) {
+function normalizeSquadAthlete(raw, opts) {
   const row = raw || {};
   const fullName = text(row.fullName || row.name, 120);
   if (!fullName) return { error: 'Thiếu họ tên vận động viên.' };
   const cccd = text(row.cccd, 20).replace(/[^\dA-Za-z]/g, '');
   if (!cccd) return { error: 'Thiếu số căn cước — Liên đoàn cần số này để đối chiếu hồ sơ hội viên.' };
   const gender = text(row.gender, 10);
+  /* Đội tự thêm VĐV (strict) thì mọi trường trừ địa chỉ đều bắt buộc; nhập hộ
+     hàng loạt từ CMS vẫn nhận hồ sơ thiếu để vận hành bổ sung sau. */
+  if (opts && opts.strict) {
+    if (!row.dob) return { error: 'Thiếu ngày sinh của vận động viên.' };
+    if (gender !== 'Nam' && gender !== 'Nữ') return { error: 'Thiếu giới tính của vận động viên.' };
+    if (!normalizePhone(row.phone)) return { error: 'Thiếu số điện thoại của vận động viên.' };
+  }
   return {
     data: {
       fullName,

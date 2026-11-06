@@ -164,7 +164,7 @@ function mapStrapiEntryToRecord(c, item){
   if(item.players) rec.players = item.players.map(p=>({
     id: p.localId, memberId: p.memberId || null, name: p.name, club: p.club || '',
     registeredAt: p.registeredAt ? new Date(p.registeredAt).getTime() : Date.now(),
-    feeStatus: p.feeStatus || 'unpaid', seed: p.seed || undefined, rating: p.rating || undefined
+    feeStatus: p.feeStatus || 'unpaid', seed: p.seed || undefined, rating: p.rating || undefined, finalRank: p.finalRank || undefined
   }));
   if(item.prizes) rec.prizes = item.prizes.map(p=>({ rank: p.rank||'', cash: p.cash||'', item: p.item||'' }));
   // events/docs (giải đấu): cũng là component repeatable. Map tay thay vì copy
@@ -188,7 +188,7 @@ function tePlayersToStrapiPayload(players){
   return (players||[]).map(p=>({
     localId: p.id, memberId: p.memberId||null, name: p.name, club: p.club||null,
     registeredAt: p.registeredAt ? new Date(p.registeredAt).toISOString() : null,
-    feeStatus: p.feeStatus||'unpaid', seed: p.seed||null, rating: p.rating||null
+    feeStatus: p.feeStatus||'unpaid', seed: p.seed||null, rating: p.rating||null, finalRank: p.finalRank||null
   }));
 }
 function tePrizesToStrapiPayload(prizes){

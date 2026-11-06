@@ -305,6 +305,16 @@ describe('normalizeSquadAthlete', () => {
     assert.match(normalizeSquadAthlete({ fullName: 'A', cccd: '---' }).error, /căn cước/);
   });
 
+  test('strict: chỉ địa chỉ là không bắt buộc', () => {
+    const base = { fullName: 'A', cccd: '079095004321', dob: '2000-01-02', gender: 'Nam', phone: '0909123456' };
+    assert.ok(normalizeSquadAthlete(base, { strict: true }).data);
+    assert.match(normalizeSquadAthlete({ ...base, dob: '' }, { strict: true }).error, /ngày sinh/);
+    assert.match(normalizeSquadAthlete({ ...base, gender: '' }, { strict: true }).error, /giới tính/);
+    assert.match(normalizeSquadAthlete({ ...base, phone: '' }, { strict: true }).error, /điện thoại/);
+    // Không strict (CMS nhập hộ) vẫn nhận hồ sơ thiếu.
+    assert.ok(normalizeSquadAthlete({ fullName: 'A', cccd: '079095004321' }).data);
+  });
+
   test('thiếu họ tên thì báo lỗi', () => {
     assert.match(normalizeSquadAthlete({ cccd: '079095004321' }).error, /họ tên/);
     assert.match(normalizeSquadAthlete(null).error, /họ tên/);

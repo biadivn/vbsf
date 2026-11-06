@@ -17,6 +17,7 @@
       "default": "unpaid"
     },
     "seed": { "type": "integer" },
-    "rating": { "type": "integer" }
+    "rating": { "type": "integer" },
+    "finalRank": { "type": "integer", "min": 1, "description": "Thứ hạng chung cuộc do vận hành nhập tay (hệ thống không ghi nhận kết quả thi đấu thực tế)" }
   }
 }

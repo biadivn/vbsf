@@ -187,10 +187,17 @@ function teFmtDateTime(ts){
   return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 function renderTePlayersTab(record){
-  const rows = record.players.map(p=>{
+  /* Xếp hạng nhập tay: người có hạng đứng trước theo thứ tự hạng, chưa có hạng
+     giữ nguyên thứ tự đăng ký. */
+  const sorted = record.players.slice().sort((a,b)=>{
+    const ra = a.finalRank || Infinity, rb = b.finalRank || Infinity;
+    return ra===rb ? 0 : ra-rb;
+  });
+  const rows = sorted.map(p=>{
     const m = p.memberId ? DB.members.find(x=>x.id===p.memberId) : null;
     const paid = p.feeStatus==='paid';
     return `<tr data-pid="${p.id}">
+      <td><input type="number" min="1" step="1" data-te-rank="${p.id}" value="${p.finalRank||''}" placeholder="—" style="width:64px;border:1px solid var(--line-strong);border-radius:6px;padding:5px 8px;font-weight:600"></td>
       <td>${escapeHtml(p.name)}</td>
       <td class="cell-muted">${escapeHtml(p.club||'—')}</td>
       <td>${m ? `<span class="status green">Hội viên · ${escapeHtml(m.code||'')}</span>` : `<span class="status gray">Khách mời</span>`}</td>
@@ -241,7 +248,7 @@ function renderTePlayersTab(record){
     </div>
   </div>
   <div class="tbl-wrap" style="margin-top:20px">
-    ${record.players.length===0 ? `<div class="empty"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc nhập danh sách ở trên.</div>` : `<table><thead><tr><th>Họ tên</th><th>CLB</th><th>Liên kết</th><th>Thời gian đăng ký</th><th>Đóng phí</th><th style="width:60px"></th></tr></thead><tbody>${rows}</tbody></table>`}
+    ${record.players.length===0 ? `<div class="empty"><i class="ti ti-users"></i><b>Chưa có người chơi</b>Thêm hội viên hoặc nhập danh sách ở trên.</div>` : `<div class="fld-hint" style="padding:10px 14px"><i class="ti ti-trophy"></i> Hạng chung cuộc nhập tay (hệ thống không ghi nhận kết quả thi đấu thực tế). Hạng 1/2/3 tự cập nhật Vô địch / Á quân / Hạng 3 của giải. Để trống nếu chưa xếp hạng; cho phép đồng hạng.</div><table><thead><tr><th style="width:90px">Hạng</th><th>Họ tên</th><th>CLB</th><th>Liên kết</th><th>Thời gian đăng ký</th><th>Đóng phí</th><th style="width:60px"></th></tr></thead><tbody>${rows}</tbody></table>`}
   </div>`;
 }
 
@@ -1147,6 +1154,9 @@ function attachTournamentEditorEvents(){
   document.querySelectorAll('[data-te-rm-player]').forEach(btn=>{
     btn.addEventListener('click', ()=>teRemovePlayer(btn.getAttribute('data-te-rm-player')));
   });
+  document.querySelectorAll('[data-te-rank]').forEach(inp=>{
+    inp.addEventListener('change', ()=>teSetPlayerRank(inp.getAttribute('data-te-rank'), inp.value));
+  });
   document.querySelectorAll('[data-te-fee]').forEach(sel=>{
     sel.addEventListener('change', ()=>teSetPlayerFeeStatus(sel.getAttribute('data-te-fee'), sel.value));
   });
@@ -1306,6 +1316,23 @@ function teSetPlayerFeeStatus(pid, status){
   const p = record.players.find(x=>x.id===pid);
   if(!p) return;
   p.feeStatus = status;
+  saveDB();
+  teSyncTournamentToStrapi(record);
+  renderContent();
+}
+function teSetPlayerRank(pid, value){
+  const id = currentView.slice('tournament-edit:'.length);
+  const record = teRecord(id);
+  if(!record) return;
+  const p = record.players.find(x=>x.id===pid);
+  if(!p) return;
+  const n = Math.floor(Number(value));
+  p.finalRank = (value!=='' && Number.isFinite(n) && n>=1) ? n : undefined;
+  // Bục trao giải theo hạng nhập tay; chỉ ghi đè khi thật sự có người giữ hạng đó.
+  [[1,'champion'],[2,'runnerUp'],[3,'third']].forEach(([rank,field])=>{
+    const holder = record.players.find(x=>x.finalRank===rank);
+    if(holder) record[field] = holder.name;
+  });
   saveDB();
   teSyncTournamentToStrapi(record);
   renderContent();
